@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md", "docs/requirements/*.md", "docs/constraints/*.md", "docs/architecture/*.md", "docs/protocol/*.md", "docs/traceability/*.md", "loop/GOAL.md", "loop/STATE.json", "loop/BACKLOG.yaml", "loop/VERIFICATION.md"],
+  "permission": {
+    "*": "ask", "read": "allow", "glob": "allow", "grep": "allow", "lsp": "allow",
+    "edit": "ask", "external_directory": "deny", "webfetch": "deny", "websearch": "deny",
+    "bash": {
+      "*": "ask", "git status*": "allow", "git diff*": "allow", "git log*": "allow",
+      "python scripts/validate_opencode.py*": "allow", "python scripts/quality_gate.py*": "allow",
+      "git push*": "deny", "git reset --hard*": "deny", "git clean*": "deny",
+      "curl *": "deny", "wget *": "deny", "Invoke-WebRequest*": "deny",
+      "pip install*": "deny", "python -m pip install*": "deny", "npm install*": "deny", "bun install*": "deny", "go get*": "deny"
+    },
+    "skill": {"*":"deny","mvp-requirements":"allow","agent-package":"allow","acceptance-testing":"allow"},
+    "task": {"*":"deny","mvp-planner":"allow","mvp-builder":"allow","mvp-verifier":"allow","protocol-reviewer":"allow","security-reviewer":"allow"}
+  }
+}

@@ -1,0 +1,47 @@
+version: "1.0"
+items:
+  - id: ENG-BASE-AC-1
+    story: ENG-BASE
+    title: 建立失败关闭、可离线复现的 OpenCode 工程底座
+    status: done
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_engineering_baseline.py
+      - tests/unit/test_traceability_check.py
+      - tests/integration/test_tool_contracts.py
+      - tests/security/test_audit_log.py
+      - tests/security/test_audit_seal.py
+      - tests/security/test_loop_state_transaction.py
+      - tests/security/path_policy_test.mjs
+      - tests/e2e/test_offline_baseline.py
+    security_review: true
+    protocol_review: false
+  - id: US-0-AC-1
+    story: US-0
+    title: 建立用户、客户端、证书数据模型（最小集合）
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_identity_validation.py
+      - tests/integration/identity_store_test.py
+      - tests/security/test_identity_store_security.py
+      - tests/security/test_identity_freshness_security.py
+      - tests/e2e/test_identity_dev_environment.py
+    security_review: true
+    protocol_review: false
+  - id: US-0-AC-2
+    story: US-0
+    title: 实现私钥安全存储接口
+    status: ready
+    dependencies: [US-0-AC-1]
+    acceptance_tests: [tests/security/private_key_storage_test.py]
+    security_review: true
+    protocol_review: false
+  - id: US-5-AC-1
+    story: US-5
+    title: 实现 .agent 固定包头与 Envelope 编码
+    status: blocked
+    dependencies: [US-0-AC-2]
+    acceptance_tests: [tests/integration/package_header_test.py]
+    security_review: true
+    protocol_review: true

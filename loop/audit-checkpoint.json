@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "algorithm": "sha256",
+  "legacy_line_count": 8,
+  "legacy_byte_count": 1752,
+  "legacy_sha256": "19cd6a298d95fa7aa2d3bb5aec38e2417064417ce24c65b3cd68e920b9cc7c73",
+  "first_chained_line": 9,
+  "checkpoint_hash": "c05d89bdf9460073921210044c2b2d446974269bd46cdb063fe0aa8000760e6f"
+}

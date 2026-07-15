@@ -1,0 +1,1 @@
+"""Coevo MVP domain package."""
