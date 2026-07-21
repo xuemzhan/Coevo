@@ -7600,3 +7600,164 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-07-21T15:29:41.372231Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `14`
+```text
+preflight audit seal failed: Pinned signing certificate is missing from CurrentUser/My.
+����λ�� E:\Workspace\Coevo\scripts\audit_signature.ps1:44 �ַ�: 169
++ ... unt -ne 1){ throw 'Pinned signing certificate is missing from Current ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Pinned signing ...CurrentUser/My.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Pinned signing certificate is missing from CurrentUser/My.
+
+```
+
+
+## 2026-07-21T16:20:03.935102Z — target=`unit-test-coverage` fingerprint=`local-coevo-path3-sliceA`
+- exit_code: `0`
+```text
+$ python -m compileall -q -f scripts tests
+(exit 0, no output)
+$ python -m unittest tests.unit.test_traceability_check -v
+test_eng_base_is_fully_covered (tests.unit.test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_eng_loop_env_is_fully_covered (tests.unit.test_traceability_check.TraceabilityTests.test_eng_loop_env_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (tests.unit.test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (tests.unit.test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+test_us_0_ac_1_is_fully_covered (tests.unit.test_traceability_check.TraceabilityTests.test_us_0_ac_1_is_fully_covered) ... ok
+test_us_0_ac_2_is_pending_by_design (tests.unit.test_traceability_check.TraceabilityTests.test_us_0_ac_2_is_pending_by_design) ... ok
+test_us_5_ac_1_is_blocked_by_design (tests.unit.test_traceability_check.TraceabilityTests.test_us_5_ac_1_is_blocked_by_design) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.013s
+
+OK
+```
+- note: slice A only — no `make quality` run (preflight known to fail since 2026-07-21T15:29:41Z).
+  4 new unit tests added to lock coverage for ENG-LOOP-ENV (done), US-0-AC-1 (done),
+  US-0-AC-2 (ready/pending) and US-5-AC-1 (blocked). See loop/DECISIONS.md
+  2026-07-22 ENG-LOOP-ENV-AC-2 self-correction entry for full rationale.
+
+## 2026-07-21T16:26:16.477477Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `0`
+```text
+FreshnessSecurityTests.test_key_destroyed_before_certificate_crash_recovers_idempotently) ... ok
+test_official_marker_signature_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_official_marker_signature_tampering_is_rejected) ... ok
+test_pre_removed_certificate_still_destroys_signed_key_id (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_pre_removed_certificate_still_destroys_signed_key_id) ... ok
+test_restored_old_certificate_cannot_reassociate_destroyed_key (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_restored_old_certificate_cannot_reassociate_destroyed_key) ... ok
+test_tampered_dual_signed_pending_is_not_recovered (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tampered_dual_signed_pending_is_not_recovered) ... ok
+test_tombstone_content_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_content_tampering_is_rejected) ... ok
+test_tombstone_store_failure_keeps_pending_and_recovers (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_store_failure_keeps_pending_and_recovers) ... ok
+test_marker_schema_binds_transition_key_id_and_public_digest (test_identity_retirement_security.IdentityRetirementSecurityTests.test_marker_schema_binds_transition_key_id_and_public_digest) ... ok
+test_production_delete_is_key_first_and_verifies_both_resources_absent (test_identity_retirement_security.IdentityRetirementSecurityTests.test_production_delete_is_key_first_and_verifies_both_resources_absent) ... ok
+test_anchor_from_another_database_is_rejected (test_identity_store_security.IdentityStoreSecurityTests.test_anchor_from_another_database_is_rejected) ... ok
+test_committed_pending_state_recovers_and_retires_old_marker (test_identity_store_security.IdentityStoreSecurityTests.test_committed_pending_state_recovers_and_retires_old_marker) ... ok
+test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker (test_identity_store_security.IdentityStoreSecurityTests.test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker) ... ok
+test_cyclic_and_oversized_inputs_are_rejected_with_audit (test_identity_store_security.IdentityStoreSecurityTests.test_cyclic_and_oversized_inputs_are_rejected_with_audit) ... ok
+test_missing_store_never_silently_initializes (test_identity_store_security.IdentityStoreSecurityTests.test_missing_store_never_silently_initializes) ... ok
+test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted (test_identity_store_security.IdentityStoreSecurityTests.test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted) ... ok
+test_signature_and_marker_loss_are_detected (test_identity_store_security.IdentityStoreSecurityTests.test_signature_and_marker_loss_are_detected) ... ok
+test_signed_anchor_detects_audit_tail_and_all_event_deletion (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_audit_tail_and_all_event_deletion) ... ok
+test_signed_anchor_detects_business_and_command_tampering (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_business_and_command_tampering) ... ok
+test_entry_and_importer_have_no_network_or_system_configuration (test_local_toolchain_security.LocalToolchainSecurityTest.test_entry_and_importer_have_no_network_or_system_configuration) ... ok
+test_importer_guards_archive_and_reparse_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 56.295s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 36.406s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-21T16:28:47.872684Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `0`
+```text
+FreshnessSecurityTests.test_key_destroyed_before_certificate_crash_recovers_idempotently) ... ok
+test_official_marker_signature_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_official_marker_signature_tampering_is_rejected) ... ok
+test_pre_removed_certificate_still_destroys_signed_key_id (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_pre_removed_certificate_still_destroys_signed_key_id) ... ok
+test_restored_old_certificate_cannot_reassociate_destroyed_key (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_restored_old_certificate_cannot_reassociate_destroyed_key) ... ok
+test_tampered_dual_signed_pending_is_not_recovered (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tampered_dual_signed_pending_is_not_recovered) ... ok
+test_tombstone_content_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_content_tampering_is_rejected) ... ok
+test_tombstone_store_failure_keeps_pending_and_recovers (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_store_failure_keeps_pending_and_recovers) ... ok
+test_marker_schema_binds_transition_key_id_and_public_digest (test_identity_retirement_security.IdentityRetirementSecurityTests.test_marker_schema_binds_transition_key_id_and_public_digest) ... ok
+test_production_delete_is_key_first_and_verifies_both_resources_absent (test_identity_retirement_security.IdentityRetirementSecurityTests.test_production_delete_is_key_first_and_verifies_both_resources_absent) ... ok
+test_anchor_from_another_database_is_rejected (test_identity_store_security.IdentityStoreSecurityTests.test_anchor_from_another_database_is_rejected) ... ok
+test_committed_pending_state_recovers_and_retires_old_marker (test_identity_store_security.IdentityStoreSecurityTests.test_committed_pending_state_recovers_and_retires_old_marker) ... ok
+test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker (test_identity_store_security.IdentityStoreSecurityTests.test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker) ... ok
+test_cyclic_and_oversized_inputs_are_rejected_with_audit (test_identity_store_security.IdentityStoreSecurityTests.test_cyclic_and_oversized_inputs_are_rejected_with_audit) ... ok
+test_missing_store_never_silently_initializes (test_identity_store_security.IdentityStoreSecurityTests.test_missing_store_never_silently_initializes) ... ok
+test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted (test_identity_store_security.IdentityStoreSecurityTests.test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted) ... ok
+test_signature_and_marker_loss_are_detected (test_identity_store_security.IdentityStoreSecurityTests.test_signature_and_marker_loss_are_detected) ... ok
+test_signed_anchor_detects_audit_tail_and_all_event_deletion (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_audit_tail_and_all_event_deletion) ... ok
+test_signed_anchor_detects_business_and_command_tampering (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_business_and_command_tampering) ... ok
+test_entry_and_importer_have_no_network_or_system_configuration (test_local_toolchain_security.LocalToolchainSecurityTest.test_entry_and_importer_have_no_network_or_system_configuration) ... ok
+test_importer_guards_archive_and_reparse_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 43.627s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 69.796s
+
+OK
+audit seal: fully-sealed
+
+```

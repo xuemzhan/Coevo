@@ -47,6 +47,7 @@ items:
     status: ready
     dependencies: [US-0-AC-1]
     acceptance_tests: [tests/security/private_key_storage_test.py]
+    acceptance_tests_pending: [tests/security/private_key_storage_test.py]
     security_review: true
     protocol_review: false
   - id: US-5-AC-1
@@ -55,5 +56,6 @@ items:
     status: blocked
     dependencies: [US-0-AC-2]
     acceptance_tests: [tests/integration/package_header_test.py]
+    acceptance_tests_pending: [tests/integration/package_header_test.py]
     security_review: true
     protocol_review: true

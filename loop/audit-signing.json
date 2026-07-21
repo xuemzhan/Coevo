@@ -1,11 +1,11 @@
 {
-    "schema_version":  "1.0",
-    "prototype":  true,
-    "store":  "CurrentUser/My",
-    "thumbprint":  "F7132638B319851806DD55E826B34BC8952D41B2",
-    "public_certificate":  "loop/audit-signing-public-F7132638B319851806DD55E826B34BC8952D41B2.cer",
-    "public_certificate_sha256":  "d051f1a1f7600ebb762b9d9b81aa868babd1114e9e1e50876b429c831d98cce6",
-    "signature_algorithm":  "RSA-PKCS1-v1_5",
-    "digest_algorithm":  "SHA-256",
-    "formal_replacement":  "approved SM2 product required"
+    "schema_version": "1.0",
+    "prototype": true,
+    "store": "CurrentUser/My",
+    "thumbprint": "F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86",
+    "public_certificate": "loop/audit-signing-public.cer",
+    "public_certificate_sha256": "bbd51fafe9185e59d515514984f9ee9feb989c2e5862fcd22d1a15758e6bbe92",
+    "signature_algorithm": "RSA-PKCS1-v1_5",
+    "digest_algorithm": "SHA-256",
+    "formal_replacement": "approved SM2 product required"
 }

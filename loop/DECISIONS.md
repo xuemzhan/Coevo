@@ -128,3 +128,150 @@
 - Audit continuity: rotate the active non-exportable signing certificate from F6 to F713 while retaining signer-pinned historical verification for the F6 evidence chain.
 - Test isolation: keep permission and identity E2E tests inside repository or temporary roots when the host profile is sandboxed; production defaults remain unchanged.
 - Verification: independent `mvp-verifier` PASS (`make quality` fingerprint `e050cf72f6cda47e`) and independent `security-reviewer` PASS (`make test-security` fingerprint `1458f00e53463d6f`, Critical 0, High 0).
+
+
+## 2026-07-22 — ENG-LOOP-ENV-AC-1 勘误（path D 文档修复）
+
+- 本条目**不撤销**上一条 2026-07-21 的"recovery and completion"——那是 14:38:47Z test-security 绿 + 14:40:34Z quality 绿那一瞬的合法状态。本条目记录**勘误**，把同一时刻的剩余风险明确化。
+
+- 用户在 2026-07-22 跑 `loop-state-integrity-audit.md` 八项检查时发现上述声明与实际证据**部分不符**，按用户选择路径 D（不动仓库代码/审计链，只修文档）落盘。
+
+- 勘误事实：
+  1. `loop/audit-signing.json` 当前 thumbprint=`F7132638B319851806DD55E826B34BC8952D41B2`，但 `Cert:\CurrentUser\My` 中只有 `F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86`。F713 私钥**未持久化**——`scripts\audit_signature.ps1` Sign 路径（第 42-50 行）找不到证书，**任何 2026-07-21T15:29:41Z 之后的 preflight 都不可重跑**。audit-head.json + audit-head.p7s（带 F713 签名的）和 audit-head-F6DE...json + .p7s 都还在仓库，链式记录连续，但无法在当前机器复演新一轮签名。
+  2. DECISIONS 上一条说 "retain signer-pinned historical verification for the F6 evidence chain"——仓库里**没有** `loop\audit-signing-F6DE...json` 归档副本，`audit_signature.ps1` Verify 路径（第 22-24 行）会找不到归档文件。这意味着即便 F713 私钥被恢复，F6 历史 head 也无法被脚本直接验证（仅靠 .p7s 的 CMS 解码能验签，但脚本不写这个路径）。
+  3. 14:38:47Z `test-security` 指纹 `1458f00e53463d6f` 仅 1 次 exit=0（此前 4 次 exit=1）；14:40:34Z `quality` 指纹 `e050cf72f6cda47e` 仅 1 次 exit=0（之后 15:29:41Z 立即 exit=14）。两个绿窗各只有一次成功，不是稳定双签。
+  4. `loop/STATE.json.last_verified_commit` 在 14:40 时为 `null`；本轮 16:11:55Z 经 `scripts\loop_state.py` 写入 `8fd55a8324b9cff6457e06b92fbf734c061d3b23`（当前 HEAD），并把 `blocking_issue` 设为证书私钥缺失的事实。
+  5. `loop/BACKLOG.yaml` 的 `US-0-AC-2` 与 `US-5-AC-1` 各自引用了**不存在的测试文件**（`tests/security/private_key_storage_test.py`、`tests/integration/package_header_test.py`）。本轮新增字段 `acceptance_tests_pending`（不删原 `acceptance_tests`），让 `traceability_check.py` 与未来的 gate 能识别"测试待创建"。
+
+- 未做（按用户路径 D 的范围）：
+  - 未改 `loop/audit-signing.json`（改它等于篡改审计链——AGENTS.md §3 第 6 条）。
+  - 未删 `loop/audit-head.json` 或 `.p7s`（保留 F713 签名的链头事实）。
+  - 未删 `loop/audit-head-F6DE...json/.p7s`（保留 F6 历史证据）。
+  - 未改上一条 2026-07-21 DECISIONS 条目文本（append-only，不重写历史）。
+  - 未重跑 `make quality`（preflight 已知会失败——强行跑会污染 `loop/tool-audit.jsonl` 的 exit_code 序列）。
+  - 未在 `tests\unit\test_traceability_check.py` 加 ENG-LOOP-ENV/US-0/US-5 等价覆盖测试（属下一个 `/loop` 工作项，本轮不夹带）。
+
+- 新增测试覆盖缺口（NEXT ROUND 选题，本轮不实施）：
+  - `tests\unit\test_traceability_check.py` 缺 `test_eng_loop_env_is_fully_covered` / `test_us_0_ac_1_is_fully_covered` / `test_us_0_ac_2_is_fully_covered` / `test_us_5_ac_1_is_fully_covered`。
+  - `scripts\traceability_check.py` 默认 `ACTIVE={"in-progress","done"}` 静默跳过 ready/blocked——下次应在 self-check 里 include all statuses（参考 audit 报告 check #3）。
+  - 跨 profile 备份去重：`.bak.20260717T222602Z` 和 `.bak.20260718T062545Z` SHA256 完全相同；下一次跨 profile 写入应先比对再备份（参考 audit 报告 check #5）。
+  - 备份 mtime 异常（copy2 在 Windows 上的失效）——纯 cosmetic，不影响数据。
+
+- 待办（NEXT ROUND 必须由用户/业务负责人决断，本轮不擅自推进）：
+  - F713 私钥恢复方案三选一：(a) 重新执行 `audit_signature.ps1 -Action Initialize`（会被 "already exists" 抛错拒）；(b) 备份 `audit-signing.json` 后手工删除，再 Initialize 生成新 thumb；(c) 把 `audit-signing.json` 切回 F6DE（恢复原始签名者），**同时**为 F713 head 落档 `audit-signing-F7132638B319851806DD55E826B34BC8952D41B2.json`，让 Verify 路径能跨 thumb 寻址。
+  - F6 历史归档：`audit-signing-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json` 的存在性——上一条 DECISIONS 声称"retain" 但仓库没落档，本轮也未补（属代码/审计改动，越权）。
+
+- 提出者：loop-engineer（在用户指令"D"下生成 STATE 修正 + BACKLOG 补丁 + DECISIONS 勘误，未触动审计链）。
+- 决策状态：**拟议**——本轮用户指令为 "D"（仅修文档），不等同于 AGENTS.md §2 第六步 DECIDE 阶段的正式签字。
+  本条目在用户对勘误文本本身无异议、并经 security-reviewer 与 mvp-verifier 双签后转为**已批准**；
+  若任一复核方不通过、或用户撤回"D"指令，立即撤销并以本节追加的方式留痕。
+- 待办：用户重启 OpenCode Desktop（如仍未重启）→ 决定 F713 私钥恢复方案 → 下一轮开 `loop/STATE.json` 新工作项 → security-reviewer 复核 → mvp-verifier 复核 → 回填批准戳。
+
+
+## 2026-07-22 — ENG-LOOP-ENV-AC-2 self-correction (path 3)
+
+- 用户在 2026-07-22 接受路径 3 提案（开 ENG-LOOP-ENV-AC-2：恢复审计签名私钥 + 补 F6 归档 + 加 test_<story>_is_fully_covered 覆盖）。本条目记录路径 3 第一阶段的 self-correction + IMPLEMENT 切片 A（测试覆盖）。
+
+- Self-correction（修正上一条 2026-07-22 勘误的 claim）：
+  1. 上一条 2026-07-22 勘误 claim ② 说"仓库里**没有** `loop\audit-signing-F6DE...json` 归档副本"——**错误**。实测 `Get-ChildItem loop\audit-signing*.json` 列出 3 个文件：
+     - `audit-signing.json` (498B, 2026/7/21 22:14) — 当前生效配置，thumbprint=F713
+     - `audit-signing-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json` (430B, 2026/7/17 22:27) — F6 历史归档，thumbprint=F6DE
+     - `audit-signing-F7132638B319851806DD55E826B34BC8952D41B2.json` (471B, 2026/7/21 22:35) — F713 历史归档
+     也就是说 F6 历史归档**存在**，且 `audit_signature.ps1` Verify 路径（第 22-24 行 `audit-signing-{THUMB}.json` 寻址）能直接找到。原始 claim 中"这意味着即便 F713 私钥被恢复，F6 历史 head 也无法被脚本直接验证"——**反了**：F6 历史归档在，能被脚本寻址；唯一缺失的是 F713 私钥本身（CurrentUser/My 中 count=0）。
+  2. 修正后的精确事实：
+     - 审计签名链 `audit-head.json` + `audit-head.p7s`（无 thumb 后缀的当前 head，sequence=127, signed_at 2026-07-21T14:49:04Z, signer_thumbprint=F713）+ 对应 `audit-signing-F713...json` + `audit-signing-public-F713...cer` + `tool-audit.jsonl` 末尾 16 行（sequence 127 签时 byte_count=63326）——**全部 self-consistent**。
+     - `audit_signature.ps1 -Action Verify` 单独运行 exit=0（不依赖私钥）。
+     - `audit_signature.ps1 -Action Sign` 抛 "Pinned signing certificate is missing from CurrentUser/My"（脚本第 44 行）——因为 Sign 路径要在 `CurrentUser/My` 中按 thumbprint 找证书，找不到 F713。
+     - `audit_seal.py verify` 抛 "audit has an unsealed tail"——因为本轮 2026-07-21T16:11:55Z 经 `scripts\loop_state.py` 写入的 STATE 修改产生了 16 行新未签名尾部（head 签的是 63326 bytes，当前 65382 bytes）。
+  3. 第一轮 audit 报告（上方）误把 "audit-signing-F6DE...json" 当作缺失，归因于"Get-ChildItem 输出截断"——但实际当时文件就在仓库里。**这是审计方法论瑕疵**：审计必须 `git ls-files` 或 `find . -name 'audit-signing*'` 全量列举，不能依赖单次截断的 `Get-ChildItem`。已记入 skill 待办。
+
+- IMPLEMENT 切片 A（test coverage，已完成）：
+  - 文件：`tests/unit/test_traceability_check.py`（由 779 字节扩展到 2790 字节）。
+  - 新增 4 个 test method：
+    - `test_eng_loop_env_is_fully_covered` — 锁定 ENG-LOOP-ENV/AC-1 done 状态的全部路径存在（与 ENG-BASE 模板对称）。
+    - `test_us_0_ac_1_is_fully_covered` — 锁定 US-0/AC-1 done 状态的全部路径存在。
+    - `test_us_0_ac_2_is_pending_by_design` — 显式 `active_only=False` 锁 US-0/AC-2 ready + 测试文件缺失的策略。
+    - `test_us_5_ac_1_is_blocked_by_design` — 显式 `active_only=False` 锁 US-5/AC-1 blocked + 矩阵无路径的策略。
+  - 验证：`python -m unittest tests.unit.test_traceability_check -v` 输出 7 tests / 7 OK（0.013s）。`python -m compileall -q -f scripts tests` 退出 0。
+  - 覆盖缺口关闭：现在每个 done 状态的 story 都至少有一个 `test_<story>_is_fully_covered` 单元断言。ready/blocked 状态的策略也锁定（防止未来 schema 静默修改）。
+
+- 未做（路径 3 第一阶段范围外）：
+  - **切片 B（F6 历史归档补全）** — 已废弃：F6 归档本就存在（claim ① 错误，无需补）。如果未来要"加固 Verify 路径对 F6 head 的可重现验证"，那是另一个独立工作项。
+  - **切片 C（F713 私钥恢复）** — 未做。原因：
+    1. 触及 `CurrentUser/My` 证书 store —— 非仓库内操作，越权。
+    2. `audit_signature.ps1 -Action Initialize` 路径被 "Signing configuration already exists; refusing replacement" 拒 —— 重置必须先备份并删 `loop\audit-signing.json`，这是密码方案调整（AGENTS.md §6 停止条件：调整密码方案需业务负责人单独批准）。
+    3. 重新生成将产生新 thumb，**新 head 的 thumb 与 audit-head.json 已签的 thumb=F713 不匹配**——必须重签 head.p7s 并重新接受 sequence 断裂（破坏"无未解决审计尾删"目标）。
+  - **切片 D（重跑 make quality 验证）** — 未做。`audit_seal.py verify` 当前 exit=14（unsealed tail）；任何 make quality 跑都会 exit=14 并污染 `loop\tool-audit.jsonl` 序列。
+
+- 待办（NEXT ROUND 必须由用户/业务负责人决断）：
+  - F713 私钥恢复方案三选一仍有效（详见上一条 2026-07-22 勘误条目）：(a) `audit_signature.ps1 Initialize` 拒（已确认）；(b) 备份并删 `audit-signing.json` 后重 Initialize（**会破坏现有 head 的 F713 签名链**——必须先决定是否接受 sequence 重置）；(c) 切回 F6DE 作当前签名者（恢复原始签名者）+ 为 F713 head 落档（已落档），这样 `audit_signature.ps1 Sign` 能用 F6DE 私钥签下一轮 head（sequence 128），Verify 路径仍能寻址到 `audit-signing-F713...json` 验证 sequence 127 的 head。
+  - 切 (c) 后下一轮的完整流程：重跑 `make quality` → 应在 preflight 通过 `audit_seal.py` Sign（私钥现成）+ 整体 gate 期望 exit=0（除非另有功能问题）。
+  - audit 方法论修复：审计时用 `git ls-files` 而非 `Get-ChildItem` 全量列举——下次 audit 报告引用此经验。
+
+- 提出者：loop-engineer（在用户指令"3"下生成测试覆盖补丁 + DECISIONS self-correction，未触动审计链、未触发密码方案调整）。
+- 决策状态：**拟议**——本轮用户指令为"3"，本条目记录路径 3 第一阶段（切片 A + self-correction）的状态；不等同于 AGENTS.md §2 第六步 DECIDE 阶段的正式签字。
+  本条目在用户对 self-correction 文本本身无异议、并经 security-reviewer 与 mvp-verifier 双签后转为**已批准**；
+  若任一复核方不通过、或用户撤回"3"指令，立即撤销并以本节追加的方式留痕。
+- 待办：security-reviewer 复核 4 个新单元测试 → mvp-verifier 复核 → 用户对 self-correction + 切片 A 文本签字 → 回填批准戳 → 下一轮开 F713 私钥恢复决策。
+
+
+## 2026-07-22 — ENG-LOOP-ENV-AC-2 阶段二：切回 F6DE 作当前签名者（方案 c 已批准并完成）
+
+- 工作项：F713 私钥恢复。用户批准方案 (c)：备份 `loop\audit-signing.json` → 改 thumbprint 为 F6DE → 跑 `make quality` 验证。
+
+- 已批准并完成：
+  - 备份：`loop\audit-signing.json` → `loop\audit-signing.json.c.bak.20260721T163000Z`（SHA-256 `6afe0df1...`）。
+  - 切换：`loop\audit-signing.json` thumbprint `F7132638B319851806DD55E826B34BC8952D41B2` → `F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86`；public_certificate 从 `loop/audit-signing-public-F713...cer` (SHA-256 `d051f1a1...`) 改回 `loop/audit-signing-public.cer` (SHA-256 `bbd51faf...`)；schema_version / prototype / signature_algorithm / digest_algorithm / formal_replacement 字段保留不变。原子写：`tmp + os.replace`，无半写状态。
+  - 验证 sequence 127 F713 head 仍可验证：`scripts\audit_signature.ps1 -Action Verify` exit=0（脚本通过 `audit-signing-{THUMB}.json` 归档寻址，自动加载 F713 归档 config 后通过 CMS 验签）。
+  - 验证 F6DE 私钥可用：`scripts\audit_signature.ps1 -Action Inspect` exit=0，match_count=1, has_private_key=true, pfx_exportable=false。
+  - 跑 `python scripts\audit_seal.py sign` → exit=0, status="fully-sealed"。新 `loop\audit-head.json`：
+    - sequence: 127 → **128**
+    - signer_thumbprint: F7132638... → **F6DE13A4...**
+    - audit_byte_count: 63326 → **65382**（闭合了之前的 16 行未签名尾部）
+    - audit_line_count: 169 → **172**
+    - signed_at: 2026-07-21T16:23:54.205531Z
+    - tail_record_hash: 42d4b878869b0b62b432b5919ffe01b2add855d32e30fa988048675d391f1bda
+  - 跑 `.\\scripts\\dev.ps1 -Task quality`（先 `.\\scripts\\enter-dev-environment.ps1`）→ **连续两次 exit=0**（2026-07-21T16:26:16Z, 2026-07-21T16:28:47Z）。两次都通过完整 5 阶段（fmt / lint / test / test-security / test-e2e）+ preflight audit seal + final audit seal。
+
+- 测量数据（来自 `loop\VERIFICATION.md` 最后两段）：
+  - Lint 步骤（`scripts\validate_opencode.py` + `traceability_check.py` + `audit_log verify` + `audit_seal verify --allow-tail`）：全 exit=0。
+  - Test（unit 7 + integration 3）= 10 tests，全 OK。
+  - Test-security：52 tests，56.295s，全 OK（含 `test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment`——此条 SKILL §pitfall 2026-07-18 列为已知失败，本次实测 **绿**；脚本中 `make.cs` 字符串断言已与当前实现对齐）。
+  - Test-e2e：3 tests，36.406s，全 OK。
+  - 最终 `audit seal: fully-sealed` 两次。
+  - `loop\tool-audit.jsonl` 末尾记录（quality_gate 5 行）：
+    - 2026-07-21T15:29:41Z quality exit=14（preflight 旧失败）
+    - 2026-07-21T16:11:55Z loop_state prepared/committed（路径 D 的 STATE 修正）
+    - 2026-07-21T16:26:16Z quality exit=0（**首次绿**）
+    - 2026-07-21T16:28:47Z quality exit=0（**稳定双签绿**）
+
+- 安全审计链影响（按 AGENTS.md §3 第 6 条透明记录）：
+  1. `audit-head.json`（无 thumb 后缀，当前 head）从 F713 签名 → **F6DE 签名**。sequence 连续（127→128），无断裂。
+  2. `audit-head.json` 之前的 F713 版本**没有保留独立副本**——它就是被覆盖的当前 head 文件。F713 签名的"实物证据"现在仅存在于 (a) `loop\audit-head-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json`（这是 F6 早期归档，与 F713 无关）和 (b) 之前 `audit_seal.py sign` 写的 `loop\audit-head.json.bak`（如果存在）。
+  3. `loop\audit-head-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json` + `.p7s`（2026-07-17 22:12 创建的 F6 历史归档）保留，作为 sequence ≤ 46 的历史 head 证据。
+  4. `loop\audit-signing-F713...json` + `.cer`（F713 归档配置 + 公钥）保留——`audit_signature.ps1 Verify` 路径可寻址，用于未来手动校验 sequence 127 F713 head 的 CMS 签名。
+  5. F713 私钥**永久不可恢复**（CurrentUser/My 中找不到 thumbprint=F713 证书，连证书本身都丢失）。任何未来想"切回 F713 作当前签名者"的操作必须先重新生成 F713 证书（`Initialize` 路径拒"already exists"——需要先备份并删 `audit-signing.json`），会破坏 sequence 128 起的签名链，**目前不建议操作**。
+
+- 边界（按用户路径 c 的范围严格遵守）：
+  - 未生成新的密钥 / 证书——F6DE 是已存在的原始签名者（2026-07-15 创建，2028-07-14 仍有效）。
+  - 未删除 `loop\audit-head-F6DE...json/.p7s` 或 `audit-signing-F713...json/.cer`。
+  - 未删除 `loop\audit-signing.json.c.bak.20260721T163000Z` 备份——它保留以便回滚。
+  - 未改任何非 `loop\audit-signing.json` 的源文件。
+  - 未 `git commit`（用户未在本轮指令中明确要求 commit；遵循路径 D precedent "doc + state 修改后不 commit，由用户决策"）。
+
+- 与 AGENTS.md §6 停止条件的对照：
+  - "调整密码方案" → 满足（签名者从 F713 切回 F6DE），但用户已在"3"/"c"指令中明确批准。
+  - "出现 Critical 或 High 安全问题" → 未触发（无新的安全 finding；切换后 make quality 两次连绿 + 52 个 security tests 全 OK）。
+  - "当前工作项完成" → 本条 DECISIONS 自身记录完成；state 是否标 done 由下一轮 `loop_state.py` 决定。
+
+- 待办（NEXT ROUND 待办——本轮不擅自推进）：
+  1. **`git commit` 决策**：本轮共 9 个 M（路径 D + 路径 3 第一/二阶段），累积较大。建议按 3 个 commit 切分：(i) `loop\STATE.json` + `loop\BACKLOG.yaml` + `loop\DECISIONS.md` 路径 D 段（doc-only repair）；(ii) `tests\unit\test_traceability_check.py` 路径 3 切片 A（test coverage）；(iii) `loop\audit-signing.json` + `loop\audit-head.json` + `loop\audit-head.p7s` + `loop\tool-audit.jsonl` + `loop\VERIFICATION.md` + `loop\DECISIONS.md` 路径 3 阶段二（signer switch + quality gate green）。本轮不擅自 commit。
+  2. **`loop\STATE.json` 状态推进**：当前 `status=done, phase=decide, last_verified_commit=8fd55a8...`（路径 D 写入）。路径 3 阶段二完成后是否 bump `iteration`、改 `last_verified_commit` 到新 commit hash？建议留待 commit 决策之后。
+  3. **F713 私钥**：当前状态"永久丢失"已被记录；如需重新启用 F713 必须重新走 `Initialize`（会破坏 sequence 128 起的签名链——目前不建议）。
+  4. **`make.cs` 字符串断言**：SKILL §pitfall 提到的已知失败本次实测**绿**——但本轮未修改测试或 make.cs，所以这是静默自愈（推测：之前某轮已修复但未记录在 DECISIONS 中）。下次 audit 应核对 `tests\security\test_local_toolchain_security.py` 的 `test_make_shim_locks_*` 与 `scripts\tool-shims\make.cs` 的当前内容是否真的一致。
+
+- 提出者：loop-engineer（在用户指令"c"下生成备份、改 config、跑 make quality、写 DECISIONS；未触动其他仓库文件）。
+- 决策状态：**拟议**——本轮用户指令为"c"，本条目记录方案 c 的执行结果与影响；不等同于 AGENTS.md §2 第六步 DECIDE 阶段的正式签字。
+  本条目在用户对方案 c 文本本身无异议、并经 security-reviewer 与 mvp-verifier 双签后转为**已批准**；
+  若任一复核方不通过、或用户撤回"c"指令，立即撤销并以本节追加的方式留痕。
+- 待办：security-reviewer 复核签名者切换影响 → mvp-verifier 复核 make quality 双绿 → 用户对方案 c 文本签字 → 回填批准戳 → 下一轮处理 `git commit` 边界与 `loop\STATE.json` 推进。
