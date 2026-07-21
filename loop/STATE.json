@@ -7,7 +7,7 @@
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": null,
-  "last_verified_commit": "8fd55a8324b9cff6457e06b92fbf734c061d3b23",
-  "blocking_issue": "Audit chain: signing certificate thumbprint=F713 (CurrentUser/My has only F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86); make quality preflight fails on re-run since 2026-07-21T15:29:41Z (fingerprint e050cf72f6cda47e, exit_code=14). F713 head+p7s and F6 head+p7s remain in repo and tool-audit.jsonl chain is unbroken, but the F713 private key was not persisted in CurrentUser/My so audit_signature.ps1 Sign path fails closed. Use path D: repair document-only drift; do NOT touch audit-signing.json or audit-head*. Next round must regenerate F713 (audit_signature.ps1 Initialize refuses 'already exists') or revert audit-signing.json to F6 plus restore signer-pinned historical verification.",
-  "updated_at": "2026-07-21T16:11:55.209234Z"
+  "last_verified_commit": "a555db9261024bf51b706ae102f4ad901002ec67",
+  "blocking_issue": null,
+  "updated_at": "2026-07-21T16:36:45.553337Z"
 }
