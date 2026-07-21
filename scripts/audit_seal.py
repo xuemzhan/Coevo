@@ -4,10 +4,17 @@ import argparse, datetime as dt, hashlib, json, os, shutil, subprocess, uuid
 from pathlib import Path
 from audit_log import DEFAULT_AUDIT, DEFAULT_CHECKPOINT, exclusive_lock, verify as verify_chain
 
-ROOT=Path(__file__).resolve().parents[1]; HEAD=ROOT/"loop/audit-head.json"; SIGNATURE=ROOT/"loop/audit-head.p7s"; CONFIG=ROOT/"loop/audit-signing.json"; SCRIPT=ROOT/"scripts/audit_signature.ps1"; JOURNAL=ROOT/"loop/audit-seal.transaction.json"
+ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1])); HEAD=ROOT/"loop/audit-head.json"; SIGNATURE=ROOT/"loop/audit-head.p7s"; CONFIG=ROOT/"loop/audit-signing.json"; SCRIPT=ROOT/"scripts/audit_signature.ps1"; JOURNAL=ROOT/"loop/audit-seal.transaction.json"
 def canonical(value): return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")+b"\n"
 def powershell(action,head=HEAD,signature=SIGNATURE):
-    result=subprocess.run(["powershell","-NoProfile","-ExecutionPolicy","Bypass","-File",str(SCRIPT),"-Action",action,"-HeadPath",str(head),"-SignaturePath",str(signature),"-ConfigPath",str(CONFIG)],cwd=ROOT,capture_output=True,text=True,encoding="utf-8",errors="replace")
+    executable=os.environ.get("COEVO_POWERSHELL_PATH")
+    if not executable or not Path(executable).is_absolute():
+        executable = shutil.which("pwsh") or shutil.which("powershell")
+    if not executable or not Path(executable).is_absolute():
+        fallback = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+        if fallback.is_file(): executable = str(fallback)
+    if not executable or not Path(executable).is_absolute(): raise RuntimeError("locked Windows PowerShell path is unavailable")
+    result=subprocess.run([executable,"-NoProfile","-ExecutionPolicy","Bypass","-File",str(SCRIPT),"-Action",action,"-HeadPath",str(head),"-SignaturePath",str(signature),"-ConfigPath",str(CONFIG)],cwd=ROOT,capture_output=True,text=True,encoding="utf-8",errors="replace")
     if result.returncode: raise RuntimeError((result.stderr or result.stdout).strip())
 def signed_head(head=HEAD,signature=SIGNATURE): powershell("Verify",head,signature); return json.loads(head.read_text(encoding="utf-8"))
 def verify_seal(audit=DEFAULT_AUDIT,head=HEAD,signature=SIGNATURE):
@@ -51,5 +58,5 @@ def main():
         result=seal() if args.action=="sign" else verify_seal()
         if result=="valid-prefix-with-unsealed-tail" and not args.allow_tail: raise ValueError("audit has an unsealed tail")
         print(json.dumps({"ok":True,"status":result if isinstance(result,str) else "fully-sealed"},ensure_ascii=False)); return 0
-    except Exception as exc: print(json.dumps({"ok":False,"error":str(exc)},ensure_ascii=False)); return 14
+    except Exception as exc: print(json.dumps({"ok":False,"error":str(exc)},ensure_ascii=True)); return 14
 if __name__=="__main__": raise SystemExit(main())

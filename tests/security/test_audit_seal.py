@@ -6,6 +6,11 @@ from audit_seal import HEAD, SIGNATURE, signed_head, verify_seal
 
 class AuditSealTests(unittest.TestCase):
     def test_current_project_audit_is_fully_sealed(self): self.assertEqual("fully-sealed",verify_seal())
+    def test_historical_signer_remains_verifiable_after_rotation(self):
+        thumbprint="F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86"
+        head=ROOT/f"loop/audit-head-{thumbprint}.json"
+        signature=ROOT/f"loop/audit-head-{thumbprint}.p7s"
+        self.assertEqual(thumbprint,signed_head(head,signature)["signer_thumbprint"])
     def test_complete_tail_deletion_is_detected(self):
         sealed=signed_head(); raw=(ROOT/"loop/tool-audit.jsonl").read_bytes(); lines=raw.splitlines(keepends=True)
         with tempfile.TemporaryDirectory() as temp:

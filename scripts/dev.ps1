@@ -1,13 +1,13 @@
 [CmdletBinding()]
-param([ValidateSet('validate','quality','env-check')][string]$Task='quality')
+param([ValidateSet('validate','quality','env-check','loop-status')][string]$Task='quality')
 $ErrorActionPreference='Stop'
 $Root=Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $Root
-$Python=Join-Path $Root '.venv\Scripts\python.exe'
-if(-not (Test-Path -LiteralPath $Python)){ throw 'Missing .venv. Create it offline with: python -m venv .venv' }
+. (Join-Path $PSScriptRoot 'enter-dev-environment.ps1') -Quiet
 switch($Task){
-  'validate' { & $Python scripts/validate_opencode.py }
-  'quality' { & $Python scripts/quality_gate.py --target quality }
-  'env-check' { & $Python scripts/validate_opencode.py --require-tools }
+  'validate' { & $env:COEVO_MAKE_PATH env-check }
+  'quality' { & $env:COEVO_MAKE_PATH quality }
+  'env-check' { & $env:COEVO_MAKE_PATH env-check }
+  'loop-status' { & $env:COEVO_OPENCODE_PATH run --command loop-status }
 }
 exit $LASTEXITCODE

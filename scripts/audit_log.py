@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib, hashlib, json, os
 from pathlib import Path
 
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1]))
 DEFAULT_AUDIT=ROOT/"loop/tool-audit.jsonl"
 DEFAULT_CHECKPOINT=ROOT/"loop/audit-checkpoint.json"
 

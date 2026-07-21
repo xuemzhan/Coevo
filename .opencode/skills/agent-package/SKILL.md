@@ -1,6 +1,6 @@
 ---
 name: agent-package
-description: `.agent` 任务包的封装、加密、签名、版本、重放检测、冲突处理与原子导入；按需加载，协议变更必须同步 schema 与兼容性测试。
+description: "`.agent` 任务包的封装、加密、签名、版本、重放检测、冲突处理与原子导入；按需加载，协议变更必须同步 schema 与兼容性测试。"
 compatibility: opencode
 metadata:
   project: coevo

@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "approved_at": "2026-07-16",
+  "approved_by": "repository owner",
+  "runtime_downloads_allowed": false,
+  "tools": {
+    "opencode": {
+      "name": "OpenCode CLI",
+      "version": "1.18.2",
+      "source_repository": "https://github.com/anomalyco/opencode",
+      "release_url": "https://github.com/anomalyco/opencode/releases/tag/v1.18.2",
+      "release_metadata_evidence_path": "docs/dependencies/evidence/opencode-v1.18.2-release-asset.json",
+      "published_at": "2026-07-15T16:15:38Z",
+      "license": "MIT",
+      "license_url": "https://github.com/anomalyco/opencode/blob/v1.18.2/LICENSE",
+      "license_path": "docs/dependencies/licenses/opencode-MIT.txt",
+      "archive": {
+        "path": ".tools/downloads/opencode-windows-x64.zip",
+        "asset_api_id": 478101580,
+        "size": 59152788,
+        "sha256": "aca23b18d03639c6bd576a2dd23cebfa6dab80d31358f17cfa03fd1f2a5c41fd",
+        "digest_source": "GitHub release asset metadata"
+      },
+      "executable": {
+        "path": ".tools/opencode/v1.18.2/opencode.exe",
+        "size": 173071752,
+        "sha256": "a610d2704ca43e328ae28d34e94d3e725d6435a282c8a654cfb9f184a8b7ab5b",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=\"Anomaly Innovations, Inc https://anoma.ly/\", O=\"Anomaly Innovations, Inc https://anoma.ly/\", L=Dover, S=Delaware, C=US",
+        "signer_thumbprint": "7C13FB1468AB0B9DC6931A4CAE3CC189119A1DD8"
+      },
+      "external_runtime_dependencies": [],
+      "bundled_dependency_inventory": "Inherited from the upstream self-contained release artifact; no separate runtime packages are resolved by Coevo."
+    },
+    "python": {
+      "name": "CPython",
+      "version": "3.14.3",
+      "source_url": "https://www.python.org/downloads/release/python-3143/",
+      "offline_source": "C:/Python314 official signed installation",
+      "artifact_root": ".tools/python/3.14.3",
+      "file_count": 5421,
+      "total_size": 163694479,
+      "license": "Python Software Foundation License Version 2",
+      "license_path": ".tools/python/3.14.3/LICENSE.txt",
+      "executable": {
+        "path": ".tools/python/3.14.3/python.exe",
+        "size": 106328,
+        "sha256": "cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=Python Software Foundation, O=Python Software Foundation, L=Beaverton, S=Oregon, C=US",
+        "signer_thumbprint": "AB0D2A5429F749A63EF2197B112857BEA6767CB0"
+      },
+      "inventory": {
+        "path": ".tools/python/3.14.3-files.lock",
+        "size": 591052,
+        "sha256": "829b9f4c69430fe1ed18573bedd828552eca242f8c5d128324ad2b1a844534c2",
+        "format": "sha256-tab-size-tab-relative-path"
+      },
+      "network_access": false
+    },
+    "control_archive": {
+      "path": ".tools/control/control.pyz",
+      "size": 37387,
+      "sha256": "7dd50b147a1c9bf336feb1493dfade9a854af19cf892df57391d2ef584dfce02",
+      "format": "deterministic ZIP_STORED; sorted fixed entries; DOS epoch",
+      "audit_signature_path": "scripts/audit_signature.ps1",
+      "audit_signature_size": 5994,
+      "audit_signature_sha256": "e87681df0c40d13df675c67794f6f9589bac74edf5ebb1f2996e9ec348212a60"
+    },
+    "make_compatibility_shim": {
+      "node": {
+        "name": "Node.js",
+        "version": "24.14.0",
+        "offline_source": "D:/Program Files/nodejs/node.exe",
+        "license": "MIT",
+        "license_url": "https://github.com/nodejs/node/blob/v24.14.0/LICENSE",
+        "executable": {
+          "path": ".tools/node/24.14.0/node.exe",
+          "size": 91380224,
+          "sha256": "63c259c81e5d472b5f11c8d506070130cb04a1ecf84b80377a34ed6ec9048088",
+          "authenticode_status": "Valid",
+          "signer_subject": "CN=OpenJS Foundation, O=OpenJS Foundation, L=San Francisco, S=California, C=US",
+          "signer_thumbprint": "1E5F84AB818EBC0E2ABD161659EF6DF5E9203773"
+        },
+        "network_access": false
+      },
+      "windows_powershell": {
+        "name": "Windows PowerShell",
+        "version": "10.0.26100.8875",
+        "windows_directory_relative_path": "System32/WindowsPowerShell/v1.0/powershell.exe",
+        "size": 454656,
+        "sha256": "0ff6f2c94bc7e2833a5f7e16de1622e5dba70396f31c7d5f56381870317e8c46",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+        "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79",
+        "network_access": false
+      },
+      "name": "Coevo Make compatibility shim",
+      "version": "1.0",
+      "source": "scripts/tool-shims/make.cs",
+      "source_sha256": "6396971d0414a5e1bd643ddb043f78688ffeaf05b58428a8b76e8c1eaabcc9e1",
+      "script_inventory": {
+        "path": "docs/dependencies/python-script-lock.tsv",
+        "size": 854,
+        "sha256": "6f4e6d759b8269101172f09f260fab95f0992f252bd6c3cc6526a7df2c11b07a"
+      },
+      "compiler": "%WINDIR%/Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+      "compiler_lock": {
+        "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+        "size": 2569832,
+        "sha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+        "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+      },
+      "license": "repository license",
+      "network_access": false
+    }
+  }
+}

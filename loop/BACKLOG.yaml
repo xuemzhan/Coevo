@@ -16,6 +16,18 @@ items:
       - tests/e2e/test_offline_baseline.py
     security_review: true
     protocol_review: false
+  - id: ENG-LOOP-ENV-AC-1
+    story: ENG-LOOP-ENV
+    title: 配置锁版本、仓库本地且可隔离验证的 Loop 开发环境
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_dev_environment_tools.py
+      - tests/integration/test_dev_environment_entry.py
+      - tests/security/test_local_toolchain_security.py
+      - tests/e2e/test_loop_environment.py
+    security_review: true
+    protocol_review: false
   - id: US-0-AC-1
     story: US-0
     title: 建立用户、客户端、证书数据模型（最小集合）

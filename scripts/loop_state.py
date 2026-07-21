@@ -4,7 +4,7 @@ import argparse, datetime as dt, hashlib, json, os, sys, uuid
 from pathlib import Path
 from audit_log import append_record, exclusive_lock
 
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1]))
 STATE=ROOT/"loop/STATE.json"; AUDIT=ROOT/"loop/tool-audit.jsonl"; JOURNAL=ROOT/"loop/STATE.transaction.json"; LOCK=ROOT/"loop/STATE.lock"
 ALLOWED={"phase","status","current_story","current_item","failed_verifications","last_failure_fingerprint","last_verified_commit","blocking_issue"}
 PHASES={"ready","discover","plan","implement","verify","review","record","decide"}

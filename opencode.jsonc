@@ -1,15 +1,38 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "shell": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+  "autoupdate": false,
+  "lsp": false,
   "instructions": ["AGENTS.md", "docs/requirements/*.md", "docs/constraints/*.md", "docs/architecture/*.md", "docs/protocol/*.md", "docs/traceability/*.md", "loop/GOAL.md", "loop/STATE.json", "loop/BACKLOG.yaml", "loop/VERIFICATION.md"],
   "permission": {
     "*": "ask", "read": "allow", "glob": "allow", "grep": "allow", "lsp": "allow",
     "edit": "ask", "external_directory": "deny", "webfetch": "deny", "websearch": "deny",
+    "loop_state": "allow", "quality_gate": "allow", "traceability_check": "allow",
     "bash": {
-      "*": "ask", "git status*": "allow", "git diff*": "allow", "git log*": "allow",
-      "python scripts/validate_opencode.py*": "allow", "python scripts/quality_gate.py*": "allow",
+      "*": "ask",
+
+      "git status*": "allow", "git diff*": "allow", "git log*": "allow",
+      "git show*": "allow", "git rev-parse*": "allow",
+
+      "python scripts/validate_opencode.py*": "allow",
+      "python scripts/quality_gate.py*": "allow",
+      "python scripts/loop_state.py*": "allow",
+      "python scripts/audit_log.py*": "allow",
+      "python scripts/audit_seal.py*": "allow",
+      "python -m pytest tests/unit/*": "allow",
+      "python -m pytest tests/integration/*": "allow",
+      "python -m pytest tests/security/*": "allow",
+      "python -m pytest tests/e2e/*": "allow",
+      "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev.ps1*": "allow",
+
+      ".tools/bin/make-*.exe *": "allow",
+      ".tools/opencode/v*/opencode.exe *": "allow",
+
+      "rm -rf*": "deny",
       "git push*": "deny", "git reset --hard*": "deny", "git clean*": "deny",
       "curl *": "deny", "wget *": "deny", "Invoke-WebRequest*": "deny",
-      "pip install*": "deny", "python -m pip install*": "deny", "npm install*": "deny", "bun install*": "deny", "go get*": "deny"
+      "pip install*": "deny", "python -m pip install*": "deny",
+      "npm install*": "deny", "bun install*": "deny", "go get*": "deny"
     },
     "skill": {"*":"deny","mvp-requirements":"allow","agent-package":"allow","acceptance-testing":"allow"},
     "task": {"*":"deny","mvp-planner":"allow","mvp-builder":"allow","mvp-verifier":"allow","protocol-reviewer":"allow","security-reviewer":"allow"}

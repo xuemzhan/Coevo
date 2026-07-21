@@ -1,9 +1,9 @@
 """Dependency-free, fail-closed validation for Coevo's engineering baseline."""
 from __future__ import annotations
-import argparse, json, shutil
+import argparse, json, os, shutil, subprocess
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("COEVO_REPO_ROOT", Path(__file__).resolve().parents[1]))
 REQUIRED = ("AGENTS.md", "opencode.jsonc", "Makefile", "docs/README.md", "loop/STATE.json",
  "loop/BACKLOG.yaml", "loop/VERIFICATION.md", "loop/tool-audit.jsonl", ".opencode/plugins/loop-guard.ts",
  ".opencode/tools/loop_state.ts", ".opencode/tools/quality_gate.ts", ".opencode/tools/traceability_check.ts",
@@ -30,6 +30,40 @@ def strip_jsonc(text):
         out.append(c); i+=1
     return "".join(out)
 
+def validate_resolved_config(check):
+    executable = Path(os.environ.get("COEVO_OPENCODE_PATH", ""))
+    if not executable.is_absolute() or not executable.is_file():
+        check(False, "OpenCode resolved config unavailable")
+        return
+    try:
+        process = subprocess.run(
+            [str(executable), "debug", "config"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+            check=False,
+        )
+        if process.returncode:
+            check(False, "OpenCode resolved config unavailable")
+            return
+        resolved = json.loads(process.stdout)
+        if not isinstance(resolved, dict):
+            raise TypeError("resolved config is not an object")
+        permission = resolved.get("permission")
+        if not isinstance(permission, dict):
+            raise TypeError("resolved permission is not an object")
+        safe = (
+            all(permission.get(name) == "deny" for name in ("webfetch", "websearch", "external_directory"))
+            and resolved.get("autoupdate") is False
+            and resolved.get("lsp") is False
+        )
+        check(safe, "OpenCode resolved security policy denied")
+    except (OSError, subprocess.SubprocessError, ValueError, TypeError):
+        check(False, "OpenCode resolved config unavailable")
+
 def validate(require_tools=False):
     failures=[]
     def check(ok,msg):
@@ -46,6 +80,7 @@ def validate(require_tools=False):
     for p in (ROOT/".opencode/tools").glob("*.ts"): check("export default tool(" in p.read_text(encoding="utf-8"), "current tool API: "+p.name)
     if require_tools:
         for name in ("git","opencode","make"): check(shutil.which(name) is not None,"tool available: "+name)
+        validate_resolved_config(check)
     return failures
 
 def main():

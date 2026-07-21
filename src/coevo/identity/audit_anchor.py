@@ -6,7 +6,6 @@ import contextlib
 import hashlib
 import json
 import os
-import shutil
 import subprocess
 import tempfile
 import uuid
@@ -18,6 +17,16 @@ ROOT = Path(__file__).resolve().parents[3]
 SIGNING_SCRIPT = ROOT / "scripts" / "audit_signature.ps1"
 FRESHNESS_SCRIPT = ROOT / "scripts" / "identity_freshness.ps1"
 SIGNING_CONFIG = ROOT / "loop" / "audit-signing.json"
+
+
+def _powershell_executable() -> str:
+    exe = os.environ.get("COEVO_POWERSHELL_PATH")
+    if exe and Path(exe).is_absolute():
+        return exe
+    fallback = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+    if fallback.is_file():
+        return str(fallback)
+    raise AuditAnchorError("Windows PowerShell is unavailable")
 
 
 class AuditAnchorError(RuntimeError):
@@ -49,7 +58,7 @@ class WindowsCertificateSigner:
             if signature is not None:
                 signed.write_bytes(signature)
             process = subprocess.run(
-                ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(SIGNING_SCRIPT), "-Action", action, "-HeadPath", str(head), "-SignaturePath", str(signed), "-ConfigPath", str(SIGNING_CONFIG)],
+                [_powershell_executable(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(SIGNING_SCRIPT), "-Action", action, "-HeadPath", str(head), "-SignaturePath", str(signed), "-ConfigPath", str(SIGNING_CONFIG)],
                 cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30,
             )
             if process.returncode:
@@ -93,7 +102,7 @@ class WindowsFreshnessAuthority:
 
     def _arguments(self, action: str, marker: dict) -> list[str]:
         args = [
-            "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(FRESHNESS_SCRIPT),
+            _powershell_executable(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(FRESHNESS_SCRIPT),
             "-Action", action, "-StoreId", marker["store_id"], "-Generation", str(marker["generation"]),
             "-Binding", marker["binding_sha256"], "-TransitionId", marker["transition_id"],
             "-ConfigPath", str(SIGNING_CONFIG),

@@ -12,7 +12,21 @@ if($Action -eq 'Initialize'){
   $config=[ordered]@{schema_version='1.0';prototype=$true;store='CurrentUser/My';thumbprint=$cert.Thumbprint;public_certificate='loop/audit-signing-public.cer';public_certificate_sha256=(FileSha256 $publicPath);signature_algorithm='RSA-PKCS1-v1_5';digest_algorithm='SHA-256';formal_replacement='approved SM2 product required'}
   [IO.File]::WriteAllText($ConfigPath,($config|ConvertTo-Json -Depth 4)+"`n",[Text.UTF8Encoding]::new($false)); Write-Output $cert.Thumbprint; exit 0
 }
-$config=Get-Content -Raw -LiteralPath $ConfigPath | ConvertFrom-Json; $publicPath=Full $config.public_certificate
+$config=Get-Content -Raw -LiteralPath $ConfigPath | ConvertFrom-Json
+if($Action -eq 'Verify'){
+  $head=Get-Content -Raw -LiteralPath $HeadPath | ConvertFrom-Json
+  $signerThumb=[string]$head.signer_thumbprint
+  if($signerThumb){
+    if($signerThumb -notmatch '^[0-9A-Fa-f]{40}$'){ throw 'Audit head signer thumbprint is invalid.' }
+    if($signerThumb -ne $config.thumbprint){
+      $archive=Join-Path (Split-Path -Parent $ConfigPath) ("audit-signing-"+$signerThumb.ToUpperInvariant()+".json")
+      if(-not (Test-Path -LiteralPath $archive -PathType Leaf)){ throw 'Pinned historical signing configuration is unavailable.' }
+      $config=Get-Content -Raw -LiteralPath $archive | ConvertFrom-Json
+    }
+    if($config.thumbprint -ne $signerThumb){ throw 'Audit head signer does not match pinned signing configuration.' }
+  }
+}
+$publicPath=Full $config.public_certificate
 if((FileSha256 $publicPath) -ne $config.public_certificate_sha256){ throw 'Pinned public certificate hash mismatch.' }
 $public=[Security.Cryptography.X509Certificates.X509Certificate2]::new($publicPath)
 if($public.Thumbprint -ne $config.thumbprint){ throw 'Pinned certificate thumbprint mismatch.' }

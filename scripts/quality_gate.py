@@ -1,15 +1,17 @@
 """Zero-download, fail-closed quality gate with a signed final audit seal."""
 from __future__ import annotations
-import argparse, datetime as dt, hashlib, json, subprocess, sys
+import argparse, datetime as dt, hashlib, json, os, subprocess, sys
 from pathlib import Path
 from audit_log import append_record
 from audit_seal import seal, verify_seal
-ROOT=Path(__file__).resolve().parents[1]; VERIFICATION=ROOT/"loop/VERIFICATION.md"
+ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1])); VERIFICATION=ROOT/"loop/VERIFICATION.md"; os.environ.setdefault("COEVO_REPO_ROOT",str(ROOT))
+CONTROL=os.environ.get("COEVO_CONTROL_ARCHIVE",str(ROOT/".tools"/"control"/"control.pyz"))
+def control(module,*args): return [sys.executable,CONTROL,module,*args]
 TARGETS={
  "fmt":[[sys.executable,"-m","compileall","-q","-f","scripts","src","tests"]],
- "lint":[[sys.executable,"scripts/validate_opencode.py"],[sys.executable,"scripts/traceability_check.py"],[sys.executable,"scripts/audit_log.py","verify"],[sys.executable,"scripts/audit_seal.py","verify","--allow-tail"]],
+ "lint":[[sys.executable,str(ROOT/"scripts"/"validate_opencode.py")],control("traceability_check"),control("audit_log","verify"),[sys.executable,str(ROOT/"scripts"/"audit_seal.py"),"verify","--allow-tail"]],
  "test":[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"],[sys.executable,"-m","unittest","discover","-s","tests/integration","-p","*test.py","-v"]],
- "test-security":[[sys.executable,"-m","unittest","discover","-s","tests/security","-v"],["node","tests/security/path_policy_test.mjs"]],
+ "test-security":[[sys.executable,"-m","unittest","discover","-s","tests/security","-v"],[os.environ.get("COEVO_NODE_PATH",str(ROOT/".tools"/"node"/"24.14.0"/"node.exe")),"tests/security/path_policy_test.mjs"]],
  "test-e2e":[[sys.executable,"-m","unittest","discover","-s","tests/e2e","-v"]]}
 def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
 def fingerprint(argvs): return hashlib.sha256(json.dumps(argvs,separators=(",",":")).encode()).hexdigest()[:16]

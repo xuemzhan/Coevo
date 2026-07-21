@@ -1897,3 +1897,5706 @@ audit seal: fully-sealed
 - mvp-verifier: PASS
 - security-reviewer: PASS; Critical 0, High 0; non-blocking Medium 1, Low 2 recorded in `loop/DECISIONS.md`
 - final hygiene: audit `fully-sealed`; freshness certificates 0; test retirement directories 0
+
+## 2026-07-17T16:45:01.238786Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `1`
+```text
+))\n            {\n                expandedRoots.Add(current);\n                current = Path.GetDirectoryName(current);\n            }\n        }\n        foreach (string directory in expandedRoots) directories.Add(OpenLockedDirectory(directory));\n        if (enforceComplete)\n            foreach (string path in Directory.GetFiles(basePath, "*", SearchOption.AllDirectories))\n                if (!expected.Contains(Path.GetFullPath(path))) throw new InvalidDataException("unlocked file in locked tree: " + path);\n    }\n\n    private static string Quote(string value)\n    {\n        return "\\"" + value.Replace("\\\\", "\\\\\\\\").Replace("\\"", "\\\\\\"") + "\\"";\n    }\n\n    private static int Main(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, true, files, directories);\n            files.Add(OpenLockedFile(control, 42110, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 84, in test_tampered_locked_python_script_is_rejected_before_execution
+    self.assertEqual(69,result.returncode,result.stdout+result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 69 != 0 : PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: docs/dependencies/toolchain-lock.json
+PASS required: docs/dependencies/licenses/opencode-MIT.txt
+PASS required: docs/dependencies/python-script-lock.tsv
+PASS required: scripts/enter-dev-environment.ps1
+PASS required: scripts/import-toolchain.ps1
+PASS required: scripts/run-loop.ps1
+PASS required: scripts/tool-shims/make.cs
+PASS required: scripts/windows-native-security.ps1
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS OpenCode autoupdate denied
+PASS OpenCode LSP downloads disabled by configuration
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+PASS runtime tool downloads denied
+PASS OpenCode version locked
+PASS OpenCode license recorded
+PASS OpenCode license present
+PASS locked SHA-256: archive
+PASS locked artifact present: archive
+PASS locked artifact size: archive
+PASS locked artifact hash: archive
+PASS locked SHA-256: executable
+PASS locked artifact present: executable
+PASS locked artifact size: executable
+PASS locked artifact hash: executable
+PASS locked compiler path
+PASS locked compiler size
+PASS locked compiler SHA-256
+PASS locked compiler signer
+PASS Python version locked
+PASS Python runtime inventory totals locked
+PASS Python executable SHA-256 locked
+PASS Python executable present
+PASS Python executable size
+PASS Python executable hash
+PASS Python runtime inventory SHA-256 locked
+PASS Python runtime inventory present
+PASS Python runtime inventory size
+PASS Python runtime inventory hash
+PASS Python script inventory SHA-256 locked
+PASS Python script inventory present
+PASS Python script inventory size
+PASS Python script inventory hash
+PASS Python executable signer locked
+PASS tool available: git
+PASS locked tool available: opencode
+PASS locked tool available: make
+PASS locked tool available: python
+PASS Make runtime hash attested
+PASS OpenCode explicit config locked
+PASS OpenCode runtime version
+PASS OpenCode resolved config loads
+PASS OpenCode resolved downloads disabled
+PASS OpenCode resolved security policy denied
+PASS OpenCode required agents loaded
+PASS OpenCode required commands loaded
+PASS OpenCode skill registry loads
+PASS OpenCode required skills loaded
+{"ok": true, "failures": []}
+
+
+----------------------------------------------------------------------
+Ran 48 tests in 65.813s
+
+FAILED (failures=2)
+
+```
+
+## 2026-07-17T16:53:22.155474Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `2`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz validate_opencode
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: docs/dependencies/toolchain-lock.json
+PASS required: docs/dependencies/licenses/opencode-MIT.txt
+PASS required: docs/dependencies/python-script-lock.tsv
+PASS required: scripts/enter-dev-environment.ps1
+PASS required: scripts/import-toolchain.ps1
+PASS required: scripts/run-loop.ps1
+PASS required: scripts/tool-shims/make.cs
+PASS required: scripts/windows-native-security.ps1
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS OpenCode autoupdate denied
+PASS OpenCode LSP downloads disabled by configuration
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+PASS runtime tool downloads denied
+PASS OpenCode version locked
+PASS OpenCode license recorded
+PASS OpenCode license present
+PASS locked SHA-256: archive
+PASS locked SHA-256: executable
+PASS locked compiler path
+PASS locked compiler size
+PASS locked compiler SHA-256
+PASS locked compiler signer
+PASS Python version locked
+PASS Python runtime inventory totals locked
+PASS Python executable SHA-256 locked
+PASS Python runtime inventory SHA-256 locked
+PASS Python script inventory SHA-256 locked
+PASS Python script inventory present
+FAIL Python script inventory size
+FAIL Python script inventory hash
+PASS Python executable signer locked
+{"ok": false, "failures": ["Python script inventory size", "Python script inventory hash"]}
+
+```
+
+## 2026-07-17T16:56:04.679974Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `1`
+```text
+s = new byte[checked((int)stream.Length)];\n        int offset = 0;\n        while (offset < bytes.Length)\n        {\n            int read = stream.Read(bytes, offset, bytes.Length - offset);\n            if (read == 0) throw new EndOfStreamException();\n            offset += read;\n        }\n        return bytes;\n    }\n\n    private static void LockDirectoryTree(string root, List<IntPtr> directories)\n    {\n        var pending = new Queue<string>();\n        pending.Enqueue(root);\n        while (pending.Count != 0)\n        {\n            string current = pending.Dequeue();\n            directories.Add(OpenLockedDirectory(current));\n            foreach (string directory in Directory.GetDirectories(current, "*", SearchOption.TopDirectoryOnly))\n            {\n                if ((new DirectoryInfo(directory).Attributes & FileAttributes.ReparsePoint) != 0)\n                    throw new InvalidDataException("unsafe locked directory: " + directory);\n                pending.Enqueue(directory);\n            }\n        }\n    }\n\n    private static void LockInventory(string inventoryPath, string inventoryHash, string basePath, bool enforceComplete,\n        List<FileStream> files, List<IntPtr> directories)\n    {\n        var info = new FileInfo(inventoryPath);\n        FileStream inventory = OpenLockedFile(inventoryPath, info.Length, inventoryHash);\n        files.Add(inventory);\n        string text = new UTF8Encoding(false, true).GetString(ReadBytes(inventory));\n        string canonicalBase = Path.GetFullPath(basePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;\n        var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        foreach (string raw in text.Split(new[] { \'\\n\' }, StringSplitOptions.RemoveEmptyEntries))\n        {\n            string[] fields = raw.TrimEnd(\'\\r\').Split(\'\\t\');\n            if (fields.Length != 3 || fields[0].Length != 64)\n                throw new InvalidDataException("invalid lock inventory line");\n            long size;\n            if (!Int64.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out size) || size < 0)\n                throw new InvalidDataException("invalid locked file size");\n            string relative = fields[2].Replace(\'/\', Path.DirectorySeparatorChar);\n            if (Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar).Length == 0)\n                throw new InvalidDataException("unsafe inventory path");\n            foreach (string part in relative.Split(Path.DirectorySeparatorChar))\n                if (part == ".." || part.Length == 0) throw new InvalidDataException("unsafe inventory path");\n            string path = Path.GetFullPath(Path.Combine(basePath, relative));\n            if (!path.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n                throw new InvalidDataException("inventory path escapes root");\n            expected.Add(path);\n            roots.Add(Path.GetDirectoryName(path));\n            files.Add(OpenLockedFile(path, size, fields[0]));\n        }\n        var expandedRoots = new HashSet<string>(roots, StringComparer.OrdinalIgnoreCase);\n        foreach (string root in new List<string>(roots))\n        {\n            string current = root;\n            while (current.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n            {\n                expandedRoots.Add(current);\n                current = Path.GetDirectoryName(current);\n            }\n        }\n        foreach (string directory in expandedRoots) directories.Add(OpenLockedDirectory(directory));\n        if (enforceComplete)\n            foreach (string path in Directory.GetFiles(basePath, "*", SearchOption.AllDirectories))\n                if (!expected.Contains(Path.GetFullPath(path))) throw new InvalidDataException("unlocked file in locked tree: " + path);\n    }\n\n    private static string Quote(string value)\n    {\n        return "\\"" + value.Replace("\\\\", "\\\\\\\\").Replace("\\"", "\\\\\\"") + "\\"";\n    }\n\n    private static int Main(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, true, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 42110, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 59.108s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-17T17:04:54.473063Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `1`
+```text
+s = new byte[checked((int)stream.Length)];\n        int offset = 0;\n        while (offset < bytes.Length)\n        {\n            int read = stream.Read(bytes, offset, bytes.Length - offset);\n            if (read == 0) throw new EndOfStreamException();\n            offset += read;\n        }\n        return bytes;\n    }\n\n    private static void LockDirectoryTree(string root, List<IntPtr> directories)\n    {\n        var pending = new Queue<string>();\n        pending.Enqueue(root);\n        while (pending.Count != 0)\n        {\n            string current = pending.Dequeue();\n            directories.Add(OpenLockedDirectory(current));\n            foreach (string directory in Directory.GetDirectories(current, "*", SearchOption.TopDirectoryOnly))\n            {\n                if ((new DirectoryInfo(directory).Attributes & FileAttributes.ReparsePoint) != 0)\n                    throw new InvalidDataException("unsafe locked directory: " + directory);\n                pending.Enqueue(directory);\n            }\n        }\n    }\n\n    private static void LockInventory(string inventoryPath, string inventoryHash, string basePath, bool enforceComplete,\n        List<FileStream> files, List<IntPtr> directories)\n    {\n        var info = new FileInfo(inventoryPath);\n        FileStream inventory = OpenLockedFile(inventoryPath, info.Length, inventoryHash);\n        files.Add(inventory);\n        string text = new UTF8Encoding(false, true).GetString(ReadBytes(inventory));\n        string canonicalBase = Path.GetFullPath(basePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;\n        var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        foreach (string raw in text.Split(new[] { \'\\n\' }, StringSplitOptions.RemoveEmptyEntries))\n        {\n            string[] fields = raw.TrimEnd(\'\\r\').Split(\'\\t\');\n            if (fields.Length != 3 || fields[0].Length != 64)\n                throw new InvalidDataException("invalid lock inventory line");\n            long size;\n            if (!Int64.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out size) || size < 0)\n                throw new InvalidDataException("invalid locked file size");\n            string relative = fields[2].Replace(\'/\', Path.DirectorySeparatorChar);\n            if (Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar).Length == 0)\n                throw new InvalidDataException("unsafe inventory path");\n            foreach (string part in relative.Split(Path.DirectorySeparatorChar))\n                if (part == ".." || part.Length == 0) throw new InvalidDataException("unsafe inventory path");\n            string path = Path.GetFullPath(Path.Combine(basePath, relative));\n            if (!path.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n                throw new InvalidDataException("inventory path escapes root");\n            expected.Add(path);\n            roots.Add(Path.GetDirectoryName(path));\n            files.Add(OpenLockedFile(path, size, fields[0]));\n        }\n        var expandedRoots = new HashSet<string>(roots, StringComparer.OrdinalIgnoreCase);\n        foreach (string root in new List<string>(roots))\n        {\n            string current = root;\n            while (current.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n            {\n                expandedRoots.Add(current);\n                current = Path.GetDirectoryName(current);\n            }\n        }\n        foreach (string directory in expandedRoots) directories.Add(OpenLockedDirectory(directory));\n        if (enforceComplete)\n            foreach (string path in Directory.GetFiles(basePath, "*", SearchOption.AllDirectories))\n                if (!expected.Contains(Path.GetFullPath(path))) throw new InvalidDataException("unlocked file in locked tree: " + path);\n    }\n\n    private static string Quote(string value)\n    {\n        return "\\"" + value.Replace("\\\\", "\\\\\\\\").Replace("\\"", "\\\\\\"") + "\\"";\n    }\n\n    private static int Main(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, true, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 42110, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 63.086s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-17T17:07:50.475401Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `1`
+```text
+s = new byte[checked((int)stream.Length)];\n        int offset = 0;\n        while (offset < bytes.Length)\n        {\n            int read = stream.Read(bytes, offset, bytes.Length - offset);\n            if (read == 0) throw new EndOfStreamException();\n            offset += read;\n        }\n        return bytes;\n    }\n\n    private static void LockDirectoryTree(string root, List<IntPtr> directories)\n    {\n        var pending = new Queue<string>();\n        pending.Enqueue(root);\n        while (pending.Count != 0)\n        {\n            string current = pending.Dequeue();\n            directories.Add(OpenLockedDirectory(current));\n            foreach (string directory in Directory.GetDirectories(current, "*", SearchOption.TopDirectoryOnly))\n            {\n                if ((new DirectoryInfo(directory).Attributes & FileAttributes.ReparsePoint) != 0)\n                    throw new InvalidDataException("unsafe locked directory: " + directory);\n                pending.Enqueue(directory);\n            }\n        }\n    }\n\n    private static void LockInventory(string inventoryPath, string inventoryHash, string basePath, bool enforceComplete,\n        List<FileStream> files, List<IntPtr> directories)\n    {\n        var info = new FileInfo(inventoryPath);\n        FileStream inventory = OpenLockedFile(inventoryPath, info.Length, inventoryHash);\n        files.Add(inventory);\n        string text = new UTF8Encoding(false, true).GetString(ReadBytes(inventory));\n        string canonicalBase = Path.GetFullPath(basePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;\n        var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        foreach (string raw in text.Split(new[] { \'\\n\' }, StringSplitOptions.RemoveEmptyEntries))\n        {\n            string[] fields = raw.TrimEnd(\'\\r\').Split(\'\\t\');\n            if (fields.Length != 3 || fields[0].Length != 64)\n                throw new InvalidDataException("invalid lock inventory line");\n            long size;\n            if (!Int64.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out size) || size < 0)\n                throw new InvalidDataException("invalid locked file size");\n            string relative = fields[2].Replace(\'/\', Path.DirectorySeparatorChar);\n            if (Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar).Length == 0)\n                throw new InvalidDataException("unsafe inventory path");\n            foreach (string part in relative.Split(Path.DirectorySeparatorChar))\n                if (part == ".." || part.Length == 0) throw new InvalidDataException("unsafe inventory path");\n            string path = Path.GetFullPath(Path.Combine(basePath, relative));\n            if (!path.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n                throw new InvalidDataException("inventory path escapes root");\n            expected.Add(path);\n            roots.Add(Path.GetDirectoryName(path));\n            files.Add(OpenLockedFile(path, size, fields[0]));\n        }\n        var expandedRoots = new HashSet<string>(roots, StringComparer.OrdinalIgnoreCase);\n        foreach (string root in new List<string>(roots))\n        {\n            string current = root;\n            while (current.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n            {\n                expandedRoots.Add(current);\n                current = Path.GetDirectoryName(current);\n            }\n        }\n        foreach (string directory in expandedRoots) directories.Add(OpenLockedDirectory(directory));\n        if (enforceComplete)\n            foreach (string path in Directory.GetFiles(basePath, "*", SearchOption.AllDirectories))\n                if (!expected.Contains(Path.GetFullPath(path))) throw new InvalidDataException("unlocked file in locked tree: " + path);\n    }\n\n    private static string Quote(string value)\n    {\n        return "\\"" + value.Replace("\\\\", "\\\\\\\\").Replace("\\"", "\\\\\\"") + "\\"";\n    }\n\n    private static int Main(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, true, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 42110, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 59.508s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-17T17:13:58.603848Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `1`
+```text
+s = new byte[checked((int)stream.Length)];\n        int offset = 0;\n        while (offset < bytes.Length)\n        {\n            int read = stream.Read(bytes, offset, bytes.Length - offset);\n            if (read == 0) throw new EndOfStreamException();\n            offset += read;\n        }\n        return bytes;\n    }\n\n    private static void LockDirectoryTree(string root, List<IntPtr> directories)\n    {\n        var pending = new Queue<string>();\n        pending.Enqueue(root);\n        while (pending.Count != 0)\n        {\n            string current = pending.Dequeue();\n            directories.Add(OpenLockedDirectory(current));\n            foreach (string directory in Directory.GetDirectories(current, "*", SearchOption.TopDirectoryOnly))\n            {\n                if ((new DirectoryInfo(directory).Attributes & FileAttributes.ReparsePoint) != 0)\n                    throw new InvalidDataException("unsafe locked directory: " + directory);\n                pending.Enqueue(directory);\n            }\n        }\n    }\n\n    private static void LockInventory(string inventoryPath, string inventoryHash, string basePath, bool enforceComplete,\n        List<FileStream> files, List<IntPtr> directories)\n    {\n        var info = new FileInfo(inventoryPath);\n        FileStream inventory = OpenLockedFile(inventoryPath, info.Length, inventoryHash);\n        files.Add(inventory);\n        string text = new UTF8Encoding(false, true).GetString(ReadBytes(inventory));\n        string canonicalBase = Path.GetFullPath(basePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;\n        var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        foreach (string raw in text.Split(new[] { \'\\n\' }, StringSplitOptions.RemoveEmptyEntries))\n        {\n            string[] fields = raw.TrimEnd(\'\\r\').Split(\'\\t\');\n            if (fields.Length != 3 || fields[0].Length != 64)\n                throw new InvalidDataException("invalid lock inventory line");\n            long size;\n            if (!Int64.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out size) || size < 0)\n                throw new InvalidDataException("invalid locked file size");\n            string relative = fields[2].Replace(\'/\', Path.DirectorySeparatorChar);\n            if (Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar).Length == 0)\n                throw new InvalidDataException("unsafe inventory path");\n            foreach (string part in relative.Split(Path.DirectorySeparatorChar))\n                if (part == ".." || part.Length == 0) throw new InvalidDataException("unsafe inventory path");\n            string path = Path.GetFullPath(Path.Combine(basePath, relative));\n            if (!path.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n                throw new InvalidDataException("inventory path escapes root");\n            expected.Add(path);\n            roots.Add(Path.GetDirectoryName(path));\n            files.Add(OpenLockedFile(path, size, fields[0]));\n        }\n        var expandedRoots = new HashSet<string>(roots, StringComparer.OrdinalIgnoreCase);\n        foreach (string root in new List<string>(roots))\n        {\n            string current = root;\n            while (current.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n            {\n                expandedRoots.Add(current);\n                current = Path.GetDirectoryName(current);\n            }\n        }\n        foreach (string directory in expandedRoots) directories.Add(OpenLockedDirectory(directory));\n        if (enforceComplete)\n            foreach (string path in Directory.GetFiles(basePath, "*", SearchOption.AllDirectories))\n                if (!expected.Contains(Path.GetFullPath(path))) throw new InvalidDataException("unlocked file in locked tree: " + path);\n    }\n\n    private static string Quote(string value)\n    {\n        return "\\"" + value.Replace("\\\\", "\\\\\\\\").Replace("\\"", "\\\\\\"") + "\\"";\n    }\n\n    private static int Main(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, true, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 42110, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 80.874s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-17T17:24:58.585730Z — target=`quality` fingerprint=`301012cce832d6de`
+- exit_code: `2`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe __missing_locked_control_archive__ validate_opencode
+C:\Python314\python.exe: can't open file 'E:\\Workspace\\Coevo\\__missing_locked_control_archive__': [Errno 2] No such file or directory
+
+```
+
+## 2026-07-17T17:40:03.250051Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `14`
+```text
+preflight audit seal failed: locked Windows PowerShell path is unavailable
+
+```
+
+## 2026-07-17T17:45:11.459421Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `14`
+```text
+preflight audit seal failed: locked Windows PowerShell path is unavailable
+
+```
+
+## 2026-07-17T17:45:39.305878Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `14`
+```text
+preflight audit seal failed: locked Windows PowerShell path is unavailable
+
+```
+
+## 2026-07-17T17:47:07.287974Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `1`
+```text
+cate
+    process = subprocess.run(
+        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+    )
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+======================================================================
+ERROR: test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) (length=24)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_identity_validation.py", line 34, in test_random_truncated_trailing_and_private_der_are_rejected
+    validate_bundle(value)
+    ~~~~~~~~~~~~~~~^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\validation.py", line 157, in validate_bundle
+    inspected = inspect_certificate(cert["certificate_der"])
+  File "E:\Workspace\Coevo\src\coevo\identity\certificates.py", line 49, in inspect_certificate
+    process = subprocess.run(
+        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+    )
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+======================================================================
+ERROR: test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_identity_validation.py", line 21, in test_real_der_certificate_metadata_and_spki_are_derived
+    inspected = inspect_certificate(CERTIFICATE_DER)
+  File "E:\Workspace\Coevo\src\coevo\identity\certificates.py", line 49, in inspect_certificate
+    process = subprocess.run(
+        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+    )
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+======================================================================
+ERROR: test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_loop_launcher.py", line 28, in test_option_shaped_item_and_model_are_rejected_before_cli_start
+    result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/run-loop.ps1'),'-MaxIterations','1',f'-{name}','--auto'],cwd=ROOT,capture_output=True,text=True)
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.361s
+
+FAILED (errors=7)
+
+```
+
+## 2026-07-17T17:48:18.930398Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `1`
+```text
+cate
+    process = subprocess.run(
+        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+    )
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+======================================================================
+ERROR: test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) (length=24)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_identity_validation.py", line 34, in test_random_truncated_trailing_and_private_der_are_rejected
+    validate_bundle(value)
+    ~~~~~~~~~~~~~~~^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\validation.py", line 157, in validate_bundle
+    inspected = inspect_certificate(cert["certificate_der"])
+  File "E:\Workspace\Coevo\src\coevo\identity\certificates.py", line 49, in inspect_certificate
+    process = subprocess.run(
+        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+    )
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+======================================================================
+ERROR: test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_identity_validation.py", line 21, in test_real_der_certificate_metadata_and_spki_are_derived
+    inspected = inspect_certificate(CERTIFICATE_DER)
+  File "E:\Workspace\Coevo\src\coevo\identity\certificates.py", line 49, in inspect_certificate
+    process = subprocess.run(
+        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+    )
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+======================================================================
+ERROR: test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_loop_launcher.py", line 28, in test_option_shaped_item_and_model_are_rejected_before_cli_start
+    result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/run-loop.ps1'),'-MaxIterations','1',f'-{name}','--auto'],cwd=ROOT,capture_output=True,text=True)
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] ϵͳ�Ҳ���ָ�����ļ���
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.375s
+
+FAILED (errors=7)
+
+```
+
+## 2026-07-17T17:55:06.332898Z — target=`quality` fingerprint=`301012cce832d6de`
+- exit_code: `2`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe __missing_locked_control_archive__ validate_opencode
+C:\Python314\python.exe: can't open file 'E:\\Workspace\\Coevo\\__missing_locked_control_archive__': [Errno 2] No such file or directory
+
+```
+
+## 2026-07-17T17:55:39.560503Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `14`
+```text
+preflight audit seal failed: locked Windows PowerShell path is unavailable
+
+```
+
+## 2026-07-17T17:57:14.044110Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `14`
+```text
+preflight audit seal failed: locked Windows PowerShell path is unavailable
+
+```
+
+## 2026-07-17T18:02:52.006060Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `1`
+```text
+rc/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_seal verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/unit -v
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... FAIL
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+======================================================================
+FAIL: test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_loop_launcher.py", line 43, in test_option_shaped_item_and_model_are_rejected_before_cli_start
+    self.assertIn('ParameterArgumentValidationError',result.stderr+result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'ParameterArgumentValidationError' not found in '\x1b[31;1mrun-loop.ps1: \x1b[31;1mCannot validate argument on parameter \'Item\'. The argument "--auto" does not match the "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" pattern. Supply an argument that matches "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" and try the command again.\x1b[0m\n'
+
+----------------------------------------------------------------------
+Ran 19 tests in 11.665s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-17T18:03:41.039177Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `1`
+```text
+rc/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_seal verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/unit -v
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... FAIL
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+======================================================================
+FAIL: test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_loop_launcher.py", line 43, in test_option_shaped_item_and_model_are_rejected_before_cli_start
+    self.assertIn('ParameterArgumentValidationError',result.stderr+result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'ParameterArgumentValidationError' not found in '\x1b[31;1mrun-loop.ps1: \x1b[31;1mCannot validate argument on parameter \'Item\'. The argument "--auto" does not match the "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" pattern. Supply an argument that matches "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" and try the command again.\x1b[0m\n'
+
+----------------------------------------------------------------------
+Ran 19 tests in 10.398s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-17T18:04:44.660205Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `1`
+```text
+rc/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_seal verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/unit -v
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... FAIL
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+======================================================================
+FAIL: test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_loop_launcher.py", line 43, in test_option_shaped_item_and_model_are_rejected_before_cli_start
+    self.assertIn('ParameterArgumentValidationError',result.stderr+result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'ParameterArgumentValidationError' not found in '\x1b[31;1mrun-loop.ps1: \x1b[31;1mCannot validate argument on parameter \'Item\'. The argument "--auto" does not match the "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" pattern. Supply an argument that matches "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" and try the command again.\x1b[0m\n'
+
+----------------------------------------------------------------------
+Ran 19 tests in 12.892s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-17T18:10:05.983864Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `1`
+```text
+xitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 20, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 2 : PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: docs/dependencies/toolchain-lock.json
+PASS required: docs/dependencies/licenses/opencode-MIT.txt
+PASS required: docs/dependencies/python-script-lock.tsv
+PASS required: scripts/enter-dev-environment.ps1
+PASS required: scripts/import-toolchain.ps1
+PASS required: scripts/run-loop.ps1
+PASS required: scripts/tool-shims/make.cs
+PASS required: scripts/windows-native-security.ps1
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS OpenCode autoupdate denied
+PASS OpenCode LSP downloads disabled by configuration
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+PASS runtime tool downloads denied
+PASS OpenCode version locked
+PASS OpenCode license recorded
+PASS OpenCode license present
+PASS locked SHA-256: archive
+PASS locked artifact present: archive
+PASS locked artifact size: archive
+PASS locked artifact hash: archive
+PASS locked SHA-256: executable
+PASS locked artifact present: executable
+PASS locked artifact size: executable
+PASS locked artifact hash: executable
+PASS locked compiler path
+PASS locked compiler size
+PASS locked compiler SHA-256
+PASS locked compiler signer
+PASS Python version locked
+PASS Python runtime inventory totals locked
+PASS Python executable SHA-256 locked
+PASS Python executable present
+PASS Python executable size
+PASS Python executable hash
+PASS Python runtime inventory SHA-256 locked
+PASS Python runtime inventory present
+PASS Python runtime inventory size
+PASS Python runtime inventory hash
+PASS Python script inventory SHA-256 locked
+PASS Python script inventory present
+PASS Python script inventory size
+PASS Python script inventory hash
+PASS Python executable signer locked
+FAIL tool available: git
+PASS locked tool available: opencode
+PASS locked tool available: make
+PASS locked tool available: python
+PASS Make runtime hash attested
+PASS OpenCode explicit config locked
+PASS OpenCode runtime version
+PASS OpenCode resolved config loads
+PASS OpenCode resolved downloads disabled
+PASS OpenCode resolved security policy denied
+PASS OpenCode required agents loaded
+PASS OpenCode required commands loaded
+PASS OpenCode skill registry loads
+PASS OpenCode required skills loaded
+{"ok": false, "failures": ["tool available: git"]}
+
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 41, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 2 : PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: docs/dependencies/toolchain-lock.json
+PASS required: docs/dependencies/licenses/opencode-MIT.txt
+PASS required: docs/dependencies/python-script-lock.tsv
+PASS required: scripts/enter-dev-environment.ps1
+PASS required: scripts/import-toolchain.ps1
+PASS required: scripts/run-loop.ps1
+PASS required: scripts/tool-shims/make.cs
+PASS required: scripts/windows-native-security.ps1
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS OpenCode autoupdate denied
+PASS OpenCode LSP downloads disabled by configuration
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+PASS runtime tool downloads denied
+PASS OpenCode version locked
+PASS OpenCode license recorded
+PASS OpenCode license present
+PASS locked SHA-256: archive
+PASS locked artifact present: archive
+PASS locked artifact size: archive
+PASS locked artifact hash: archive
+PASS locked SHA-256: executable
+PASS locked artifact present: executable
+PASS locked artifact size: executable
+PASS locked artifact hash: executable
+PASS locked compiler path
+PASS locked compiler size
+PASS locked compiler SHA-256
+PASS locked compiler signer
+PASS Python version locked
+PASS Python runtime inventory totals locked
+PASS Python executable SHA-256 locked
+PASS Python executable present
+PASS Python executable size
+PASS Python executable hash
+PASS Python runtime inventory SHA-256 locked
+PASS Python runtime inventory present
+PASS Python runtime inventory size
+PASS Python runtime inventory hash
+PASS Python script inventory SHA-256 locked
+PASS Python script inventory present
+PASS Python script inventory size
+PASS Python script inventory hash
+PASS Python executable signer locked
+FAIL tool available: git
+PASS locked tool available: opencode
+PASS locked tool available: make
+PASS locked tool available: python
+PASS Make runtime hash attested
+PASS OpenCode explicit config locked
+PASS OpenCode runtime version
+PASS OpenCode resolved config loads
+PASS OpenCode resolved downloads disabled
+PASS OpenCode resolved security policy denied
+PASS OpenCode required agents loaded
+PASS OpenCode required commands loaded
+PASS OpenCode skill registry loads
+PASS OpenCode required skills loaded
+{"ok": false, "failures": ["tool available: git"]}
+
+
+----------------------------------------------------------------------
+Ran 48 tests in 95.663s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-17T18:11:33.347054Z — target=`quality` fingerprint=`345c38b9cbc372da`
+- exit_code: `1`
+```text
+          foreach (string directory in Directory.GetDirectories(current, "*", SearchOption.TopDirectoryOnly))\n            {\n                if ((new DirectoryInfo(directory).Attributes & FileAttributes.ReparsePoint) != 0)\n                    throw new InvalidDataException("unsafe locked directory: " + directory);\n                pending.Enqueue(directory);\n            }\n        }\n    }\n\n    private static void LockInventory(string inventoryPath, string inventoryHash, string basePath, bool enforceComplete,\n        List<FileStream> files, List<IntPtr> directories)\n    {\n        var info = new FileInfo(inventoryPath);\n        FileStream inventory = OpenLockedFile(inventoryPath, info.Length, inventoryHash);\n        files.Add(inventory);\n        string text = new UTF8Encoding(false, true).GetString(ReadBytes(inventory));\n        string canonicalBase = Path.GetFullPath(basePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;\n        var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);\n        foreach (string raw in text.Split(new[] { \'\\n\' }, StringSplitOptions.RemoveEmptyEntries))\n        {\n            string[] fields = raw.TrimEnd(\'\\r\').Split(\'\\t\');\n            if (fields.Length != 3 || fields[0].Length != 64)\n                throw new InvalidDataException("invalid lock inventory line");\n            long size;\n            if (!Int64.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out size) || size < 0)\n                throw new InvalidDataException("invalid locked file size");\n            string relative = fields[2].Replace(\'/\', Path.DirectorySeparatorChar);\n            if (Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar).Length == 0)\n                throw new InvalidDataException("unsafe inventory path");\n            foreach (string part in relative.Split(Path.DirectorySeparatorChar))\n                if (part == ".." || part.Length == 0) throw new InvalidDataException("unsafe inventory path");\n            string path = Path.GetFullPath(Path.Combine(basePath, relative));\n            if (!path.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n                throw new InvalidDataException("inventory path escapes root");\n            expected.Add(path);\n            roots.Add(Path.GetDirectoryName(path));\n            files.Add(OpenLockedFile(path, size, fields[0]));\n        }\n        var expandedRoots = new HashSet<string>(roots, StringComparer.OrdinalIgnoreCase);\n        foreach (string root in new List<string>(roots))\n        {\n            string current = root;\n            while (current.StartsWith(canonicalBase, StringComparison.OrdinalIgnoreCase))\n            {\n                expandedRoots.Add(current);\n                current = Path.GetDirectoryName(current);\n            }\n        }\n        foreach (string directory in expandedRoots) directories.Add(OpenLockedDirectory(directory));\n        if (enforceComplete)\n            foreach (string path in Directory.GetFiles(basePath, "*", SearchOption.AllDirectories))\n                if (!expected.Contains(Path.GetFullPath(path))) throw new InvalidDataException("unlocked file in locked tree: " + path);\n    }\n\n    private static string Quote(string value)\n    {\n        return "\\"" + value.Replace("\\\\", "\\\\\\\\").Replace("\\"", "\\\\\\"") + "\\"";\n    }\n\n    private static int Main(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 42110, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string pwshExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "PowerShell", "7", "pwsh.exe");\n            string powershellPath = File.Exists(pwshExe) ? pwshExe : Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 38.681s
+
+FAILED (failures=1, errors=8)
+
+```
+
+## 2026-07-17T18:25:10.601642Z — target=`quality` fingerprint=`301012cce832d6de`
+- exit_code: `2`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe __missing_locked_control_archive__ validate_opencode
+C:\Python314\python.exe: can't open file 'E:\\Workspace\\Coevo\\__missing_locked_control_archive__': [Errno 2] No such file or directory
+
+```
+
+## 2026-07-17T23:05:13.792704Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `10`
+```text
+ac": "AC-1",
+      "title": "ʧ�ܹرա����߹��̵�����ǩ�������ͷ",
+      "code": [
+        "scripts/validate_opencode.py",
+        "scripts/quality_gate.py",
+        "scripts/loop_state.py",
+        "scripts/audit_log.py",
+        "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+          "exists": false
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "missing"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+
+```
+
+## 2026-07-17T23:07:46.339365Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `10`
+```text
+ac": "AC-1",
+      "title": "ʧ�ܹرա����߹��̵�����ǩ�������ͷ",
+      "code": [
+        "scripts/validate_opencode.py",
+        "scripts/quality_gate.py",
+        "scripts/loop_state.py",
+        "scripts/audit_log.py",
+        "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+          "exists": false
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "missing"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+
+```
+
+## 2026-07-17T23:15:59.099240Z — target=`quality` fingerprint=`dbcf373ecb30adb7`
+- exit_code: `10`
+```text
+ac": "AC-1",
+      "title": "ʧ�ܹرա����߹��̵�����ǩ�������ͷ",
+      "code": [
+        "scripts/validate_opencode.py",
+        "scripts/quality_gate.py",
+        "scripts/loop_state.py",
+        "scripts/audit_log.py",
+        "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+          "exists": false
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "missing"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+
+```
+
+## 2026-07-17T23:24:52.072055Z — target=`quality` fingerprint=`301012cce832d6de`
+- exit_code: `2`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe __missing_locked_control_archive__ validate_opencode
+C:\Python314\python.exe: can't open file 'E:\\Workspace\\Coevo\\__missing_locked_control_archive__': [Errno 2] No such file or directory
+
+```
+
+## 2026-07-18T06:23:28.142985Z — target=`quality` fingerprint=`0c7401d84cc1ed33`
+- exit_code: `2`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz validate_opencode
+FAIL required: AGENTS.md
+FAIL required: opencode.jsonc
+FAIL required: Makefile
+FAIL required: docs/README.md
+FAIL required: loop/STATE.json
+FAIL required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+FAIL required: .opencode/plugins/loop-guard.ts
+FAIL required: .opencode/tools/loop_state.ts
+FAIL required: .opencode/tools/quality_gate.ts
+FAIL required: .opencode/tools/traceability_check.ts
+FAIL required: docs/dependencies/toolchain-lock.json
+FAIL required: docs/dependencies/licenses/opencode-MIT.txt
+FAIL required: docs/dependencies/python-script-lock.tsv
+FAIL required: scripts/enter-dev-environment.ps1
+FAIL required: scripts/import-toolchain.ps1
+FAIL required: scripts/run-loop.ps1
+FAIL required: scripts/tool-shims/make.cs
+FAIL required: scripts/windows-native-security.ps1
+FAIL required: tests/unit
+FAIL required: tests/integration
+FAIL required: tests/security
+FAIL required: tests/e2e
+FAIL config parses: [Errno 2] No such file or directory: 'E:\\Workspace\\Coevo\\.tools\\control\\opencode.jsonc'
+FAIL toolchain lock parses: [Errno 2] No such file or directory: 'E:\\Workspace\\Coevo\\.tools\\control\\docs\\dependencies\\toolchain-lock.json'
+{"ok": false, "failures": ["required: AGENTS.md", "required: opencode.jsonc", "required: Makefile", "required: docs/README.md", "required: loop/STATE.json", "required: loop/BACKLOG.yaml", "required: .opencode/plugins/loop-guard.ts", "required: .opencode/tools/loop_state.ts", "required: .opencode/tools/quality_gate.ts", "required: .opencode/tools/traceability_check.ts", "required: docs/dependencies/toolchain-lock.json", "required: docs/dependencies/licenses/opencode-MIT.txt", "required: docs/dependencies/python-script-lock.tsv", "required: scripts/enter-dev-environment.ps1", "required: scripts/import-toolchain.ps1", "required: scripts/run-loop.ps1", "required: scripts/tool-shims/make.cs", "required: scripts/windows-native-security.ps1", "required: tests/unit", "required: tests/integration", "required: tests/security", "required: tests/e2e", "config parses: [Errno 2] No such file or directory: 'E:\\\\Workspace\\\\Coevo\\\\.tools\\\\control\\\\opencode.jsonc'", "toolchain lock parses: [Errno 2] No such file or directory: 'E:\\\\Workspace\\\\Coevo\\\\.tools\\\\control\\\\docs\\\\dependencies\\\\toolchain-lock.json'"]}
+
+```
+
+## 2026-07-18T06:36:37.555077Z — target=`quality` fingerprint=`e5cfa6e678f7ab29`
+- exit_code: `10`
+```text
+ac": "AC-1",
+      "title": "ʧ�ܹرա����߹��̵�����ǩ�������ͷ",
+      "code": [
+        "scripts/validate_opencode.py",
+        "scripts/quality_gate.py",
+        "scripts/loop_state.py",
+        "scripts/audit_log.py",
+        "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+          "exists": false
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "missing"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+
+```
+
+## 2026-07-18T06:38:28.913752Z — target=`lint` fingerprint=`00b25c86dc15f599`
+- exit_code: `10`
+```text
+ac": "AC-1",
+      "title": "ʧ�ܹرա����߹��̵�����ǩ�������ͷ",
+      "code": [
+        "scripts/validate_opencode.py",
+        "scripts/quality_gate.py",
+        "scripts/loop_state.py",
+        "scripts/audit_log.py",
+        "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py��9 method / 82 subTest��",
+          "exists": false
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "missing"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+
+```
+
+## 2026-07-18T06:45:15.960322Z — target=`quality` fingerprint=`e5cfa6e678f7ab29`
+- exit_code: `14`
+```text
+al.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_seal verify --allow-tail
+{"ok": false, "error": "locked Windows PowerShell path is unavailable"}
+
+```
+
+## 2026-07-18T15:24:10.780229Z — target=`lint` fingerprint=`a165091a9e4ce524`
+- exit_code: `0`
+```text
+       "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+audit seal: fully-sealed
+
+```
+
+## 2026-07-18T23:47:12.486591Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-07-19T09:48:56.955684Z — target=`test` fingerprint=`422ec7404a6dbdfb`
+- exit_code: `1`
+```text
+unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... ok
+test_dangerous_commands_resolve_to_deny (test_permission_whitelist.PermissionWhitelistTests.test_dangerous_commands_resolve_to_deny) ... ok
+test_existing_deny_entries_are_preserved (test_permission_whitelist.PermissionWhitelistTests.test_existing_deny_entries_are_preserved) ... ok
+test_global_wildcard_remains_ask (test_permission_whitelist.PermissionWhitelistTests.test_global_wildcard_remains_ask) ... ok
+test_loop_guard_hard_block_list_intact (test_permission_whitelist.PermissionWhitelistTests.test_loop_guard_hard_block_list_intact) ... ok
+test_new_whitelist_entries_are_present (test_permission_whitelist.PermissionWhitelistTests.test_new_whitelist_entries_are_present) ... ok
+test_realistic_command_prefixes_match_whitelist (test_permission_whitelist.PermissionWhitelistTests.test_realistic_command_prefixes_match_whitelist) ... ok
+test_resolver_semantics (test_permission_whitelist.PermissionWhitelistTests.test_resolver_semantics) ... ok
+test_unrelated_commands_default_to_ask (test_permission_whitelist.PermissionWhitelistTests.test_unrelated_commands_default_to_ask) ... ok
+test_user_and_repo_bash_tables_diverge_alarmingly (test_permission_whitelist.PermissionWhitelistTests.test_user_and_repo_bash_tables_diverge_alarmingly) ... ok
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 8.722s
+
+OK
+$ C:\Python314\python.exe -m unittest discover -s tests/integration -p *test.py -v
+test_authorization_comes_from_policy_and_invalid_envelope_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_authorization_comes_from_policy_and_invalid_envelope_is_audited) ... ok
+test_authorized_bundle_is_created_atomically_and_externally_anchored (identity_store_test.IdentityStoreIntegrationTests.test_authorized_bundle_is_created_atomically_and_externally_anchored) ... ok
+test_changed_replay_conflicts_without_partial_business_writes (identity_store_test.IdentityStoreIntegrationTests.test_changed_replay_conflicts_without_partial_business_writes) ... ok
+test_existing_identity_conflict_rolls_back_entire_new_bundle (identity_store_test.IdentityStoreIntegrationTests.test_existing_identity_conflict_rolls_back_entire_new_bundle) ... ERROR
+test_same_request_is_idempotent_and_replay_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_same_request_is_idempotent_and_replay_is_audited) ... ok
+
+======================================================================
+ERROR: test_existing_identity_conflict_rolls_back_entire_new_bundle (identity_store_test.IdentityStoreIntegrationTests.test_existing_identity_conflict_rolls_back_entire_new_bundle)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\identity_store_test.py", line 60, in test_existing_identity_conflict_rolls_back_entire_new_bundle
+    self.service.register_identity_bundle(self.writer, "request-1", identity_payload())
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\service.py", line 57, in register_identity_bundle
+    bundle = validate_bundle(payload)
+  File "E:\Workspace\Coevo\src\coevo\identity\validation.py", line 157, in validate_bundle
+    inspected = inspect_certificate(cert["certificate_der"])
+  File "E:\Workspace\Coevo\src\coevo\identity\certificates.py", line 60, in inspect_certificate
+    process = subprocess.run(
+        [_powershell_executable(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+    )
+  File "C:\Python314\Lib\subprocess.py", line 556, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1239, in communicate
+    sts = self.wait(timeout=self._remaining_time(endtime))
+  File "C:\Python314\Lib\subprocess.py", line 1278, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1607, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'E:\\Workspace\\Coevo\\scripts\\inspect_certificate.ps1']' timed out after 20 seconds
+
+----------------------------------------------------------------------
+Ran 5 tests in 36075.335s
+
+FAILED (errors=1)
+
+```
+
+## 2026-07-19T09:52:06.620515Z — target=`test` fingerprint=`422ec7404a6dbdfb`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m unittest discover -s tests/unit -v
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... ok
+test_dangerous_commands_resolve_to_deny (test_permission_whitelist.PermissionWhitelistTests.test_dangerous_commands_resolve_to_deny) ... ok
+test_existing_deny_entries_are_preserved (test_permission_whitelist.PermissionWhitelistTests.test_existing_deny_entries_are_preserved) ... ok
+test_global_wildcard_remains_ask (test_permission_whitelist.PermissionWhitelistTests.test_global_wildcard_remains_ask) ... ok
+test_loop_guard_hard_block_list_intact (test_permission_whitelist.PermissionWhitelistTests.test_loop_guard_hard_block_list_intact) ... ok
+test_new_whitelist_entries_are_present (test_permission_whitelist.PermissionWhitelistTests.test_new_whitelist_entries_are_present) ... ok
+test_realistic_command_prefixes_match_whitelist (test_permission_whitelist.PermissionWhitelistTests.test_realistic_command_prefixes_match_whitelist) ... ok
+test_resolver_semantics (test_permission_whitelist.PermissionWhitelistTests.test_resolver_semantics) ... ok
+test_unrelated_commands_default_to_ask (test_permission_whitelist.PermissionWhitelistTests.test_unrelated_commands_default_to_ask) ... ok
+test_user_and_repo_bash_tables_diverge_alarmingly (test_permission_whitelist.PermissionWhitelistTests.test_user_and_repo_bash_tables_diverge_alarmingly) ... ok
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 12.255s
+
+OK
+$ C:\Python314\python.exe -m unittest discover -s tests/integration -p *test.py -v
+test_authorization_comes_from_policy_and_invalid_envelope_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_authorization_comes_from_policy_and_invalid_envelope_is_audited) ... ok
+test_authorized_bundle_is_created_atomically_and_externally_anchored (identity_store_test.IdentityStoreIntegrationTests.test_authorized_bundle_is_created_atomically_and_externally_anchored) ... ok
+test_changed_replay_conflicts_without_partial_business_writes (identity_store_test.IdentityStoreIntegrationTests.test_changed_replay_conflicts_without_partial_business_writes) ... ok
+test_existing_identity_conflict_rolls_back_entire_new_bundle (identity_store_test.IdentityStoreIntegrationTests.test_existing_identity_conflict_rolls_back_entire_new_bundle) ... ok
+test_same_request_is_idempotent_and_replay_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_same_request_is_idempotent_and_replay_is_audited) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 7.902s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-19T09:53:38.985533Z — target=`test-e2e` fingerprint=`c6aa520a1a1485e3`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 65.654s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-19T14:19:21.280506Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-07-19T14:20:21.563692Z — target=`test-security` fingerprint=`892375629e72aea4`
+- exit_code: `14`
+```text
+preflight audit seal failed: [Errno 36] Resource deadlock avoided
+
+```
+
+## 2026-07-19T14:20:20.913032Z — target=`test-e2e` fingerprint=`c6aa520a1a1485e3`
+- exit_code: `14`
+```text
+preflight audit seal failed: [Errno 36] Resource deadlock avoided
+
+```
+
+## 2026-07-19T14:20:18.726205Z — target=`lint` fingerprint=`a165091a9e4ce524`
+- exit_code: `14`
+```text
+l.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+audit seal failed: final audit seal is incomplete
+
+```
+
+## 2026-07-19T14:20:20.556204Z — target=`test` fingerprint=`422ec7404a6dbdfb`
+- exit_code: `14`
+```text
+preflight audit seal failed: preflight audit seal is incomplete
+
+```
+
+## 2026-07-19T14:21:12.052787Z — target=`test` fingerprint=`422ec7404a6dbdfb`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m unittest discover -s tests/unit -v
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... ok
+test_dangerous_commands_resolve_to_deny (test_permission_whitelist.PermissionWhitelistTests.test_dangerous_commands_resolve_to_deny) ... ok
+test_existing_deny_entries_are_preserved (test_permission_whitelist.PermissionWhitelistTests.test_existing_deny_entries_are_preserved) ... ok
+test_global_wildcard_remains_ask (test_permission_whitelist.PermissionWhitelistTests.test_global_wildcard_remains_ask) ... ok
+test_loop_guard_hard_block_list_intact (test_permission_whitelist.PermissionWhitelistTests.test_loop_guard_hard_block_list_intact) ... ok
+test_new_whitelist_entries_are_present (test_permission_whitelist.PermissionWhitelistTests.test_new_whitelist_entries_are_present) ... ok
+test_realistic_command_prefixes_match_whitelist (test_permission_whitelist.PermissionWhitelistTests.test_realistic_command_prefixes_match_whitelist) ... ok
+test_resolver_semantics (test_permission_whitelist.PermissionWhitelistTests.test_resolver_semantics) ... ok
+test_unrelated_commands_default_to_ask (test_permission_whitelist.PermissionWhitelistTests.test_unrelated_commands_default_to_ask) ... ok
+test_user_and_repo_bash_tables_diverge_alarmingly (test_permission_whitelist.PermissionWhitelistTests.test_user_and_repo_bash_tables_diverge_alarmingly) ... ok
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 5.776s
+
+OK
+$ C:\Python314\python.exe -m unittest discover -s tests/integration -p *test.py -v
+test_authorization_comes_from_policy_and_invalid_envelope_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_authorization_comes_from_policy_and_invalid_envelope_is_audited) ... ok
+test_authorized_bundle_is_created_atomically_and_externally_anchored (identity_store_test.IdentityStoreIntegrationTests.test_authorized_bundle_is_created_atomically_and_externally_anchored) ... ok
+test_changed_replay_conflicts_without_partial_business_writes (identity_store_test.IdentityStoreIntegrationTests.test_changed_replay_conflicts_without_partial_business_writes) ... ok
+test_existing_identity_conflict_rolls_back_entire_new_bundle (identity_store_test.IdentityStoreIntegrationTests.test_existing_identity_conflict_rolls_back_entire_new_bundle) ... ok
+test_same_request_is_idempotent_and_replay_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_same_request_is_idempotent_and_replay_is_audited) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 4.071s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-19T14:24:06.351287Z — target=`lint` fingerprint=`a165091a9e4ce524`
+- exit_code: `0`
+```text
+       "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+audit seal: fully-sealed
+
+```
+
+## 2026-07-19T23:22:36.218488Z — target=`lint` fingerprint=`a165091a9e4ce524`
+- exit_code: `0`
+```text
+       "scripts/audit_seal.py",
+        "scripts/audit_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+audit seal: fully-sealed
+
+```
+
+## 2026-07-19T23:22:37.882071Z — target=`test` fingerprint=`422ec7404a6dbdfb`
+- exit_code: `14`
+```text
+preflight audit seal failed: preflight audit seal is incomplete
+
+```
+
+## 2026-07-20T11:03:30.633142Z — target=`lint` fingerprint=`f7b9a48cf4810492`
+- exit_code: `0`
+```text
+_signature.ps1",
+        ".opencode/tools/",
+        ".opencode/plugins/path-policy.mjs"
+      ],
+      "tests": [
+        "tests/unit/test_engineering_baseline.py",
+        "tests/unit/test_traceability_check.py",
+        "tests/integration/test_tool_contracts.py",
+        "tests/security/test_audit_log.py",
+        "tests/security/test_audit_seal.py",
+        "tests/security/test_loop_state_transaction.py",
+        "tests/security/path_policy_test.mjs",
+        "tests/e2e/test_offline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/loop_state.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/audit_signature.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/tools/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/path-policy.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_traceability_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_tool_contracts.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_log.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_state_transaction.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/path_policy_test.mjs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-LOOP-ENV",
+      "ac": "AC-1",
+      "title": "���汾���ֿⱾ�ء�������ʱ���ص� OpenCode/Make Loop ���� + permission.bash ����������֤",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/enter-dev-environment.ps1",
+        "scripts/dev.ps1",
+        "scripts/tool-shims/make.cs",
+        "scripts/validate_opencode.py",
+        "opencode.jsonc"
+      ],
+      "tests": [
+        "tests/unit/test_dev_environment_tools.py",
+        "tests/unit/test_permission_whitelist.py",
+        "tests/integration/test_dev_environment_entry.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/e2e/test_loop_environment.py"
+      ],
+      "status": "in-progress",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/enter-dev-environment.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/dev.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/validate_opencode.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "opencode.jsonc",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_dev_environment_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_permission_whitelist.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-0",
+      "ac": "AC-1",
+      "title": "�����û� / �ͻ��� / ֤������ģ��",
+      "code": [
+        "src/coevo/identity/models.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/service.py",
+        "src/coevo/identity/schema.sql",
+        "scripts/inspect_certificate.ps1",
+        "scripts/identity_freshness.ps1"
+      ],
+      "tests": [
+        "tests/unit/test_identity_validation.py",
+        "tests/integration/identity_store_test.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/security/test_identity_freshness_security.py",
+        "tests/security/test_identity_retirement_security.py",
+        "tests/e2e/test_identity_dev_environment.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+audit seal: fully-sealed
+
+```
+
+## 2026-07-20T11:05:05.626286Z — target=`test` fingerprint=`9369549255b71e0f`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/unit -v
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... ok
+test_dangerous_commands_resolve_to_deny (test_permission_whitelist.PermissionWhitelistTests.test_dangerous_commands_resolve_to_deny) ... ok
+test_existing_deny_entries_are_preserved (test_permission_whitelist.PermissionWhitelistTests.test_existing_deny_entries_are_preserved) ... ok
+test_global_wildcard_remains_ask (test_permission_whitelist.PermissionWhitelistTests.test_global_wildcard_remains_ask) ... ok
+test_loop_guard_hard_block_list_intact (test_permission_whitelist.PermissionWhitelistTests.test_loop_guard_hard_block_list_intact) ... ok
+test_new_whitelist_entries_are_present (test_permission_whitelist.PermissionWhitelistTests.test_new_whitelist_entries_are_present) ... ok
+test_realistic_command_prefixes_match_whitelist (test_permission_whitelist.PermissionWhitelistTests.test_realistic_command_prefixes_match_whitelist) ... ok
+test_resolver_semantics (test_permission_whitelist.PermissionWhitelistTests.test_resolver_semantics) ... ok
+test_unrelated_commands_default_to_ask (test_permission_whitelist.PermissionWhitelistTests.test_unrelated_commands_default_to_ask) ... ok
+test_user_and_repo_bash_tables_diverge_alarmingly (test_permission_whitelist.PermissionWhitelistTests.test_user_and_repo_bash_tables_diverge_alarmingly) ... ok
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 8.948s
+
+OK
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/integration -p *test.py -v
+test_authorization_comes_from_policy_and_invalid_envelope_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_authorization_comes_from_policy_and_invalid_envelope_is_audited) ... ok
+test_authorized_bundle_is_created_atomically_and_externally_anchored (identity_store_test.IdentityStoreIntegrationTests.test_authorized_bundle_is_created_atomically_and_externally_anchored) ... ok
+test_changed_replay_conflicts_without_partial_business_writes (identity_store_test.IdentityStoreIntegrationTests.test_changed_replay_conflicts_without_partial_business_writes) ... ok
+test_existing_identity_conflict_rolls_back_entire_new_bundle (identity_store_test.IdentityStoreIntegrationTests.test_existing_identity_conflict_rolls_back_entire_new_bundle) ... ok
+test_same_request_is_idempotent_and_replay_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_same_request_is_idempotent_and_replay_is_audited) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 48.180s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-20T11:11:00.619693Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `1`
+```text
+aceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 27.395s
+
+OK
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/integration -p *test.py -v
+test_authorization_comes_from_policy_and_invalid_envelope_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_authorization_comes_from_policy_and_invalid_envelope_is_audited) ... ok
+test_authorized_bundle_is_created_atomically_and_externally_anchored (identity_store_test.IdentityStoreIntegrationTests.test_authorized_bundle_is_created_atomically_and_externally_anchored) ... ok
+test_changed_replay_conflicts_without_partial_business_writes (identity_store_test.IdentityStoreIntegrationTests.test_changed_replay_conflicts_without_partial_business_writes) ... ok
+test_existing_identity_conflict_rolls_back_entire_new_bundle (identity_store_test.IdentityStoreIntegrationTests.test_existing_identity_conflict_rolls_back_entire_new_bundle) ... ok
+test_same_request_is_idempotent_and_replay_is_audited (identity_store_test.IdentityStoreIntegrationTests.test_same_request_is_idempotent_and_replay_is_audited) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 12.327s
+
+OK
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/security -v
+test_checkpoint_is_idempotent_and_chain_verifies (test_audit_log.AuditLogTests.test_checkpoint_is_idempotent_and_chain_verifies) ... ok
+test_legacy_or_checkpoint_tampering_is_detected (test_audit_log.AuditLogTests.test_legacy_or_checkpoint_tampering_is_detected) ... ok
+test_truncated_tail_is_detected (test_audit_log.AuditLogTests.test_truncated_tail_is_detected) ... ok
+test_complete_tail_deletion_is_detected (test_audit_seal.AuditSealTests.test_complete_tail_deletion_is_detected) ... ok
+test_current_project_audit_is_fully_sealed (test_audit_seal.AuditSealTests.test_current_project_audit_is_fully_sealed) ... ok
+test_repository_contains_no_private_key_material (test_audit_seal.AuditSealTests.test_repository_contains_no_private_key_material) ... ok
+test_signature_tampering_is_rejected (test_audit_seal.AuditSealTests.test_signature_tampering_is_rejected) ... ok
+test_valid_append_is_reported_as_unsealed_tail (test_audit_seal.AuditSealTests.test_valid_append_is_reported_as_unsealed_tail) ... ok
+test_abort_retires_new_key_before_certificate_and_records_tombstone (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_abort_retires_new_key_before_certificate_and_records_tombstone) ... ok
+test_certificate_inspection_uses_stdin_without_candidate_temp_file (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_certificate_inspection_uses_stdin_without_candidate_temp_file) ... ok
+test_certificate_removed_before_tombstone_crash_recovers_idempotently (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_certificate_removed_before_tombstone_crash_recovers_idempotently) ... ok
+test_key_destroyed_before_certificate_crash_recovers_idempotently (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_key_destroyed_before_certificate_crash_recovers_idempotently) ... ok
+test_official_marker_signature_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_official_marker_signature_tampering_is_rejected) ... ok
+test_pre_removed_certificate_still_destroys_signed_key_id (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_pre_removed_certificate_still_destroys_signed_key_id) ... ok
+test_restored_old_certificate_cannot_reassociate_destroyed_key (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_restored_old_certificate_cannot_reassociate_destroyed_key) ... ok
+test_tampered_dual_signed_pending_is_not_recovered (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tampered_dual_signed_pending_is_not_recovered) ... ok
+test_tombstone_content_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_content_tampering_is_rejected) ... ok
+test_tombstone_store_failure_keeps_pending_and_recovers (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_store_failure_keeps_pending_and_recovers) ... ok
+test_marker_schema_binds_transition_key_id_and_public_digest (test_identity_retirement_security.IdentityRetirementSecurityTests.test_marker_schema_binds_transition_key_id_and_public_digest) ... ok
+test_production_delete_is_key_first_and_verifies_both_resources_absent (test_identity_retirement_security.IdentityRetirementSecurityTests.test_production_delete_is_key_first_and_verifies_both_resources_absent) ... ok
+test_anchor_from_another_database_is_rejected (test_identity_store_security.IdentityStoreSecurityTests.test_anchor_from_another_database_is_rejected) ... ok
+test_committed_pending_state_recovers_and_retires_old_marker (test_identity_store_security.IdentityStoreSecurityTests.test_committed_pending_state_recovers_and_retires_old_marker) ... ok
+test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker (test_identity_store_security.IdentityStoreSecurityTests.test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker) ... ok
+test_cyclic_and_oversized_inputs_are_rejected_with_audit (test_identity_store_security.IdentityStoreSecurityTests.test_cyclic_and_oversized_inputs_are_rejected_with_audit) ... ok
+test_missing_store_never_silently_initializes (test_identity_store_security.IdentityStoreSecurityTests.test_missing_store_never_silently_initializes) ... ok
+test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted (test_identity_store_security.IdentityStoreSecurityTests.test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted) ... ok
+test_signature_and_marker_loss_are_detected (test_identity_store_security.IdentityStoreSecurityTests.test_signature_and_marker_loss_are_detected) ... ok
+test_signed_anchor_detects_audit_tail_and_all_event_deletion (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_audit_tail_and_all_event_deletion) ... ok
+test_signed_anchor_detects_business_and_command_tampering (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_business_and_command_tampering) ... ok
+test_entry_and_importer_have_no_network_or_system_configuration (test_local_toolchain_security.LocalToolchainSecurityTest.test_entry_and_importer_have_no_network_or_system_configuration) ... ok
+test_importer_guards_archive_and_reparse_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... FAIL
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ...
+```
+
+## 2026-07-20T11:32:26.735690Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-07-20T11:37:26.570082Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `1`
+```text
+string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 243.021s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-20T11:50:45.528625Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `1`
+```text
+(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 74.644s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-20T11:53:35.801968Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `1`
+```text
+(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 58.001s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-20T11:55:35.734080Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `1`
+```text
+(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 58.356s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-21T13:09:22.290454Z — target=`test-security` fingerprint=`1458f00e53463d6f`
+- exit_code: `1`
+```text
+(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 58.945s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-21T13:10:59.272120Z — target=`test-security` fingerprint=`1458f00e53463d6f`
+- exit_code: `1`
+```text
+(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 61.245s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-21T13:14:05.256601Z — target=`test-security` fingerprint=`1458f00e53463d6f`
+- exit_code: `1`
+```text
+(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 62.183s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-21T13:16:17.980020Z — target=`test-security` fingerprint=`1458f00e53463d6f`
+- exit_code: `1`
+```text
+(string[] args)\n    {\n        if (args.Length == 1 && args[0] == "--version")\n        {\n            Console.WriteLine("Coevo Make compatibility shim 1.0 (restricted targets)");\n            return 0;\n        }\n        if (args.Length != 1 || !Targets.Contains(args[0]))\n        {\n            Console.Error.WriteLine("usage: make {fmt|lint|test|test-security|test-e2e|quality|verify-loop-state|env-check}");\n            return 64;\n        }\n\n        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."));\n        string runtime = Path.Combine(root, ".tools", "python", "3.14.3");\n        string python = Path.Combine(runtime, "python.exe");\n        string runtimeInventory = Path.Combine(root, ".tools", "python", "3.14.3-files.lock");\n        string scriptInventory = Path.Combine(root, "docs", "dependencies", "python-script-lock.tsv");\n        string control = Path.Combine(root, ".tools", "control", "control.pyz");\n        string auditSignature = Path.Combine(root, "scripts", "audit_signature.ps1");\n        var files = new List<FileStream>();\n        var directories = new List<IntPtr>();\n        try\n        {\n            LockDirectoryTree(runtime, directories);\n            LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);\n            LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);\n            files.Add(OpenLockedFile(control, 14439, ControlArchiveSha256));\n            files.Add(OpenLockedFile(auditSignature, 5277, AuditSignatureSha256));\n\n            string module;\n            string extra;\n            if (args[0] == "verify-loop-state")\n            {\n                module = "check_loop_stop"; extra = "";\n            }\n            else if (args[0] == "env-check")\n            {\n                module = "validate_opencode"; extra = " --require-tools";\n            }\n            else\n            {\n                module = "quality_gate"; extra = " --target " + args[0];\n            }\n            var start = new ProcessStartInfo\n            {\n                FileName = python,\n                Arguments = "-I -E -S -s -B " + Quote(control) + " " + module + extra,\n                WorkingDirectory = root,\n                UseShellExecute = false\n            };\n            var inherited = new ArrayList(start.EnvironmentVariables.Keys);\n            start.EnvironmentVariables["COEVO_CONTROL_ARCHIVE"] = control;\n            start.EnvironmentVariables["COEVO_REPO_ROOT"] = root;\n            foreach (string name in inherited)\n                if (name.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) start.EnvironmentVariables.Remove(name);\n            start.EnvironmentVariables["PYTHONNOUSERSITE"] = "1";\n            start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1";\n            string winPsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0");\n            string powershellPath = Path.Combine(winPsDir, "powershell.exe");\n            start.EnvironmentVariables["COEVO_POWERSHELL_PATH"] = powershellPath;\n            string inheritedPath = Environment.GetEnvironmentVariable("PATH") ?? "";\n            if (inheritedPath.IndexOf(winPsDir, StringComparison.OrdinalIgnoreCase) < 0)\n                inheritedPath = winPsDir + ";" + inheritedPath;\n            start.EnvironmentVariables.Remove("Path");\n            start.EnvironmentVariables.Remove("PATH");\n            start.EnvironmentVariables["PATH"] = inheritedPath;\n            var process = Process.Start(start);\n            process.WaitForExit();\n            return process.ExitCode;\n        }\n        catch (Exception error)\n        {\n            Console.Error.WriteLine("locked Python launch failed: " + error.Message);\n            return 69;\n        }\n        finally\n        {\n            foreach (FileStream file in files) file.Dispose();\n            foreach (IntPtr directory in directories) if (directory != IntPtr.Zero && directory != new IntPtr(-1)) CloseHandle(directory);\n        }\n    }\n}\n'
+
+======================================================================
+FAIL: test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 21, in test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS OpenCode resolved security policy denied' not found in 'PASS required: AGENTS.md\nPASS required: opencode.jsonc\nPASS required: Makefile\nPASS required: docs/README.md\nPASS required: loop/STATE.json\nPASS required: loop/BACKLOG.yaml\nPASS required: loop/VERIFICATION.md\nPASS required: loop/tool-audit.jsonl\nPASS required: .opencode/plugins/loop-guard.ts\nPASS required: .opencode/tools/loop_state.ts\nPASS required: .opencode/tools/quality_gate.ts\nPASS required: .opencode/tools/traceability_check.ts\nPASS required: tests/unit\nPASS required: tests/integration\nPASS required: tests/security\nPASS required: tests/e2e\nPASS denied: webfetch\nPASS denied: websearch\nPASS denied: external_directory\nPASS bash defaults to ask\nPASS bash denied: git push*\nPASS bash denied: curl *\nPASS bash denied: wget *\nPASS bash denied: pip install*\nPASS bash denied: npm install*\nPASS current tool API: loop_state.ts\nPASS current tool API: quality_gate.ts\nPASS current tool API: traceability_check.ts\nPASS tool available: git\nPASS tool available: opencode\nPASS tool available: make\n{"ok": true, "failures": []}\n'
+
+----------------------------------------------------------------------
+Ran 48 tests in 65.476s
+
+FAILED (failures=3)
+
+```
+
+## 2026-07-21T14:11:29.044896Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `14`
+```text
+preflight audit seal failed: Pinned signing certificate is missing from CurrentUser/My.
+At E:\Workspace\Coevo\scripts\audit_signature.ps1:30 char:169
++ ... unt -ne 1){ throw 'Pinned signing certificate is missing from Current ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Pinned signing ...CurrentUser/My.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Pinned signing certificate is missing from CurrentUser/My.
+
+```
+
+## 2026-07-21T14:17:34.146509Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `1`
+```text
+   },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/schema.sql",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/inspect_certificate.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/identity_freshness.ps1",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_identity_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/identity_store_test.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_freshness_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_retirement_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_identity_dev_environment.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/unit -v
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+test_official_release_metadata_matches_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_official_release_metadata_matches_lock) ... ok
+test_present_artifacts_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_artifacts_match_lock) ... ok
+test_present_python_and_script_inventories_match_lock (test_dev_environment_tools.DevEnvironmentToolsTest.test_present_python_and_script_inventories_match_lock) ... ok
+test_toolchain_is_exactly_locked (test_dev_environment_tools.DevEnvironmentToolsTest.test_toolchain_is_exactly_locked) ... ok
+test_baseline_validation_passes_without_optional_tool_installation (test_engineering_baseline.BaselineTests.test_baseline_validation_passes_without_optional_tool_installation) ... ok
+test_jsonc_comments_are_removed_without_damaging_urls (test_engineering_baseline.BaselineTests.test_jsonc_comments_are_removed_without_damaging_urls) ... ok
+test_quality_gate_covers_product_source_and_preseals_audit (test_engineering_baseline.BaselineTests.test_quality_gate_covers_product_source_and_preseals_audit) ... ok
+test_cross_references_roles_and_status_check_are_strict (test_identity_validation.IdentityValidationTests.test_cross_references_roles_and_status_check_are_strict) ... ok
+test_cyclic_deep_and_oversized_inputs_fail_closed (test_identity_validation.IdentityValidationTests.test_cyclic_deep_and_oversized_inputs_fail_closed) ... ok
+test_helper_unavailability_fails_closed (test_identity_validation.IdentityValidationTests.test_helper_unavailability_fails_closed) ... ok
+test_private_key_fields_unknown_fields_and_controls_are_rejected (test_identity_validation.IdentityValidationTests.test_private_key_fields_unknown_fields_and_controls_are_rejected) ... ok
+test_random_truncated_trailing_and_private_der_are_rejected (test_identity_validation.IdentityValidationTests.test_random_truncated_trailing_and_private_der_are_rejected) ... ok
+test_real_der_certificate_metadata_and_spki_are_derived (test_identity_validation.IdentityValidationTests.test_real_der_certificate_metadata_and_spki_are_derived) ... ok
+test_launcher_uses_locked_environment_and_custom_command (test_loop_launcher.LoopLauncherTest.test_launcher_uses_locked_environment_and_custom_command) ... ok
+test_loop_prompt_pins_windows_session_root_and_current_evidence (test_loop_launcher.LoopLauncherTest.test_loop_prompt_pins_windows_session_root_and_current_evidence) ... ok
+test_option_shaped_item_and_model_are_rejected_before_cli_start (test_loop_launcher.LoopLauncherTest.test_option_shaped_item_and_model_are_rejected_before_cli_start) ... ok
+test_dangerous_commands_resolve_to_deny (test_permission_whitelist.PermissionWhitelistTests.test_dangerous_commands_resolve_to_deny) ... ok
+test_existing_deny_entries_are_preserved (test_permission_whitelist.PermissionWhitelistTests.test_existing_deny_entries_are_preserved) ... ok
+test_global_wildcard_remains_ask (test_permission_whitelist.PermissionWhitelistTests.test_global_wildcard_remains_ask) ... ok
+test_loop_guard_hard_block_list_intact (test_permission_whitelist.PermissionWhitelistTests.test_loop_guard_hard_block_list_intact) ... ok
+test_new_whitelist_entries_are_present (test_permission_whitelist.PermissionWhitelistTests.test_new_whitelist_entries_are_present) ... ok
+test_realistic_command_prefixes_match_whitelist (test_permission_whitelist.PermissionWhitelistTests.test_realistic_command_prefixes_match_whitelist) ... ok
+test_resolver_semantics (test_permission_whitelist.PermissionWhitelistTests.test_resolver_semantics) ... ok
+test_unrelated_commands_default_to_ask (test_permission_whitelist.PermissionWhitelistTests.test_unrelated_commands_default_to_ask) ... ok
+test_user_and_repo_bash_tables_diverge_alarmingly (test_permission_whitelist.PermissionWhitelistTests.test_user_and_repo_bash_tables_diverge_alarmingly) ... ERROR
+test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered) ... ok
+test_extracts_multiple_backtick_paths (test_traceability_check.TraceabilityTests.test_extracts_multiple_backtick_paths) ... ok
+test_rejects_absolute_and_traversal_paths (test_traceability_check.TraceabilityTests.test_rejects_absolute_and_traversal_paths) ... ok
+
+======================================================================
+ERROR: test_user_and_repo_bash_tables_diverge_alarmingly (test_permission_whitelist.PermissionWhitelistTests.test_user_and_repo_bash_tables_diverge_alarmingly)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_permission_whitelist.py", line 221, in test_user_and_repo_bash_tables_diverge_alarmingly
+    user_raw = user_cfg_path.read_text(encoding="utf-8")
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\pathlib\__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\.tools\python\3.14.3\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\liq08\\.config\\opencode\\opencode.jsonc'
+
+----------------------------------------------------------------------
+Ran 28 tests in 18.676s
+
+FAILED (errors=1)
+
+```
+
+## 2026-07-21T14:23:01.173510Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `1`
+```text
+s.test_anchor_from_another_database_is_rejected) ... ok
+test_committed_pending_state_recovers_and_retires_old_marker (test_identity_store_security.IdentityStoreSecurityTests.test_committed_pending_state_recovers_and_retires_old_marker) ... ok
+test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker (test_identity_store_security.IdentityStoreSecurityTests.test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker) ... ok
+test_cyclic_and_oversized_inputs_are_rejected_with_audit (test_identity_store_security.IdentityStoreSecurityTests.test_cyclic_and_oversized_inputs_are_rejected_with_audit) ... ok
+test_missing_store_never_silently_initializes (test_identity_store_security.IdentityStoreSecurityTests.test_missing_store_never_silently_initializes) ... ok
+test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted (test_identity_store_security.IdentityStoreSecurityTests.test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted) ... ok
+test_signature_and_marker_loss_are_detected (test_identity_store_security.IdentityStoreSecurityTests.test_signature_and_marker_loss_are_detected) ... ok
+test_signed_anchor_detects_audit_tail_and_all_event_deletion (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_audit_tail_and_all_event_deletion) ... ok
+test_signed_anchor_detects_business_and_command_tampering (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_business_and_command_tampering) ... ok
+test_entry_and_importer_have_no_network_or_system_configuration (test_local_toolchain_security.LocalToolchainSecurityTest.test_entry_and_importer_have_no_network_or_system_configuration) ... ok
+test_importer_guards_archive_and_reparse_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 82.303s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ERROR
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+======================================================================
+ERROR: test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\e2e\test_identity_dev_environment.py", line 22, in test_windows_certificate_parser_and_generation_markers_work_end_to_end
+    database = Path(temporary) / "identity.sqlite3"; repository = IdentityRepository.create(database)
+                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\repository.py", line 31, in create
+    return cls(database, signer, freshness, create=True)
+  File "E:\Workspace\Coevo\src\coevo\identity\repository.py", line 59, in __init__
+    self.anchor.prepare(self._checkpoint())
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\audit_anchor.py", line 354, in prepare
+    self.signer.verify(raw, main_signature); self.freshness.verify_signature(raw, new_signature, marker)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\audit_anchor.py", line 72, in verify
+    self._run("Verify", content, signature)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\audit_anchor.py", line 65, in _run
+    raise AuditAnchorError("identity audit signature operation failed")
+coevo.identity.audit_anchor.AuditAnchorError: identity audit signature operation failed
+
+----------------------------------------------------------------------
+Ran 3 tests in 13.052s
+
+FAILED (errors=1)
+
+```
+
+## 2026-07-21T14:33:25.016607Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `0`
+```text
+reshnessSecurityTests.test_key_destroyed_before_certificate_crash_recovers_idempotently) ... ok
+test_official_marker_signature_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_official_marker_signature_tampering_is_rejected) ... ok
+test_pre_removed_certificate_still_destroys_signed_key_id (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_pre_removed_certificate_still_destroys_signed_key_id) ... ok
+test_restored_old_certificate_cannot_reassociate_destroyed_key (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_restored_old_certificate_cannot_reassociate_destroyed_key) ... ok
+test_tampered_dual_signed_pending_is_not_recovered (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tampered_dual_signed_pending_is_not_recovered) ... ok
+test_tombstone_content_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_content_tampering_is_rejected) ... ok
+test_tombstone_store_failure_keeps_pending_and_recovers (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_store_failure_keeps_pending_and_recovers) ... ok
+test_marker_schema_binds_transition_key_id_and_public_digest (test_identity_retirement_security.IdentityRetirementSecurityTests.test_marker_schema_binds_transition_key_id_and_public_digest) ... ok
+test_production_delete_is_key_first_and_verifies_both_resources_absent (test_identity_retirement_security.IdentityRetirementSecurityTests.test_production_delete_is_key_first_and_verifies_both_resources_absent) ... ok
+test_anchor_from_another_database_is_rejected (test_identity_store_security.IdentityStoreSecurityTests.test_anchor_from_another_database_is_rejected) ... ok
+test_committed_pending_state_recovers_and_retires_old_marker (test_identity_store_security.IdentityStoreSecurityTests.test_committed_pending_state_recovers_and_retires_old_marker) ... ok
+test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker (test_identity_store_security.IdentityStoreSecurityTests.test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker) ... ok
+test_cyclic_and_oversized_inputs_are_rejected_with_audit (test_identity_store_security.IdentityStoreSecurityTests.test_cyclic_and_oversized_inputs_are_rejected_with_audit) ... ok
+test_missing_store_never_silently_initializes (test_identity_store_security.IdentityStoreSecurityTests.test_missing_store_never_silently_initializes) ... ok
+test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted (test_identity_store_security.IdentityStoreSecurityTests.test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted) ... ok
+test_signature_and_marker_loss_are_detected (test_identity_store_security.IdentityStoreSecurityTests.test_signature_and_marker_loss_are_detected) ... ok
+test_signed_anchor_detects_audit_tail_and_all_event_deletion (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_audit_tail_and_all_event_deletion) ... ok
+test_signed_anchor_detects_business_and_command_tampering (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_business_and_command_tampering) ... ok
+test_entry_and_importer_have_no_network_or_system_configuration (test_local_toolchain_security.LocalToolchainSecurityTest.test_entry_and_importer_have_no_network_or_system_configuration) ... ok
+test_importer_guards_archive_and_reparse_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 74.487s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 102.880s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-21T14:38:47.680074Z — target=`test-security` fingerprint=`1458f00e53463d6f`
+- exit_code: `0`
+```text
+records_tombstone (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_abort_retires_new_key_before_certificate_and_records_tombstone) ... ok
+test_certificate_inspection_uses_stdin_without_candidate_temp_file (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_certificate_inspection_uses_stdin_without_candidate_temp_file) ... ok
+test_certificate_removed_before_tombstone_crash_recovers_idempotently (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_certificate_removed_before_tombstone_crash_recovers_idempotently) ... ok
+test_key_destroyed_before_certificate_crash_recovers_idempotently (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_key_destroyed_before_certificate_crash_recovers_idempotently) ... ok
+test_official_marker_signature_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_official_marker_signature_tampering_is_rejected) ... ok
+test_pre_removed_certificate_still_destroys_signed_key_id (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_pre_removed_certificate_still_destroys_signed_key_id) ... ok
+test_restored_old_certificate_cannot_reassociate_destroyed_key (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_restored_old_certificate_cannot_reassociate_destroyed_key) ... ok
+test_tampered_dual_signed_pending_is_not_recovered (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tampered_dual_signed_pending_is_not_recovered) ... ok
+test_tombstone_content_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_content_tampering_is_rejected) ... ok
+test_tombstone_store_failure_keeps_pending_and_recovers (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_store_failure_keeps_pending_and_recovers) ... ok
+test_marker_schema_binds_transition_key_id_and_public_digest (test_identity_retirement_security.IdentityRetirementSecurityTests.test_marker_schema_binds_transition_key_id_and_public_digest) ... ok
+test_production_delete_is_key_first_and_verifies_both_resources_absent (test_identity_retirement_security.IdentityRetirementSecurityTests.test_production_delete_is_key_first_and_verifies_both_resources_absent) ... ok
+test_anchor_from_another_database_is_rejected (test_identity_store_security.IdentityStoreSecurityTests.test_anchor_from_another_database_is_rejected) ... ok
+test_committed_pending_state_recovers_and_retires_old_marker (test_identity_store_security.IdentityStoreSecurityTests.test_committed_pending_state_recovers_and_retires_old_marker) ... ok
+test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker (test_identity_store_security.IdentityStoreSecurityTests.test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker) ... ok
+test_cyclic_and_oversized_inputs_are_rejected_with_audit (test_identity_store_security.IdentityStoreSecurityTests.test_cyclic_and_oversized_inputs_are_rejected_with_audit) ... ok
+test_missing_store_never_silently_initializes (test_identity_store_security.IdentityStoreSecurityTests.test_missing_store_never_silently_initializes) ... ok
+test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted (test_identity_store_security.IdentityStoreSecurityTests.test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted) ... ok
+test_signature_and_marker_loss_are_detected (test_identity_store_security.IdentityStoreSecurityTests.test_signature_and_marker_loss_are_detected) ... ok
+test_signed_anchor_detects_audit_tail_and_all_event_deletion (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_audit_tail_and_all_event_deletion) ... ok
+test_signed_anchor_detects_business_and_command_tampering (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_business_and_command_tampering) ... ok
+test_entry_and_importer_have_no_network_or_system_configuration (test_local_toolchain_security.LocalToolchainSecurityTest.test_entry_and_importer_have_no_network_or_system_configuration) ... ok
+test_importer_guards_archive_and_reparse_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 101.111s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+audit seal: fully-sealed
+
+```
+
+## 2026-07-21T14:40:34.184453Z — target=`quality` fingerprint=`e050cf72f6cda47e`
+- exit_code: `0`
+```text
+reshnessSecurityTests.test_key_destroyed_before_certificate_crash_recovers_idempotently) ... ok
+test_official_marker_signature_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_official_marker_signature_tampering_is_rejected) ... ok
+test_pre_removed_certificate_still_destroys_signed_key_id (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_pre_removed_certificate_still_destroys_signed_key_id) ... ok
+test_restored_old_certificate_cannot_reassociate_destroyed_key (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_restored_old_certificate_cannot_reassociate_destroyed_key) ... ok
+test_tampered_dual_signed_pending_is_not_recovered (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tampered_dual_signed_pending_is_not_recovered) ... ok
+test_tombstone_content_tampering_is_rejected (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_content_tampering_is_rejected) ... ok
+test_tombstone_store_failure_keeps_pending_and_recovers (test_identity_freshness_security.IdentityFreshnessSecurityTests.test_tombstone_store_failure_keeps_pending_and_recovers) ... ok
+test_marker_schema_binds_transition_key_id_and_public_digest (test_identity_retirement_security.IdentityRetirementSecurityTests.test_marker_schema_binds_transition_key_id_and_public_digest) ... ok
+test_production_delete_is_key_first_and_verifies_both_resources_absent (test_identity_retirement_security.IdentityRetirementSecurityTests.test_production_delete_is_key_first_and_verifies_both_resources_absent) ... ok
+test_anchor_from_another_database_is_rejected (test_identity_store_security.IdentityStoreSecurityTests.test_anchor_from_another_database_is_rejected) ... ok
+test_committed_pending_state_recovers_and_retires_old_marker (test_identity_store_security.IdentityStoreSecurityTests.test_committed_pending_state_recovers_and_retires_old_marker) ... ok
+test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker (test_identity_store_security.IdentityStoreSecurityTests.test_complete_old_snapshot_rollback_is_rejected_by_destroyed_marker) ... ok
+test_cyclic_and_oversized_inputs_are_rejected_with_audit (test_identity_store_security.IdentityStoreSecurityTests.test_cyclic_and_oversized_inputs_are_rejected_with_audit) ... ok
+test_missing_store_never_silently_initializes (test_identity_store_security.IdentityStoreSecurityTests.test_missing_store_never_silently_initializes) ... ok
+test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted (test_identity_store_security.IdentityStoreSecurityTests.test_private_key_fields_and_binary_pkcs8_are_rejected_and_redacted) ... ok
+test_signature_and_marker_loss_are_detected (test_identity_store_security.IdentityStoreSecurityTests.test_signature_and_marker_loss_are_detected) ... ok
+test_signed_anchor_detects_audit_tail_and_all_event_deletion (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_audit_tail_and_all_event_deletion) ... ok
+test_signed_anchor_detects_business_and_command_tampering (test_identity_store_security.IdentityStoreSecurityTests.test_signed_anchor_detects_business_and_command_tampering) ... ok
+test_entry_and_importer_have_no_network_or_system_configuration (test_local_toolchain_security.LocalToolchainSecurityTest.test_entry_and_importer_have_no_network_or_system_configuration) ... ok
+test_importer_guards_archive_and_reparse_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 101.707s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 76.121s
+
+OK
+audit seal: fully-sealed
+
+```

@@ -1,8 +1,8 @@
 """Validate every code/test path for active traceability rows."""
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, json, os, re, sys
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]; MATRIX=ROOT/"docs/traceability/requirements-test-matrix.md"
+ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1])); MATRIX=ROOT/"docs/traceability/requirements-test-matrix.md"
 ACTIVE={"in-progress","done"}
 def paths(cell): return re.findall(r"`([^`]+)`",cell.replace("<br>",";"))
 def safe_path(value):

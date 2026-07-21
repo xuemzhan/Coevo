@@ -1,32 +1,28 @@
 ---
-description: 执行一个受控 MVP 工程循环（DISCOVER→PLAN→IMPLEMENT→VERIFY→REVIEW→RECORD→DECIDE），只推进一个工作项；可接受 $ITEM 作为工作项 ID 覆盖。
+description: Run exactly one controlled MVP engineering cycle for one work item; accepts $ITEM as an explicit item id.
 agent: loop-engineer
 ---
 
-执行且只执行一个工程循环。
+Execute exactly one engineering cycle.
 
-读取：
+Workspace rules:
+
+- Treat the current session `cwd` / project root as the only repository root.
+- Use repository-relative paths. Never guess `/workspace`, `C:\workspace`, a parent repository, or another external root.
+- This is Windows PowerShell. Run the quality gate only as `make quality` or through `quality_gate`; never rewrite it as `cd /workspace && ...`.
+- Base conclusions only on the current `loop/STATE.json`, this cycle's actual gate results, and this cycle's reviewer results.
+- Historical failures in verification or audit logs are evidence of history, not current blockers. A current block requires a non-null `STATE.json.blocking_issue` or a fresh failing gate/reviewer result.
+
+Read:
 
 - `loop/STATE.json`
 - `loop/BACKLOG.yaml`
 - `loop/GOAL.md`
 - `loop/VERIFICATION.md`
-- 当前 `git diff` 与未提交修改
+- current `git diff` and uncommitted changes
 
-如有 `$ITEM` 参数（例如 `/loop US-0-AC-2`），将该工作项强制设为本次目标；否则按 `BACKLOG.yaml` 中 `ready` 优先级选最小切片。
+If `$ITEM` is present, it is the only target. Otherwise select the smallest ready item from `loop/BACKLOG.yaml`.
 
-严格按以下阶段推进：
+Follow DISCOVER -> PLAN -> IMPLEMENT -> VERIFY -> REVIEW -> RECORD -> DECIDE. Do not process multiple items and do not skip testing or required security review.
 
-DISCOVER → PLAN → IMPLEMENT → VERIFY → REVIEW → RECORD → DECIDE
-
-禁止同时处理多个工作项；禁止跳过测试或安全审查。
-
-结束时必须输出：
-
-1. 当前用户故事 / 工作项 ID。
-2. 已满足 AC（逐条）。
-3. 未满足 AC（逐条 + 缺口原因）。
-4. 测试结果摘要（命令指纹 + 失败列表）。
-5. 安全审查 / 协议审查结论（如触发）。
-6. 状态文件改动摘要（`STATE.json` 字段前后值）。
-7. 下一步建议或阻断原因。
+At the end report the item id, each met and unmet AC, actual test fingerprint and failures, reviewer conclusions, exact STATE field changes, and the next action or current blocker.

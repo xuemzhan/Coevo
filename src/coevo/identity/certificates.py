@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import os
 import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -12,6 +13,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 HELPER = ROOT / "scripts" / "inspect_certificate.ps1"
+
+
+def _powershell_executable() -> str:
+    exe = os.environ.get("COEVO_POWERSHELL_PATH")
+    if exe and Path(exe).is_absolute():
+        return exe
+    fallback = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+    if fallback.is_file():
+        return str(fallback)
+    raise CertificateError("Windows PowerShell is unavailable")
 
 
 class CertificateError(ValueError):
@@ -47,7 +58,7 @@ def inspect_certificate(certificate_der: bytes) -> InspectedCertificate:
         raise CertificateError("controlled certificate helper is unavailable")
     request = json.dumps({"certificate_der_base64": base64.b64encode(certificate_der).decode("ascii")}, separators=(",", ":"))
     process = subprocess.run(
-        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
+        [_powershell_executable(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(HELPER)],
         cwd=ROOT, input=request, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
     )
     if process.returncode:

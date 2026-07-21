@@ -20,7 +20,7 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1]))
 VERIFY = "scripts/validate_opencode.py"
 
 EXPECTED_FILES = [

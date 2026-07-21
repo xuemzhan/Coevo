@@ -1,49 +1,42 @@
 <#
-  run-loop.ps1 — 受限自动循环脚本
+  run-loop.ps1 — 受限 Loop 启动器。每次 opencode run 只执行一个工作项，
+  不使用 --auto；完成、阻断或达到上限后立即停止。
 
-  退出码契约（与 scripts/check_loop_stop.py 一致）：
-    0  — mvp-complete，停循环
-    10 — 继续下一轮
-    20 — 阻断，需要人工决策
-    30 — opencode CLI 调用失败
-    40 — 检查脚本返回了未知状态
-    50 — 达到 MaxIterations 上限
+  退出码：0=mvp-complete；10=尚可继续；20=需人工决策；
+  30=OpenCode 调用失败；40=未知状态。达到上限时返回 10，由新 session 继续。
 #>
-
 [CmdletBinding()]
 param(
-    [int]$MaxIterations = 12,
-    [string]$Agent       = "loop-engineer",
-    [string]$TitlePrefix = "MVP Loop"
+    [ValidateRange(1,40)][int]$MaxIterations = 12,
+    [ValidatePattern('^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$')][string]$Item,
+    [ValidatePattern('^[a-z0-9][a-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._:/-]*$')][string]$Model,
+    [ValidatePattern('^[^-][A-Za-z0-9 _.-]{0,79}$')][string]$TitlePrefix = 'MVP Loop'
 )
 
-$ErrorActionPreference = "Stop"
-Set-Location -LiteralPath (Split-Path -Parent $PSCommandPath) | Out-Null
-Set-Location .. | Out-Null   # 切到仓库根
+$ErrorActionPreference='Stop'
+$Root=Split-Path -Parent $PSScriptRoot
+Set-Location -LiteralPath $Root
+. (Join-Path $PSScriptRoot 'enter-dev-environment.ps1') -Quiet
+$OpenCode=$env:COEVO_OPENCODE_PATH
 
-Write-Host "Coevo / Loop running from: $PWD"
-
-for ($i = 1; $i -le $MaxIterations; $i++) {
+Write-Host "Coevo / Loop running from: $Root"
+for($i=1;$i -le $MaxIterations;$i++){
     Write-Host "=== Loop iteration $i / $MaxIterations ==="
+    $Arguments=@('run','--command','loop','--title',"$TitlePrefix $i")
+    if($Model){ $Arguments+=@('--model',$Model) }
+    if($Item){ $Arguments+=@('--',$Item) }
+    if($Arguments -contains '--auto'){ throw 'Automatic permission approval is forbidden.' }
+    & $OpenCode @Arguments
+    if($LASTEXITCODE -ne 0){ Write-Error "opencode run failed in iteration $i (exit=$LASTEXITCODE)"; exit 30 }
 
-    & opencode run `
-        --agent $Agent `
-        --title  "$TitlePrefix $i" `
-        "执行一个且仅一个受控工程循环。完成、阻塞或失败后立即停止本轮。"
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "opencode run failed in iteration $i (exit=$LASTEXITCODE)"
-        exit 30
+    & $env:COEVO_MAKE_PATH verify-loop-state | Out-Null
+    switch($LASTEXITCODE){
+      0 { Write-Host 'MVP stop condition reached.'; exit 0 }
+      10 { Write-Host 'Current item finished; another fresh session may continue.' }
+      20 { Write-Error 'Loop is blocked and requires human decision.'; exit 20 }
+      default { Write-Error "Unknown loop state (exit=$LASTEXITCODE)"; exit 40 }
     }
-
-    & python scripts/check_loop_stop.py | Out-Null
-    switch ($LASTEXITCODE) {
-        0  { Write-Host "MVP stop condition reached."; exit 0  }
-        10 { Write-Host "Continue to next iteration." }
-        20 { Write-Error "Loop is blocked and requires human decision."; exit 20 }
-        default { Write-Error "Unknown loop state (exit=$LASTEXITCODE)"; exit 40 }
-    }
+    $Item=$null
 }
-
-Write-Error "Maximum iteration count reached ($MaxIterations)"
-exit 50
+Write-Host "Maximum iteration count reached ($MaxIterations); a fresh session may continue."
+exit 10
