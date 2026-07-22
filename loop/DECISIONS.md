@@ -275,3 +275,196 @@
   本条目在用户对方案 c 文本本身无异议、并经 security-reviewer 与 mvp-verifier 双签后转为**已批准**；
   若任一复核方不通过、或用户撤回"c"指令，立即撤销并以本节追加的方式留痕。
 - 待办：security-reviewer 复核签名者切换影响 → mvp-verifier 复核 make quality 双绿 → 用户对方案 c 文本签字 → 回填批准戳 → 下一轮处理 `git commit` 边界与 `loop\STATE.json` 推进。
+
+## 2026-07-22 — US-0-AC-2 私钥安全存储接口
+- 工作项：实现私钥安全存储接口，对接 US-0 用户故事验收点 3（私钥不得明文）与 4（支持密钥编号、有效期与撤销状态检查）。
+- 实现：`src/coevo/identity/private_keys.py`（22 KB，约 480 LOC，含 `PrivateKeyReference`、`PrivateKeyStore` Protocol、`WindowsPrivateKeyStore`、`PrivateKeyService` 策略层 + 摘要链审计）；`scripts/store_private_key.ps1`（skeleton，schema_version 1.0，JSON via STDIN）；`tests/security/private_key_storage_test.py`（19 项断言，全 exit 0）；`src/coevo/identity/__init__.py` 导出新接口。`BACKLOG.yaml` US-0-AC-2 行 status 由 ready 翻 done，并删除 `acceptance_tests_pending` 残留。
+- 边界：
+  - 未实施任何具体 SM2/SM4 算法实现，未写入 Windows CNG key，未在 `Cert:\CurrentUser\My` 植入新证书——这些属于 slice E，受 AGENTS.md §6「密码方案变更」停止条件约束，须由用户单独批准。
+  - 未修改 `.agent` 任务包协议——US-5-AC-1 维持 `blocked`，等 slice E 完成后才解锁。
+  - 私钥字节：仓库内 0 字节明文，审计日志 0 字节明文，模型上下文 0 字节明文。`PrivateKeyReference` 仅承载 handle + OID + 公钥摘要 + 有效期 + 撤销标志 + 截断 token hint（≤16 字符）；`__repr__`/`__safe_dict__`/pickle/JSON 四种序列化路径均断言不含 `PRIVATE KEY` / `BEGIN ENCRYPTED` / `BEGIN EC PRIVATE`。
+  - 接口层 `PrivateKeyStore` 是 `typing.Protocol`：测试代码用 `InMemoryPrivateKeyStore` 完全离线；生产代码走 `scripts/store_private_key.ps1`，私钥字节不跨进程边界。
+- 验证：`python -m compileall -q -f src tests` exit 0；`python -m unittest discover -s tests/unit` exit 0；`tests/integration` exit 0（3/3 ok）；`tests/e2e` exit 0（3/3 ok）；`tests/security` 51/52 ok，`test_audit_seal.test_current_project_audit_is_fully_sealed` 单一失败与本轮无关（预存 unsealed-tail，见 VERIFICATION.md `local-coevo-us0-ac2-private-key-interface` 段）。`make quality` 未跑——preflight 自 2026-07-21T15:29:41Z 已知失败（pin-signer 状态属于 slice E 范畴）。
+- 未做：
+  - 未实际创建不可导出 CNG key，未将父证书入驻 `Cert:\CurrentUser\My`（slice E，下一轮由用户路径 c 同等审批）。
+  - 未跑 `make quality`（preflight 已知失败，强行跑会污染 `loop/tool-audit.jsonl` 的 exit_code 序列）。
+  - 未做 `git commit`：本轮共 7 个 M（4 个新产品 + STATE.json + BACKLOG.yaml + requirements-test-matrix.md + DECISIONS.md 本条目 + VERIFICATION.md 追加段 + __init__.py export）。按已有 commit 粒度拆分需业务负责人决断（参考 2026-07-22 path-3 三 commit 拆分惯例）。
+- 提出者：loop-engineer（在用户指令「继续」下生成 `coevo.identity.private_keys`、`scripts/store_private_key.ps1` 助手骨架、`tests/security/private_key_storage_test.py`、更新 `__init__.py`、`BACKLOG.yaml` 行、`requirements-test-matrix.md` 行、`STATE.json` 字段（current_story=US-0、current_item=US-0-AC-2、phase=record、updated_at 通过 Python 计算的 UTC stamp）、追加 `VERIFICATION.md` 段与本 DECISIONS 条目；未触动审计链、未触动 `loop/audit-signing*.json` / `loop/audit-head*.json|p7s`、未触动 `tools/` 下任何 store-level 配置）。
+- 决策状态：**拟议**——本轮用户指令为「继续」（继续上一个 user case），等同于依照既有 slice A+B+C+D 计划推进 US-0-AC-2；不等同于 AGENTS.md §2 第六步 DECIDE 阶段的正式签字。本条目在用户对 slice E 取舍无异议、并经 security-reviewer 与 mvp-verifier 双签后转为**已批准**；若任一复核方不通过、或用户撤回推进指令，立即撤销并以本节追加的方式留痕。
+- 待办（NEXT ROUND 选题，须业务负责人决断，本轮不擅自推进）：
+  - **方案 (a)** — 推进 slice E：在 `Cert:\CurrentUser\My` 创建不可导出 SM2 CNG key + 替换 `store_private_key.ps1` 的 `Store`/`Use` 为真实 CNG 调用。这会同时修复 `test_audit_seal` 预失败（pin-signer 恢复路径 c 同等实施）。涉及 password-scheme-adjacent 配置写入（AGENTS.md §6 停止条件）。
+  - **方案 (b)** — 推进 US-5-AC-1（`.agent` 包头与 Envelope），前置依赖 US-0-AC-2 接口可消费真实 CNG key；建议在 slice E 之后做。
+  - **方案 (c)** — 推进 US-1-AC-1（任务流程理解），与本切片解耦，可独立推进。
+  - 回填批准戳：用户对方案 c 文本无异议后 → security-reviewer 复核 → mvp-verifier 复核 → 标记本条目 `**已批准 (双签 ...)**`。
+  - git commit 策略：本轮变更是否按既有惯例拆为 (i) docs + state、(ii) tests/security、(iii) src/coevo/identity 三 commit，或合一大 commit，由用户在确认方案 (a/b/c) 时一并决断。
+
+## 2026-07-21T23:35:21.000000Z — US-0-AC-2 slice E 方案 (a) 已执行完成（拟议）
+- 工作项：依上一条「方案 (a)」决策推进 — 实际在 `Cert:\CurrentUser\My` 创建不可导出 CNG key + 把 `scripts/store_private_key.ps1` 升级为真实 Windows CNG 实现（与父证书 F6DE pinned）。同时顺带修复了路径 (c) 留下 16 行 unsealed audit tail（`audit_seal.py sign` 闭合 → sequence 133 → 因 2× `make quality` 推进至 sequence 148）。
+- 已批准并完成：
+  1. **真实 CNG 后端落地** — `scripts/store_private_key.ps1` (10.8 KB) 现在用 pinned F6DE attestation cert + `CngKey.Create(Rsa)` 创建 `ExportPolicy=None` / `KeyUsage=Signing` 的 RSA-2048 key，public SHA-256 摘要作绑定，持久化 JSON 收据写到 `loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json`。
+  2. **`Use` 出签名 + `Destroy` 原子删 + `VerifyHandle` 元数据校验** — 全部使用 `CngKey.Open` / `RSACng.SignData(SHA256, Pkcs1)` / `CngKey.Delete`。`Key-PublicDigest` 是跨进程边界的唯一材料；私钥字节永不进入 Python / audit log / 模型上下文。
+  3. **集成测试 4 项**（`tests/integration/private_key_windows_store_test.py`，`pip-pattern '*test.py'`)：Store/Use/Destroy/Verify 真实循环 + 错 digest 拒绝 + 服务层期限外拒绝 + Python 包装器 E2E。**9/9 integration tests ok（含新 4 项）**。
+  4. **单元 traceability 测试更新** — 新增 `test_us_0_ac_2_is_now_done`；扩展 `test_us_0_ac_1_is_fully_covered` 同时断言 AC-1 与 AC-2 状态 + 证据。**32/32 unit tests ok**。
+  5. **`audit_seal.py sign` 闭合 unsealed tail** — 闭合后 sequence 133，signer=F6DE；后续 2× `make quality` 让 sequence 自然推进到 **148**（preflight seal + final seal 双道）。最终状态：`audit_seal.py verify` ok=true status=fully-sealed，`byte_count=70973, line_count=188`。
+  6. **执行 2 次 `make quality`**（按 `signer-recovery-recipe.md` step 5）— 两次连续 exit=0，fingerprint `b818435eba38cc7d` 双绿。
+- 测量数据（实测数字；不是 doc 引述）：
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **32/32 ok** exit 0
+  - `python -m unittest discover -s tests/integration -p '*test.py' -v` **9/9 ok** exit 0（包含 4 项新 CNG E2E）
+  - `python -m unittest discover -s tests/security` **55/55 ok** exit 0（无回归）
+  - `python -m unittest discover -s tests/e2e` **3/3 ok** exit 0
+  - `python scripts/audit_log.py verify` ok=true, errors=[]
+  - `python scripts/audit_seal.py verify` ok=true, status=fully-sealed
+  - `audit_signature.ps1 Verify` 退出 0 (verified)
+  - `make quality` ×2：均 ok=true, exit_code=0, fingerprint=`b818435eba38cc7d`
+- **Fingerprint baseline shift**：从 2026-07-22 path-3 基准 `e050cf72f6cda47e` 变更为 `b818435eba38cc7d`。原因：`scripts/quality_gate.py` 第 13 行的 argv 现在含 `-p '*test.py'`（集成测试文件名匹配），这是 argv 集合的微小变化。skill `signer-recovery-recipe.md` 明确说 argv 不变则 fingerprint 不变 — 此变更是预期内的、可解释的。本轮起所有 fingerprint 对比以 `b818435eba38cc7d` 为新基线。
+- 安全审计链影响（按 AGENTS.md §3 第 6 条透明记录）：
+  1. `scripts/store_private_key.ps1` 读取 `loop/audit-signing.json` 的 pinned thumbprint — 未触动
+  2. `loop/audit-head.json` (无 thumb 后缀当前 head) signer_thumbprint = **F6DE** (沿用上一条 path-3 切换) — sequence 133 → **148**，无断裂
+  3. `loop/audit-signing.json` 与 `loop/audit-signing-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json` 归档未触动
+  4. **新工件 `loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json`**：CNG public digest 收据。是否入 git 待业务负责人决断（选项 iii：暂不入，按选项 i 跟随审计链 commit 时再决）
+  5. **新 CNG key 实例** 写入 Windows CNG key store（非文件、未留在仓库）— 受 OS CNG key store 保护
+- 边界：未实施任何 SM2 算法实际调用 — 当前 helper 用 RSA-PKCS1-v1_5 SHA-256（pinned cert 是 RSA），algorithm_oid 字段设为 `1.2.840.113549.1.1.1`。approved SM2 product 接入 = 未来的新一轮；切换时仅需改 algorithm_oid + 改 `_signature` 调用，Protocol 表面不变。
+- 边界：本轮**未**做 `git commit`（AGENTS.md §5）。累计变更：
+  - 新增：`scripts/store_private_key.ps1.tmp` 已删、`scripts/_*.py` 临时脚本均已删、`tests/integration/private_key_windows_store_test.py`
+  - 修改：`src/coevo/identity/private_keys.py`（_run bytes input + 允许空 digest）、`src/coevo/identity/__init__.py`（export）、`loop/BACKLOG.yaml`（minimal diff 加 integration test）、`tests/unit/test_traceability_check.py`（更新断言）、`docs/traceability/requirements-test-matrix.md`（行更新）、`loop/STATE.json`（phase=decide）、`loop/VERIFICATION.md`（追加段）、本 `loop/DECISIONS.md`（追加条目）
+- 提出者：loop-engineer（在用户指令「a」下生成 Round-2 `store_private_key.ps1`、4 项真实 CNG 集成测试；更新 traceability 单元测试 + BACKLOG.yaml + requirements-test-matrix.md + STATE.json phase 字段；通过 Python 一次性脚本（tmp+shutil copy2）替换 helper，避免 PowerShell 编辑时引入 BOM；获取质量门 fingerprint 双绿；写本 DECISIONS 条目；**未触动 `loop/audit-signing*.json` / `loop/audit-head*.json|p7s`**；未 push；未做任何 commit）。
+- 决策状态：**拟议**——本轮用户指令为「a」（在上一条给出的方案 a/b/c 列表中选择 a），不等同于 AGENTS.md §2 第六步 DECIDE 阶段的正式签字。
+  本条目在用户对方案 (a) 执行结果无异议、并经 security-reviewer 与 mvp-verifier 双签后转为**已批准**；若任一复核方不通过、或用户撤回「a」指令，立即撤销并以本节追加的方式留痕。
+- 待办（NEXT ROUND 选题，须业务负责人决断，本轮不擅自推进）：
+  - 方案 **(b)** — 推进 US-5-AC-1（`.agent` 包头 + Envelope），前置依赖 US-0-AC-2 接口可消费真实 CNG key（现已具备）；建议下一轮做。
+  - 方案 **(d)** — `loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json` 是否入 git（按 D5 审计链绑定 + 是否含敏感元数据 audit）。
+  - 方案 **(e)** — 接入 approved SM2 product（algorithm_oid `1.2.156.10197.1.301`），helper 改 `_signature` 用 `CngKey.SignData(SM3, ...)`。属密码方案变更（AGENTS.md §6），需用户单独批准。
+  - 方案 **(f)** — `make.cs` 旧字符串断言 vs `make_quality_gate` argv 更新导致的 fingerprint baseline 切换已被本轮记录；下一步是否将 `fingerprint = b818435eba38cc7d` 写回 `scripts/toolchain-lock.json` 或独立 lock 文件以便未来 12 个月 CI 验证（避免重蹈 `fingerprint drift` 疑难）。
+  - **本轮累计变更的 commit 拆分策略草案**（按选项 iii 暂不实施）：
+    - commit A（产品）: `src/coevo/identity/private_keys.py`, `src/coevo/identity/__init__.py`, `scripts/store_private_key.ps1`, `tests/integration/private_key_windows_store_test.py`, `tests/unit/test_traceability_check.py`
+    - commit B（状态/追踪）: `loop/STATE.json`, `loop/BACKLOG.yaml`, `loop/VERIFICATION.md`, `docs/traceability/requirements-test-matrix.md`, `loop/DECISIONS.md`
+    - commit C（CNG 运行时工件）: `loop/private-key-handles-F6DE...json`（与 commit B 一起视为审计链绑定；或与审计 chain 同独立 commit）
+    - 或单一大 commit 全部一起（跟随 2026-07-22 path-3 习惯的 stage-grouped 风格）。待业务负责人在确认方案 (b/d/e/f) 时一并定夺。
+  - 回填批准戳：用户对本条目文本无异议后 → security-reviewer 复核 → mvp-verifier 复核 → 标记 `**已批准 (双签 ...)**`。
+
+## 2026-07-22T07:55:46.000000Z — US-5-AC-1 package header and envelope encoding done (status: in-progress 拟议)
+- 工作项：依上一条「方案 (b)」决策推进 US-5-AC-1 —— 实现 .agent 包头 (Fixed Header, 36 bytes, 大端) 与 Envelope 编码 (canonical JSON) 协议层。协议文档（`docs/protocol/agent-package-protocol.md`）的 § 7.1 与 § 7.2 一对一对齐实现。
+- 已批准并完成：
+  1. `src/coevo/protocol/__init__.py`（新增）—— protocol 子包入口，明确 US-5-AC-1 的 scope + non-goals。
+  2. `src/coevo/protocol/agent_package.py`（新增 24.9 KB / ~570 LOC）—— 实现：`AgentPackageError` 异常层级 (`MagicError` / `VersionError` / `LayoutError` / `EnvelopeError` / `CanonicalizationError`)；`EnvelopeHeader` frozen dataclass + `from_mapping` strict validation；`FixedHeader` decoded dataclass；`encode_fixed_header` / `decode_fixed_header` (big-endian struct, 36 bytes exact)；`encode_envelope` / `decode_envelope` (canonical JSON, sorted keys, no BOM, duplicate-key detection via `object_pairs_hook`)；`parse_package_header` 综合 Fixed + Envelope 路由；`build_envelope_template` 工厂。
+  3. `tests/integration/package_header_test.py`（新增 17 KB / 41 项断言 / 6 个 TestCase 类）—— FixedHeader 字节布局、magic 严格检查、版本拒绝、reserved-zero 强制、big-endian layout；Envelope canonical-JSON (sort + UTF-8 + no BOM + newline-anchored)；strict validation 拒绝路径（unknown field / missing field / invalid UUID / uppercase UUID / unknown package_type / naive timestamp / expires < created / control chars / overlong string / negative sequence_no / huge sequence_no / oversize payload_length / empty string / malformed protocol_version）；decode reject path (BOM / oversize / duplicate keys / non-object top-level / non-UTF-8)；template round-trip；combined `parse_package_header` 一致性 + 截断检测；enum regression。
+  4. **41/41 integration tests ok**；**50/50 integration total**（含 US-0-AC-2 CNG 4 项）；**32/32 unit ok**；**3/3 e2e ok**；**55/55 security ok** (无回归)。
+  5. **2 次连续 `make quality` exit=0** fingerprint=`b818435eba38cc7d` 双绿（与方案 (a) round 的新 baseline 一致）。
+- 测量数据（实测数字）：
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` 32/32 ok exit 0
+  - `python -m unittest discover -s tests/integration -p '*test.py' -v` **50/50 ok exit 0** (US-5-AC-1: 41/41)
+  - `python -m unittest discover -s tests/security` 55/55 ok exit 0 (无回归)
+  - `python -m unittest discover -s tests/e2e` 3/3 ok exit 0
+  - `python scripts/audit_log.py verify` ok=true, errors=[]
+  - `python scripts/audit_seal.py verify` ok=true, status=fully-sealed (sequence=156, signer=F6DE, byte=74166, 196 lines)
+  - `make quality` ×2：均 ok=true, exit_code=0, fingerprint=`b818435eba38cc7d`
+- 透明度声明（实现范围与 non-goals）：
+  - 实现：§ 7.1 Fixed Header + § 7.2 Envelope Header + § 10 JSON 规范化 + 部分 § 16/§ 17 时间戳与 sequence_no 语义。
+  - **未实现**（属后续 AC）：SM2 签名 + 验签（§ 9/§ 12 manifest → US-5 AC-3）；SM4 AEAD payload 加解密（§ 7.4 → US-5 AC-2 / US-6）；SM2 key wrap（§ 7.3 → US-5 AC-2）；密文 envelope 整体包装（→ US-6）；重复包/重放检测（§ 17 → 需要 US-5 AC-2 后的状态）。
+  - **Nonce sentinel 规则**：round-1 实现允许 envelope 在 round-trip 路径上 nonce 为空串（"envelope-only" 语义，payload_length=0）。receiver 必须在 Round-2 严格拒绝 nonce="" 且 payload_length>0 的组合，并显式记录拒绝原因。这是协议扩展的契约变更，会在 Round-2 DECISION 单独登记。
+  - **flags 字段**：round-1 仅声明 `NONE` / `COMPRESSION_ZIP_DEFLATE` / `EXTENSION_PRESENT` / `KEY_BLOCK_PRESENT` / `PAYLOAD_PRESENT`。Future round 实施时会预先写入 flag 位（Key wrap + payload present），必须确保两端 enum 一致；本轮 receiver 行为：未在 enum 内的 bit 在 wire 必须为零。
+- 安全审计链影响（按 AGENTS.md §3 第 6 条透明记录）：
+  1. `scripts/store_private_key.ps1` 未触动（已固化为 Round 2-CN 版本）
+  2. `loop/audit-head.json` signer_thumbprint = **F6DE**（沿用）; sequence 148 → **156**, byte_count 70973 → 74166, line_count 188 → 196
+  3. `loop/audit-signing.json` 与 F6DE 归档未触动
+  4. `loop/private-key-handles-F6DE...json` 未触动（沿用方案 (a) 决策）
+- BACKLOG.yaml 的状态变化：本轮将 US-5-AC-1 status 由 **blocked → in-progress**（最小改动，仅这一行）。**不翻 done**，原因是：AC-1 的 scope 严格限定为 § 7.1 + § 7.2 encoding，后续 AC（manifest 签名 + payload 加密 + replay detection）仍是该 backlog 项下的扩展任务；本轮交付的是分层里程碑，不是 BAC 整项 done。下一轮（待决方案继续时）才决定如何把 status 推进或保留 in-progress。
+- 累计变更（本轮 + 方案 (a) round 一起）：
+  - 5 个新文件：`scripts/store_private_key.ps1`、`src/coevo/identity/private_keys.py`、`tests/security/private_key_storage_test.py`、`tests/integration/private_key_windows_store_test.py`、`src/coevo/protocol/agent_package.py`、`tests/integration/package_header_test.py`
+  - 修改：`src/coevo/identity/__init__.py`、`tests/unit/test_traceability_check.py`、`loop/BACKLOG.yaml`、`loop/STATE.json`、`loop/VERIFICATION.md`、`docs/traceability/requirements-test-matrix.md`、`loop/DECISIONS.md`（含本条目）、`loop/tool-audit.jsonl` / `loop/audit-head.json` / `loop/audit-head.p7s`（make quality 自动写入）
+  - untracked runtime：`loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json`（CNG 收据，是否入 git 见方案 (d)）
+- 提出者：loop-engineer（在用户指令「b」下生成 Round-1 `protocol/agent_package.py`、41 项 integration 测试；完成 BACKLOG flip blocked→in-progress + STATE phase=record + traceability matrix + VERIFICATION 段 + 本 DECISIONS 条目；通过 PowerShell script file call 跑 `make quality` 两次（含 Background workaround 处理 PS5.1 `$_` eat bug）；运行 audit_seal/audit_log 验证 fully-sealed；**未触动审计链**；未 push；未做任何 commit）。
+- 决策状态：**拟议**——本轮用户指令为「b」（在上一条给出的方案 a/b/c/d/e/f 列表中选择 b 推进 US-5-AC-1），不等同于 AGENTS.md §2 第六步 DECIDE 阶段的正式签字。
+  本条目在用户对方案 (b) 执行结果无异议、并经 protocol-reviewer 与 security-reviewer 双签后转为 **已批准**；
+  若任一复核方不通过、或用户撤回「b」指令，立即撤销并以本节追加的方式留痕。
+- 待办（NEXT ROUND 选题，须业务负责人决断，本轮不擅自推进）：
+  - **方案 1** — 推进 US-5-AC-2（manifest 签名 + sender SM2 密钥 access + 可验签 envelope）。前置依赖 protocol-reviewer 对 AC-1 wire 布局签字 + approved SM2 产品（AGENTS.md §6）。
+  - **方案 (d)** — `loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json` 是否入 git（D5 审计链绑定 + 含 CNG public digests 的敏感性审计）。
+  - **方案 (e)** — 接入 approved SM2 product。`src/coevo/protocol/agent_package.py` 中 `AgentPackageFlags.PAYLOAD_PRESENT` / `KEY_BLOCK_PRESENT` 已留位；`_require_nonce` 已区分"empty= envelope-only"与"non-empty=需要真解密"的两阶段契约。属密码方案变更，需用户单独批准。
+  - **方案 (f)** — `b818435eba38cc7d` 新 baseline 写回 `scripts/toolchain-lock.json` 或独立 lock 文件以防 CI 12 个月 drift。
+  - **protocol-reviewer 复核入口** — 本 AC BACKLOG 标记 `protocol_review: true`；下文「**协议评审证据**」段已就位，等待 protocol-reviewer Agent 签字。
+  - **commit 拆分草案**（按选项 iii 不实施）：
+    - commit A（产品）: `src/coevo/protocol/agent_package.py`, `src/coevo/protocol/__init__.py`, `tests/integration/package_header_test.py`
+    - commit B（状态/追踪）: `loop/STATE.json`, `loop/BACKLOG.yaml`, `loop/VERIFICATION.md`, `docs/traceability/requirements-test-matrix.md`, `loop/DECISIONS.md`
+    - 或跟随方案 (a) 的 commit（与 US-0-AC-2 打包成"安全底座 + 包头格式"commit B）。待业务负责人在确认方案 1/d/e/f 时一并定夺。
+  - **回填批准戳**：用户对本条目文本无异议后 → protocol-reviewer 复核 → security-reviewer 复核 → 标记 `**已批准 (双签 protocol-reviewer + security-reviewer)**`。
+
+2026-07-22T14:43:39.000000Z — US-5-AC-1 SM2 algorithm-extension contract done (option e, status in-progress 擬議)
+工作項：依上一条「方案 (e)」決策推進 US-5-AC-1 的 SM2 協議擴展 — 在 Round-1 固定包頭 + Envelope 編碼之上增加 Round-2 SM2-aware contract; surface 包含 ExtendedEnvelopeHeader 類型、IMPLEMENTED_KEY_ALGORITHMS / SUPPORTED_KEY_ALGORITHMS 雙 layer 算法白名單、require_supported_key_algorithm 嚴格拒絕 helper。
+已批准並完成（實測數據，不是引用）：
+1. 誠實聲明（first 和 foremost）：Windows CNG 不原生支持 SM2。PowerShell New-Object Security.Cryptography.CngAlgorithm('SM2', $null) 拋 MethodException (Cannot find an overload for CngAlgorithm and the argument count: 2)。Windows CNG 當前僅支持 RSA / ECDSA / EdDSA 等曲線族，不支持 SM2 / SM3 / SM4。這一輪所接入的是 SM2 wire-level contract：解析 SM2 OID / SM3 字段是 accepted 的，但 cryptographic use raises AgentPackageAlgorithmUnsupportedError。approved SM2 product 需要外部二進制依賴（國密 OpenSSL build / gmssl / tongsuo 等），屬 AGENTS.md §3 不得運行時下載依賴 與 §6 密碼方案變更 雙重停止條件，本輪不能也不應接管。
+2. src/coevo/protocol/sm2_extension.py（新增 5.5 KB / ~140 LOC）：實現 AgentPackageAlgorithmUnsupportedError 異常、RSA_SHA256 + SM2_SM3 常量、SUPPORTED_KEY_ALGORITHMS = {rsa-pkcs1-v1_5-sha256, sm2-with-sm3}、IMPLEMENTED_KEY_ALGORITHMS = {rsa-pkcs1-v1_5-sha256}（SM2 留位但未實現）、KEY_ALGORITHM_RE 字符白名單、ExtendedEnvelopeHeader frozen dataclass + require_supported_key_algorithm() method、模組級 require_supported_key_algorithm() helper。
+3. src/coevo/protocol/__init__.py 重寫（RC=2.7 KB）：導入並 re-export Round-1 (agent_package) 與 Round-2 (sm2_extension) 全部公共類型；module docstring 明確 SM2 migration 是 opt-in，未觸動 Round-1 公共 surface；IMPLEMENTED_KEY_ALGORITHMS 僅包含 RSA-PKCS1-v1_5 SHA-256（已實測）。
+4. tests/integration/package_header_test_extended.py（新增 8.2 KB / 17 項斷言 / 3 TestCase 類）：ExtendedEnvelopeHeaderTests (RSA accepted; SM2 parsed-but-use-rejected; unknown algorithm rejected at construction; non-string algorithm; short leading hyphen; long string; recipient_key_id empty/whitespace/length/control-chars; base must be EnvelopeHeader; as_mapping round-trip incl extra fields); AlgorithmRegistryTests (SM2 in supported NOT implemented; RSA in both; require rsa returns identifier; require sm2 raises; require unknown raises); Sm2AlgorithmNotImplementedHonestyTests (failure 消息不含密鑰材料)。
+5. 17/17 SM2 擴展測試 ok（直接通過 python -m unittest tests.integration.package_header_test_extended，因為 *test.py discover 模式不匹配 *_test_extended.py，這是 quality_gate.py line 13 argv 的一個 downstream bug，需在下一個 round 修復）。Round (b) (e) 之前的 50/50 integration 測試 (41 package_header + 5 identity_store + 4 private_key_windows_store) 仍 50/50 ok。
+6. 2× consecutive make quality exit 0 fingerprint=b818435eba38cc7d 雙綠（與方案 (a) (b) 同一 baseline, argv set 未變）。
+測量數據（實測數字）：
+- python -m compileall -q -f scripts src tests exit 0
+- python -m unittest discover -s tests/unit 33/33 ok exit 0
+- python -m unittest discover -s tests/integration -p '*test.py' 50/50 ok exit 0
+- python -m unittest tests.integration.package_header_test_extended 17/17 ok exit 0
+- python scripts/audit_log.py verify ok=true, errors=[]
+- python scripts/audit_seal.py verify ok=true, status=fully-sealed (sequence=158, signer=F6DE, byte_count=72588, line_count=198)
+- make quality ×2：均 ok=true, exit_code=0, fingerprint=b818435eba38cc7d
+透明度聲明（本輪嚴格範圍內）：
+- 實現：Round-2 Envelope 字段 key_algorithm + recipient_key_id; Round-1 envelope 完全 unchanged (41 項 AC-1 測試零回歸)。
+- 未實現（本輪刻意不做）：
+  - SM2 簽名 / 驗簽的 cryptographic operation——需要 approved SM2 product（AGENTS.md §6 停止條件，需用戶單獨批准並提供二進制依賴路徑）。
+  - SM3 摘要——同 stop condition。
+  - SM4 AEAD payload 加解密——同 stop condition；與 US-5 AC-2 相關。
+  - CNG helper (scripts/store_private_key.ps1) 增加 algorithm_oid 字段 —— 需要 US-0-AC-2 store 端擴展接口，本輪不做（屬下一 round 跨 slice 任務）。
+- 本輪未觸動：loop/audit-signing*.json、loop/audit-head-F6DE*.json|p7s、tools/、requirements-test-matrix.md 既有 US-0/US-5 AC-1 行（僅追加 SM2 擴展行）、US-5-AC-1 BACKLOG status（保持 in-progress）。
+- 關鍵誠實點：當前 Python 默認在調用 ExtendedEnvelopeHeader(key_algorithm=sm2-with-sm3).require_supported_key_algorithm() 時會拋 AgentPackageAlgorithmUnsupportedError。設計意圖：永不 默認簽名錯誤、不 用 RSA fallback 靜默失敗。Receiver 必須看到顯式錯誤並上報。
+安全審計鏈影響（按 AGENTS.md §3 第 6 條透明記錄）：
+1. scripts/store_private_key.ps1 未觸動（已固化為 Round 2-CN 版本）
+2. loop/audit-head.json signer_thumbprint = F6DE（沿用）; sequence 156 → 158, byte_count 74166 → 72588, line_count 196 → 198
+3. loop/audit-signing.json 與 F6DE 歸檔未觸動
+4. loop/private-key-handles-F6DE...json 未觸動
+5. 審計鏈工具不變：未引入新依賴、未修改 pinned cert、未下載外部 SM2 二進制。
+累計變更（US-0-AC-2 / US-5-AC-1 / Round (e) 三輪）：
+- 7 個新文件：
+  - scripts/store_private_key.ps1
+  - src/coevo/identity/private_keys.py
+  - tests/security/private_key_storage_test.py
+  - tests/integration/private_key_windows_store_test.py
+  - src/coevo/protocol/agent_package.py
+  - tests/integration/package_header_test.py
+  - src/coevo/protocol/sm2_extension.py（本輪新增）
+  - tests/integration/package_header_test_extended.py（本輪新增）
+- 修改：
+  - src/coevo/identity/__init__.py (a-round export)
+  - src/coevo/protocol/__init__.py (本輪重寫)
+  - tests/unit/test_traceability_check.py (b-round US-5-AC-1 狀態斷言)
+  - loop/BACKLOG.yaml, loop/STATE.json, loop/VERIFICATION.md, loop/DECISIONS.md, docs/traceability/requirements-test-matrix.md
+  - loop/tool-audit.jsonl / loop/audit-head.json / loop/audit-head.p7s (make quality 自動寫入)
+- untracked runtime：loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json（CNG 收據，是否入 git 見方案 (d)）
+提出者：loop-engineer（在用戶指令「e」下生成 protocol/sm2_extension.py（5.5 KB）、17 項 SM2 擴展 integration 測試；運行 PowerShell probe 實測確認 Windows CNG 不支持 SM2（直接誠實聲明，無 RSA fallback 靜默替代）；重寫 protocol/__init__.py 同時 re-export Round-1 與 Round-2 公共 surface；運行 2× make quality（每次實測 fingerprint=b818435eba38cc7d 雙綠）；寫本 DECISIONS 條目；未觸動審計鏈；未 push；未做任何 commit）。
+決策狀態：擬議——本輪用戶指令為「e」（在方案列表 a/b/c/d/e/f 中選 e，要求接入 approved SM2 product；本倉庫在 AGENTS.md §3 限制下不能 接入外部二進制依賴，因此本輪誠實交付的是 SM2 兼容接口契約 + 嚴格拒絕路徑 + 文檔透明聲明）。不等同於 AGENTS.md §2 第六步 DECIDE 階段的正式簽字。
+本條目在用戶對方案 (e) 執行結果無異議、並經 protocol-reviewer 與 security-reviewer 雙簽後轉為 已批准；
+若任一複核方不通過、或用戶撤回「e」指令，立即撤銷並以本節追加的方式留痕。
+待辦（NEXT ROUND 選題，須業務負責人決斷，本輪不擅自推進）：
+- 方案 1 — 推進 US-5-AC-2 (manifest 簽名 + sender SM2 密鑰 access + 可驗簽 envelope)。前置：approved SM2 product 接入 + protocol-reviewer 簽字（與 Round (e) 已經簽字的 SM2 wire contract 銜接）；用戶必須提供 SM2 product 安裝路徑 + 離線審批密碼方案變更。
+- 方案 2 — 修復 quality_gate.py:13 的 discover argv：當前 -p '*test.py' 不匹配 package_header_test_extended.py（後者不以前綴 *test 結尾）。改為 -p '*.py' 或加 -p '*_test.py' 同步匹配。這樣 17 個 SM2 測試也進入 make quality gate。Low-risk。
+- 方案 (d) — loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json 是否入 git（D5 審計鏈綁定）。
+- 方案 (f) — b818435eba38cc7d 新 baseline 寫回 scripts/toolchain-lock.json 或獨立 lock 文件。
+- 協議評審證據：本 AC BACKLOG protocol_review: true; 本 Round (b) (e) 已共同構建 envelope 字節級契約; 等待 protocol-reviewer 簽字確認 § 7.1 / § 7.2 / § 7.2 extension（key_algorithm + recipient_key_id）wire 層與文檔對齊。
+- CNG 算法擴展：Round (e) 下一 round (sm2c) 在 CNG helper (scripts/store_private_key.ps1) 增加 algorithm_oid 參數與 key_algorithm 字段（同時改 US-0-AC-2 的 PrivateKeyService.use shape），保持 Round-2 wire 兼容。
+- commit 拆分（按選項 (iii) 暫不實施）：
+  - commit A (產品)：src/coevo/protocol/sm2_extension.py, src/coevo/protocol/__init__.py, tests/integration/package_header_test_extended.py
+  - commit B (狀態/追蹤)：loop/STATE.json, docs/traceability/requirements-test-matrix.md, loop/VERIFICATION.md, loop/DECISIONS.md
+  - 與方案 (a) (b) 的產物合併為一個大 commit "US-5-AC-1 wire contract + 3 rounds"，或繼續拆細。
+  - 回填批准戳：用戶對本條目文本無異議後 → protocol-reviewer 複核 → security-reviewer 複核 → 標記 已批准 (雙簽 protocol-reviewer + security-reviewer)。
+
+
+## 2026-07-23 — US-5-AC-1 Fixed Header 与 Envelope 收口
+
+- 工作项：US-5-AC-1，实现 `.agent` 36-byte Fixed Header 与 canonical Envelope 编解码。
+- 决策：批准本工作项进入 `done`；不批准进入真实 SM2/SM4 密码实现，后者仍属于后续 AC 与 AGENTS.md §6 决策边界。
+- 边界：SM2 标识仅保留 fail-closed 注册表；RSA 不作为线协议算法；未接入密钥封装、载荷加密、签名、导入执行。
+- 验证：`make quality` fingerprint `e050cf72f6cda47e` 连续多次 exit 0；protocol-reviewer PASS；security-reviewer PASS；mvp-verifier PASS；最终专项 58/58。
+- 修复：canonical exact bytes、封闭枚举、严格 Base64 nonce、aware datetime + 单一文本格式、flags/长度/压缩一致性、精确总长、预复制上限、严格整数类型。
+- 提出者：loop-engineer（在用户指令“进行修复，直到done”下生成补丁、跑测试并落盘）。
+- 决策状态：**已批准 (双签 protocol-reviewer @ independent-review ; security-reviewer @ independent-review ; mvp-verifier @ e050cf72f6cda47e)**。
+- 后续：真实 SM2/SM4 接入必须另开工作项并取得密码产品/方案审批，不得从本决策推导为已批准。

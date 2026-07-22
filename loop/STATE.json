@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
   "iteration": 0,
-  "current_story": "ENG-LOOP-ENV",
-  "current_item": "ENG-LOOP-ENV-AC-1",
+  "current_story": "US-5",
+  "current_item": "US-5-AC-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": null,
   "last_verified_commit": "a555db9261024bf51b706ae102f4ad901002ec67",
   "blocking_issue": null,
-  "updated_at": "2026-07-21T16:36:45.553337Z"
+  "updated_at": "2026-07-22T14:43:39.489804Z"
 }

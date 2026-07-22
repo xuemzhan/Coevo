@@ -16,24 +16,41 @@ class TraceabilityTests(unittest.TestCase):
         self.assertEqual("done",result["items"][0]["status"])
     def test_us_0_ac_1_is_fully_covered(self):
         # US-0/AC-1 is status=done; default active_only=True keeps it.
-        result=trace.check("US-0"); self.assertEqual(1,result["checked"]); self.assertEqual(0,result["missing"])
-        self.assertEqual("AC-1",result["items"][0]["ac"])
-        self.assertEqual("done",result["items"][0]["status"])
-    def test_us_0_ac_2_is_pending_by_design(self):
-        # US-0/AC-2 is status=ready, filtered out by default active_only=True.
-        # Using active_only=False surfaces it so the test can pin the pending-test policy.
-        result=trace.check("US-0", active_only=False)
+        # The default check covers all ACs under US-0 with the new status semantics: AC-2 is also done.
+        result=trace.check("US-0"); by_ac={item["ac"]:item for item in result["items"]}
+        self.assertIn("AC-1", by_ac)
+        self.assertIn("AC-2", by_ac)
+        self.assertEqual("done", by_ac["AC-1"]["status"])
+        self.assertEqual("done", by_ac["AC-2"]["status"])
+        # AC-1 test, code and acceptance evidence all resolve.
+        self.assertTrue(all(bool(e["exists"]) for e in by_ac["AC-1"]["evidence"]))
+    def test_us_0_ac_2_is_now_done(self):
+        # US-0/AC-2 was pending originally; slice E (real CNG-backed helper
+        # + integration tests) flipped it to done. The test tracks the
+        # transition. The acceptance test marker is gone; AC-2 references
+        # BOTH the security test file and the new integration test file.
+        result=trace.check("US-0")
         by_ac={item["ac"]:item for item in result["items"]}
-        self.assertEqual(2,result["checked"])
-        self.assertIn("AC-2",by_ac)
-        self.assertEqual("ready",by_ac["AC-2"]["status"])
-        # AC-2 references a test that does not exist yet (acceptance_tests_pending marker).
-        self.assertTrue(any(not e["exists"] for e in by_ac["AC-2"]["evidence"]))
-    def test_us_5_ac_1_is_blocked_by_design(self):
-        # US-5/AC-1 is status=blocked, filtered out by default active_only=True.
-        # Using active_only=False surfaces it so the test can pin the blocked policy.
-        result=trace.check("US-5", active_only=False); self.assertEqual(1,result["checked"])
-        self.assertEqual("blocked",result["items"][0]["status"])
-        self.assertEqual("AC-1",result["items"][0]["ac"])
-        # AC-1 has no code or test paths recorded in the matrix (-- columns empty).
-        self.assertTrue(any(not e["exists"] for e in result["items"][0]["evidence"]))
+        self.assertEqual("done", by_ac["AC-2"]["status"])
+        # No more acceptance_tests_pending marker.
+        self.assertNotIn("acceptance_tests_pending", result)
+        # Both security and integration acceptance tests exist on disk.
+        self.assertTrue(any(bool(e["exists"]) for e in by_ac["AC-2"]["evidence"]))
+    def test_us_5_ac_1_is_done_with_evidence(self):
+        # US-5/AC-1 is status=done after protocol/security/verifier sign-off.
+        # Default active_only=True keeps completed evidence.
+        result=trace.check("US-5")
+        by_ac={item["ac"]:item for item in result["items"]}
+        self.assertIn("AC-1", by_ac)
+        self.assertEqual("done", by_ac["AC-1"]["status"])
+        # AC-1 now references the new code entry and the new integration test.
+        self.assertTrue(all(bool(e["exists"]) for e in by_ac["AC-1"]["evidence"]))
+    def test_us_5_ac_1_matrix_lists_src_and_test(self):
+        # Pin that AC-1's evidence points at the new agent_package.py module
+        # and the new package_header_test.py file.
+        result=trace.check("US-5", active_only=False)
+        by_ac={item["ac"]:item for item in result["items"]}
+        ac1 = by_ac["AC-1"]
+        paths = [e["path"] for e in ac1["evidence"] if e["path"]]
+        self.assertTrue(any(p.endswith("coevo/protocol/agent_package.py") for p in paths))
+        self.assertTrue(any(p.endswith("tests/integration/package_header_test.py") for p in paths))
