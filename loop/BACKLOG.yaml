@@ -82,11 +82,11 @@ items:
     protocol_review: false
   - id: US-2-AC-1
     story: US-2
-    title: 实现任务分解的最小数据模型 + 依赖图（US-2 第一刀，stage graph 消费者）
-    status: ready
+    title: 实现任务分解的最小数据模型 + 依赖图 + 基线版本（ProjectBaseline + DependencyGraph + DAG cycle fail-closed + ISO-8601 UTC 严格单调 version）
+    status: done
     dependencies: [US-1-AC-2]
     acceptance_tests:
-      - tests/unit/test_task_decomposition_models.py
+      - tests/unit/test_task_decomposition.py
     security_review: false
     protocol_review: false
   - id: US-3-AC-1

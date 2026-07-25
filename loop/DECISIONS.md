@@ -647,4 +647,74 @@ Audit-corpus note (correlated, awaiting business-owner decision):
   - **D**:US-5-AC-2(SM4 AEAD + SM2 key wrap + manifest 签名),状态 blocked,需用户单独批准 approved SM2 product
   - **E**:STATE 同步占位已完成(本 round bump 即是);后续按 B/C/D/F 推进时同样 bump
   - **F**:本 round 累计 9M + 2 untracked 拆分——见下条 2026-07-25 F round 决策
+  - **G**:audit / 已完成项尾扫——见下条## 2026-07-25T10:30:00Z -- US-2-AC-1 任务分解 data-model + 依赖图 + 基线版本 (B round, status done)
+
+- 工作项:依"同意 A→B→C→D→E→F→G 顺序 + 审核 A 后 commit,再 US-2-AC-1"指令推进 US-2-AC-1。在 US-1-AC-2 StageGraph 之上构建结构化任务分解最小集。
+- 已批准并完成(实测数字,不是引用):
+  1. `src/coevo/task_decomposition/__init__.py`(~85 行):子包入口,scope / non-goals 声明,re-export 14 个公共类型
+  2. `src/coevo/task_decomposition/models.py`(5.6 KB,~140 LOC):
+     - `TaskDecompositionError`(base) + `TaskDecompositionValidationError`(subclass)显式分层
+     - `Deliverable` frozen dataclass(`deliverable_id` / `title` / closed-set `kind` / `acceptance_criteria`)
+     - `Task` frozen dataclass(`task_id` / `title` / `responsible_role` / plan window / deliverables)
+     - `WorkPackage` frozen dataclass(`work_package_id` / `standard_stage` 字符串值 / `tasks`)
+     - `Milestone` frozen dataclass(`milestone_id` / `target_date` / `work_package_id`)
+     - `DependencyEdge` frozen dataclass + `__post_init__` 验证:`kind="fs"` closed set + 拒绝 self-loop
+     - `ProjectBaseline` frozen dataclass:strict monotonic int `version` / ISO-8601 UTC `Z` `created_at` / `process_flow_ref=(unit_id, version)` 钉住 US-1 快照 / `with_overrides` 升 version+1
+     - `Override` frozen dataclass
+  3. `src/coevo/task_decomposition/dependency_graph.py`(7.9 KB,~210 LOC):
+     - `DependencyGraph` frozen dataclass + `predecessors` / `successors` 查询
+     - `cycle_in_components` helper:迭代式 DFS white/gray/black 标记,back edges 确定性排序
+     - `topological_order` 确定性 Kahn 算法 + lexical tie-breaking,cycle 时 raise `TaskDecompositionValidationError` 含 offending edges
+     - `build_dependency_graph`:stage-order edges 自动 seed(i → i+1 阶段所有节点对)+ 显式 edge 叠加 + 未知 task id 拒绝 + 跨包重复 task_id 拒绝 + 去重
+  4. `src/coevo/task_decomposition/baseline.py`(8.9 KB,~230 LOC):
+     - `BaselineInput` frozen dataclass
+     - `build_baseline`:full validation(ISO-Z 正则 + safe_id 正则 + window end >= start + deliverable kind closed-set + cross-package task_id 唯一)+ 跑 build_dependency_graph + 派生 milestones(每个 work_package 一条,target_date 取该 package 最后任务 plan_end)
+     - `confirm_baseline`:空 created_at 拒绝,version+1
+  5. `src/coevo/task_decomposition/service.py`(6.7 KB,~165 LOC):
+     - `TaskDecompositionService` facade:`propose(understanding, project_input)` 消费 US-1 `FlowUnderstanding`,按 `standard_stage` 分组生成 WorkPackage + 1:1 派生 Task(responsible_role 来自节点 responsible_roles[0] / fallback `unassigned`;deliverables 来自 review_criteria 或 fallback `accepted_by_reviewer`);`to_audit_record` 输出 JSON 安全投影(不含 deliverables / tasks / titles)
+     - 严格错误层级:`TaskDecompositionValidationError` 是 base `TaskDecompositionError` 子类
+  6. `tests/unit/test_task_decomposition.py`(18.4 KB,~410 LOC,**23 项 / 4 个 TestCase**):
+     - InputValidationTests(5 项):input 完整字段 / 空 title 拒 / 非法 ISO-Z 拒 / window end<start 拒 / 跨包重复 task_id 拒
+     - DependencyGraphTests(6 项):stage-order 自动 seed / topo 确定性 / cycle fail-closed / 未知 task id 拒 / cycle_in_components helper / dependency kind closed-set
+     - BaselineVersionTests(6 项):first draft version=1 / with_overrides bump version+1 / 空 overrides 拒 / confirm_baseline bump / process_flow_ref 钉快照 / milestones 派生
+     - ServiceLayerTests(6 项):按 standard_stage 分组 / process_flow_ref 钉 / 缺 key 拒 / 端到端 round-trip / audit_record JSON 安全 / 敏感字段排除
+- 验证(`make_quality_gate` ×2 稳定双绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **110/110 ok**(US-1-AC-2 27 + US-2-AC-1 23 + 既有 56 + traceability 4 新 = 110;上次基线 85 含 US-1-AC-2 的 2 个新 traceability + B round 加 2 个新 traceability 共 4 项)
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` status=fully-sealed(B round 双绿后)
+  - `python scripts/traceability_check.py --story US-2` checked=1 missing=0
+  - `make_quality_gate` ×2:exit_code=0 ×2,fingerprint=`6ba24930200fc687`(与 baseline 一致,argv set 未变)
+- 边界(严格遵守 AGENTS.md §3):
+  - **无 LLM 调用**——`TaskDecompositionService.propose` 是纯确定性;stage-order edges 自动 seed 取代 LLM 推断;显式 edges 由 caller 提供
+  - **无 IO**——无文件系统 / 无网络 / 无 DB,纯 Python 对象
+  - **无新依赖**——仅 `__future__` / `dataclasses` / `typing` / `datetime` / `re` 标准库
+  - **不重写 US-1**——`StageGraph` 是**输入**,通过 `FlowUnderstanding.mapped` / `.graph` 访问
+  - **不动 .agent 协议**——US-5-AC-1 done 状态保持;US-5-AC-2 仍 blocked
+  - **不动审计链签名**——`loop/audit-signing*.json` / `loop/audit-signing-public*.cer` 未触动;signer thumbprint=F6DE 不变;audit head 由 2× quality_gate 自然 bump
+  - **不删除既有安全测试**——`tests/security/*` 任何文件未触动
+  - **不扩展 US-2-AC-2**——智能体自动生成 / 候选 edge 提议 / 用户编辑 UI 留给后续 AC
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 自然 bump 2×(US-1-AC-2 上一轮 + B round),signer_thumbprint=F6DE 不变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加(2× make_quality_gate + loop_state.py prepared/committed)
+- BACKLOG 状态变化(`loop/BACKLOG.yaml`):
+  - `US-2-AC-1` 由 ready → **done**;新 `acceptance_tests`=`tests/unit/test_task_decomposition.py`;`dependencies=[US-1-AC-2]` 锁定
+  - `US-3-AC-1` 仍 ready(留给 C round)
+  - `US-5-AC-2` 仍 blocked(密码方案变更待 D round 单独审批)
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-2/AC-1 行;`tests/unit/test_traceability_check.py` 新增 `test_us_2_ac_1_is_done_with_evidence` + `test_us_2_ac_1_matrix_lists_src_and_test`(锁定 AC-1 evidence 指向 task_decomposition/service.py + dependency_graph.py + baseline.py + test_task_decomposition.py)
+- **未做**(本 round 范围外):
+  - **US-2-AC-2 / AC-3 / AC-4 / AC-5 / AC-6 / AC-7**——智能体生成 / 编辑 UI / 显式 edge 提议属后续 slice
+  - **git commit**——本 round 累计 5M + 2 untracked:
+    - M: `loop/BACKLOG.yaml`(US-2-AC-1 status done),`docs/traceability/requirements-test-matrix.md`(US-2/AC-1 行),`loop/VERIFICATION.md`(quality_gate 自动追加 ×2),`tests/unit/test_traceability_check.py`(US-2 traceability 锁)+ audit-managed 三个 `loop/audit-head*.json|p7s` + `loop/tool-audit.jsonl`(归入 F round 系统提交)
+    - untracked: `src/coevo/task_decomposition/` 整目录(5 个新 .py),`tests/unit/test_task_decomposition.py`
+  - **不重命名 / 不调整既有测试**——US-2-AC-1 与 US-1-AC-2 完全解耦,各自 trace 独立
+- 提出者:loop-engineer(在用户指令"审核 A → commit → US-2-AC-1"下生成 task_decomposition 5 个新 .py + test_task_decomposition.py / 更新 __init__.py + BACKLOG + 矩阵 + traceability 单测 / 跑 2× make_quality_gate 双绿 / 写本 DECISIONS 条目;未触动审计链;未 push;未做 commit)
+- 决策状态:**已批准(双签 protocol-reviewer 不涉及——非协议;security-reviewer 不涉及——非密钥 / 非文件解析 / 非权限 / 非审计新增;走 mvp-verifier 内审 pass)**
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **F**:本 round 累计 5M + 2 untracked 拆分——见下条 F round 决策
+  - **C**:US-3-AC-1 脱敏人才库最小集 + 候选推荐确定性层(BACKLOG status=ready)
+  - **D**:US-5-AC-2(SM4 AEAD + SM2 key wrap + manifest 签名),状态 blocked,需用户单独批准 approved SM2 product
+  - **E**:STATE bump 在 commit 前同步完成(F round 内)
   - **G**:audit / 已完成项尾扫——见下条
