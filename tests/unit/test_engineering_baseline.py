@@ -14,5 +14,5 @@ class BaselineTests(unittest.TestCase):
     def test_quality_gate_covers_product_source_and_preseals_audit(self):
         source=(ROOT/"scripts/quality_gate.py").read_text(encoding="utf-8")
         self.assertIn('"scripts","src","tests"',source)
-        self.assertIn('"-p","*test.py"',source)
+        self.assertIn('"-p","*test*.py"',source)
         self.assertLess(source.index("seal()"),source.index("for argv in argvs"))
