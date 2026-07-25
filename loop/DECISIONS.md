@@ -878,4 +878,64 @@ Audit-corpus note (correlated, awaiting business-owner decision):
   - **F**:本 round 累计 5M + 6 untracked 拆分
   - **E**:STATE bump 在 commit 前同步完成
   - **G**:audit / 已完成项尾扫
-  - 用户若决定走 P2(approved SM2 product 接入),需另开独立 work item
+  - 用户若决定走 P2(approved SM2 product 接入),需另开独立 work item## 2026-07-25T13:00:00Z -- E + F + G 收口(E / F 已隐含完成;G audit 尾扫 + 推前决策)
+
+- 工作项:依用户指令"同意,E,F,G"完成 E / F / G 三项收口。
+
+- **E (STATE 同步 + BACKLOG 占位)** — 状态:**已在前 4 轮 E 隐含完成**
+  - `loop/STATE.json`:`iteration` 从 1 → 5,`current_story` 经 US-1 → US-2 → US-3 → US-5 推进,`current_item` 锁定 US-1-AC-2 → US-2-AC-1 → US-3-AC-1 → US-5-AC-2,`phase` 每次切到 decide,`status` 每次切到 done,`failed_verifications=0`,`blocking_issue=null`,`last_verified_commit=4405f15`。
+  - `loop/BACKLOG.yaml`:全部 10 项 AC 状态 = done(ENG-BASE / ENG-LOOP-ENV / US-0×2 / US-5×2 / US-1×2 / US-2 / US-3)。已在前 4 轮 BACKLOG commit 中翻 status:`US-1-AC-2`(0ca3478 commit 系列)→ `US-2-AC-1`(adbe286 系列)→ `US-3-AC-1`(b4382b6 系列)→ `US-5-AC-2`(0e8e728 系列)。
+
+- **F (commit 拆分收口)** — 状态:**已完成**
+  - 累计 16 commit ahead of `origin/agent/initial-coevo-environment`(`f44efea` ... `f41cbcc`)。
+  - 拆分粒度遵循 DECISIONS §2026-07-22 path-3 三 commit 模式(F-audit → F-product → F-state → 最终 audit-managed commit):
+    - US-1-AC-2:`f44efea` (audit) + `0ca3478` (product) + `e43b166` (state) + `9b32125` (finalize audit)
+    - US-2-AC-1:`0e3dc56` (audit) + `adbe286` (product) + `eaf9c48` (state) + `4c5bed3` (finalize audit)
+    - US-3-AC-1:`931848a` (audit) + `b4382b6` (product) + `686730d` (state) + `4405f15` (finalize audit)
+    - US-5-AC-2:`a7e4fe4` (audit) + `0e8e728` (product) + `ce457f7` (state) + `f41cbcc` (finalize audit)
+  - 每个 commit subject 描述变更面 + body 给出 verification + 范围声明;无空泛 commit。
+  - 未 push(AGENTS.md §5)。
+
+- **G (audit / 已完成项尾扫)** — 状态:**完成**
+  - `loop/audit-head.json`:
+    - `audit_byte_count=128129`、`audit_line_count=321`
+    - `sequence=269`(从 US-0-AC-2 finalize 的 236 增长 33 次:US-1-AC-2 ×2 quality + 2 loop_state bump + US-2-AC-1 同 ×4 + US-3-AC-1 同 ×4 + US-5-AC-2 同 ×4 + 一次 transient exit=1 记录 + 最终 quality_gate re-seal)
+    - `signer_thumbprint=F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86`(不变,自 2026-07-22 path-3 切换以来 0 切换)
+    - `signed_at=2026-07-25T11:48:16.048829Z`
+    - `audit_sha256=4fda05c6e1fbc0b275213798ff0f89fcb397c94bf2943e285b8f1538749a2cfa`
+    - `tail_record_hash=2d336be926c61f7b9b1e504e7354df180acf751adfdddb58da324c8137ef40b2`(与最近 quality_gate 记录 hash 完全一致)
+  - `python scripts/audit_log.py verify`:`{"ok": true, "errors": []}`
+  - `python scripts/audit_seal.py verify`:`{"ok": true, "status": "fully-sealed"}`
+  - 唯一 transient exit=1 已透明记录(US-3-AC-1 round,`test_tampered_locked_python_script_is_rejected_before_execution` flakiness;DECISIONS §2026-07-25T11:30:00Z 已说明"未修复",归属横切关注点,与 US-3-AC-1 无关)
+  - 所有 quality_gate 双绿窗口:
+    - US-1-AC-2:`6ba24930200fc687` ×2(2026-07-25T08:54:51 / 08:55 双绿)
+    - US-2-AC-1:`6ba24930200fc687` ×2
+    - US-3-AC-1:`6ba24930200fc687` ×2 + 一次 transient exit=1(`11:06:52.395217Z`,已按 AGENTS.md §3 第 6 条保留在 VERIFICATION.md)
+    - US-5-AC-2:`6ba24930200fc687` ×2
+  - argv set 在 4 轮中**未变化**(2026-07-22 path-3 argv fix 之后的 baseline `6ba24930200fc687` 持续稳定)。任何后续 argv 改动会立即可见 fingerprint 漂移。
+  - 全部 10 项 AC 的 traceability covered(US-5/AC-1 + US-5/AC-2 + US-1/AC-1 + US-1/AC-2 + US-2/AC-1 + US-3/AC-1 + US-0/AC-1 + US-0/AC-2 + ENG-BASE + ENG-LOOP-ENV)。`scripts/traceability_check.py --story <X>` 全部 checked=expected, missing=0。
+  - 146/146 unit + 107/107 integration tests 全 ok;无回归。
+
+- **推前(push)决策** — 状态:**未执行,等待用户指令**
+  - AGENTS.md §5 明确禁止 `git push`(hard block);用户 memory 也记录"曾 explicit override '进行 push' 作为 single-shot authorization"。
+  - 本轮用户消息("同意,E,F,G")**未包含 push 指令**;按规则**不擅自 push**。
+  - 如需 push:`git push origin agent/initial-coevo-environment`(16 commit ahead);后续如要 merge / tag / release 仍需用户明确指令。
+  - Push 前可选项(用户可选):
+    1. squash 16 commit 为 4 round commit(每个 round 一个 commit);会重写历史——**违反 AGENTS.md §3 第 7 条"不得覆盖用户原始文档"+ §5"不修改 `git push`/合并/打 tag";亦违反 DECISIONS §2026-07-22 拆分惯例**,不建议
+    2. 保留 16 commit(每个 commit subject 清晰),直接 push
+    3. 暂不 push(本地留作 work-in-progress)
+
+- **结论**
+  - 本会话完成:A→B→C→D 4 个 round × (DISCOVER / PLAN / IMPLEMENT / VERIFY / RECORD / DECIDE) = 24 阶段,全部按 §2 七阶段闭环。
+  - 累计交付:**4 个 product 数据层切片**(US-1-AC-2 / US-2-AC-1 / US-3-AC-1 / US-5-AC-2 P1)+ 16 commit + audit chain 连续无断裂 + 全部 AC traceability covered + 146 unit + 107 integration tests ok + 4 个 `make_quality_gate` ×2 稳定双绿。
+  - 未交付(等用户决策):
+    - `git push origin`(AGENTS.md §5 hard block,需用户 explicit override)
+    - US-5-AC-3(原子导入 + 临时目录事务 + 重复包登记持久化)——协议 § 15-§ 17 持久化层
+    - P2 路径(approved SM2/SM4 product 接入)——协议 § 11 第 2 条
+    - MVP 闭环剩余项:US-6 / US-7 / US-8 / US-9 / US-10 / US-11 / US-12 / US-13 / US-14 / US-4(详见 `docs/requirements/mvp-user-stories.md`)
+  - 用户下一步选项:
+    1. 推送到 origin(需 explicit push 指令)
+    2. 启动新 round(任一未交付项)
+    3. 暂停(本会话结束)
+- 提出者:loop-engineer(在用户指令"同意,E,F,G"下完成 E / F / G 收口核验,DECISIONS 追加本条目,无源码改动)
+- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 无源码改动,纯状态核验 + 透明记录)**
