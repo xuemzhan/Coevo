@@ -1,4 +1,4 @@
-"""Pin the git-binding policy for loop/private-key-handles-F6DE...json.
+"""Pin the local-runtime policy for loop/private-key-handles-F6DE...json.
 
 These tests are deliberately read-only:
   - DO NOT mutate git, .gitignore, or the file itself.
@@ -7,7 +7,7 @@ These tests are deliberately read-only:
     updating this test AND loop/DECISIONS.md (AGENTS.md §3 第 6 条
     audit-binding discipline).
 
-Pin rationale:
+Policy rationale:
   - DECISIONS §2026-07-22 path-3 阶段二 §"untracked runtime" claimed the
     file is untracked — empirically incorrect. git ls-files shows it
     was added in commit cbeab97 ("Harden key handling and agent envelope
@@ -18,9 +18,10 @@ Pin rationale:
     destroyed_at timestamp. No key bytes, no cng_key_id literals, no
     PIN or secrets.
   - The risk is bloat (every CNG integration test adds ~1.5KB and one
-    destroyed entry), NOT exposure. Decision is deferred to the user
-    on whether (a) add .gitignore / loop/private-key-handles-*.json,
-    (b) git rm --cached the file, or (c) keep current binding.
+    destroyed entry), NOT exposure.
+  - On 2026-07-25 the business owner approved policy (a+b): ignore all
+    loop/private-key-handles-*.json receipts and remove the existing
+    receipt from the Git index while preserving the local runtime file.
 
 These tests assert the CURRENT state. If the policy is intentionally
 changed, update both tests and DECISIONS.md in one commit.
@@ -55,33 +56,36 @@ def _git_ls_files_for(path: Path) -> str:
 
 
 class PrivateKeyHandlesBindingsTests(unittest.TestCase):
-    """Ground-truth pin for the file's binding state and metadata-only property."""
+    """Ground-truth pin for local-only receipts and metadata-only payloads."""
 
-    def test_file_is_committed_in_repository(self):
-        """Pin: file is tracked (mode 100644) in HEAD tree, not untracked.
-
-        DECISIONS §2026-07-22 path-3 阶段二 §"untracked runtime" claim is
-        empirically wrong; do not regress that documentation.
-        """
-        if not HANDLE_FILE.exists():
-            self.skipTest(f"handle file absent; presumed torn down: {HANDLE_FILE}")
+    def test_file_is_not_tracked_in_repository(self):
+        """Pin: runtime receipts must not be present in the Git index."""
         listing = _git_ls_files_for(HANDLE_FILE)
-        self.assertTrue(
-            listing.startswith("100644 "),
-            f"file not in index; expected 100644, got: {listing!r}",
+        self.assertEqual(
+            "",
+            listing,
+            f"runtime receipt is tracked unexpectedly: {listing!r}",
         )
 
-    def test_gitignore_does_not_block_future_writes(self):
-        """Pin: .gitignore does NOT include loop/private-key-handles-*.json today.
-
-        If the user approves policy (a) ("add ignore"), update .gitignore
-        AND this test together in one commit per AGENTS.md §3 第 6 条.
-        """
+    def test_gitignore_blocks_future_receipts(self):
+        """Pin: future per-certificate receipts remain local runtime state."""
         ignore_text = GITIGNORE.read_text(encoding="utf-8", errors="replace")
-        self.assertNotIn(
-            "loop/private-key-handles-",
+        self.assertIn(
+            "loop/private-key-handles-*.json",
             ignore_text,
-            "gitignore policy changed; update tests + DECISIONS.md",
+            "missing ignore policy for private-key handle receipts",
+        )
+        result = subprocess.run(
+            [
+                "git", "-C", str(ROOT), "check-ignore", "--no-index", "--quiet",
+                "--", str(HANDLE_FILE.relative_to(ROOT)),
+            ],
+            capture_output=True,
+        )
+        self.assertEqual(
+            0,
+            result.returncode,
+            "Git does not apply the private-key handle receipt ignore rule",
         )
 
     def test_handle_payload_is_metadata_only(self):
@@ -129,7 +133,7 @@ class PrivateKeyHandlesBindingsTests(unittest.TestCase):
             )
 
     def test_decisions_records_the_audit_corpus_status(self):
-        """Pin: latest DECISIONS entry acknowledges that the file is committed.
+        """Pin: latest DECISIONS entry acknowledges the receipt policy.
 
         Self-correction discipline per AGENTS.md §3 第 6 条: DECISIONS is the
         source of truth for the current binding state, not an aspirational
@@ -140,16 +144,24 @@ class PrivateKeyHandlesBindingsTests(unittest.TestCase):
         # Pull the most recent entry (between last two '## ' headings)
         sections = re.split(r"(?m)^## ", text)
         last_section = "## " + sections[-1]
-        # The latest section must mention that the binding status is
-        # an open question or that it's tracked/committed; not silent.
-        self.assertTrue(
-            "private-key-handles" in last_section.lower()
-            or "private_key_handles" in last_section.lower()
-            or "policy (d)" in last_section
-            or "已 commit" in last_section
-            or "tracked" in last_section.lower(),
-            "latest DECISIONS.md section does not acknowledge the "
-            "loop/private-key-handles-F6DE...json binding state; update DECISIONS.",
+        # The latest section must mention the runtime receipt policy; not silent.
+        latest = last_section.lower()
+        for marker in (
+            "decision status: approved a+b",
+            ".gitignore",
+            "git rm --cached",
+            "local runtime file preserved",
+            "historical git blobs remain",
+        ):
+            self.assertIn(
+                marker,
+                latest,
+                f"latest DECISIONS.md section lacks approved governance marker: {marker}",
+            )
+        self.assertNotIn(
+            "awaiting",
+            latest,
+            "latest DECISIONS.md section still describes the approved policy as awaiting",
         )
 
 

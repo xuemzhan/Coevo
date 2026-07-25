@@ -49,6 +49,7 @@ items:
     acceptance_tests:
       - tests/security/test_private_key_storage.py
       - tests/integration/private_key_windows_store_test.py
+      - tests/unit/test_private_key_handles_bindings.py
     security_review: true
     protocol_review: false
   - id: US-5-AC-1

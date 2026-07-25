@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
   "iteration": 1,
-  "current_story": "US-1",
-  "current_item": "US-1-AC-1",
+  "current_story": "US-0",
+  "current_item": "US-0-AC-2",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": null,
-  "last_verified_commit": "d74f7b2ab9b6e9aa1363f89aa4de14fdec68748b",
+  "last_verified_commit": "ff45cf3e0e4de52b476ade9720bc7fe7bb9b6a02",
   "blocking_issue": null,
-  "updated_at": "2026-07-25T03:54:49.207619Z"
+  "updated_at": "2026-07-25T05:15:52.840560Z"
 }

@@ -12240,3 +12240,282 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-07-25T05:06:36.773477Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+ (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 73 tests in 104.859s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 83.449s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-25T05:08:30.705910Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+s (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 73 tests in 80.789s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 64.646s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-25T05:14:04.200321Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+s (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 73 tests in 51.091s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 38.275s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-25T05:15:27Z — US-0-AC-2 F6DE handle receipt governance (a+b)
+
+- Decision: business owner approved a+b.
+- Git policy: `loop/private-key-handles-*.json` ignored; F6DE receipt removed from index only; local runtime file preserved.
+- Preservation proof before index removal: 399827 bytes; SHA-256 `E5222FC993739DCAC8D554D19E17F9615E89217F4B9A6F1D629F004B2BAEE4F6` before and after.
+- Governance + private-key security: 26/26 passed.
+- Windows CNG integration: 5/5 passed.
+- Traceability: checked=6, missing=0; traceability unit 8/8 passed.
+- Locked full quality after remediation: exit 0; fingerprint `34fc0b672c25a7b5`.
+- Independent security review first pass: FAIL, Critical 0 / High 0 / Medium 2 / Low 1.
+- Remediation: strict approved-decision assertion; atomic 11-file staged slice; explicit historical-blob and audit-boundary documentation.
+- Independent security review final: PASS, Critical/High/Medium/Low 0/0/0/0.
+- Protocol review: not required; no `.agent` wire/protocol/cipher-suite change.
+- Audit before DECIDE transition: audit_log ok; seal fully-sealed.
+## 2026-07-25T05:18:55.872054Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+s (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_guards_archive_and_reparse_targets) ... ok
+test_importer_rejects_junction_destination (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_junction_destination) ... ok
+test_importer_rejects_manifest_target_traversal (test_local_toolchain_security.LocalToolchainSecurityTest.test_importer_rejects_manifest_target_traversal) ... ok
+test_inherited_windir_cannot_select_make_compiler (test_local_toolchain_security.LocalToolchainSecurityTest.test_inherited_windir_cannot_select_make_compiler) ... ok
+test_isolated_bootstrap_imports_only_from_locked_scripts_directory (test_local_toolchain_security.LocalToolchainSecurityTest.test_isolated_bootstrap_imports_only_from_locked_scripts_directory) ... ok
+test_make_rejects_unknown_and_injected_targets (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_rejects_unknown_and_injected_targets) ... ok
+test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment (test_local_toolchain_security.LocalToolchainSecurityTest.test_make_shim_locks_python_and_script_inventories_and_cleans_python_environment) ... ok
+test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied (test_local_toolchain_security.LocalToolchainSecurityTest.test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied) ... ok
+test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch) ... ok
+test_resolved_opencode_config_command_failure_does_not_echo_stderr (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_command_failure_does_not_echo_stderr) ... ok
+test_resolved_opencode_config_fails_closed_when_permission_is_relaxed (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_fails_closed_when_permission_is_relaxed) ... ok
+test_resolved_opencode_config_is_checked_with_locked_executable (test_local_toolchain_security.LocalToolchainSecurityTest.test_resolved_opencode_config_is_checked_with_locked_executable) ... ok
+test_tampered_locked_python_script_is_rejected_before_execution (test_local_toolchain_security.LocalToolchainSecurityTest.test_tampered_locked_python_script_is_rejected_before_execution) ... ok
+test_validated_executables_and_sources_remain_write_locked_after_entry (test_local_toolchain_security.LocalToolchainSecurityTest.test_validated_executables_and_sources_remain_write_locked_after_entry) ... ok
+test_apply_patch_and_windows_download_aliases_are_guarded (test_loop_guard_static.LoopGuardStaticTests.test_apply_patch_and_windows_download_aliases_are_guarded) ... ok
+test_invalid_status_is_rejected (test_loop_state_guard.LoopStateGuardTests.test_invalid_status_is_rejected) ... ok
+test_unknown_fields_are_rejected_without_state_change (test_loop_state_guard.LoopStateGuardTests.test_unknown_fields_are_rejected_without_state_change) ... ok
+test_commit_audit_failure_is_recovered_idempotently (test_loop_state_transaction.LoopStateTransactionTests.test_commit_audit_failure_is_recovered_idempotently) ... ok
+test_prepare_audit_failure_never_changes_state (test_loop_state_transaction.LoopStateTransactionTests.test_prepare_audit_failure_never_changes_state) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 73 tests in 57.746s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 44.677s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-25T05:20:00Z — Independent verifier closure
+
+- mvp-verifier: PASS; completion definition satisfied; change set may be committed.
+- Final staged scope: 11 files, no unstaged diff, `git diff --cached --check` clean.
+- Final quality: exit 0, fingerprint `34fc0b672c25a7b5`.
+- Final security review: PASS, Critical/High/Medium/Low 0/0/0/0.
+- Final audit: sequence 236, audit_log ok, seal fully-sealed.
+- Receipt governance: local file retained (436072 bytes at verification time), ignored by `.gitignore`, absent from Git index; historical blobs intentionally remain.

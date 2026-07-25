@@ -572,3 +572,17 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 
 
 [Self-correction 2026-07-25T04:18:00Z] The 4 historical fingerprint=34fc0b672c25a7b5 segments at 03:28:31 / 03:31:19 / 03:40:47 / 03:42:01 came from a make.cs path that never actually exercised the new -p *test*.py argv; the real, reproducible baseline under scripts/quality_gate.py --target quality is 6ba24930200fc687 (recorded 2026-07-25T04:15:31Z). This self-correction is append-only and does not delete the prior entries (AGENTS.md §3 rule 7).
+
+## 2026-07-25T05:10:30Z — F6DE private-key handle receipt governance (a+b)
+
+- Scope: maintenance of `US-0-AC-2`; no protocol, cipher-suite, key-storage path, or `.agent` version change.
+- Decision status: approved a+b by the business owner.
+- Policy (a): `.gitignore` now contains the exact repository-local rule `loop/private-key-handles-*.json`.
+- Policy (b): `git rm --cached -- loop/private-key-handles-F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86.json` removes the existing receipt from the Git index only.
+- Local runtime file preserved: pre-removal and post-removal size remained 399827 bytes and SHA-256 remained `E5222FC993739DCAC8D554D19E17F9615E89217F4B9A6F1D629F004B2BAEE4F6`. Subsequent CNG tests may legitimately append local metadata while the file remains ignored.
+- Historical Git blobs remain: this decision does not rewrite Git history. Earlier metadata-only receipt versions remain reachable from existing commits.
+- Audit boundary: the local receipt is runtime lookup state, not the formal tamper-evident audit chain. `loop/tool-audit.jsonl`, `loop/audit-head.json`, and `loop/audit-head.p7s` remain tracked and signed.
+- Fresh-clone behavior: no receipt is present until the first Store operation; Use and VerifyHandle fail closed when the referenced receipt is absent.
+- Regression coverage: `tests/unit/test_private_key_handles_bindings.py` requires the receipt to be untracked and ignored, validates the local metadata-only schema when present, and requires this approved decision record.
+- Verification before independent review: governance + private-key security 26/26; real Windows CNG 5/5; traceability checked=6, missing=0; full locked `make quality` exit 0, fingerprint `34fc0b672c25a7b5`.
+- Security review first pass: Critical 0 / High 0 / Medium 2 / Low 1. The two Medium findings (loose decision assertion and non-atomic staged slice) are remediation gates; final PASS requires strict assertions, one atomic staged change set, a fully sealed audit tail, and a repeated quality gate.- Final independent security review: PASS (Critical/High/Medium/Low 0/0/0/0). The approved a+b `.gitignore` + `git rm --cached` policy remains an atomic staged change; local runtime file preserved; historical Git blobs remain documented; formal signed audit artifacts remain tracked.
