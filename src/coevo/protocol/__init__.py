@@ -22,6 +22,13 @@ envelope). Sub-modules:
 * ``package_builder`` — US-5-AC-2 end-to-end builder / parser that
   ties the four layers together. Crypto-bearing surfaces remain
   fail-closed in P1.
+* ``import_transaction`` — US-5-AC-3 (§ 15): the 7-step atomic-import
+  transaction state machine (pure-function; no IO).
+* ``processed_package_store`` — US-5-AC-3 (§ 17): in-memory
+  processed-package registry with atomic register / scope / digest
+  queries. Pure-function; DB persistence is a future slice.
+* ``import_service`` — US-5-AC-3 facade tying the importer +
+  store + replay detector + base_revision check together.
 """
 from .agent_package import (
     ENVELOPE_MAX_BYTES,
@@ -111,15 +118,40 @@ from .package_builder import (
     build_unsigned_package,
     parse_package_bytes,
 )
+from .import_transaction import (
+    AgentPackageImportConflictError,
+    AgentPackageImportError,
+    AgentPackageImportReplayError,
+    AgentPackageImportValidationError,
+    AtomicImporter,
+    ImportStep,
+    ImportTransaction,
+)
+from .processed_package_store import (
+    AgentPackageStoreDuplicateError,
+    AgentPackageStoreError,
+    ProcessedPackageRecord,
+    ProcessedPackageStore,
+)
+from .import_service import (
+    DEFAULT_EMPTY_STORE,
+    ImportOutcome,
+    PackageImportService,
+)
 
 __all__ = [
     "AgentPackageAlgorithmUnsupportedError",
     "AgentPackageCanonicalizationError",
     "AgentPackageCryptoDecryptError",
     "AgentPackageCryptoUnavailableError",
+    "AgentPackageCryptoVerifyError",
     "AgentPackageEnvelopeError",
     "AgentPackageError",
     "AgentPackageFlags",
+    "AgentPackageImportConflictError",
+    "AgentPackageImportError",
+    "AgentPackageImportReplayError",
+    "AgentPackageImportValidationError",
     "AgentPackageKeywrapCryptoUnavailableError",
     "AgentPackageLayoutError",
     "AgentPackageMagicError",
@@ -127,12 +159,18 @@ __all__ = [
     "AgentPackageReplayError",
     "AgentPackageSignatureCanonicalizationError",
     "AgentPackageSignCryptoUnavailableError",
-    "AgentPackageCryptoVerifyError",
+    "AgentPackageStoreDuplicateError",
+    "AgentPackageStoreError",
     "AgentPackageVersionError",
+    "AtomicImporter",
     "BuiltPackage",
+    "DEFAULT_EMPTY_STORE",
     "ENVELOPE_MAX_BYTES",
     "EnvelopeHeader",
     "FIXED_HEADER_SIZE",
+    "ImportOutcome",
+    "ImportStep",
+    "ImportTransaction",
     "IMPLEMENTED_KEY_ALGORITHMS",
     "KDF_ITERATIONS_DEFAULT",
     "KDF_NAME",
@@ -145,9 +183,12 @@ __all__ = [
     "PAYLOAD_TAG_SIZE",
     "PROTOCOL_MAJOR",
     "PROTOCOL_MINOR",
+    "PackageImportService",
     "ParsedPackageHeader",
     "PayloadBlock",
     "ProcessedPackage",
+    "ProcessedPackageRecord",
+    "ProcessedPackageStore",
     "ReplayDecision",
     "ReplayOutcome",
     "SESSION_KEY_SIZE",
