@@ -161,7 +161,7 @@ TASK_ASSIGNMENT_PRJ001_7f42c9d0.agent
 
 固定包头用于快速识别文件和获取长度信息。
 
-建议字段：
+协议1.0固定字段（总长度36字节）：
 
 | 字段               |   长度 | 说明            |
 | ---------------- | ---: | ------------- |
@@ -172,9 +172,25 @@ TASK_ASSIGNMENT_PRJ001_7f42c9d0.agent
 | Key Block Length |  4字节 | 密钥块长度         |
 | Payload Length   |  8字节 | 密文载荷长度        |
 | Flags            |  4字节 | 压缩、扩展等标识      |
-| Reserved         | 固定长度 | 保留，必须置零       |
+| Reserved         |  4字节 | 保留，必须全部置零     |
 
-整数统一采用协议规定的字节序，所有实现必须保持一致。
+所有多字节整数统一采用网络字节序（大端）。`Flags`位注册如下：
+
+| 位掩码 | 名称 | 语义 |
+| ---: | --- | --- |
+| `0x00000001` | `COMPRESSION_ZIP_DEFLATE` | 内层载荷使用ZIP-DEFLATE压缩 |
+| `0x00000002` | `EXTENSION_PRESENT` | 存在协议扩展段 |
+| `0x00000004` | `KEY_BLOCK_PRESENT` | 存在接收方会话密钥块 |
+| `0x00000008` | `PAYLOAD_PRESENT` | 存在密文载荷 |
+
+协议1.0接收端必须拒绝未知标志位。标志位必须与对应长度双向一致：
+
+* `KEY_BLOCK_PRESENT`当且仅当`Key Block Length > 0`；
+* `PAYLOAD_PRESENT`当且仅当`Payload Length > 0`；
+* 非空密文载荷必须同时携带非空接收方密钥块；
+* 不得在没有密文载荷时单独携带接收方密钥块。
+
+协议1.0当前不实现`Optional Transport Trailer`，因此文件精确总长度必须等于`36 + Header Length + Key Block Length + Payload Length`。实现不得把尾随字节静默视为合法扩展。
 
 ### 7.2 Envelope Header
 
@@ -346,7 +362,7 @@ TASK_ASSIGNMENT_PRJ001_7f42c9d0.agent
 1. UTF-8编码；
 2. 不使用BOM；
 3. 对象键按字典序排列；
-4. 删除无意义空格和换行；
+4. 删除无意义空格和换行，规范化字节序列末尾不得附加LF、CRLF或其他空白；
 5. 字符串采用统一转义方式；
 6. 整数使用十进制且不得有前导零；
 7. 签名字段中不使用非确定性浮点数；

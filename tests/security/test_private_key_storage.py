@@ -35,13 +35,16 @@ from __future__ import annotations
 import copy
 import hashlib
 import hmac
+import os
 import json
 import pickle
 import sys
 import unittest
+import tempfile
 from dataclasses import FrozenInstanceError
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
@@ -53,6 +56,7 @@ from coevo.identity.private_keys import (
     PrivateKeyReference,
     PrivateKeyRevokedError,
     PrivateKeyService,
+    WindowsPrivateKeyStore,
     PrivateKeyUsageError,
     PrivateKeyValidationError,
     format_handle,
@@ -340,6 +344,26 @@ class PrivateKeyServicePolicyTests(unittest.TestCase):
             self.backend.store("cert-1", self.payload, parent_pinned_thumbprint="0000000000000000000000000000000000000000")
 
 
+class WindowsPrivateKeyLaunchPolicyTests(unittest.TestCase):
+    """The production CNG bridge must not execute caller-selected code."""
+
+    def test_rejects_uncontrolled_helper_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="coevo-helper-policy-") as tmp:
+            fake_helper = Path(tmp) / "fake.ps1"
+            fake_helper.write_text("Write-Output '{}';", encoding="utf-8")
+            with self.assertRaises(PrivateKeyHandleError):
+                WindowsPrivateKeyStore(helper_path=fake_helper)
+
+    def test_poisoned_powershell_path_is_rejected_before_execution(self) -> None:
+        backend = WindowsPrivateKeyStore()
+        with tempfile.TemporaryDirectory(prefix="coevo-powershell-policy-") as tmp:
+            fake_exe = Path(tmp) / "powershell.exe"
+            fake_exe.write_bytes(b"not the locked Windows PowerShell executable")
+            with patch.dict(os.environ, {"COEVO_POWERSHELL_PATH": str(fake_exe)}):
+                with patch("coevo.identity.private_keys.subprocess.run") as runner:
+                    with self.assertRaises(PrivateKeyHandleError):
+                        backend._run("VerifyHandle", handle="CoevoPrivateKey-" + "0" * 32, public_digest="0" * 64)
+                    runner.assert_not_called()
 class IdentityBundlePrivateKeyRejectionTests(unittest.TestCase):
     """Identity-bundle input MUST NOT carry private-key material (defense in depth)."""
 

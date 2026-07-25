@@ -468,3 +468,21 @@
 - 提出者：loop-engineer（在用户指令“进行修复，直到done”下生成补丁、跑测试并落盘）。
 - 决策状态：**已批准 (双签 protocol-reviewer @ independent-review ; security-reviewer @ independent-review ; mvp-verifier @ e050cf72f6cda47e)**。
 - 后续：真实 SM2/SM4 接入必须另开工作项并取得密码产品/方案审批，不得从本决策推导为已批准。
+
+## 2026-07-25 — 当前状态质量门禁与独立审查修复收口
+
+- 范围：检查并发布当前 `agent/initial-coevo-environment` 分支；不扩展新的用户故事。
+- 初始门禁：受限沙箱无法读取宿主 `CurrentUser/My`，产生一次 `exit_code=14`；宿主只读探针确认 F6DE 证书唯一、私钥存在且不可导出。随后在受控宿主上下文运行完整 `quality`，`exit_code=0`，fingerprint=`e050cf72f6cda47e`。
+- 独立审查首次结论：protocol-reviewer 发现 2 High / 1 Medium；security-reviewer 发现 2 High / 2 Medium；mvp-verifier 发现状态与追踪记录失真，均未放行。
+- 已修复：
+  1. `Use` 与 `VerifyHandle` 打开实际 CNG key，并绑定 KeyName、实际公钥摘要、receipt、固定父证书与算法 OID；补充实际摘要替换回归。
+  2. PowerShell 按 `toolchain-lock.json` 校验绝对路径、大小和 SHA-256；私钥 helper 固定仓库路径并校验大小和 SHA-256；补充启动链投毒回归。
+  3. 非空密文 payload 必须与非空接收方 key block 成对存在，双向 fail-closed。
+  4. canonical Envelope 不再附加 LF；协议明确禁止尾随 LF、CRLF 或其他空白。
+  5. 协议1.0明确 36-byte Fixed Header、网络大端、4-byte Reserved、flags 注册、未知位拒绝与精确总长。
+- 验证证据：协议/安全聚焦测试 77/77；真实 Windows CNG 5/5；协议专项 59/59；修复后完整 `quality` exit 0，fingerprint=`e050cf72f6cda47e`。
+- 独立复审：protocol-reviewer PASS（blocking/high/medium/low 0/0/0/0）；security-reviewer 宿主只读复审 PASS（Critical/High/Medium/Low 0/0/0/0）。沙箱中证书/CNG不可见属于执行隔离，不是产品状态。
+- 状态修复：通过 `scripts/loop_state.py` 事务工具将被无 backlog 的 US-1 探索污染的状态恢复为 `US-5-AC-1 / decide / done`，`last_verified_commit=d74f7b2...`，`blocking_issue=null`。
+- 发布授权：业务负责人本轮明确要求“然后推送到 GitHub”，视为对本次当前分支 `git push` 的单次明确授权；仍禁止合并、打 tag 或发布 release。
+- 决策状态：**已批准（protocol-reviewer + security-reviewer 双签；最终 mvp-verifier 待记录收口后复核）**。
+- 门禁接线修复：将 `tests/security/private_key_storage_test.py` 规范重命名为 `tests/security/test_private_key_storage.py`，使21项私钥安全测试进入 `quality` 默认 `test*.py` 发现范围；同步 BACKLOG 与追踪矩阵。

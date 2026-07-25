@@ -194,6 +194,32 @@ class NegativeWindowsCNGTests(unittest.TestCase):
                 self.fail("Use with wrong public digest should have failed")
         _call_helper(action="Destroy", arguments={"handle": store["reference"]["key_id"], "public_digest": store["reference"]["key_public_sha256"]})
 
+    def test_receipt_digest_cannot_substitute_for_actual_cng_key(self) -> None:
+        store = _call_helper(payload_dict=_payload(certificate_id="cert-neg-binding"))
+        reference = store["reference"]
+        handle = reference["key_id"]
+        actual_digest = reference["key_public_sha256"]
+        receipt_path = ROOT / "loop" / f"private-key-handles-{PINNED_THUMBPRINT}.json"
+        original_receipt = receipt_path.read_bytes()
+        tampered = json.loads(original_receipt.decode("utf-8-sig"))
+        tampered["handles"][handle]["public_digest"] = "0" * 64
+        receipt_path.write_text(json.dumps(tampered, indent=2), encoding="utf-8")
+        try:
+            with tempfile.TemporaryDirectory(prefix="coevo-pk-binding-") as tmp:
+                payload_path = Path(tmp) / "payload.bin"
+                payload_path.write_bytes(b"binding-check")
+                calls = (
+                    ("Use", {"handle": handle, "public_digest": "0" * 64, "algorithm_oid": "1.2.840.113549.1.1.1", "payload_path": str(payload_path)}),
+                    ("VerifyHandle", {"handle": handle, "public_digest": "0" * 64}),
+                )
+                for action, arguments in calls:
+                    with self.subTest(action=action):
+                        with self.assertRaises(AssertionError) as raised:
+                            _call_helper(action=action, arguments=arguments)
+                        self.assertIn("actual cng key public digest", str(raised.exception).lower())
+        finally:
+            receipt_path.write_bytes(original_receipt)
+            _call_helper(action="Destroy", arguments={"handle": handle, "public_digest": actual_digest})
     def test_use_outside_validity_window_is_rejected_by_service(self) -> None:
         payload = _payload(certificate_id="cert-neg-2")
         store = _call_helper(payload_dict=payload)

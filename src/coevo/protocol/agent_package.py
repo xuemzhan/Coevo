@@ -203,9 +203,6 @@ class EnvelopeHeader:
         * object keys sorted lexicographically;
         * no insignificant whitespace / newlines;
         * no duplicate keys.
-        Per internal protocol choice we also ensure the JSON ends with a
-        newline so the trailing boundary marker in future AEAD wrapping
-        has a stable anchor.
         """
         text = json.dumps(envelope.to_mapping(), ensure_ascii=False,
                           sort_keys=True, separators=(",", ":"))
@@ -215,7 +212,7 @@ class EnvelopeHeader:
             raise AgentPackageCanonicalizationError(
                 "envelope contains characters that cannot be encoded as UTF-8"
             ) from exc
-        return text.encode("utf-8") + b"\n"
+        return text.encode("utf-8")
 
     @staticmethod
     def _require_text(value: Any, *, name: str, maximum: int, pattern: re.Pattern | None = None) -> str:
@@ -569,6 +566,14 @@ def parse_package_header(blob: bytes) -> ParsedPackageHeader:
     if has_payload != (fixed.payload_length > 0):
         raise AgentPackageLayoutError("PAYLOAD_PRESENT must agree with payload_length")
     compressed = bool(fixed.flags & AgentPackageFlags.COMPRESSION_ZIP_DEFLATE)
+    if fixed.payload_length > 0 and fixed.key_block_length == 0:
+        raise AgentPackageLayoutError(
+            "an encrypted payload requires a non-empty recipient key block"
+        )
+    if fixed.key_block_length > 0 and fixed.payload_length == 0:
+        raise AgentPackageLayoutError(
+            "a recipient key block is not allowed without an encrypted payload"
+        )
     if compressed != (envelope.compression == COMPRESSION_ZIP_DEFLATE):
         raise AgentPackageLayoutError("compression flag must agree with envelope.compression")
     if fixed.flags & AgentPackageFlags.EXTENSION_PRESENT:

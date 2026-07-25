@@ -197,10 +197,10 @@ class EnvelopeCanonicalizationTests(unittest.TestCase):
         self.assertLess(text.find('"package_id"'), text.find('"payload_length"'))
         self.assertLess(text.find('"created_at"'), text.find('"expires_at"'))
 
-    def test_canonical_bytes_end_with_newline(self) -> None:
+    def test_canonical_bytes_have_no_trailing_whitespace(self) -> None:
         env = EnvelopeHeader.from_mapping(_envelope_dict())
         text = encode_envelope(env)
-        self.assertTrue(text.endswith(b"\n"))
+        self.assertFalse(text.endswith((b"\n", b"\r")))
 
     def test_canonical_is_ascii_only(self) -> None:
         env = EnvelopeHeader.from_mapping(_envelope_dict())
@@ -323,7 +323,7 @@ class EnvelopeDecodeTests(unittest.TestCase):
 
     def test_decode_rejects_duplicate_keys(self) -> None:
         env = EnvelopeHeader.from_mapping(_envelope_dict())
-        text = encode_envelope(env).decode("utf-8").rstrip("\n")
+        text = encode_envelope(env).decode("utf-8")
         tampered = text.replace('"sequence_no":12', '"sequence_no":12,"sequence_no":12', 1)
         with self.assertRaises(AgentPackageEnvelopeError):
             decode_envelope(tampered.encode("utf-8"))
@@ -370,12 +370,13 @@ class TemplateAndCombinedTests(unittest.TestCase):
         blob = (
             encode_fixed_header(
                 header_length=len(envelope_bytes),
-                key_block_length=0,
+                key_block_length=32,
                 payload_length=2048,
-                flags=AgentPackageFlags.PAYLOAD_PRESENT,
+                flags=(AgentPackageFlags.KEY_BLOCK_PRESENT | AgentPackageFlags.PAYLOAD_PRESENT),
             )
             + envelope_bytes
             + (b"P" * 2048)
+            + (b"K" * 32)
         )
         parsed = parse_package_header(blob)
         self.assertEqual(parsed.fixed.major, PROTOCOL_MAJOR)
@@ -384,8 +385,8 @@ class TemplateAndCombinedTests(unittest.TestCase):
         self.assertEqual(parsed.envelope.sequence_no, 42)
         self.assertEqual(parsed.envelope.payload_length, 2048)
         self.assertEqual(parsed.envelope_bytes, envelope_bytes)
-        # Total length is fixed header (36) + envelope + key block (0) + payload (2048).
-        self.assertEqual(parsed.total_length, 36 + len(envelope_bytes) + 0 + 2048)
+        # Total length is fixed header (36) + envelope + key block (32) + payload (2048).
+        self.assertEqual(parsed.total_length, 36 + len(envelope_bytes) + 32 + 2048)
 
     def test_combined_parse_rejects_envelope_mismatch_payload(self) -> None:
         env = build_envelope_template(
@@ -480,7 +481,7 @@ class ReviewFindingRegressionTests(unittest.TestCase):
         mapping = json.loads(canonical)
         variants = (
             json.dumps(mapping, sort_keys=False).encode("utf-8"),
-            canonical.rstrip(b"\n"),
+            b" " + canonical,
             canonical + b"\n",
             canonical.replace(b'":', b'" :', 1),
         )
@@ -488,6 +489,33 @@ class ReviewFindingRegressionTests(unittest.TestCase):
             with self.subTest(variant=variant[-20:]):
                 with self.assertRaises((AgentPackageCanonicalizationError, AgentPackageEnvelopeError)):
                     decode_envelope(variant)
+
+    def test_payload_and_recipient_key_block_must_be_paired(self) -> None:
+        cases = (
+            (
+                EnvelopeHeader.from_mapping(_envelope_dict(payload_length=1)),
+                0, 1, AgentPackageFlags.PAYLOAD_PRESENT, b"P",
+            ),
+            (
+                EnvelopeHeader.from_mapping(_envelope_dict(payload_length=0, nonce="")),
+                1, 0, AgentPackageFlags.KEY_BLOCK_PRESENT, b"K",
+            ),
+        )
+        for envelope, key_length, payload_length, flags, suffix in cases:
+            envelope_bytes = encode_envelope(envelope)
+            blob = (
+                encode_fixed_header(
+                    header_length=len(envelope_bytes),
+                    key_block_length=key_length,
+                    payload_length=payload_length,
+                    flags=flags,
+                )
+                + envelope_bytes
+                + suffix
+            )
+            with self.subTest(key_length=key_length, payload_length=payload_length):
+                with self.assertRaises(AgentPackageLayoutError):
+                    parse_package_header(blob)
 
     def test_security_critical_envelope_enums_are_closed(self) -> None:
         fields = {

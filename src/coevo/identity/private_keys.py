@@ -48,6 +48,9 @@ from typing import Any, Mapping, Protocol
 ROOT = Path(__file__).resolve().parents[3]
 STORE_HELPER = ROOT / "scripts" / "store_private_key.ps1"
 
+TOOLCHAIN_LOCK = ROOT / "docs" / "dependencies" / "toolchain-lock.json"
+STORE_HELPER_SHA256 = "7e1fc28be6d4634a17bcdf3650c3af1a058a7ddae6e7d366ecc8d8a82ec94fcb"
+STORE_HELPER_SIZE = 11827
 HANDLE_PREFIX = "CoevoPrivateKey-"
 HANDLE_RE = re.compile(r"^CoevoPrivateKey-[0-9a-fA-F]{32}$")
 PUBLIC_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -225,13 +228,29 @@ class PrivateKeyStore(Protocol):
 
 
 def _powershell_executable() -> str:
-    exe = os.environ.get("COEVO_POWERSHELL_PATH")
-    if exe and Path(exe).is_absolute():
-        return exe
-    fallback = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
-    if fallback.is_file():
-        return str(fallback)
-    raise PrivateKeyHandleError("Windows PowerShell is unavailable")
+    try:
+        lock = json.loads(TOOLCHAIN_LOCK.read_text(encoding="utf-8"))
+        expected = lock["tools"]["make_compatibility_shim"]["windows_powershell"]
+        expected_size = int(expected["size"])
+        expected_sha256 = str(expected["sha256"])
+    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise PrivateKeyHandleError("locked Windows PowerShell metadata is unavailable") from exc
+    configured = os.environ.get("COEVO_POWERSHELL_PATH")
+    candidate = Path(configured) if configured else (
+        Path(os.environ.get("SystemRoot", r"C:\Windows"))
+        / str(expected["windows_directory_relative_path"])
+    )
+    if not candidate.is_absolute():
+        raise PrivateKeyHandleError("Windows PowerShell path must be absolute")
+    try:
+        resolved = candidate.resolve(strict=True)
+        stat = resolved.stat()
+        digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
+    except OSError as exc:
+        raise PrivateKeyHandleError("Windows PowerShell is unavailable") from exc
+    if stat.st_size != expected_size or digest != expected_sha256:
+        raise PrivateKeyHandleError("Windows PowerShell failed the locked integrity check")
+    return str(resolved)
 
 
 class WindowsPrivateKeyStore:
@@ -246,9 +265,18 @@ class WindowsPrivateKeyStore:
     """
 
     def __init__(self, helper_path: Path | None = None) -> None:
-        self.helper_path = Path(helper_path) if helper_path is not None else STORE_HELPER
-        if not self.helper_path.is_file():
-            raise PrivateKeyHandleError("controlled private-key helper is unavailable")
+        candidate = Path(helper_path) if helper_path is not None else STORE_HELPER
+        try:
+            self.helper_path = candidate.resolve(strict=True)
+            controlled = STORE_HELPER.resolve(strict=True)
+        except OSError as exc:
+            raise PrivateKeyHandleError("controlled private-key helper is unavailable") from exc
+        if self.helper_path != controlled:
+            raise PrivateKeyHandleError("private-key helper path is not controlled by the repository")
+        helper_bytes = self.helper_path.read_bytes()
+        canonical_helper = helper_bytes.replace(b"\r\n", b"\n")
+        if len(canonical_helper) != STORE_HELPER_SIZE or hashlib.sha256(canonical_helper).hexdigest() != STORE_HELPER_SHA256:
+            raise PrivateKeyHandleError("private-key helper failed the locked integrity check")
 
     def _run(self, action: str, **arguments: Any) -> dict:
         body = json.dumps({"action": action, "arguments": arguments}, separators=(",", ":"))

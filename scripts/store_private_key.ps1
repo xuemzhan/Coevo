@@ -120,6 +120,30 @@ function Add-EntryField($Entry, $Name, $Value) {
   return $temp
 }
 
+function Assert-ActiveKeyBinding(
+  [Security.Cryptography.CngKey]$Key,
+  $Record,
+  [string]$Handle,
+  [string]$PublicDigest
+) {
+  if ($null -eq $Record) { throw ('receipt for handle {0} is missing' -f $Handle) }
+  if ($Record.PSObject.Properties.Name -contains 'destroyed_at') {
+    throw ('receipt for handle {0} is tombstoned; treat as destroyed' -f $Handle)
+  }
+  if ([string]$Record.parent_thumbprint -ne $PinnedThumb) {
+    throw 'stored handle is not bound to the pinned parent certificate'
+  }
+  if ([string]$Record.public_digest -ne $PublicDigest) {
+    throw 'public digest does not match stored handle'
+  }
+  if ($Key.KeyName -ne $Handle) {
+    throw 'opened CNG key name does not match requested handle'
+  }
+  if ((Key-PublicDigest $Key) -ne $PublicDigest) {
+    throw 'actual CNG key public digest does not match stored handle'
+  }
+}
+
 $raw = [Console]::In.ReadToEnd()
 if ([string]::IsNullOrWhiteSpace($raw)) { throw 'store_private_key helper: STDIN is empty' }
 try {
@@ -197,10 +221,13 @@ switch ($request.action) {
     $stored = Read-Receipt
     $record = Get-HandleEntry $stored $handle
     if (-not $record) { throw ('receipt for handle {0} is missing; treat as destroyed' -f $handle) }
-    if ($record.public_digest -ne $publicDigest) { throw 'public digest does not match stored handle' }
     $key = [Security.Cryptography.CngKey]::Open($handle)
     $rsa = $null
     try {
+      Assert-ActiveKeyBinding $key $record $handle $publicDigest
+      if ([string]$record.algorithm_oid -ne [string]$request.arguments.algorithm_oid) {
+        throw 'algorithm OID does not match stored handle'
+      }
       $rsa = [Security.Cryptography.RSACng]::new($key)
       $bytes = [IO.File]::ReadAllBytes($payloadPath)
       $signature = $rsa.SignData($bytes, [Security.Cryptography.HashAlgorithmName]::SHA256, [Security.Cryptography.RSASignaturePadding]::Pkcs1)
@@ -238,8 +265,13 @@ switch ($request.action) {
     $stored = Read-Receipt
     $record = Get-HandleEntry $stored $handle
     if (-not $record) { throw ('receipt for handle {0} is missing' -f $handle) }
-    if ($record.public_digest -ne $publicDigest) { throw 'public digest does not match stored handle' }
-    Emit @{ result = @{ verified = $true; certificate_id = $record.certificate_id; parent_thumbprint = $record.parent_thumbprint } }
+    $key = [Security.Cryptography.CngKey]::Open($handle)
+    try {
+      Assert-ActiveKeyBinding $key $record $handle $publicDigest
+      Emit @{ result = @{ verified = $true; certificate_id = $record.certificate_id; parent_thumbprint = $record.parent_thumbprint } }
+    } finally {
+      $key.Dispose()
+    }
   }
   default { throw ("unknown action '{0}'" -f $request.action) }
 }
