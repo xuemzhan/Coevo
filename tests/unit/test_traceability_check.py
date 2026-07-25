@@ -71,3 +71,22 @@ class TraceabilityTests(unittest.TestCase):
         paths = [e["path"] for e in ac2["evidence"] if e["path"]]
         self.assertTrue(any(p.endswith("coevo/task_flow/service.py") for p in paths))
         self.assertTrue(any(p.endswith("tests/unit/test_task_flow_service.py") for p in paths))
+    def test_us_2_ac_1_is_done_with_evidence(self):
+        # US-2/AC-1 is status=done; data-model + dependency graph + baseline factory
+        # + service layer are all wired and covered.
+        result = trace.check("US-2")
+        by_ac = {item["ac"]: item for item in result["items"]}
+        self.assertIn("AC-1", by_ac)
+        self.assertEqual("done", by_ac["AC-1"]["status"])
+        # All evidence resolves on disk.
+        self.assertTrue(all(bool(e["exists"]) for e in by_ac["AC-1"]["evidence"]))
+    def test_us_2_ac_1_matrix_lists_src_and_test(self):
+        # Pin US-2/AC-1 evidence to the new task_decomposition subtree.
+        result = trace.check("US-2", active_only=False)
+        by_ac = {item["ac"]: item for item in result["items"]}
+        ac1 = by_ac["AC-1"]
+        paths = [e["path"] for e in ac1["evidence"] if e["path"]]
+        self.assertTrue(any(p.endswith("coevo/task_decomposition/service.py") for p in paths))
+        self.assertTrue(any(p.endswith("tests/unit/test_task_decomposition.py") for p in paths))
+        self.assertTrue(any(p.endswith("coevo/task_decomposition/dependency_graph.py") for p in paths))
+        self.assertTrue(any(p.endswith("coevo/task_decomposition/baseline.py") for p in paths))
