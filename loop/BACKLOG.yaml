@@ -91,11 +91,11 @@ items:
     protocol_review: false
   - id: US-3-AC-1
     story: US-3
-    title: 脱敏人才库最小集 + 候选推荐确定性层
-    status: ready
+    title: 脱敏人才库最小集 + 候选推荐确定性层（TalentPool + RedactedIdentity + 评分 + 负荷/冲突检测 + audit projection）
+    status: done
     dependencies: []
     acceptance_tests:
-      - tests/unit/test_talent_recommender_models.py
+      - tests/unit/test_talent_recommender.py
     security_review: false
     protocol_review: false
   - id: US-5-AC-2

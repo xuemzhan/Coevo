@@ -717,4 +717,73 @@ Audit-corpus note (correlated, awaiting business-owner decision):
   - **C**:US-3-AC-1 脱敏人才库最小集 + 候选推荐确定性层(BACKLOG status=ready)
   - **D**:US-5-AC-2(SM4 AEAD + SM2 key wrap + manifest 签名),状态 blocked,需用户单独批准 approved SM2 product
   - **E**:STATE bump 在 commit 前同步完成(F round 内)
+  - **G**:audit / 已完成项尾扫——见下条## 2026-07-25T11:30:00Z -- US-3-AC-1 脱敏人才库 + 候选推荐确定性层 (C round, status done)
+
+- 工作项:依"同意 A→B→C→D→E→F→G 顺序"指令推进 US-3-AC-1。在 US-2-AC-1 ProjectBaseline 之上构建脱敏人才库 + 确定性推荐最小集,AC-2/AC-3/AC-4/AC-5 全部在数据层闭环。
+- 已批准并完成(实测数字,不是引用):
+  1. `src/coevo/talent/__init__.py`(~85 行):子包入口,scope / non-goals 声明,re-export 16 个公共类型
+  2. `src/coevo/talent/models.py`(8.7 KB,~210 LOC):
+     - `TalentRecommenderError`(base) + `TalentValidationError`(subclass)显式分层
+     - `SkillTag` frozen dataclass(`category:value` 格式 + `__post_init__` 验证)
+     - `AvailabilityWindow` frozen dataclass(ISO-8601 UTC `Z` + `overlaps` half-open 区间检测)
+     - `RedactedIdentity` frozen dataclass(pool_code + display_hint ≤16 + 64 字符 SHA-256 identity_hash)
+     - `Talent` frozen dataclass:field-minimum(无 name / email / resume 字段,严格 7 字段)+ invariants(current >= 0 / max >= 1 / current <= max / 跨 talent_code 唯一)
+     - `TalentPool` frozen dataclass(schema_version="1.0" closed / pool_code safe-id / talents 跨 talent_code 唯一 / talents[].redacted_identity.pool_code 与 pool_code 一致)
+     - `OverloadReason` enum(AT_CAPACITY / OVER_CAPACITY / WINDOW_CONFLICT)
+     - `LoadAlert` / `RecommendationReason` / `Recommendation` frozen dataclasses
+  3. `src/coevo/talent/redaction.py`(4.5 KB,~110 LOC):
+     - `stable_pool_code`:org 名称 → safe-id(小写化 + 非字母数字替换下划线 + 截断 + safe-id 验证)
+     - `redact_identity`:**不可逆脱敏**,canonical 形式 `pool_code|name|email|org` 后 SHA-256;display_hint bounded 16 字符;空白输入 raise
+  4. `src/coevo/talent/recommender.py`(8.3 KB,~210 LOC):
+     - 评分权重(W_SKILL=2.0 / W_CREDENTIAL=1.0 / W_WINDOW_FULL=1.5 / W_WINDOW_PARTIAL=0.5 / W_LOAD_HEADROOM=1.0 / W_TIE_BREAK=0.0 信息性)
+     - `score_candidate`:纯函数,返回 (score, reasons, alerts) 三元组
+     - `recommend`:确定性排序 `(-score, talent_code)`,支持 limit;空 requirement 拒绝;limit < 1 拒绝
+  5. `src/coevo/talent/service.py`(3.1 KB,~75 LOC):
+     - `TalentRecommenderService` facade:`recommend_for_requirements` 透传 `recommend`;`to_audit_record` 输出 JSON 安全投影(不含 raw name / email;只含 pool_code / count / alert_counts / top_score)
+  6. `tests/unit/test_talent_recommender.py`(17.7 KB,~390 LOC,**32 项 / 6 个 TestCase**):
+     - ModelFieldTests(11 项):field-minimum 锁死 / 无 name/email/resume 字段 / talent_code 验证 / 重复 skill_tag / 负 current / max=0 / current>max / 非法窗口 / pool 重复 talent_code / 跨 pool 拒绝 / 空 pool 拒 / schema_version 验证
+     - RedactionTests(6 项):pool code 转换 / 空拒绝 / 确定性 / display_hint bounded / 空白输入拒 / case canonicalise
+     - RecommendationRankingTests(6 项):top_n / 排序确定性 / 评分精确 / 重复调用确定性 / 空 requirement 拒 / 非法 limit 拒
+     - RecommendationReasonTests(3 项):skill_match 理由 / credential_match 理由 / score_candidate 返回 reasons + alerts
+     - LoadAlertTests(3 项):AT_CAPACITY 触发 / WINDOW_CONFLICT 触发 / partial window fit 评分
+     - ServiceLayerTests(3 项):passthrough / audit_record JSON 安全 / 不含 raw PII
+- 验证(`make_quality_gate` ×2 稳定双绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **144/144 ok**(US-3-AC-1 32 + US-2-AC-1 23 + US-1-AC-2 27 + 既有 56 + traceability 6 新 = 144;上次基线 110,B round 加 2 traceability + C round 加 2 traceability = 6 项)
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` status=fully-sealed
+  - `python scripts/traceability_check.py --story US-3` checked=1 missing=0
+  - `make_quality_gate` ×2 末尾稳定双绿 exit=0 fingerprint=`6ba24930200fc687`
+- **透明记录(已知 transient flakiness)**:首次跑 `make_quality_gate` 时 exit=1 一次,根因是 `tests/security/test_local_toolchain_security.py::test_tampered_locked_python_script_is_rejected_before_execution`(line 114-130)临时修改 `scripts/validate_opencode.py` 加 `raise RuntimeError("must not execute")` 验证 locked file mismatch,紧接着下一个测试 `test_engineering_baseline.py` 通过 `importlib.util.spec_from_file_location` 重新 exec 该文件——若两次测试间未完成复原,baseline 抛 RuntimeError。**该 flakiness 与 US-3-AC-1 无关**,属既有 baseline 边界问题;本轮末尾两次 `make_quality_gate` exit=0 双绿已恢复。**未修复**——属于后续切片可独立处理的横切关注点。DECISIONS §2026-07-22 path-3 "audit method must NOT delete evidence"——已保留 fail 记录在 `loop/VERIFICATION.md`(line 13042, timestamp 2026-07-25T11:06:52.395217Z)。
+- 边界(严格遵守 AGENTS.md §3):
+  - **无 LLM 调用**——`TaskDecompositionService`-style 的 deterministic facade,推荐算法是加权评分
+  - **无 IO**——无文件系统 / 无网络 / 无 DB,TalentPool 由 caller 提供
+  - **无新依赖**——仅 `__future__` / `dataclasses` / `enum` / `hashlib` / `re` / `typing` 标准库
+  - **不重写 US-1 / US-2**——`TalentRecommenderService` 是独立 facade;TaskRequirement.task_type 与 US-2 standard_stage 概念一致但不强耦合(US-3-AC-2 再接)
+  - **不动 .agent 协议**——US-5-AC-1 done 状态保持;US-5-AC-2 仍 blocked
+  - **不动审计链签名**——`loop/audit-signing*.json` / `loop/audit-signing-public*.cer` 未触动;signer thumbprint=F6DE 不变
+  - **不删除既有安全测试**——`tests/security/*` 任何文件未触动
+  - **不写明文 PII**——`redact_identity` 是不可逆的,`RedactedIdentity` 不携带 raw name / email / org 字段,raw 输入**只**在 redaction 层出现一次,SHA-256 hash 不可逆
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 自然 bump(2× quality_gate + loop_state.py prepared/committed),signer_thumbprint=F6DE 不变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加
+- BACKLOG 状态变化(`loop/BACKLOG.yaml`):
+  - `US-3-AC-1` 由 ready → **done**;新 `acceptance_tests`=`tests/unit/test_talent_recommender.py`;`dependencies=[]`(无前置依赖)
+  - `US-5-AC-2` 仍 blocked(密码方案变更待 D round 单独审批)
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-3/AC-1 行;`tests/unit/test_traceability_check.py` 新增 `test_us_3_ac_1_is_done_with_evidence` + `test_us_3_ac_1_matrix_lists_src_and_test`(锁定 AC-1 evidence 指向 talent/service.py + redaction.py + recommender.py + test_talent_recommender.py)
+- **未做**(本 round 范围外):
+  - **US-3-AC-2 / AC-1 / AC-6 / AC-7 / AC-8**——人才库 DB 持久化 / 用户手工替换 / 确认责任分工 / 操作审计 属后续 slice
+  - **TalentRecommenderService 消费 US-2 ProjectBaseline**——本次未接,US-3-AC-2 时由 caller 把 ProjectBaseline.work_packages 转成 TaskRequirement 后传入
+  - **git commit**——本 round 累计 5M + 2 untracked:
+    - M: `loop/BACKLOG.yaml`(US-3-AC-1 status done),`docs/traceability/requirements-test-matrix.md`(US-3/AC-1 行),`loop/VERIFICATION.md`(quality_gate 自动追加 ×2),`tests/unit/test_traceability_check.py`(US-3 traceability 锁)+ audit-managed 三个 `loop/audit-head*.json|p7s` + `loop/tool-audit.jsonl`(归入 F round 系统提交)
+    - untracked: `src/coevo/talent/` 整目录(5 个新 .py),`tests/unit/test_talent_recommender.py`
+  - **不修 test_tampered_locked_python_script 已知 flakiness**——属横切关注点,留待后续
+- 提出者:loop-engineer(在用户指令"继续"下生成 talent 5 个新 .py + test_talent_recommender.py / 更新 __init__.py + BACKLOG + 矩阵 + traceability 单测 / 跑 2× make_quality_gate 双绿 / 写本 DECISIONS 条目;未触动审计链;未 push;未做 commit)
+- 决策状态:**已批准(走 mvp-verifier 内审 pass——非协议 / 非密钥 / 非文件解析 / 非权限 / 非审计新增边界)**
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **F**:本 round 累计 5M + 2 untracked 拆分——见下条 F round 决策
+  - **D**:US-5-AC-2(SM4 AEAD + SM2 key wrap + manifest 签名),状态 blocked,需用户单独批准 approved SM2 product
+  - **E**:STATE bump 在 commit 前同步完成(F round 内)
   - **G**:audit / 已完成项尾扫——见下条
