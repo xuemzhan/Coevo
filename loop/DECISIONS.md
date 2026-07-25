@@ -486,3 +486,89 @@
 - 发布授权：业务负责人本轮明确要求“然后推送到 GitHub”，视为对本次当前分支 `git push` 的单次明确授权；仍禁止合并、打 tag 或发布 release。
 - 决策状态：**已批准（protocol-reviewer + security-reviewer 双签；最终 mvp-verifier 待记录收口后复核）**。
 - 门禁接线修复：将 `tests/security/private_key_storage_test.py` 规范重命名为 `tests/security/test_private_key_storage.py`，使21项私钥安全测试进入 `quality` 默认 `test*.py` 发现范围；同步 BACKLOG 与追踪矩阵。
+
+## 2026-07-25T03:31:45Z -- argv（包含）fix + control.pyz rebuild + lock chain sync (Proposed)
+
+- Item: project 4 fix scripts/quality_gate.py -p glob leak.
+- Self-correction on the previous DECISIONS entry 2026-07-22 path-3 option 2 -- the '17 SM2 wire-contract tests not entering gate' claim was factually wrong; the real gap was 3 integration tests using test_*.py basename.
+- Done:
+  1. scripts/quality_gate.py:13 -p '*test.py' -> -p '*test*.py'
+  2. tests/unit/test_engineering_baseline.py:17 string-assert update
+  3. docs/dependencies/python-script-lock.tsv 9 rows rehashed
+  4. scripts/tool-shims/make.cs ScriptInventorySha256 + ControlArchiveSha256 constants + size literal sync
+  5. .tools/control/control.pyz deterministic rebuild per ZIP_STORED + sorted + DOS epoch
+  6. docs/dependencies/toolchain-lock.json script_inventory + source_sha256 + control_archive sync
+  7. temp scripts .dev_*.py + E:\temp\*.py removed
+- Verified: make_quality_gate x2 exit=0 fingerprint 34fc0b672c25a7b5.
+- Audit impact: signed head stays F6DE, fully-sealed after each make_quality_gate; no signer switch.
+- Boundaries: no protocol change, no crypto change, no .agent main-version change.
+- 9 M files accumulated this round.
+- Proposer: loop-engineer (under user instruction '4,5,7,3,2,1').
+- Decision status: proposed.
+
+- Audit-binding note (correlated, awaits user decision):
+  - loop/private-key-handles-F6DE...json is committed in cbeab97 (206 entries metadata-only).
+  - Content: only public_digest + parent_thumbprint + creation_audit_id + destroyed_at. No key bytes, no cng_key_id literal, no PIN.
+  - Tests added: tests/unit/test_private_key_handles_bindings.py (5/5 OK).
+  - Policy (a/b/c) awaiting: (a) .gitignore: loop/private-key-handles-*.json, (b) git rm --cached, (c) keep current binding.
+
+## 2026-07-25T16:00:00Z -- US-5-AC-2 crypto scheme decision table (Proposed)
+
+- Item: project 2 (US-5-AC-2) crypto scheme decision.
+- Trigger: AGENTS.md section 6 stop condition 'crypto-scheme change / new dependency / .agent main-version change' requires separate approval.
+- Protocol baseline cipher suite: CS-SM2-SM4-AEAD-SM3-01 (docs/protocol/agent-package-protocol.md section 11).
+- History constraint: DECISIONS 2026-07-22 path-3 option (e) + AGENTS.md section 3 rule 4 (no runtime downloads).
+- Decisions (await business owner):
+  - D1: P1 (registry only) / P2 (approved product) / P3 (self-implement).
+  - D2: approve crypto-scheme change or not.
+  - D3: if P2, provide approved SM2 product path (e.g. gmssl.exe) + offline SHA-256 + docs.
+  - D4: if P2, approve US-5-AC-2 scope this round.
+  - D5: if P2, lock naming for SM2 artifact.
+- Approach notes:
+  - P1: strict registry + AgentPackageAlgorithmUnsupportedError; manifest sign + SM4 payload + SM2 key wrap all fail-closed.
+  - P2: gmssl / tongsuo / OpenSSL national build; store_private_key.ps1 add algorithm_oid router.
+  - P3: rejected (no crypto-module certification).
+- Proposer: loop-engineer.
+- Decision status: proposed.
+
+## 2026-07-25T16:30:00Z -- US-1-AC-1 process understanding (Proposed)
+
+- Item: project 3, US-1-AC-1 deterministic data-model + parser + stage mapping.
+- Scope (AC-1 closed loop):
+  - input: tabular / tree / canonical schema,
+  - output: ProcessFlow with monotonic int version, ISO-8601 UTC 'Z' informational created_at, stages, roles, source_mapping, overrides,
+  - per-field: source_path + confidence in [0,1] + SourceKind {LITERAL, DERIVED, DEFAULTED, OVERRIDDEN},
+  - reviewer edits go through Override + with_overrides(...),
+  - mapping: DEFAULT_MAPPING_RULES maps per-unit stage_hint strings to StandardStage closed set (intake / planning / execution / review / delivery / closure).
+- Done (measured, not quoted):
+  1. src/coevo/task_flow/__init__.py (46 lines, re-export Public API)
+  2. src/coevo/task_flow/models.py (212 lines, frozen dataclass + invariants + ISO-8601 UTC 'Z' suffix; version strict monotonic int)
+  3. src/coevo/task_flow/parser.py (290+ lines, three-schema adapter + fail-closed validation)
+  4. src/coevo/task_flow/mapping.py (180 lines, 27 default mapping rules)
+  5. tests/unit/test_task_flow_models.py (18 test method / 18 OK / 0.002s)
+- Verified:
+  - python -m compileall -q -f scripts src tests exit 0
+  - python -m unittest discover -s tests/unit 56/56 OK (38 prior + 18 new)
+  - python -m unittest tests.unit.test_task_flow_models 18/18 OK
+  - python scripts/audit_log.py verify ok=true
+  - python scripts/audit_seal.py verify status=fully-sealed
+- Security/compliance boundaries:
+  - No LLM call; deterministic state machine.
+  - No IO / no network.
+  - Confidence in [0,1] enforced in Traced.__post_init__.
+  - Version strict monotonic int; created_at informational only.
+  - No .agent main-version change; no crypto-scheme change.
+- Proposer: loop-engineer (under user instruction '1,2,3,4' item 3).
+- Decision status: proposed.
+
+
+--- 
+
+Audit-corpus note (correlated, awaiting business-owner decision):
+  - `loop/private-key-handles-F6DE...json` is committed in cbeab97 (206 entries metadata-only).
+  - Content: only public_digest + parent_thumbprint + creation_audit_id + destroyed_at.
+  - Tests: `tests/unit/test_private_key_handles_bindings.py` (5/5 OK).
+  - Policy (a/b/c) awaiting: (a) .gitignore rule, (b) git rm --cached, (c) keep binding.
+
+
+[Self-correction 2026-07-25T04:18:00Z] The 4 historical fingerprint=34fc0b672c25a7b5 segments at 03:28:31 / 03:31:19 / 03:40:47 / 03:42:01 came from a make.cs path that never actually exercised the new -p *test*.py argv; the real, reproducible baseline under scripts/quality_gate.py --target quality is 6ba24930200fc687 (recorded 2026-07-25T04:15:31Z). This self-correction is append-only and does not delete the prior entries (AGENTS.md §3 rule 7).

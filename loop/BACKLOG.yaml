@@ -61,3 +61,12 @@ items:
       - tests/integration/package_header_extended_test.py
     security_review: true
     protocol_review: true
+  - id: US-1-AC-1
+    story: US-1
+    title: 实现任务流程理解的数据模型 + 解析 + 阶段映射层（deterministic state machine）
+    status: done
+    dependencies: [US-0-AC-2]
+    acceptance_tests:
+      - tests/unit/test_task_flow_models.py
+    security_review: false
+    protocol_review: false
