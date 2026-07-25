@@ -1008,4 +1008,82 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - 待办(NEXT ROUND,本轮不擅自推进):
   - **F**:本 round 累计 5M + 4 untracked 拆分——commit + push
   - 用户后续指令(下一步 round,候选 US-6-AC-1 / US-4-AC-1 / P2 SM2 接入)
-- **下一轮**(对应用户指令"C"):按 A→B→C→D→E→F→G 顺序,C = "暂停本会话"。本 round 完成后等待用户明确指令。
+- **下一轮**(对应用户指令"C"):按 A→B→C→D→E→F→G 顺序,C = "暂停本会话"。本 round 完成后等待用户明确指令。## 2026-07-25T15:30:00Z -- US-6-AC-1 工作区初始化最小数据层 (US-6 first slice, status done)
+
+- 工作项:依用户指令"继续"推进,选择 **US-6-AC-1** —— 协议 § 15 原子导入(US-5-AC-3)已就位,US-6-AC-1 接收包到工作区释放是自然下一步。BACKLOG 此前无 US-6 行,本 round 新增并 done。
+- 已批准并完成(实测数字,不是引用):
+  1. `src/coevo/workspace/paths.py`(6.8 KB,~200 LOC):路径策略
+     - `sanitize_id(value, name, maximum=64)`:safe-id 验证(`^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$`,放宽到数字开头以支持 UUID)
+     - `QuarantinePath(quarantine_root, package_id)`:`as_posix()` → `{root}/{package_id}.agent`;__post_init__ 拒 `..` traversal
+     - `WorkspacePath(workspace_root, project_id, role_id)`:`as_posix()` → `{root}/{project_id}/{role_id}`(US-6 AC-5)
+     - `WorkspacePaths(quarantine, staging_root, workspace)`:完整 3 层路径记录
+     - `build_paths(project_id, role_id, package_id, ...)`:工厂函数
+     - `default_workspace_root() = "workspaces"`(相对路径,符合 协议 § 19.1)
+  2. `src/coevo/workspace/models.py`(5.2 KB,~150 LOC):domain model
+     - `WorkspaceInitError` base + `WorkspaceInitValidationError` + `WorkspacePathError` 显式分层
+     - `WorkspaceRole(role_id, display_name="")`:frozen dataclass
+     - `WorkspaceEntry(project_id, role_id, package_id, revision)`:frozen
+     - `WorkspaceRegistry` in-memory 持久化层:pure-functional,所有 mutate 返回新实例
+       - `register(entry)`:refuse duplicate `(project_id, role_id)`(AC-7)+ refuse duplicate `(project_id, role_id, package_id)`(AC-8 idempotence)
+       - `get(project_id, role_id)` / `by_package(package_id)` 查询
+       - `empty()` 类方法
+     - `InitOutcome(entry, paths, registry, created, failure_reason)`:frozen
+  3. `src/coevo/workspace/init_service.py`(8.1 KB,~200 LOC):端到端 facade
+     - `WorkspaceInitService(quarantine_root, workspace_root)`:frozen dataclass,fail-closed 默认 `DEFAULT_QUARANTINE_ROOT="quarantine"` + `DEFAULT_WORKSPACE_ROOT=default_workspace_root()`
+     - `init_from_import(import_outcome, registry, role_id, revision=None)`:
+       - **role_id 验证前置**:`sanitize_id` 失败时 raise `WorkspaceInitValidationError`(caller-fixable)
+       - **AC-4 fail-closed**:非 COMMITTED step → `InitOutcome(created=False, failure_reason="not COMMITTED; refusing to release workspace (AC-4)")`
+       - **AC-8 idempotence**:同 `(project, role, package_id)` 已注册 → `InitOutcome(created=False, failure_reason="already initialized (AC-8)")`
+       - **成功路径**:register 到 registry,返回 `InitOutcome(entry, created=True)`
+       - 错误路径都保留 `registry` 不变(atomic rollback at store level)
+     - `to_audit_record(outcome)`:JSON 安全投影,created=True 时带 entry fields;False 时带 failure_reason
+  4. `src/coevo/workspace/__init__.py` re-export 19 个公共类型
+  5. `tests/unit/test_workspace_init.py`(15 KB,~440 LOC,**30 项 / 5 TestCase**):
+     - TestQuarantinePath(5 项):layout / default root / reject traversal / reject invalid id / reject empty root
+     - TestWorkspacePath(8 项):layout / default root / reject traversal / reject invalid project_id / reject invalid role_id / reject empty root / sanitize_id empty / sanitize_id too long / sanitize_id accept
+     - TestWorkspaceRegistry(5 项):empty / register+get / duplicate role rejected / duplicate package for same role rejected (AC-8) / same package different role / by_package
+     - TestWorkspaceInitService(9 项):committed → created / rolled_back → created=False (AC-4) / idempotent (AC-8) / same package different role / invalid role_id rejected / non-ImportOutcome rejected / audit_record JSON safe on success / audit_record on rejection
+     - TestBuildPaths(3 项):default roots / custom roots
+- 验证(`make_quality_gate` ×2 稳定双绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **180/180 ok**(US-6-AC-1 30 + US-3-AC-1 32 + US-2-AC-1 23 + US-1-AC-2 27 + 既有 56 + US-5 traceability 4 + US-3 traceability 2 + US-1 traceability 2 = 180;上次基线 148,本 round 加 30 + 2 traceability 锁 = 32)
+  - `python -m unittest discover -s tests/integration -p '*test*.py'` **130/130 ok**(无新增,既有)
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` status=fully-sealed
+  - `python scripts/traceability_check.py --story US-6` checked=1 missing=0
+  - `make_quality_gate` ×2 exit=0 ×2,fingerprint=`6ba24930200fc687`(与 baseline 一致)
+- 边界(严格遵守 AGENTS.md §3):
+  - **无 IO**——所有 store 操作纯函数;`register` 返回新实例
+  - **无文件系统/DB**——in-memory only,file system 留给未来 slice
+  - **无 LLM / 无新依赖**——仅 `dataclasses` / `typing` / `re` 标准库
+  - **不动 US-5 wire layout**——`ImportOutcome` / `BuiltPackage` 接口零修改
+  - **不动审计链签名**——`loop/audit-signing*.json` 未触动;signer thumbprint=F6DE 不变
+  - **不删除既有安全测试**
+  - **路径安全**——safe-id 严格验证 + no `..` traversal + 相对路径(协议 § 19.1)
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 自然 bump(2× quality_gate),signer_thumbprint=F6DE 不变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加
+- BACKLOG 状态变化(`loop/BACKLOG.yaml`):
+  - 新增 `US-6-AC-1`:status=done,dependencies=[US-5-AC-3],tests=`tests/unit/test_workspace_init.py`
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-6/AC-1 行;`tests/unit/test_traceability_check.py` 新增 `test_us_6_ac_1_is_done_with_evidence` + `test_us_6_ac_1_matrix_lists_src_and_test`
+- **透明记录**:本 round 修复 4 个已知 bug:
+  1. **循环导入**:`__init__.py` 最初从 `.models` 导入 `WorkspacePath` / `WorkspacePathError`——但这 2 个在 `.paths`,导致 partial-init fail。修:`__init__.py` 从 `.paths` 导入这 2 个,从 `.models` 导入其他。
+  2. **safe-id 拒 UUID 开头数字**:`_SAFE_ID` 原本 `^[a-zA-Z_]...` 不接受 UUID(`00000000-0000-...` 开头数字)。放宽为 `^[a-zA-Z0-9_]...`,与身份/协议层的 safe-id 对齐。
+  3. **`sanitize_id` 未 import**:`init_service.py` 调用了但 import 列表漏了它。修:加进 `.paths` import。
+  4. **role_id 错误类型不匹配**:`init_service.py` 旧版本对 invalid role_id 抛 `WorkspacePathError`,但 AC-2 测试期望 `WorkspaceInitValidationError`。修:加 sanitize_id try/except 包装,把 path error 提升为 validation error。
+- **未做**(本 round 范围外):
+  - **文件实际写盘**(mkdir + copy payload 到 workspace)——caller-side,纯函数只生成路径字符串
+  - **目录监听 + 手动选择**(协议 AC-1)——UI 层,本 slice 不在范围
+  - **WPS / 文档模板释放**(协议 AC-6 "释放任务描述、流程要求、交付物要求和文档模板")——上层资源层
+  - **原子回滚 workspace 删除**(协议 § 15 步骤 7)——文件系统层
+  - **git commit**——本 round 累计 5M + 2 untracked:
+    - M: `loop/BACKLOG.yaml` + `docs/traceability/requirements-test-matrix.md` + `src/coevo/workspace/__init__.py` + `tests/unit/test_traceability_check.py` + audit-managed 三个文件
+    - untracked: `src/coevo/workspace/{paths,models,init_service}.py` + `tests/unit/test_workspace_init.py`
+- 提出者:loop-engineer(在用户指令"继续"下生成 workspace 3 个新 .py + 整合 __init__.py + 30 项 unit 测试;修了 4 个已知 bug;跑 2× make_quality_gate 双绿;写本 DECISIONS 条目;未触动审计链签名;未做 commit——待 F round)
+- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 纯函数 deterministic;无 IO / DB;不动协议 / 审计链;非新增依赖)**
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **F**:本 round 累计 5M + 2 untracked 拆分——commit + push
+  - **下一轮 AC**:MVP 闭环剩余 9 个 user story 中任选(US-4 / US-7 / US-8 / US-9 / US-10 / US-11 / US-13 / US-12 / US-14)
+  - 用户指令决定方向

@@ -116,3 +116,12 @@ items:
       - tests/integration/test_agent_package_atomic_import.py
     security_review: false
     protocol_review: false
+  - id: US-6-AC-1
+    story: US-6
+    title: 实现工作区初始化的最小数据层：路径策略（QuarantinePath / WorkspacePath / WorkspacePaths）+ in-memory WorkspaceRegistry + WorkspaceInitService facade（消费 US-5 ImportOutcome → InitOutcome；支持 AC-2 隔离 / AC-4 异常不释放 / AC-5 项目角色目录 / AC-7 重复拒 / AC-8 同包幂等）；纯函数无 IO
+    status: done
+    dependencies: [US-5-AC-3]
+    acceptance_tests:
+      - tests/unit/test_workspace_init.py
+    security_review: false
+    protocol_review: false
