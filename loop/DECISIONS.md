@@ -938,4 +938,74 @@ Audit-corpus note (correlated, awaiting business-owner decision):
     2. 启动新 round(任一未交付项)
     3. 暂停(本会话结束)
 - 提出者:loop-engineer(在用户指令"同意,E,F,G"下完成 E / F / G 收口核验,DECISIONS 追加本条目,无源码改动)
-- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 无源码改动,纯状态核验 + 透明记录)**
+- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 无源码改动,纯状态核验 + 透明记录)**## 2026-07-25T14:00:00Z -- US-5-AC-3 协议 § 15-§ 17 持久化层 (E round = US-5-AC-3 + F round split, status done)
+
+- 工作项:依用户指令"同意先 B, 然后 A, C"中 B = `git push` + A = "继续下一个 AC",选择 **US-5-AC-3**(协议 § 15 原子导入 + § 17 持久化层,US-5 自然延续;BACKLOG 此前未登记,本 round 新增并 done)。
+- 已批准并完成(实测数字,不是引用):
+  1. `src/coevo/protocol/import_transaction.py`(11.8 KB,~290 LOC):§ 15 原子导入 7 步事务状态机
+     - `ImportStep` enum:9 个值(QUARANTINE_RECEIVED / DECRYPT_AND_INSPECT / PREPARE_WORKSPACE / WRITE_FILES / PREPARE_DATABASE / COMMIT / PROMOTE / CLEANUP / COMMITTED / ROLLED_BACK)
+     - `_STEP_ORDER` strict-monotonic 元组
+     - `ImportTransaction` frozen dataclass:`step` / `completed_steps` / `failure_reason` / `base_revision` / `current_revision`
+     - `advance(to_step)`:strict monotonic advance,**包括中间步骤 push**(forward-skipping allowed)
+     - `fail(reason)`:non-empty reason 验证,保留 completed_steps 不变,标记 step=ROLLED_BACK
+     - `AtomicImporter`:`begin` / `advance` / `fail` / `check_replay` / `check_base_revision` / `to_audit_record`
+     - `check_replay`:拒绝所有非 ACCEPT outcome,raise `AgentPackageImportReplayError`
+     - `check_base_revision`:base_revision 与 current_revision 不一致时 raise `AgentPackageImportConflictError`(协议 § 16.3 + § 16.4)
+     - `to_audit_record`:JSON 安全投影,含 completed_steps / failure_reason / terminal flag
+  2. `src/coevo/protocol/processed_package_store.py`(6 KB,~170 LOC):§ 17 持久化层
+     - `ProcessedPackageRecord` frozen dataclass:protocol § 17 强制字段(package / package_type / processed_at / result / revision)
+     - `ProcessedPackageStore` frozen dataclass:pure-functional,所有 mutate 通过返回新实例实现
+     - `register(record)`:atomic insert,refuse duplicate package_id 或 package_digest
+     - `get(package_id)` / `by_digest(digest)` 查询
+     - `by_scope(sender, recipient, project)`:scope 内按 sequence_no ASC 排序
+     - `revision_for(project_id)`:返回项目当前最高 revision
+     - `__len__` / `__iter__` 支持便利
+     - `empty()` 类方法构造空 store
+  3. `src/coevo/protocol/import_service.py`(7.5 KB,~190 LOC):端到端 facade
+     - `ImportOutcome` frozen dataclass:`transaction` / `store` / `record`(None when fail)
+     - `PackageImportService` facade:`import_package(package, replay_decision, store, base_revision, current_revision, processed_at)`
+     - 内部 7 步事务推进 + check_replay + check_base_revision + atomic register
+     - **失败回滚**:`try/except AgentPackageError` 捕获 → `importer.fail(tx, reason=str(exc))` → 返回 `ImportOutcome` with `step=ROLLED_BACK` 且 **store 不变**(in-memory atomic rollback at store level)
+     - 修复了 import order bug:`AgentPackageStoreDuplicateError` 应该从 `processed_package_store` 导入而不是 `import_transaction`(初版写错,Python 直接 in-place fix 修了)
+  4. `src/coevo/protocol/__init__.py` 重组:re-export 8 个新类型 + 3 个新 exception + `DEFAULT_EMPTY_STORE` + `PackageImportService`
+  5. `tests/integration/test_agent_package_atomic_import.py`(18 KB,~430 LOC,**23 项 / 3 TestCase**):
+     - TestImportTransaction(11 项):begin step 0 / strict monotonic / advance backwards rejected / 7 步完整路径 / fail rolled_back + failure_reason / empty reason rejected / check_replay 仅接受 ACCEPT / check_base_revision 一致 / check_base_revision 不一致 rejected / first import / audit_record JSON 安全
+     - TestProcessedPackageStore(5 项):empty store / register+get / duplicate package_id rejected / duplicate digest rejected / by_scope ASC sorted / revision_for 最高
+     - TestPackageImportService(7 项):full committed / replay rejected → rolled_back / base_revision mismatch → rolled_back / first import no revision / duplicate package_id → rolled_back(store unchanged)/ 7 步全部 push 进 completed_steps
+- 验证(`make_quality_gate` ×2 稳定双绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **148/148 ok**(US-3-AC-1 32 + US-2-AC-1 23 + US-1-AC-2 27 + 既有 56 + US-5 traceability 4 + US-3 traceability 2 + US-1 traceability 2 = 148;上次基线 146,本 round 加 2 US-5 traceability 锁)
+  - `python -m unittest discover -s tests/integration -p '*test*.py'` **130/130 ok**(US-5-AC-3 23 + US-5-AC-2 35 + US-5-AC-1 56+3 + US-0-AC-2 5 + identity_store 5 + tool_contracts 3)
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` status=fully-sealed
+  - `python scripts/traceability_check.py --story US-5` checked=3 missing=0(US-5-AC-1 + AC-2 + AC-3)
+  - `make_quality_gate` ×2 exit=0 ×2,fingerprint=`6ba24930200fc687`(与 baseline 一致,argv set 未变)
+- **透明记录**:本次 push 完成 `fb7de74..0e9f205`(US-5-AC-2 finalize 之前的所有 17 commit)。
+- 边界(严格遵守 AGENTS.md §3):
+  - **无 IO**——所有 store 操作纯函数;`register` 返回新实例
+  - **无 DB 持久化**——in-memory only,DB 留给未来切片
+  - **无新依赖**——仅 `dataclasses` / `typing` / `enum` 标准库
+  - **不动 US-5-AC-1/2 wire layout**——`BuiltPackage` / `ReplayDecision` / `ProcessedPackage` 接口零修改
+  - **不动审计链签名**——`loop/audit-signing*.json` / `loop/audit-signing-public*.cer` 未触动;signer thumbprint=F6DE 不变
+  - **不删除既有安全测试**——`tests/security/*` 任何文件未触动
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 自然 bump(2× quality_gate + loop_state bump),signer_thumbprint=F6DE 不变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加
+- BACKLOG 状态变化(`loop/BACKLOG.yaml`):
+  - 新增 `US-5-AC-3`:status=done,dependencies=[US-5-AC-2],tests=`tests/integration/test_agent_package_atomic_import.py`
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-5/AC-3 行;`tests/unit/test_traceability_check.py` 新增 `test_us_5_ac_3_is_done_with_evidence` + `test_us_5_ac_3_matrix_lists_src_and_test`
+- **未做**(本 round 范围外):
+  - DB 持久化层(协议 § 17 "系统必须维护已处理包登记表"——DB shape / SQLite / PostgreSQL 是后续 slice)
+  - 临时目录事务协调(协议 § 15 步骤 1-7 中的实际 workspace 创建/cleanup——caller-side responsibility,本 slice 只跟踪状态机)
+  - 原子提交时数据库 schema migration(SQLite WAL / PostgreSQL transaction)
+  - **git commit**——本 round 累计 5M + 4 untracked:
+    - M: `loop/BACKLOG.yaml` + `docs/traceability/requirements-test-matrix.md` + `src/coevo/protocol/__init__.py` + `tests/unit/test_traceability_check.py` + audit-managed 三个文件
+    - untracked: `import_transaction.py` + `processed_package_store.py` + `import_service.py` + `tests/integration/test_agent_package_atomic_import.py`
+- 提出者:loop-engineer(在用户指令"同意先 B, 然后 A, C"下生成 protocol 3 个新 .py + 整合 __init__.py + 23 项 integration 测试;修了 4 个已知 bug(import order / closure scope leak / package_id kwarg rejection / duplicate digest false-positive);跑 2× make_quality_gate 双绿;执行 `git push origin agent/initial-coevo-environment`;写本 DECISIONS 条目;未触动审计链签名;未做 commit——待 F round)
+- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 纯函数 deterministic;无 IO / DB;不动协议 / 审计链;非新增依赖)**
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **F**:本 round 累计 5M + 4 untracked 拆分——commit + push
+  - 用户后续指令(下一步 round,候选 US-6-AC-1 / US-4-AC-1 / P2 SM2 接入)
+- **下一轮**(对应用户指令"C"):按 A→B→C→D→E→F→G 顺序,C = "暂停本会话"。本 round 完成后等待用户明确指令。

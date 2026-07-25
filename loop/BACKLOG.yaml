@@ -107,3 +107,12 @@ items:
       - tests/integration/test_agent_package_aead.py
     security_review: true
     protocol_review: true
+  - id: US-5-AC-3
+    story: US-5
+    title: 实现 .agent 协议 § 15 原子导入 7 步事务状态机 + § 17 处理包登记 in-memory store + 端到端 PackageImportService facade；纯函数无 IO / DB
+    status: done
+    dependencies: [US-5-AC-2]
+    acceptance_tests:
+      - tests/integration/test_agent_package_atomic_import.py
+    security_review: false
+    protocol_review: false
