@@ -71,3 +71,41 @@ items:
       - tests/unit/test_task_flow_models.py
     security_review: false
     protocol_review: false
+  - id: US-1-AC-2
+    story: US-1
+    title: 实现任务流程理解的服务层（FlowUnderstandingService + StageGraph + ReviewerView + 审计记录投影）
+    status: done
+    dependencies: [US-1-AC-1]
+    acceptance_tests:
+      - tests/unit/test_task_flow_service.py
+    security_review: false
+    protocol_review: false
+  - id: US-2-AC-1
+    story: US-2
+    title: 实现任务分解的最小数据模型 + 依赖图（US-2 第一刀，stage graph 消费者）
+    status: ready
+    dependencies: [US-1-AC-2]
+    acceptance_tests:
+      - tests/unit/test_task_decomposition_models.py
+    security_review: false
+    protocol_review: false
+  - id: US-3-AC-1
+    story: US-3
+    title: 脱敏人才库最小集 + 候选推荐确定性层
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_talent_recommender_models.py
+    security_review: false
+    protocol_review: false
+  - id: US-5-AC-2
+    story: US-5
+    title: 实现 SM4 AEAD payload + SM2 key wrap + manifest 签名（密码方案变更，待 approved SM2 product 接入）
+    status: blocked
+    dependencies: [US-5-AC-1, US-0-AC-2]
+    acceptance_tests:
+      - tests/security/test_agent_package_aead.py
+      - tests/integration/test_agent_package_wire_round_trip.py
+    security_review: true
+    protocol_review: true
+    blocking_reason: "AGENTS.md §6 密码方案变更需用户单独批准 approved SM2 product 接入；当前 Windows CNG 不原生支持 SM2（实测 2026-07-22 path-3 option e）。"

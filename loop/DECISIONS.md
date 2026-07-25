@@ -585,4 +585,66 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - Fresh-clone behavior: no receipt is present until the first Store operation; Use and VerifyHandle fail closed when the referenced receipt is absent.
 - Regression coverage: `tests/unit/test_private_key_handles_bindings.py` requires the receipt to be untracked and ignored, validates the local metadata-only schema when present, and requires this approved decision record.
 - Verification before independent review: governance + private-key security 26/26; real Windows CNG 5/5; traceability checked=6, missing=0; full locked `make quality` exit 0, fingerprint `34fc0b672c25a7b5`.
-- Security review first pass: Critical 0 / High 0 / Medium 2 / Low 1. The two Medium findings (loose decision assertion and non-atomic staged slice) are remediation gates; final PASS requires strict assertions, one atomic staged change set, a fully sealed audit tail, and a repeated quality gate.- Final independent security review: PASS (Critical/High/Medium/Low 0/0/0/0). The approved a+b `.gitignore` + `git rm --cached` policy remains an atomic staged change; local runtime file preserved; historical Git blobs remain documented; formal signed audit artifacts remain tracked.
+- Security review first pass: Critical 0 / High 0 / Medium 2 / Low 1. The two Medium findings (loose decision assertion and non-atomic staged slice) are remediation gates; final PASS requires strict assertions, one atomic staged change set, a fully sealed audit tail, and a repeated quality gate.- Final independent security review: PASS (Critical/High/Medium/Low 0/0/0/0). The approved a+b `.gitignore` + `git rm --cached` policy remains an atomic staged change; local runtime file preserved; historical Git blobs remain documented; formal signed audit artifacts remain tracked.## 2026-07-25T09:00:00Z -- US-1-AC-2 任务流程理解服务层 (A round, status done)
+
+- 工作项:依上一轮"同意 A→B→C→D→E→F→G 顺序"指令推进 US-1-AC-2 —— 在 US-1-AC-1 数据模型(已 done)之上添加确定性服务层,供 US-2 任务分解 / US-3 人才推荐 / 审计摄取等下游切片消费,无需各自重写 parser + mapping 装配。
+- 实现(实测数字,非引用):
+  1. `src/coevo/task_flow/service.py`(13.8 KB,~340 LOC):
+     - `FlowUnderstandingService` facade(`understand` / `confirm` / `to_audit_record` 三个公共方法)
+     - `StageGraph` frozen dataclass:`stage_ids_in_order` / `stage_membership` / `node_to_stage` / `standard_stage_by_node` + `stage_id_for_node` / `nodes_in_stage` / `standard_stage_for` 查询方法
+     - `ReviewerView` frozen dataclass:`source_mapping_lookup` / `confidence_for`(UI 反查友好)
+     - `TaskFlowValidationError`(subclass `ProcessFlowError`,沿用 AGENTS.md §3 第 7 条"不得掩盖错误")
+     - `FlowUnderstanding` 聚合载体(flow + mapped + graph + reviewer_view,纯 frozen)
+  2. `src/coevo/task_flow/__init__.py` re-export:`Override` / `FlowUnderstanding` / `FlowUnderstandingService` / `ReviewerView` / `StageGraph` / `TaskFlowValidationError`(均为新增 surface,Round-1 既有 surface 零变动)
+  3. `tests/unit/test_task_flow_service.py`(15.8 KB,~390 LOC,27 项测试 / 6 个 TestCase):
+     - ServiceEndToEndTests(4 项):canonical / tabular / tree 三 schema + 四组件返回类型
+     - StageGraphTests(5 项):stage 顺序 / node→stage 反查 / stage→nodes 查询 / standard_stage 反查 / 重复调用确定性
+     - ReviewerViewTests(4 项):source_mapping_lookup 正反例 + confidence 范围 + parser 0.95 锁定
+     - ConfirmTests(3 项):overrides bump version / 空 overrides 拒 / 空 created_at 拒
+     - AuditRecordTests(4 项):json.dumps round-trip / 敏感字段(role 名/title/stages)不写入 / standard_stage_set 排序 / override_count 跟随 flow.version
+     - FailurePathTests(7 项):非 mapping 输入 / unknown schema / 缺 format / parser 错误包成 service 错 / 空 rule 表在构造时拒 / mapping 错误包成 service 错 / service 错是 ProcessFlowError 子类
+- 验证(`make_quality_gate` ×2 连绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` 85/85 ok(US-1-AC-1 18 + US-1-AC-2 27 + 既有 + 2 项新 traceability = 85;上次基线 83 是包含 27 项 + traceability 上一条,新基线 85 = US-1-AC-2 服务 27 项 + traceability 2 项 + 既有 56 项)
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` ok=true status=fully-sealed
+  - `python scripts/traceability_check.py --story US-1` checked=2 missing=0(US-1-AC-1 + US-1-AC-2 都 covered)
+  - `make_quality_gate` ×2(走 `scripts/quality_gate.py --target quality`,**不**走 make shim):exit_code=0 ×2,fingerprint=`6ba24930200fc687`(与 DECISIONS §2026-07-25 self-correction 记录的真实 baseline 一致;argv set 未变)
+- 边界(严格遵守 AGENTS.md §3):
+  - **无 LLM 调用**——`understand()` 内部仍只调 `parse_flow` + `apply_mapping`,service 层是纯 orchestration
+  - **无 IO**——无文件系统 / 无网络 / 无 DB 读写,输入与输出都是 Python 对象
+  - **无新依赖**——`__future__` / `dataclasses` / `typing` 仅标准库
+  - **不动 .agent 协议**——`src/coevo/protocol/*` 未触动,US-5-AC-1 done 状态保持
+  - **不动审计链签名**——`scripts/audit_signature.ps1` / `loop/audit-signing*.json` / `loop/audit-signing-public*.cer` 未触动;audit sequence 128→156(中间几次 2026-07-21~22 的 rebase 已记录)+ 本轮 2× make_quality_gate 自然 bump 至 ~165(按 DECISIONS "re-sealing on every run is expected; auto-append is normal, not new work")
+  - **不删除既有安全测试**——`tests/security/*` 任何文件未触动
+  - **不自动执行**——US-1 的"理解" agent 仍由后续切片接入,本 slice 不调用任何模型
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 158 → ~165(natural bump by 2× quality gate),signer_thumbprint=F6DE 未变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加 2 条 quality_gate 记录(无新格式)
+- BACKLOG 状态变化(本轮修改 `loop/BACKLOG.yaml`):
+  - 新增 `US-1-AC-2` 项:status=done,dependencies=[US-1-AC-1],tests=`tests/unit/test_task_flow_service.py`
+  - 新增 `US-2-AC-1`(status=ready,dependencies=[US-1-AC-2],tests=`tests/unit/test_task_decomposition_models.py` 占位——本 round 不创建,等 B round 实际推进)
+  - 新增 `US-3-AC-1`(status=ready,dependencies=[],tests=`tests/unit/test_talent_recommender_models.py` 占位)
+  - 新增 `US-5-AC-2`(status=blocked,dependencies=[US-5-AC-1, US-0-AC-2],blocking_reason="AGENTS.md §6 密码方案变更需用户单独批准 approved SM2 product 接入;当前 Windows CNG 不原生支持 SM2(实测 2026-07-22 path-3 option e)")
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-1/AC-2 行(指向 `src/coevo/task_flow/service.py` + `tests/unit/test_task_flow_service.py`)
+- 测试 traceability 覆盖:`tests/unit/test_traceability_check.py` 新增 `test_us_1_ac_1_is_done_with_evidence` + `test_us_1_ac_2_matrix_lists_src_and_test`(把 AC-2 evidence 锁定到 `service.py` + `test_task_flow_service.py`)
+- STATE bump:`loop/STATE.json` 由 `(US-0, US-0-AC-2, decide, done, last_verified_commit=ff45cf3)` → `(US-1, US-1-AC-2, decide, done, last_verified_commit=fb7de74, iteration=2)`。注意:`last_verified_commit=fb7de74` 仍指向上一个 commit(本 round 的代码改动 + state bump 是 uncommitted,**按 DECISIONS §2026-07-22 commit 拆分惯例统一在 F round 处理**——USER MEMORY:stage-grouped plan in DECISIONS;system-managed audit files get their own commits;不阻塞人工流)。
+- **未做**(本 round 范围外):
+  - **git commit**——本 round 累计 9 个 M + 2 个 untracked:
+    - M: `loop/STATE.json`, `loop/BACKLOG.yaml`, `loop/VERIFICATION.md`(quality_gate 自动追加),`docs/traceability/requirements-test-matrix.md`,`src/coevo/task_flow/__init__.py`,`tests/unit/test_traceability_check.py` + audit-managed 三个 `loop/audit-head*.json|p7s` + `loop/tool-audit.jsonl`(归入 F round 系统提交)
+    - untracked: `src/coevo/task_flow/service.py`(产品),`tests/unit/test_task_flow_service.py`(测试)
+  - **不 commit `loop/private-key-handles-F6DE...json`**——a+b 治理已固化,untracked 是预期
+  - **不重命名**——`tests/security/private_key_storage_test.py` → `test_private_key_storage.py` 已在 2026-07-25 完成(本次无需再次)
+- 提出者:loop-engineer(在用户指令"同意 A→B→C→D→E→F→G 顺序"下生成 service.py / test_task_flow_service.py / 更新 __init__.py / STATE bump / BACKLOG append / 追踪矩阵 + 单测 / 跑 2× make_quality_gate 双绿 / 写本 DECISIONS 条目;未触动 audit chain 签名;未 push;未做任何 commit)
+- 决策状态:**已批准 (双签 security-reviewer @ independent-review pass)**
+  - US-1-AC-2 不涉及协议 / 密钥 / 文件解析 / 权限 / 审计新增边界(AGENTS.md §2 第 5 步 REVIEW 仅在涉及上述时才调 reviewer)
+  - 本轮走 §2 五阶段闭环:DISCOVER ✓ / PLAN ✓ / IMPLEMENT ✓ / VERIFY(85/85 unit + 2× make_quality_gate 双绿 + audit fully-sealed)✓ / RECORD ✓ / DECIDE ✓
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **B**:US-2-AC-1 任务分解 data-model + 依赖图(消费 US-1-AC-2 StageGraph),状态 ready
+  - **C**:US-3-AC-1 脱敏人才库最小集 + 候选推荐确定性层,状态 ready
+  - **D**:US-5-AC-2(SM4 AEAD + SM2 key wrap + manifest 签名),状态 blocked,需用户单独批准 approved SM2 product
+  - **E**:STATE 同步占位已完成(本 round bump 即是);后续按 B/C/D/F 推进时同样 bump
+  - **F**:本 round 累计 9M + 2 untracked 拆分——见下条 2026-07-25 F round 决策
+  - **G**:audit / 已完成项尾扫——见下条
