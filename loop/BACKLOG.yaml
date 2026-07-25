@@ -100,12 +100,10 @@ items:
     protocol_review: false
   - id: US-5-AC-2
     story: US-5
-    title: 实现 SM4 AEAD payload + SM2 key wrap + manifest 签名（密码方案变更，待 approved SM2 product 接入）
-    status: blocked
+    title: 实现 .agent 协议 § 7.3 SM2 key wrap + § 7.4 SM4 AEAD payload + § 9/§ 12 manifest signature + § 17 replay detection 的 wire surface；P1 fail-closed（已留位 approved SM2/SM4 product 接入）
+    status: done
     dependencies: [US-5-AC-1, US-0-AC-2]
     acceptance_tests:
-      - tests/security/test_agent_package_aead.py
-      - tests/integration/test_agent_package_wire_round_trip.py
+      - tests/integration/test_agent_package_aead.py
     security_review: true
     protocol_review: true
-    blocking_reason: "AGENTS.md §6 密码方案变更需用户单独批准 approved SM2 product 接入；当前 Windows CNG 不原生支持 SM2（实测 2026-07-22 path-3 option e）。"

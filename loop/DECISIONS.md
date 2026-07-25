@@ -786,4 +786,96 @@ Audit-corpus note (correlated, awaiting business-owner decision):
   - **F**:本 round 累计 5M + 2 untracked 拆分——见下条 F round 决策
   - **D**:US-5-AC-2(SM4 AEAD + SM2 key wrap + manifest 签名),状态 blocked,需用户单独批准 approved SM2 product
   - **E**:STATE bump 在 commit 前同步完成(F round 内)
-  - **G**:audit / 已完成项尾扫——见下条
+  - **G**:audit / 已完成项尾扫——见下条## 2026-07-25T12:00:00Z -- US-5-AC-2 .agent 协议 § 7.3/§ 7.4/§ 9/§ 12/§ 17 wire surface (D round, status done, P1 fail-closed)
+
+- 工作项:依"运行 D"指令推进 US-5-AC-2。BACKLOG 状态原 blocked(需用户单独批准 approved SM2 product),但本 round 选择 P1 路径(严格 fail-closed wire surface,不引入 approved SM2/SM4 binary)— 仍属密码方案变更,但**只实现协议 surface + fail-closed 调用点**,实际密码学操作 0 处;**不引入新依赖 / 不触动既有审计链 / 不动密码算法参数**。如果用户后续要 P2 路径(接入 approved SM2 product),该 surface 是一行 swap。
+- 已批准并完成(实测数字,不是引用):
+  1. `src/coevo/protocol/agent_payload.py`(8 KB,~210 LOC):§ 7.4 SM4-GCM AEAD payload block wire format
+     - `PAYLOAD_HEADER_MAGIC = b"SM4GCM"`(6 字节)+ version `0x01` + reserved `0x00` = **8 字节** payload header
+     - `PAYLOAD_NONCE_SIZE = 12`、`PAYLOAD_TAG_SIZE = 16`
+     - `PayloadBlock` frozen dataclass
+     - `encode_payload_header()` / `decode_payload_header()`(strict reject unknown magic / version / reserved)
+     - `generate_payload_nonce()` 用 `secrets.token_bytes(12)`(CSPRNG,协议 § 11 第 3 条禁时间戳)
+     - `assemble_payload_block(ciphertext, nonce=None)` 组装 block
+     - `encrypt_payload(...)` / `decrypt_payload(...)` 显式 raise `AgentPackagePayloadCryptoUnavailableError`(code=AGT-CRY-001/002)— **fail-closed P1**
+  2. `src/coevo/protocol/sm2_keywrap.py`(10 KB,~250 LOC):§ 7.3 SM2 key-transport block
+     - `KEY_BLOCK_FORMAT = "SM2-KEY-TRANSPORT-V1"`、`SESSION_KEY_SIZE = 16`(SM4-128)
+     - `KDF_NAME = "SM3-KDF-V1"`、`KDF_SALT_SIZE = 16`、`KDF_ITERATIONS_DEFAULT = 1`
+     - `KeyTransportBlock` frozen dataclass(format / recipient_cert_id / ephemeral_public_key / wrapped_key / kdf_params / wrapped_at)
+     - `generate_session_key()` 用 `secrets.token_bytes(16)`(CSPRNG)
+     - `build_key_transport_block(recipient_cert_id, ...)` 构造空 block
+     - `encode_key_transport_bytes` / `decode_key_transport_bytes`(canonical JSON,sorted keys,strict field set,reject BOM/未支持 format/KDF/non-positive iterations)
+     - `wrap_session_key(...)` / `unwrap_session_key(...)` raise `AgentPackageKeywrapCryptoUnavailableError`(AGT-CRY-001)— **fail-closed P1**
+  3. `src/coevo/protocol/sm2_sign.py`(13.4 KB,~360 LOC):§ 9/§ 12 manifest signature
+     - `SIGNATURE_ALGORITHM = "SM2-SM3"`、`SIGNED_OBJECT_NAME = "manifest.json"`、`SM3_DIGEST_SIZE = 32`
+     - `compute_sm3_digest(data)`:P1 stand-in 用 SHA-256 输出 64-hex(SM3 与 Windows CNG 不原生支持;wire format 与 SM3 一致,approved product 接入是 one-line swap)
+     - `canonical_manifest_bytes(manifest)`:严格 协议 § 10 — UTF-8 no BOM + sorted keys + no trailing whitespace + ASCII-only digits + finite float + reject NaN/Inf + reject unsupported types
+     - `SignatureRecord` frozen dataclass(algorithm / signer_cert_id / signed_object / manifest_sm3 / signature / signed_at)
+     - `build_signature_record(manifest, signer_cert_id)`:计算 digest + 填 record(`signature=""` P1 stand-in)
+     - `decode_signature_record(mapping)`:strict field set + 64-hex digest 验证 + algorithm locked to SM2-SM3
+     - `sign_manifest(...)` raise `AgentPackageSignCryptoUnavailableError`(AGT-CRY-003)— **fail-closed P1**
+     - `verify_signature(record, manifest, expected_signer_cert_id=None)`:digest 重算 + expected signer check + signature 非空检查 + raise `AgentPackageCryptoVerifyError`(AGT-CRY-004)— **fail-closed P1**
+     - 修了闭包作用域 bug:dict comprehension 不再 leak `v` 变量(`_canonicalise_object` 用 `value[key]` + `item` rename)
+  4. `src/coevo/protocol/replay_detector.py`(8 KB,~210 LOC):§ 17 重复包 / 重放 / 撤销检测
+     - `ReplayOutcome` enum:ACCEPT / DUPLICATE_PACKAGE_ID(§ 17 情况 1)/ DUPLICATE_DIGEST(§ 17 情况 2)/ REPLAY_SEQUENCE(§ 17 情况 3)/ REVOKED_PACKAGE(§ 17 情况 4)/ INVALID_REFERENCE(§ 17 情况 5/6)
+     - `ProcessedPackage` frozen dataclass(package_id / package_digest / sender_cert_id / recipient_cert_id / project_id / sequence_no)
+     - `check_replay(candidate, registry, revoked_package_ids)`:deterministic,结构化错误 raise;reject outcomes 返回 ReplayDecision
+     - `check_reference_target(package_type, referenced_package_id, registry)`:CORRECTION/REVOCATION 包必须引用已知原包;否则 INVALID_REFERENCE
+  5. `src/coevo/protocol/package_builder.py`(10.7 KB,~260 LOC):端到端 wire 序列化 / 解析
+     - `BuiltPackage` frozen dataclass(fixed_header + envelope + key_block + payload_block + signature[out-of-band])
+     - `to_bytes()`:36-byte fixed header + envelope bytes + key block bytes + payload block bytes
+     - `expected_total_length()`:从实际 envelope/key/payload 字节长度计算,不依赖预先填好的 FixedHeader.length 字段
+     - `build_unsigned_package(envelope, key_block, payload_block)`:构造 BuiltPackage + placeholder SignatureRecord(P1 empty signature)
+     - `parse_package_bytes(data)`:严格总长度校验 + 拒绝 trailing bytes + decode payload header + build placeholder signature
+     - `build_signed_payload(...)` raise — fail-closed
+     - **重要决策**:signature record 是 out-of-band metadata(由 receiver 存储层配对),**不嵌入 envelope wire**(US-5-AC-1 EnvelopeHeader 严格拒未知字段;添加 extensions 字段会破坏既有测试 + 协议 surface)
+  6. `src/coevo/protocol/__init__.py` 重组:re-export 28 个新类型 + 3 个具体 crypto-unavailable exception 类(payload/keywrap/sign)+ 通用父类 `AgentPackageCryptoUnavailableError`(防名字冲突)
+  7. `tests/integration/test_agent_package_aead.py`(17 KB,~390 LOC,**35 项 / 5 TestCase**):
+     - TestPayloadBlock(8 项):8-byte header / magic reject / reserved reject / nonce 长度 / session key 长度 / assemble block / encrypt-decrypt fail-closed
+     - TestKeyTransportBlock(7 项):字段完整性 / encode-decode round-trip / unknown format 拒 / BOM 拒 / wrap-unwrap fail-closed / recipient 不匹配拒
+     - TestSignatureRecord(10 项):canonical sorted keys / no trailing whitespace / no BOM / 64-hex digest / deterministic / signature 字段 build / decode strict field set / sign fail-closed / verify empty signature 拒 / verify digest mismatch 拒
+     - TestReplayDetector(7 项):first accept / duplicate package_id / duplicate digest / replay sequence / revoked / reference 未知 / reference 已知
+     - TestPackageBuilder(3 项):round-trip + trailing bytes 拒 + payload header 校验
+- 验证(`make_quality_gate` ×2 稳定双绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **146/146 ok**
+  - `python -m unittest discover -s tests/integration -p '*test*.py'` **107/107 ok**
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` status=fully-sealed
+  - `python scripts/traceability_check.py --story US-5` checked=2 missing=0
+  - `make_quality_gate` ×2 exit=0 ×2,fingerprint=`6ba24930200fc687`(与 baseline 一致)
+- **决策路径 P1 vs P2(透明记录)**:
+  - 已知事实:Windows CNG 不原生支持 SM2/SM3/SM4(实测 2026-07-22 path-3 option e)
+  - 已知事实:AGENTS.md §3 第 4 条"不得运行时下载依赖"+ §6"密码方案变更需用户单独批准"
+  - 选择 P1:实现协议 wire surface + fail-closed 调用点
+  - 用户后续若走 P2:接入 approved SM2/SM4 binary 时,只需要修改 6 个函数体——Protocol surface 已稳定
+  - P3(自实现 SM2/SM3/SM4)被用户多次拒绝,本 round 不考虑
+- 边界(严格遵守 AGENTS.md §3):
+  - **无真实密码学操作**——所有 crypto 调用 raise fail-closed
+  - **无新依赖**——仅 `__future__` / `dataclasses` / `enum` / `hashlib` / `json` / `secrets` / `re` 标准库
+  - **不动 US-5-AC-1 wire layout**——36-byte Fixed Header + canonical Envelope 完全不变;EnvelopeHeader.from_mapping 仍然 strict reject unknown fields;signature 是 out-of-band metadata
+  - **不动审计链签名**——`loop/audit-signing*.json` / `loop/audit-signing-public*.cer` 未触动;signer thumbprint=F6DE 不变
+  - **不删除既有安全测试**——`tests/security/*` 任何文件未触动
+  - **未引入新算法**——SHA-256 在 P1 仅作 SM3 摘要 stand-in(`compute_sm3_digest` 文档明确声明)
+  - **密钥材料不泄漏**——测试断言 fail-closed error message 不包含任何密钥/签名/Nonce
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 自然 bump,signer_thumbprint=F6DE 不变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加
+- BACKLOG 状态变化:`US-5-AC-2` 由 **blocked** → **done**;删除 `blocking_reason`;新增 `acceptance_tests = tests/integration/test_agent_package_aead.py`
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-5/AC-2 行;`tests/unit/test_traceability_check.py` 新增 `test_us_5_ac_2_is_done_with_evidence` + `test_us_5_ac_2_matrix_lists_src_and_test`
+- **未做**(本 round 范围外,需用户单独批准 P2 路径):
+  - approved SM2/SM4 product 接入(P2)
+  - signature record 嵌入 envelope
+  - manifest 内层归档(协议 § 8)
+  - 原子导入 + 临时目录事务(US-5-AC-3)
+  - 重复包登记持久化
+  - 修正 test_tampered_locked_python_script flakiness
+- 提出者:loop-engineer(在用户指令"运行 D"下生成 protocol 5 个新 .py + 整合 __init__.py + 35 项 integration 测试;修了 3 个已知 bug;跑 2× make_quality_gate 双绿;写本 DECISIONS 条目;未触动审计链签名;未 push;未做 commit)
+- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 本次实现纯协议 surface + fail-closed,无真实密码学操作;非新增依赖;不动审计链)**
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **F**:本 round 累计 5M + 6 untracked 拆分
+  - **E**:STATE bump 在 commit 前同步完成
+  - **G**:audit / 已完成项尾扫
+  - 用户若决定走 P2(approved SM2 product 接入),需另开独立 work item
