@@ -54,3 +54,20 @@ class TraceabilityTests(unittest.TestCase):
         paths = [e["path"] for e in ac1["evidence"] if e["path"]]
         self.assertTrue(any(p.endswith("coevo/protocol/agent_package.py") for p in paths))
         self.assertTrue(any(p.endswith("tests/integration/package_header_test.py") for p in paths))
+    def test_us_1_ac_1_is_done_with_evidence(self):
+        # US-1/AC-1 is status=done; service-layer extension AC-2 was added.
+        result = trace.check("US-1")
+        by_ac = {item["ac"]: item for item in result["items"]}
+        self.assertIn("AC-1", by_ac)
+        self.assertIn("AC-2", by_ac)
+        self.assertEqual("done", by_ac["AC-1"]["status"])
+        self.assertEqual("done", by_ac["AC-2"]["status"])
+    def test_us_1_ac_2_matrix_lists_src_and_test(self):
+        # Pin that AC-2 evidence points at the new service.py module
+        # and the new test_task_flow_service.py file.
+        result = trace.check("US-1", active_only=False)
+        by_ac = {item["ac"]: item for item in result["items"]}
+        ac2 = by_ac["AC-2"]
+        paths = [e["path"] for e in ac2["evidence"] if e["path"]]
+        self.assertTrue(any(p.endswith("coevo/task_flow/service.py") for p in paths))
+        self.assertTrue(any(p.endswith("tests/unit/test_task_flow_service.py") for p in paths))
