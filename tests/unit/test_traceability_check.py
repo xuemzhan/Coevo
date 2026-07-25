@@ -96,15 +96,12 @@ class TraceabilityTests(unittest.TestCase):
         self.assertTrue(any(p.endswith("coevo/protocol/package_builder.py") for p in paths))
         self.assertTrue(any(p.endswith("tests/integration/test_agent_package_aead.py") for p in paths))
     def test_us_5_ac_3_is_done_with_evidence(self):
-        # US-5/AC-3 is status=done; pure-function atomic-import +
-        # persistence layer + facade.
         result = trace.check("US-5")
         by_ac = {item["ac"]: item for item in result["items"]}
         self.assertIn("AC-3", by_ac)
         self.assertEqual("done", by_ac["AC-3"]["status"])
         self.assertTrue(all(bool(e["exists"]) for e in by_ac["AC-3"]["evidence"]))
     def test_us_5_ac_3_matrix_lists_src_and_test(self):
-        # Pin US-5/AC-3 evidence to the new atomic-import modules.
         result = trace.check("US-5", active_only=False)
         by_ac = {item["ac"]: item for item in result["items"]}
         ac3 = by_ac["AC-3"]
@@ -113,3 +110,20 @@ class TraceabilityTests(unittest.TestCase):
         self.assertTrue(any(p.endswith("coevo/protocol/processed_package_store.py") for p in paths))
         self.assertTrue(any(p.endswith("coevo/protocol/import_service.py") for p in paths))
         self.assertTrue(any(p.endswith("tests/integration/test_agent_package_atomic_import.py") for p in paths))
+    def test_us_6_ac_1_is_done_with_evidence(self):
+        # US-6/AC-1 is status=done; pure-function workspace
+        # path strategy + in-memory registry + init facade.
+        result = trace.check("US-6")
+        by_ac = {item["ac"]: item for item in result["items"]}
+        self.assertIn("AC-1", by_ac)
+        self.assertEqual("done", by_ac["AC-1"]["status"])
+        self.assertTrue(all(bool(e["exists"]) for e in by_ac["AC-1"]["evidence"]))
+    def test_us_6_ac_1_matrix_lists_src_and_test(self):
+        result = trace.check("US-6", active_only=False)
+        by_ac = {item["ac"]: item for item in result["items"]}
+        ac1 = by_ac["AC-1"]
+        paths = [e["path"] for e in ac1["evidence"] if e["path"]]
+        self.assertTrue(any(p.endswith("coevo/workspace/paths.py") for p in paths))
+        self.assertTrue(any(p.endswith("coevo/workspace/models.py") for p in paths))
+        self.assertTrue(any(p.endswith("coevo/workspace/init_service.py") for p in paths))
+        self.assertTrue(any(p.endswith("tests/unit/test_workspace_init.py") for p in paths))
