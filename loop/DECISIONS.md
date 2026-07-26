@@ -1086,4 +1086,68 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - 待办(NEXT ROUND,本轮不擅自推进):
   - **F**:本 round 累计 5M + 2 untracked 拆分——commit + push
   - **下一轮 AC**:MVP 闭环剩余 9 个 user story 中任选(US-4 / US-7 / US-8 / US-9 / US-10 / US-11 / US-13 / US-12 / US-14)
+  - 用户指令决定方向## 2026-07-25T16:30:00Z -- US-9-AC-1 成果汇报包生成最小数据层 (US-9 first slice, status done)
+
+- 工作项:依用户指令"继续开发"推进,选择 **US-9-AC-1** —— 编排链 A 路径(任务输入→流程理解→任务分解→团队推荐→负责人确认→生成任务包)走完最后一步。BACKLOG 此前无 US-9 行,本 round 新增并 done。
+- 已批准并完成(实测数字,不是引用):
+  1. `src/coevo/report/models.py`(8.8 KB,~210 LOC):manifest 数据层
+     - `ReportStatus` enum:ON_TRACK / AT_RISK / BLOCKED / COMPLETED(AC-1)
+     - `ReportArtifact` frozen dataclass:path safe-id / role / media_type / size ≥ 0 / 64-hex digest / classification / required bool(AC-2)
+     - `ReportManifest` frozen dataclass:AC-1..AC-4 全字段 + 强 `__post_init__` 验证(safe-id / sequence_no > 0 / 字段类型 / completed_work 等 tuple-of-strings)
+     - `ReportOverride` frozen dataclass:reviewer 编辑记录
+     - `ReportManifestError` base + `ReportManifestValidationError` 显式分层
+  2. `src/coevo/report/builder.py`(11 KB,~280 LOC):facade + sequence counter
+     - `ReportSubmissionSequence` in-memory 严格单调 counter(AC-4)
+     - `ReportPackage` frozen dataclass:`package` (US-5 BuiltPackage) + `manifest`;`to_bytes()` 委托 US-5;`expected_filename()` 协议 § 6 格式 `{package_type}_{project_id}_{package_id}.agent`
+     - `ReportBuilder.build(manifest, baseline, sequence)`:AC-3 验证 baseline.project_id == manifest.project_id;AC-4 验证 sequence.peek() == manifest.sequence_no;拒绝时 raise `ReportManifestValidationError`
+     - `ReportBuilder._build_envelope()`:直接构造 EnvelopeHeader 走 US-5 wire layout,`wrapped_at` 用 `manifest.submitted_at` 保持 deterministic
+     - `ReportBuilder.to_audit_record()`:JSON 安全投影
+     - `ReportBuilderError` base
+  3. `src/coevo/report/__init__.py` re-export 11 个公共类型
+  4. `tests/unit/test_report_builder.py`(16.5 KB,~420 LOC,**25 项 / 7 TestCase**):
+     - TestReportArtifact(5 项):basic / invalid digest / traversal / negative size / non-string role
+     - TestReportManifest(4 项):basic / bad id / zero sequence / bad status / bad schema version
+     - TestReportManifest_AC3(1 项):project_id / task_id / base_revision
+     - TestSubmissionSequence(3 项):first value 1 / next bumps / two nexts
+     - TestReportBuilder(6 项):emits ReportPackage / wire bytes deterministic / mismatched project_id / mismatched sequence / inherits US-5 wire layout / requires valid args
+     - TestExpectedFilename(1 项):canonical filename format
+     - TestOverrides(3 项):with_overrides bumps / empty rejected / empty submitted_at rejected
+     - TestAuditRecord(1 项):JSON safety + structural fields
+- 验证(`make_quality_gate` ×2 稳定双绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **207/207 ok**(US-9-AC-1 25 + US-6-AC-1 30 + US-3-AC-1 32 + US-2-AC-1 23 + US-1-AC-2 27 + 既有 56 + traceability 14 = 207;上次基线 180,本 round +27)
+  - `python -m unittest discover -s tests/integration -p '*test*.py'` **130/130 ok**(无新增)
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` status=fully-sealed
+  - `python scripts/traceability_check.py --story US-9` checked=1 missing=0
+  - `make_quality_gate` ×2 exit=0 ×2,fingerprint=`6ba24930200fc687`(与 baseline 一致)
+- **AC-5 关键决策**:报告包和下发包**严格共用同一 wire layout**。`ReportBuilder.build()` 内部直接调 US-5 `build_unsigned_package()`,所以解码端不需要新代码——同一个 `parse_package_bytes` 就能解析(只需 envelope.package_type 区分 `TASK_ASSIGNMENT` vs `RESULT_SUBMISSION`)。这是协议 § 13 第 11-12 步的"端到端一致性"保证。
+- 边界(严格遵守 AGENTS.md §3):
+  - **无 IO**——`ReportPackage.to_bytes()` 委托 US-5,实际写盘是 caller-side
+  - **无 LLM / 无新依赖**——仅 `dataclasses` / `enum` / `datetime` / `uuid` / `re` 标准库
+  - **不动 US-5 wire layout**——`ReportBuilder` 是 US-5 `build_unsigned_package` 的 caller,产出字节格式与下发包完全一致
+  - **不动 US-2 wire layout**——`ProjectBaseline` 接口零修改,US-9 通过 `process_flow_ref` 读取
+  - **不动审计链签名**——`loop/audit-signing*.json` 未触动;signer thumbprint=F6DE 不变
+  - **不删除既有安全测试**
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 自然 bump,signer_thumbprint=F6DE 不变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加
+- BACKLOG 状态变化(`loop/BACKLOG.yaml`):
+  - 新增 `US-9-AC-1`:status=done,dependencies=[US-5-AC-1, US-5-AC-2, US-5-AC-3, US-2-AC-1]
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-9/AC-1 行;`tests/unit/test_traceability_check.py` 新增 `test_us_9_ac_1_is_done_with_evidence` + `test_us_9_ac_1_matrix_lists_src_and_test`
+- **未做**(本 round 范围外,等用户单独批准):
+  - **approved SM2/SM4 product 接入**——`ReportBuilder.build` 输出空 payload,接收端 US-5-AC-2 § 7.4 fail-closed 会显式抛 AGT-CRY-001(协议 § 5 AC-5 保持一致性的 P1 行为)
+  - **用户确认 GUI**(US-9 AC-6 的人机交互)——上层 UI 层
+  - **成果文件复制**(US-9 AC-7 "原始成果文件保留在本地工作区")——文件系统层
+  - **base_revision 冲突审核 UI**(US-9 AC-3 与 US-10 状态合并相关)——上层审核
+  - **git commit**——本 round 累计 5M + 2 untracked:
+    - M: `loop/BACKLOG.yaml` + `docs/traceability/requirements-test-matrix.md` + `tests/unit/test_traceability_check.py` + audit-managed 三个文件
+    - untracked: `src/coevo/report/{models,builder}.py` + `tests/unit/test_report_builder.py`
+- 提出者:loop-engineer(在用户指令"继续开发"下生成 report 2 个新 .py + 整合 __init__.py + 25 项 unit 测试;修了 2 个已知 bug(progress_summary 类型混淆 + wrapped_at timestamp 不一致);跑 2× make_quality_gate 双绿;写本 DECISIONS 条目;未触动审计链签名;未做 commit——待 F round)
+- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 纯函数 deterministic;无 IO / DB;与 US-5 共享 wire layout 满足 AC-5;不动协议 / 审计链;非新增依赖)**
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **F**:本 round 累计 5M + 2 untracked 拆分——commit + push
+  - **下一轮 AC**:MVP 编排链 A 已基本完整;剩 US-4(运行中枢)、US-7(本地驾驶舱)、US-8(进展采集)、US-10(状态合并)、US-11(风险预警)、US-12(督办)、US-13(决策简报)、US-14(成果沉淀)
   - 用户指令决定方向

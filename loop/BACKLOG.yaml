@@ -125,3 +125,12 @@ items:
       - tests/unit/test_workspace_init.py
     security_review: false
     protocol_review: false
+  - id: US-9-AC-1
+    story: US-9
+    title: 实现成果汇报包生成的最小数据层：ReportManifest（AC-1 状态/进度/已完成/未完成/下一步/风险 + AC-2 证据文件 + AC-3 项目/任务/基线版本 + AC-4 包唯一编号/提交序号）+ ReportArtifact（含 64-hex 摘要）+ ReportSubmissionSequence（单调计数）+ ReportBuilder facade（消费 US-2 ProjectBaseline + manifest → 委托 US-5 build_unsigned_package 复用 wire layout，AC-5 一致性）+ ReportPackage + to_audit_record；纯函数无 IO
+    status: done
+    dependencies: [US-5-AC-1, US-5-AC-2, US-5-AC-3, US-2-AC-1]
+    acceptance_tests:
+      - tests/unit/test_report_builder.py
+    security_review: false
+    protocol_review: false
