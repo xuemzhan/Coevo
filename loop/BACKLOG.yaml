@@ -134,3 +134,12 @@ items:
       - tests/unit/test_report_builder.py
     security_review: false
     protocol_review: false
+  - id: US-10-AC-1
+    story: US-10
+    title: 实现状态合并最小数据层：MergeDecision 枚举（ACCEPT / REJECT / HOLD / MANUAL）+ FieldMerge（field_path + original/submitted value + decision + reason）+ MergeRecord 持久化记录 + MergeProposal（new_baseline + record + accepted）+ MergeEngine facade（消费 US-9 ReportManifest + US-2 ProjectBaseline → 校验 AC-1/AC-3 身份 + 基线版本 + AC-7 不依赖时间戳覆盖 + AC-8 严格单调 version + AC-9 持久化记录 + to_audit_record）；纯函数无 IO
+    status: done
+    dependencies: [US-9-AC-1, US-2-AC-1]
+    acceptance_tests:
+      - tests/unit/test_merge_engine.py
+    security_review: false
+    protocol_review: false

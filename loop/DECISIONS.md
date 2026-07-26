@@ -1150,4 +1150,68 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - 待办(NEXT ROUND,本轮不擅自推进):
   - **F**:本 round 累计 5M + 2 untracked 拆分——commit + push
   - **下一轮 AC**:MVP 编排链 A 已基本完整;剩 US-4(运行中枢)、US-7(本地驾驶舱)、US-8(进展采集)、US-10(状态合并)、US-11(风险预警)、US-12(督办)、US-13(决策简报)、US-14(成果沉淀)
+  - 用户指令决定方向## 2026-07-25T17:30:00Z -- US-10-AC-1 状态合并最小数据层 (编排链 B 第 2-3 步, status done)
+
+- 工作项:依"继续开发"指令推进,选 **US-10-AC-1**(编排链 B 起步:消费 US-9 报告包,生成 v+1 ProjectBaseline)。BACKLOG 此前无 US-10,本 round 新增并 done。
+- 已批准并完成(实测数字,不是引用):
+  1. `src/coevo/merge/__init__.py`(14.7 KB,~390 LOC):end-to-end merge engine + data model
+     - `MergeDecision` enum:ACCEPT / REJECT / HOLD / MANUAL(AC-6)
+     - `FieldMerge` frozen dataclass:field_path + original/submitted value + decision + reason(AC-9)
+     - `MergeRecord` frozen dataclass:project_id / reporter_package_id / base_revision / merged_revision / status / field_merges / decided_at / decider(AC-9 持久化)
+     - `MergeProposal` frozen dataclass:new_baseline + record + accepted + rejection_reason(AC-8 + top-level accept flag)
+     - `MergeEngine` facade(AC-1 校验 / AC-3 base_revision 匹配 / AC-4 / AC-7 不依赖时间戳 / AC-8 严格单调):
+       - 拒 project_id 错 → accepted=False + rejection_reason
+       - 拒 base_revision 错 → accepted=False + rejection_reason
+       - **plan_end 推进规则**:report.status == COMPLETED 且 report.submitted_at > baseline.plan_end → 推进 plan_end 到 submitted_at,reason 引 AC-8(非 "newer")
+       - **risks 总是 HOLD**(AC-4):需要人工 review
+       - **pending work HOLD 当 status ∈ {AT_RISK, BLOCKED}**(AC-4 + AC-7)
+       - **strict monotonic version**:`new_baseline.version = baseline.version + 1`
+     - `to_audit_record(proposal)`:JSON 安全投影
+     - `MergeError` base + `MergeValidationError` 显式分层
+  2. `tests/unit/test_merge_engine.py`(16 KB,~430 LOC,**19 项 / 7 TestCase**):
+     - TestMergeValidation(4 项):valid inputs / non-report rejected / non-baseline rejected / empty decided_at rejected
+     - TestMergeConflict(2 项):mismatched project_id / mismatched base_revision rejected
+     - TestAutoMerge(5 项):completed report advances plan_end / completed report keeps plan_end when earlier / risks always HOLD / pending work HOLD when at_risk / pending work ACCEPT when on_track
+     - TestNoTimestampOverride(2 项):every merge carries a decision / plan_end reason cites AC-8
+     - TestNewRevision(2 项):merge produces new revision / strict monotonic across consecutive merges
+     - TestMergeRecord(3 项):JSON safety / audit_record JSON safety / audit_record on rejection
+     - TestMergeIdempotence(1 项):byte-deterministic for same inputs
+- 验证(`make_quality_gate` ×2 稳定双绿):
+  - `python -m compileall -q -f scripts src tests` exit 0
+  - `python -m unittest discover -s tests/unit` **228/228 ok**(US-10-AC-1 19 + US-9-AC-1 25 + US-6-AC-1 30 + US-3-AC-1 32 + US-2-AC-1 23 + US-1-AC-2 27 + 既有 56 + traceability 16 = 228;上次基线 207,本 round +21)
+  - `python -m unittest discover -s tests/integration -p '*test*.py'` **130/130 ok**(无新增)
+  - `python scripts/audit_log.py verify` ok=true errors=[]
+  - `python scripts/audit_seal.py verify --allow-tail` status=fully-sealed
+  - `python scripts/traceability_check.py --story US-10` checked=1 missing=0
+  - `make_quality_gate` ×2 exit=0 ×2,fingerprint=`6ba24930200fc687`(与 baseline 一致)
+- **AC-7 关键决策**:plan_end 推进 rule 的 reason 字段**必须**包含 "AC-8" 字样;rejected 时 "AC-3"。**绝不让 timestamp 单独做决策**——每条 field 都有显式 decision + reason,所有 decision 都是 4-值 enum 之一。
+- 边界(严格遵守 AGENTS.md §3):
+  - **无 IO**——纯函数 deterministic
+  - **无 LLM / 无新依赖**——仅 `dataclasses` / `enum` 标准库
+  - **不动 US-2 / US-9 wire layout**——`ProjectBaseline` + `ReportManifest` 接口零修改
+  - **不动审计链签名**——`loop/audit-signing*.json` 未触动;signer thumbprint=F6DE 不变
+  - **不删除既有安全测试**
+  - **不实现 US-10 AC-6**——"用户可选择接受提交值、保留本地值、手工调整、暂不合并或退回" 是 UI 决策,本 slice 提供数据 + 引擎 + 记录;UI 层用 4 值 enum 自然实现
+  - **不实现 US-10 AC-9**——"原始汇报包和合并记录永久保留"——DB 持久化留给未来 slice
+  - **不实现 US-10 AC-10**——"按权限撤销"——权限层
+- 安全审计链影响(按 AGENTS.md §3 第 6 条透明记录):
+  1. `loop/audit-signing.json` thumbprint=F6DE 未触动
+  2. `loop/audit-head.json` sequence 自然 bump,signer_thumbprint=F6DE 不变
+  3. `loop/audit-head-F6DE*.json|p7s` 历史归档保留
+  4. `loop/tool-audit.jsonl` 自然追加
+- BACKLOG 状态变化(`loop/BACKLOG.yaml`):
+  - 新增 `US-10-AC-1`:status=done,dependencies=[US-9-AC-1, US-2-AC-1]
+- 追踪矩阵变化:`docs/traceability/requirements-test-matrix.md` 追加 US-10/AC-1 行;`tests/unit/test_traceability_check.py` 新增 `test_us_10_ac_1_is_done_with_evidence` + `test_us_10_ac_1_matrix_lists_src_and_test`
+- **未做**(本 round 范围外,等用户单独批准):
+  - **用户手动审核 UI**(US-10 AC-6)——上层 UI
+  - **DB 持久化层**(US-10 AC-9 永久保留)——SQLite / PostgreSQL
+  - **权限撤销**(US-10 AC-10)——权限层
+  - **git commit**——本 round 累计 5M + 2 untracked:
+    - M: `loop/BACKLOG.yaml` + `docs/traceability/requirements-test-matrix.md` + `tests/unit/test_traceability_check.py` + audit-managed 三个文件
+    - untracked: `src/coevo/merge/__init__.py` + `tests/unit/test_merge_engine.py`
+- 提出者:loop-engineer(在用户指令"继续开发 + terse continuation"下生成 merge/__init__.py 14.7 KB + 19 项 unit 测试;修了 2 个已知 bug(JSON tuple-vs-list 序列化 + 严格单调测试 fixture process_flow_ref version 误传);跑 2× make_quality_gate 双绿;写本 DECISIONS 条目;未触动审计链签名;未做 commit——待 F round)
+- 决策状态:**已批准(独立 mvp-verifier 内审 pass — 纯函数 deterministic;无 IO / DB;AC-7 显式 reason 字段含 "AC-8" 防时间戳 override;不动协议 / 审计链;非新增依赖)**
+- 待办(NEXT ROUND,本轮不擅自推进):
+  - **F**:本 round 累计 5M + 2 untracked 拆分——commit + push
+  - **下一轮 AC**:MVP 编排链 B 剩余 — US-11-AC-1 风险预警(消费 US-10 merge record)、US-13-AC-1 决策简报(消费 US-11 风险)、US-12 督办 + US-8 进展采集
   - 用户指令决定方向
