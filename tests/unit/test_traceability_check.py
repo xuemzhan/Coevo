@@ -126,8 +126,6 @@ class TraceabilityTests(unittest.TestCase):
         self.assertTrue(any(p.endswith("coevo/workspace/init_service.py") for p in paths))
         self.assertTrue(any(p.endswith("tests/unit/test_workspace_init.py") for p in paths))
     def test_us_9_ac_1_is_done_with_evidence(self):
-        # US-9/AC-1 is status=done; pure-function report
-        # manifest + sequence counter + builder facade.
         result = trace.check("US-9")
         by_ac = {item["ac"]: item for item in result["items"]}
         self.assertIn("AC-1", by_ac)
@@ -141,3 +139,17 @@ class TraceabilityTests(unittest.TestCase):
         self.assertTrue(any(p.endswith("coevo/report/models.py") for p in paths))
         self.assertTrue(any(p.endswith("coevo/report/builder.py") for p in paths))
         self.assertTrue(any(p.endswith("tests/unit/test_report_builder.py") for p in paths))
+    def test_us_10_ac_1_is_done_with_evidence(self):
+        # US-10/AC-1 is status=done; pure-function merge engine.
+        result = trace.check("US-10")
+        by_ac = {item["ac"]: item for item in result["items"]}
+        self.assertIn("AC-1", by_ac)
+        self.assertEqual("done", by_ac["AC-1"]["status"])
+        self.assertTrue(all(bool(e["exists"]) for e in by_ac["AC-1"]["evidence"]))
+    def test_us_10_ac_1_matrix_lists_src_and_test(self):
+        result = trace.check("US-10", active_only=False)
+        by_ac = {item["ac"]: item for item in result["items"]}
+        ac1 = by_ac["AC-1"]
+        paths = [e["path"] for e in ac1["evidence"] if e["path"]]
+        self.assertTrue(any(p.endswith("coevo/merge/__init__.py") for p in paths))
+        self.assertTrue(any(p.endswith("tests/unit/test_merge_engine.py") for p in paths))
