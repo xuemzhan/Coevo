@@ -136,10 +136,47 @@ items:
     protocol_review: false
   - id: US-10-AC-1
     story: US-10
-    title: 实现状态合并最小数据层：MergeDecision 枚举（ACCEPT / REJECT / HOLD / MANUAL）+ FieldMerge（field_path + original/submitted value + decision + reason）+ MergeRecord 持久化记录 + MergeProposal（new_baseline + record + accepted）+ MergeEngine facade（消费 US-9 ReportManifest + US-2 ProjectBaseline → 校验 AC-1/AC-3 身份 + 基线版本 + AC-7 不依赖时间戳覆盖 + AC-8 严格单调 version + AC-9 持久化记录 + to_audit_record）；纯函数无 IO
+    title: '实现状态合并最小数据层: MergeDecision 枚举 ACCEPT/REJECT/HOLD/MANUAL + FieldMerge field_path/original/submitted value/decision/reason + MergeRecord 持久化记录 + MergeProposal new_baseline/record/accepted + MergeEngine facade 消费 US-9 ReportManifest 加 US-2 ProjectBaseline 校验 AC-1/AC-3 身份 + 基线版本 + AC-7 不依赖时间戳覆盖 + AC-8 严格单调 version + AC-9 持久化记录 + to_audit_record, 纯函数无 IO. Round-2 fix 2026-07-27: AC-3 base_revision 冲突检测 (HOLD-with-conflict) + decision_maker authority from verified ImportOutcome (mandatory constraint 8.4).'
     status: done
     dependencies: [US-9-AC-1, US-2-AC-1]
     acceptance_tests:
       - tests/unit/test_merge_engine.py
+      - tests/unit/test_merge_engine_v3.py
+    security_review: true
+    protocol_review: false
+  - id: US-11-AC-1
+    story: US-11
+    title: 实现风险预警最小数据层：RiskKind 枚举（DEADLINE_OVERRUN / PREDECESSOR_UNFINISHED / LONG_SILENCE / INSUFFICIENT_EVIDENCE / SEVERE_COORDINATION_NEEDED / AT_RISK_BLOOM / BLOCKED_BLOOM）+ SourceKind（FACTUAL / RULE / INFERRED）+ Risk（basis + affected_tasks + recommendation + suggested_deadline + severity ∈ [1,5]）+ RiskReport（merge_reporter_package_id + project_id + risks + coordination_meeting_recommended + 强制 requires_owner_confirmation=True + formally_released=False）+ RiskAnalyzer facade（消费 US-10 MergeRecord + US-2 ProjectBaseline → 规则/事实/推断三类风险 + 会议建议 + to_audit_record 排除 basis/recommendation）；纯函数无 IO
+    status: ready
+    dependencies: [US-10-AC-1, US-2-AC-1]
+    acceptance_tests:
+      - tests/unit/test_risk_analyzer.py
+    security_review: true
+    protocol_review: false
+  - id: US-12-AC-1
+    story: US-12
+    title: 督办/会议协同 service facade（消费 US-11 风险 + 8 项 AC；待办）
+    status: ready
+    dependencies: [US-11-AC-1]
+    acceptance_tests:
+      - tests/unit/test_supervision_meeting.py
+    security_review: false
+    protocol_review: false
+  - id: US-13-AC-1
+    story: US-13
+    title: 决策简报 service facade（消费 US-10 合并后基线 + US-11 风险；待办）
+    status: ready
+    dependencies: [US-10-AC-1, US-11-AC-1]
+    acceptance_tests:
+      - tests/unit/test_decision_brief.py
+    security_review: false
+    protocol_review: false
+  - id: US-8-AC-1
+    story: US-8
+    title: 进展采集（待办；依赖 US-6 workspace 与 US-9 report）
+    status: ready
+    dependencies: [US-6-AC-1, US-9-AC-1]
+    acceptance_tests:
+      - tests/unit/test_progress_capture.py
     security_review: false
     protocol_review: false
