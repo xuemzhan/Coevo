@@ -94,7 +94,8 @@ Non-goals
 from __future__ import annotations
 
 import enum
-from dataclasses import dataclass, field
+import datetime as dt
+from dataclasses import dataclass, field, replace
 from typing import Iterable, Mapping
 
 from src.coevo.protocol.import_service import ImportOutcome
@@ -106,6 +107,17 @@ from src.coevo.protocol.processed_package_store import (
 )
 from src.coevo.report import ReportManifest, ReportStatus
 from src.coevo.task_decomposition import ProjectBaseline, Task, WorkPackage
+from .receipt import (
+    BASELINE_DIGEST_ALGORITHM,
+    BASELINE_SCHEMA,
+    MergeCommitReceipt,
+    MergeCommitReceiptError,
+    MergeCommitReceiptStore,
+    ReceiptSigningAuthority,
+    append_signed_receipt,
+    build_signed_merge_commit_receipt,
+)
+from .repository import MergeReceiptRepository
 
 
 # Sentinel for fields not present in a value. Exposed publicly so
@@ -291,6 +303,28 @@ class MergeProposal:
     rejection_reason: str = ""
 
 
+@dataclass(frozen=True)
+class MergeCommitOutcome:
+    """Atomic result of merge plus authoritative receipt registration."""
+
+    proposal: MergeProposal
+    receipt: MergeCommitReceipt | None
+    receipt_store: MergeCommitReceiptStore
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.proposal, MergeProposal):
+            raise ValueError("proposal must be MergeProposal")
+        if not isinstance(self.receipt_store, MergeCommitReceiptStore):
+            raise ValueError("receipt_store must be MergeCommitReceiptStore")
+        if self.proposal.accepted:
+            if self.receipt is None:
+                raise ValueError("accepted commit outcome requires a receipt")
+            if self.receipt_store.get(self.receipt.receipt_id) != self.receipt:
+                raise ValueError("accepted receipt must be registered")
+        elif self.receipt is not None:
+            raise ValueError("failed commit outcome must not carry a receipt")
+
+
 # ----------------------- exceptions -----------------------
 
 
@@ -328,6 +362,15 @@ def _master_revision(project_id: str, version_number: int) -> str:
 
 @dataclass(frozen=True)
 class MergeEngine:
+    def __init__(
+        self, *, receipt_repository: MergeReceiptRepository | None = None,
+        receipt_authority: ReceiptSigningAuthority | None = None,
+    ) -> None:
+        if (receipt_repository is None) != (receipt_authority is None):
+            raise MergeError("receipt repository and authority must be composed together")
+        object.__setattr__(self, "_receipt_repository", receipt_repository)
+        object.__setattr__(self, "_receipt_authority", receipt_authority)
+
     """Deterministic facade for the US-10-AC-1 merge slice (P1 fix + Round-2).
 
     The engine is PURE: it consumes a verified
@@ -753,7 +796,207 @@ class MergeEngine:
             accepted=True,
         )
 
+    def merge_and_commit(
+        self,
+        *,
+        import_outcome: ImportOutcome,
+        report: ReportManifest,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        decided_at: str,
+        authorized_recipient_certs: "frozenset[str] | None" = None,
+    ) -> MergeCommitOutcome:
+        """Atomically merge and register an authoritative content receipt."""
+        if (
+            type(self._receipt_repository) is not MergeReceiptRepository
+            or type(self._receipt_authority) is not ReceiptSigningAuthority
+        ):
+            raise MergeError("merge engine lacks the system receipt composition")
+        receipt_repository = self._receipt_repository
+        receipt_authority = self._receipt_authority
+        prior_history = receipt_repository.verified_history(
+            trusted_time=dt.datetime.fromisoformat(
+                decided_at.removesuffix("Z") + "+00:00"
+            )
+        )
+        receipt_store = MergeCommitReceiptStore.empty()
+        for historical in prior_history:
+            receipt_store = append_signed_receipt(receipt_store, historical)
+        proposal = self.merge(
+            import_outcome=import_outcome,
+            report=report,
+            baseline=baseline,
+            store=store,
+            decided_at=decided_at,
+            authorized_recipient_certs=authorized_recipient_certs,
+        )
+        if not proposal.accepted:
+            return MergeCommitOutcome(
+                proposal=proposal, receipt=None, receipt_store=receipt_store,
+            )
+
+        imported_record = import_outcome.record
+        transaction = import_outcome.transaction
+        if (
+            imported_record is None
+            or imported_record.result != "committed"
+            or imported_record.package_type != report.package_type
+            or imported_record.revision != report.base_revision
+            or imported_record.package.sequence_no != report.sequence_no
+            or transaction.package_id != report.package_id
+            or transaction.project_id != report.project_id
+            or transaction.base_revision != report.base_revision
+            or transaction.current_revision != report.base_revision
+        ):
+            rolled_back = self._rollback_receipt_commit(
+                proposal=proposal,
+                baseline=baseline,
+                store=store,
+                reason="authoritative import facts do not bind to the report",
+            )
+            return MergeCommitOutcome(
+                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
+            )
+
+        if (
+            not isinstance(proposal.record.field_merges, tuple)
+            or any(
+                not isinstance(field_merge, FieldMerge)
+                or field_merge.decision
+                not in (MergeDecision.ACCEPT, MergeDecision.MANUAL)
+                for field_merge in proposal.record.field_merges
+            )
+        ):
+            rolled_back = self._rollback_receipt_commit(
+                proposal=proposal,
+                baseline=baseline,
+                store=store,
+                reason="committed merge contains an untrusted field decision",
+            )
+            return MergeCommitOutcome(
+                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
+            )
+
+        status_merges = tuple(
+            merge for merge in proposal.record.field_merges
+            if isinstance(merge, FieldMerge) and merge.field_path == "status"
+        )
+        baseline_task_ids = {
+            task.task_id
+            for work_package in proposal.new_baseline.work_packages
+            for task in work_package.tasks
+        }
+        if (
+            len(status_merges) != 1
+            or status_merges[0].decision
+            not in (MergeDecision.ACCEPT, MergeDecision.MANUAL)
+            or status_merges[0].submitted_value is not report.status
+            or report.task_id not in baseline_task_ids
+            or proposal.record.reporter_package_id != report.package_id
+            or proposal.record.status is not report.status
+            or proposal.record.decision_maker
+            != imported_record.package.recipient_cert_id
+        ):
+            rolled_back = self._rollback_receipt_commit(
+                proposal=proposal,
+                baseline=baseline,
+                store=store,
+                reason=(
+                    "committed merge lacks one accepted status field "
+                    "or references an unknown task"
+                ),
+            )
+            return MergeCommitOutcome(
+                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
+            )
+
+        package = imported_record.package
+        if receipt_authority.signer_certificate_id != package.recipient_cert_id:
+            rolled_back = self._rollback_receipt_commit(
+                proposal=proposal, baseline=baseline, store=store,
+                reason="receipt signer is not the verified merge recipient",
+            )
+            return MergeCommitOutcome(
+                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
+            )
+        status_decision = status_merges[0].decision.value
+        completed_task_id = (
+            report.task_id if report.status is ReportStatus.COMPLETED else None
+        )
+        try:
+            trusted_time = dt.datetime.fromisoformat(
+                decided_at.removesuffix("Z") + "+00:00"
+            )
+            def receipt_builder(store_id, store_sequence, previous_id, previous_hash):
+                return build_signed_merge_commit_receipt(
+                authority=receipt_authority,
+                trusted_time=trusted_time,
+                baseline=proposal.new_baseline,
+                store_id=store_id, store_sequence=store_sequence,
+                previous_receipt_id=previous_id,
+                previous_receipt_hash=previous_hash,
+                package_id=package.package_id,
+                package_digest=package.package_digest,
+                sender_cert_id=package.sender_cert_id,
+                recipient_cert_id=package.recipient_cert_id,
+                sequence_no=package.sequence_no,
+                package_type=imported_record.package_type,
+                import_processed_at=imported_record.processed_at,
+                project_id=report.project_id,
+                task_id=report.task_id,
+                report_status=report.status,
+                status_decision=status_decision,
+                base_revision=proposal.record.base_revision,
+                current_revision=proposal.record.current_version,
+                merged_revision=proposal.record.merged_version,
+                commit_decided_at=proposal.record.decided_at,
+                decision_maker=proposal.record.decision_maker,
+                baseline_digest_algorithm=BASELINE_DIGEST_ALGORITHM,
+                baseline_schema=BASELINE_SCHEMA,
+                completed_task_id=completed_task_id,
+                )
+            receipt = receipt_repository.commit(
+                receipt_builder, trusted_time=trusted_time,
+            )
+            committed_receipts = append_signed_receipt(receipt_store, receipt)
+        except (MergeCommitReceiptError, ValueError) as exc:
+            rolled_back = self._rollback_receipt_commit(
+                proposal=proposal,
+                baseline=baseline,
+                store=store,
+                reason=f"receipt commit failed: {exc}",
+            )
+            return MergeCommitOutcome(
+                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
+            )
+        return MergeCommitOutcome(
+            proposal=proposal,
+            receipt=receipt,
+            receipt_store=committed_receipts,
+        )
+
     # ----- internal helpers -----
+
+    def _rollback_receipt_commit(
+        self,
+        *,
+        proposal: MergeProposal,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        reason: str,
+    ) -> MergeProposal:
+        record = replace(
+            proposal.record,
+            merged_version=proposal.record.current_version,
+            has_conflict=True,
+            store_post=store,
+        )
+        return MergeProposal(
+            new_baseline=baseline,
+            record=record,
+            accepted=False,
+            rejection_reason=reason,
+        )
 
     def _reject(
         self,
@@ -932,9 +1175,14 @@ __all__ = [
     "MergeDecision",
     "MergeEngine",
     "MergeError",
+    "MergeCommitOutcome",
+    "MergeCommitReceipt",
+    "MergeCommitReceiptError",
+    "MergeCommitReceiptStore",
     "MergeProposal",
     "MergeRecord",
     "MergeValidationError",
+    "canonical_baseline_digest",
     "_hold_with_conflict",
     "_master_revision",
 ]
