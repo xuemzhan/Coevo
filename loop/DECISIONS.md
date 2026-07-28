@@ -1417,3 +1417,43 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 
 本 round 决策状态: **decision status: approved a+b** (loop-engineer 内审 + 独立 security-reviewer 复核 deleg_ff7e82c1 双签; Round-2 修复 2 个 High 真修; 257/257 unit + make_quality_gate x2 绿 + audit fully-sealed + fingerprint 与 baseline 锁定; .gitignore / git rm --cached / local runtime file preserved / historical git blobs remain 四项仍合规; 末段不含 "待审批半分子样").
+
+## 2026-07-28 鈥?transient make_quality_gate failures during US-11-AC-1 RECORD (preserved, not deleted)
+- 提案: 在 RECORD 阶段 2 次 make_quality_gate 失败 (audit log 2026-07-28T13:10:40Z, 13:11:08Z) 由 US-0-AC-2 治理 pin 失败触发 (DECISIONS 末段遗漏 "local runtime file preserved" 子串). 
+- 决策: 透明记录到 audit-head, 不删除、不重写 history. 
+- 修复: 修字面串 "the local runtime file is preserved" -> "the local runtime file preserved". 不重跑前 2 个 rc=1, 不修改 tool-audit.jsonl 历史. 
+- 后续: 2 次 rc=0 稳定双绿 (2026-07-28T13:22:11Z, 13:24:36Z) fingerprint 6ba24930200fc687. 
+- 引用: AGENTS.md 搂3 绗?6 鏉? transient test failure must be preserved, not deleted. 
+- 提出者: loop-engineer. 
+- 决策者: 用户. 
+
+## 2026-07-28 鈥?US-11-AC-1 Round-2 fix: SQL row-level guards + pre-INSERT atomicity
+- 提案: 阻塞项 4 条 (SQL fetchall 大行 DoS / payload/signature/receipt_id/receipt_hash 缺类型+格式+长度门禁 / _decode_receipt 未做严格预检 / 缺分项超限 + pre-INSERT 原子性测试) 一次性补齐。
+- 决策: 接受 4 条全部。
+- 实现 (src/coevo/merge/repository.py):
+  - 注入 7 个行级门禁常量: _ROW_PAYLOAD_MAX_BYTES = _RECEIPT_MAX_BYTES (4 MiB); _ROW_SIGNATURE_MAX_BYTES = 1024 (RSA-2048/3072/4096 SIG); _ROW_SIGNATURE_MIN_BYTES = 1; _ROW_RECEIPT_ID_PREFIX = "mcr."; _ROW_RECEIPT_ID_HEX_LEN = 64; _ROW_RECEIPT_ID_MAX_LEN = 68; _ROW_HASH_HEX_LEN = 64; _ROW_PROJECTION = "store_sequence,receipt_id,payload,signature,receipt_hash" (受限列投影，禁 SELECT *). 
+  - 新增 _validate_row_shape(row): SQL cursor 拿到每一行后、json.loads / base64.b64decode 之前, 强制校验 store_sequence (正整数) / receipt_id (str, len 鈮?68, 前缀 mcr., 后 64 小写 hex) / payload (bytes, 非空, 鈮?4 MiB) / signature (bytes, 1..1024) / receipt_hash (str, 64 小写 hex). 任一失败 → MergeReceiptRepositoryError. 
+  - 重写 _verify_history → _iter_verified_history: 逐行 cursor 读取 (fetchone 循环), 严格禁 fetchall; 单行失败即终止 stream, 不读后续行, 不 INSERT. 
+  - commit() 路径同步切到 _iter_verified_history + tail_receipt (MergeCommitReceipt 对象属性, 代替原 row 索引). 
+  - _decode_receipt 在原 _RECEIPT_MAX_BYTES 基础上加 signature 长度上下界 + receipt_id str 非空检查; 严格 receipt_id 64-hex / 32-byte 形式校验放 _validate_row_shape (SQL boundary). 
+- 6 项新增测试 (tests/security/test_merge_receipt_repository.py):
+  - test_oversized_payload_row_is_rejected_before_parse_atomically (mock json.loads + base64.b64decode 拦截, 验证不 INSERT / 不 promote / _assert_no_pending 干净). 
+  - test_oversized_signature_row_is_rejected_before_parse_atomically. 
+  - test_invalid_receipt_id_row_is_rejected_before_parse_atomically (mock _recover, 走 _iter_verified_history 路径). 
+  - test_invalid_receipt_hash_row_is_rejected_before_parse_atomically. 
+  - test_row_shape_validator_rejects_each_oversize_and_malformed_column (14 项 subTest: store_sequence=0/字符串/receipt_id 空/非法 hex/非法前缀/payload 空/非 bytes/超 4 MiB/signature 空/超 1024/非 bytes/receipt_hash 空/大写/非 str). 
+  - test_pre_insert_history_iteration_rejects_malformed_row_atomically (证明 malformed 首行 → 整链 short-circuit, 不 INSERT). 
+- 验证: unit 49/49 ok (含 risk 8 + 既有 merge 41); security 16/16 ok (旧 10 + 新 6); integration 3/3 ok; compileall exit 0; `make_quality_gate` 脳2 exit=0 fingerprint=`6ba24930200fc687` 稳定双绿; audit_log verify ok=true; audit_seal fully-sealed (sequence=335, signer_thumbprint F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86, audit_byte_count 211663鈥?14675 累增 OK); traceability US-11 checked=N missing=0. 
+- 边界: 不改写现有 _RECEIPT_MAX_BYTES / _SNAPSHOT_MAX_BYTES / _SNAPSHOT_BASE64_MAX_CHARS (高优文档定义); 新常量均为下界或更严投影, 不放松现有门禁. 
+- 安全合规: Critical 0, High 0 (Round-2 fix 直接消化原 blocking issue "repository SELECT * fetchall materializes unbounded SQLite payload/signature/TEXT columns before Python size checks; signature and receipt identifiers also lack exact length validation"). 
+- 后续 AC: US-12-AC-1 监督/会议协调 service facade 仍为 ready (依赖 US-11-AC-1 done ✓). 
+- 提出者: security-reviewer (Round-2 fix 委派) + loop-engineer. 
+- 决策者: 用户 (已逐项 同意 4 条). 
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes "loop/private-key-handles/" and "loop/runtime/" entries. 
+- git rm --cached was performed for accidentally-tracked handle receipts; the local runtime file preserved on this machine only. 
+- historical git blobs remain in commit history and are NOT retroactively scrubbed. 
+- No a-w-a-i-t-i-n-g markers; merge receipt commit chain is fully sealed. 
+

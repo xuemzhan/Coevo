@@ -147,7 +147,7 @@ items:
   - id: US-11-AC-1
     story: US-11
     title: 实现风险预警最小数据层：RiskKind 枚举（DEADLINE_OVERRUN / PREDECESSOR_UNFINISHED / LONG_SILENCE / INSUFFICIENT_EVIDENCE / SEVERE_COORDINATION_NEEDED / AT_RISK_BLOOM / BLOCKED_BLOOM）+ SourceKind（FACTUAL / RULE / INFERRED）+ Risk（basis + affected_tasks + recommendation + suggested_deadline + severity ∈ [1,5]）+ RiskReport（merge_reporter_package_id + project_id + risks + coordination_meeting_recommended + 强制 requires_owner_confirmation=True + formally_released=False）+ RiskAnalyzer facade（消费 US-10 MergeRecord + US-2 ProjectBaseline → 规则/事实/推断三类风险 + 会议建议 + to_audit_record 排除 basis/recommendation）；纯函数无 IO
-    status: ready
+    status: done
     dependencies: [US-10-AC-1, US-2-AC-1]
     acceptance_tests:
       - tests/unit/test_risk_analyzer.py
