@@ -156,7 +156,7 @@ items:
   - id: US-12-AC-1
     story: US-12
     title: 督办/会议协同 service facade（消费 US-11 风险 + 8 项 AC；待办）
-    status: ready
+    status: done
     dependencies: [US-11-AC-1]
     acceptance_tests:
       - tests/unit/test_supervision_meeting.py

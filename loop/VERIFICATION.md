@@ -16338,3 +16338,143 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-07-28T14:11:30.901049Z — target=`quality` fingerprint=`6641503de2cfb704`
+- exit_code: `14`
+```text
+preflight audit seal failed: locked Windows PowerShell path is unavailable
+
+```
+
+## 2026-07-28T14:11:35.130963Z — target=`quality` fingerprint=`6ba24930200fc687`
+- exit_code: `0`
+```text
+t_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_history_reorder_or_substitution_is_rejected_by_per_row_verification) ... ok
+test_invalid_receipt_hash_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_invalid_receipt_hash_row_is_rejected_before_parse_atomically) ... ok
+test_invalid_receipt_id_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_invalid_receipt_id_row_is_rejected_before_parse_atomically) ... ok
+test_nonmonotonic_sender_recipient_project_sequence_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_nonmonotonic_sender_recipient_project_sequence_is_rejected_before_insert) ... ok
+test_oversized_history_is_rejected_before_parse_and_insert_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_history_is_rejected_before_parse_and_insert_atomically) ... ok
+test_oversized_payload_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_payload_row_is_rejected_before_parse_atomically) ... ok
+test_oversized_signature_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_signature_row_is_rejected_before_parse_atomically) ... ok
+test_package_id_and_digest_replay_are_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_package_id_and_digest_replay_are_rejected_before_insert) ... ok
+test_pre_insert_history_iteration_rejects_malformed_row_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_pre_insert_history_iteration_rejects_malformed_row_atomically) ... ok
+test_precommit_anchor_failure_leaves_rows_head_and_checkpoint_unchanged (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_precommit_anchor_failure_leaves_rows_head_and_checkpoint_unchanged) ... ok
+test_promote_failure_requires_recovery_and_reopen_commits_exactly_once (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_promote_failure_requires_recovery_and_reopen_commits_exactly_once) ... ok
+test_row_shape_validator_rejects_each_oversize_and_malformed_column (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_row_shape_validator_rejects_each_oversize_and_malformed_column) ... ok
+test_signed_chain_binds_store_head_sequence_and_previous_hash (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 91 tests in 121.382s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ C:\Python314\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 76.722s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-07-28T14:15:11.383229Z — target=`test` fingerprint=`a9e7dd45416f6a08`
+- exit_code: `0`
+```text
+
+test_wrap_session_key_is_fail_closed (test_agent_package_aead.TestKeyTransportBlock.test_wrap_session_key_is_fail_closed) ... ok
+test_payload_block_header_is_valid (test_agent_package_aead.TestPackageBuilder.test_payload_block_header_is_valid) ... ok
+test_unsigned_package_rejects_trailing_bytes (test_agent_package_aead.TestPackageBuilder.test_unsigned_package_rejects_trailing_bytes) ... ok
+test_unsigned_package_round_trip (test_agent_package_aead.TestPackageBuilder.test_unsigned_package_round_trip) ... ok
+test_assemble_payload_block (test_agent_package_aead.TestPayloadBlock.test_assemble_payload_block) ... ok
+test_decode_payload_header_rejects_non_zero_reserved (test_agent_package_aead.TestPayloadBlock.test_decode_payload_header_rejects_non_zero_reserved) ... ok
+test_decode_payload_header_rejects_unknown_magic (test_agent_package_aead.TestPayloadBlock.test_decode_payload_header_rejects_unknown_magic) ... ok
+test_decrypt_payload_is_fail_closed (test_agent_package_aead.TestPayloadBlock.test_decrypt_payload_is_fail_closed) ... ok
+test_encode_payload_header_is_8_bytes (test_agent_package_aead.TestPayloadBlock.test_encode_payload_header_is_8_bytes) ... ok
+test_encrypt_payload_is_fail_closed (test_agent_package_aead.TestPayloadBlock.test_encrypt_payload_is_fail_closed) ... ok
+test_generate_payload_nonce_length (test_agent_package_aead.TestPayloadBlock.test_generate_payload_nonce_length) ... ok
+test_generate_session_key_length (test_agent_package_aead.TestPayloadBlock.test_generate_session_key_length) ... ok
+test_accept_first_package (test_agent_package_aead.TestReplayDetector.test_accept_first_package) ... ok
+test_duplicate_digest_rejected (test_agent_package_aead.TestReplayDetector.test_duplicate_digest_rejected) ... ok
+test_duplicate_package_id_rejected (test_agent_package_aead.TestReplayDetector.test_duplicate_package_id_rejected) ... ok
+test_reference_target_accepts_known_package (test_agent_package_aead.TestReplayDetector.test_reference_target_accepts_known_package) ... ok
+test_reference_target_requires_existing_package (test_agent_package_aead.TestReplayDetector.test_reference_target_requires_existing_package) ... ok
+test_replay_sequence_rejected (test_agent_package_aead.TestReplayDetector.test_replay_sequence_rejected) ... ok
+test_revoked_package_id_rejected (test_agent_package_aead.TestReplayDetector.test_revoked_package_id_rejected) ... ok
+test_build_signature_record_uses_digest (test_agent_package_aead.TestSignatureRecord.test_build_signature_record_uses_digest) ... ok
+test_canonical_manifest_bytes_no_bom (test_agent_package_aead.TestSignatureRecord.test_canonical_manifest_bytes_no_bom) ... ok
+test_canonical_manifest_bytes_no_trailing_whitespace (test_agent_package_aead.TestSignatureRecord.test_canonical_manifest_bytes_no_trailing_whitespace) ... ok
+test_canonical_manifest_bytes_sorted_keys (test_agent_package_aead.TestSignatureRecord.test_canonical_manifest_bytes_sorted_keys) ... ok
+test_compute_sm3_digest_deterministic (test_agent_package_aead.TestSignatureRecord.test_compute_sm3_digest_deterministic) ... ok
+test_compute_sm3_digest_is_64_lowercase_hex (test_agent_package_aead.TestSignatureRecord.test_compute_sm3_digest_is_64_lowercase_hex) ... ok
+test_decode_signature_record_strict_field_set (test_agent_package_aead.TestSignatureRecord.test_decode_signature_record_strict_field_set) ... ok
+test_sign_manifest_is_fail_closed (test_agent_package_aead.TestSignatureRecord.test_sign_manifest_is_fail_closed) ... ok
+test_verify_signature_rejects_digest_mismatch (test_agent_package_aead.TestSignatureRecord.test_verify_signature_rejects_digest_mismatch) ... ok
+test_verify_signature_rejects_empty_signature (test_agent_package_aead.TestSignatureRecord.test_verify_signature_rejects_empty_signature) ... ok
+test_advance_backwards_rejected (test_agent_package_atomic_import.TestImportTransaction.test_advance_backwards_rejected) ... ok
+test_advance_strict_monotonic (test_agent_package_atomic_import.TestImportTransaction.test_advance_strict_monotonic) ... ok
+test_audit_record_is_json_safe (test_agent_package_atomic_import.TestImportTransaction.test_audit_record_is_json_safe) ... ok
+test_begin_returns_quarantine_received (test_agent_package_atomic_import.TestImportTransaction.test_begin_returns_quarantine_received) ... ok
+test_check_base_revision_first_import (test_agent_package_atomic_import.TestImportTransaction.test_check_base_revision_first_import) ... ok
+test_check_base_revision_match (test_agent_package_atomic_import.TestImportTransaction.test_check_base_revision_match) ... ok
+test_check_base_revision_mismatch_rejected (test_agent_package_atomic_import.TestImportTransaction.test_check_base_revision_mismatch_rejected) ... ok
+test_check_replay_accepts_only_accept (test_agent_package_atomic_import.TestImportTransaction.test_check_replay_accepts_only_accept) ... ok
+test_fail_empty_reason_rejected (test_agent_package_atomic_import.TestImportTransaction.test_fail_empty_reason_rejected) ... ok
+test_fail_marks_rolled_back (test_agent_package_atomic_import.TestImportTransaction.test_fail_marks_rolled_back) ... ok
+test_full_7_step_path (test_agent_package_atomic_import.TestImportTransaction.test_full_7_step_path) ... ok
+test_base_revision_mismatch_returns_rolled_back (test_agent_package_atomic_import.TestPackageImportService.test_base_revision_mismatch_returns_rolled_back) ... ok
+test_duplicate_package_id_rolls_back (test_agent_package_atomic_import.TestPackageImportService.test_duplicate_package_id_rolls_back) ... ok
+test_first_import_no_revision (test_agent_package_atomic_import.TestPackageImportService.test_first_import_no_revision) ... ok
+test_full_import_committed (test_agent_package_atomic_import.TestPackageImportService.test_full_import_committed) ... ok
+test_import_advances_through_all_steps (test_agent_package_atomic_import.TestPackageImportService.test_import_advances_through_all_steps) ... ok
+test_replay_rejected_returns_rolled_back (test_agent_package_atomic_import.TestPackageImportService.test_replay_rejected_returns_rolled_back) ... ok
+test_by_scope_sorted_by_sequence (test_agent_package_atomic_import.TestProcessedPackageStore.test_by_scope_sorted_by_sequence) ... ok
+test_empty_store (test_agent_package_atomic_import.TestProcessedPackageStore.test_empty_store) ... ok
+test_register_rejects_duplicate_digest (test_agent_package_atomic_import.TestProcessedPackageStore.test_register_rejects_duplicate_digest) ... ok
+test_register_rejects_duplicate_package_id (test_agent_package_atomic_import.TestProcessedPackageStore.test_register_rejects_duplicate_package_id) ... ok
+test_register_then_get (test_agent_package_atomic_import.TestProcessedPackageStore.test_register_then_get) ... ok
+test_revision_for_returns_highest_revision (test_agent_package_atomic_import.TestProcessedPackageStore.test_revision_for_returns_highest_revision) ... ok
+test_entry_exposes_locked_tools (test_dev_environment_entry.DevEnvironmentEntryTest.test_entry_exposes_locked_tools) ... ok
+test_repeated_entry_deduplicates_paths_and_rebuilds_shim (test_dev_environment_entry.DevEnvironmentEntryTest.test_repeated_entry_deduplicates_paths_and_rebuilds_shim) ... ok
+test_override_survives_close_open_verification_and_drives_risk (test_merge_risk_receipt_chain.MergeRiskReceiptChainTests.test_override_survives_close_open_verification_and_drives_risk) ... ok
+test_promote_failure_propagates_recovery_required_without_risk (test_merge_risk_receipt_chain.MergeRiskReceiptChainTests.test_promote_failure_propagates_recovery_required_without_risk) ... ok
+test_verified_objects_drive_complete_automatic_chain (test_merge_risk_receipt_chain.MergeRiskReceiptChainTests.test_verified_objects_drive_complete_automatic_chain) ... ok
+test_custom_tools_reference_existing_controlled_scripts (test_tool_contracts.ToolContractIntegrationTests.test_custom_tools_reference_existing_controlled_scripts) ... ok
+
+----------------------------------------------------------------------
+Ran 133 tests in 92.090s
+
+OK
+audit seal: fully-sealed
+
+```

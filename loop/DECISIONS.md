@@ -1455,5 +1455,26 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - .gitignore includes "loop/private-key-handles/" and "loop/runtime/" entries. 
 - git rm --cached was performed for accidentally-tracked handle receipts; the local runtime file preserved on this machine only. 
 - historical git blobs remain in commit history and are NOT retroactively scrubbed. 
-- No a-w-a-i-t-i-n-g markers; merge receipt commit chain is fully sealed. 
+- No a-w-a-i-t-i-n-g markers; merge receipt commit chain is fully sealed.
+
+## 2026-07-28 — US-12-AC-1: 监督/会议协调 service facade
+- 提案: US-12 9 项 AC (风险转督办 / 主体·时限·关闭条件 / 中转智能体建议 / 逾期分级升级 / 重大风险会议建议 / 负责人确认后召集 / 议题背景待决 / 结论三类投影 / 全程留痕) 一次性补齐。
+- 决策: 接受。服务仅产出建议，不实际召集会议。
+- 实现 (src/coevo/supervision/__init__.py):
+  - 5 个 frozen dataclass: SupervisionItem (AC-1/2) / EscalationSuggestion (AC-4) / MeetingAgendaItem (AC-7) / MeetingProposal (AC-5/6/7) / MeetingConclusionProjection (AC-8) / SupervisionOutcome (AC-9). 
+  - EscalationLevel 枚为 NONE / WATCH / ESCALATE_TO_OWNER / EMERGENCY (严格分级，超期 + 严重类型 → EMERGENCY)。
+  - MeetingConclusionKind: NEW_TASK / RISK_DISPOSITION / NEW_SUPERVISION_ITEM (后者被明示禁止，避免合成新督办项的闭环)。
+  - SupervisionCoordinator.coordinate() 消费一份验证后的 RiskReport，产出一份 SupervisionOutcome；本身是纯函数。
+  - COORDINATION_RECOMMENDED_KINDS = {SEVERE_COORDINATION_NEEDED, BLOCKED_BLOOM, DEADLINE_OVERRUN}；仅这些类型才产生 meeting proposal。
+  - item_id 格式 `sup.<project_id>.<risk_id>.<index>`，项目调查与 audit 追踪可用。
+  - to_audit_record 明示排除 basis / recommendation / rationale / closing_condition (敏感业务措辞) + requires_owner_confirmation=True + formally_released=False。
+- 10 项测试 (tests/unit/test_supervision_meeting.py):
+  - 3 model validation: 字段形状 + 重复拒绝 + frozen 与绕过 (requires_owner_confirmation/formally_released) + 未知升级 + 合成禁止 (NEW_SUPERVISION_ITEM 被拒)。
+  - 6 coordinator: stable item_id / 4 类升级覆盖 / meeting 仅在 coordination_recommended=True 时辐出 + 输入校验 / audit_record 不含敏感字段 / to_audit_record 输入校验。
+  - 1 常量: SUPERVISABLE_RISK_KINDS 覆盖所有 RiskKind + COORDINATION_RECOMMENDED_KINDS 为其子集 + domain/schema 文本。
+- 验证: unit 289/289 ok (含 US-12 10 项 + 279 既有); compileall exit 0; `make_quality_gate` 脳脳 exit=0 fingerprint=`6ba24930200fc687` 稳定；中间 14:11:30Z 出现一次 rc=14 (临时 audit seal preflight)，14:11:35Z 重跑 rc=0，已透明记录不删除；audit_log verify ok=true; audit_seal fully-sealed (sequence=353, signer_thumbprint F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86, audit_byte_count 211663→218552 累增 OK)；traceability US-12 checked=1 missing=0。
+- 边界: 不修改 US-10/US-11 wire layout；不实际召集会议 / 不发邀请 / 不调度程序；NEW_SUPERVISION_ITEM 结论被明示禁止，避免超出 risk 零部件合成闭环；Audit 记录明示排除业务敏感措辞。
+- 后续 AC: US-13-AC-1 决策简报 service facade (依赖 US-10+US-11 done) ready。
+- 提出者: loop-engineer。
+- 决策者: 用户。
 
