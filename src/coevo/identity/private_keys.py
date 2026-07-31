@@ -49,8 +49,8 @@ ROOT = Path(__file__).resolve().parents[3]
 STORE_HELPER = ROOT / "scripts" / "store_private_key.ps1"
 
 TOOLCHAIN_LOCK = ROOT / "docs" / "dependencies" / "toolchain-lock.json"
-STORE_HELPER_SHA256 = "7e1fc28be6d4634a17bcdf3650c3af1a058a7ddae6e7d366ecc8d8a82ec94fcb"
-STORE_HELPER_SIZE = 11827
+STORE_HELPER_SHA256 = "2dc55768b97c185ee62039b86eb2f6702034151235d89caffd8e4284d48f5017"
+STORE_HELPER_SIZE = 16443
 HANDLE_PREFIX = "CoevoPrivateKey-"
 HANDLE_RE = re.compile(r"^CoevoPrivateKey-[0-9a-fA-F]{32}$")
 PUBLIC_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -220,7 +220,16 @@ class PrivateKeyStore(Protocol):
     def use(self, reference: PrivateKeyReference, payload: bytes) -> bytes:
         ...
 
+    def verify(
+        self, reference: PrivateKeyReference, payload: bytes, signature: bytes,
+        *, parent_pinned_thumbprint: str
+    ) -> bool:
+        ...
+
     def destroy(self, reference: PrivateKeyReference) -> None:
+        ...
+
+    def revoke(self, reference: PrivateKeyReference, *, reason: str) -> None:
         ...
 
     def verify_handle(self, reference: PrivateKeyReference) -> None:
@@ -331,6 +340,45 @@ class WindowsPrivateKeyStore:
         except subprocess.TimeoutExpired as exc:
             raise PrivateKeyHandleError("private-key helper timed out") from exc
 
+    def verify(
+        self, reference: PrivateKeyReference, payload: bytes, signature: bytes,
+        *, parent_pinned_thumbprint: str
+    ) -> bool:
+        if not isinstance(payload, (bytes, bytearray)):
+            raise PrivateKeyUsageError("private-key verification payload must be bytes")
+        if not isinstance(signature, (bytes, bytearray)) or not signature:
+            raise PrivateKeyUsageError("private-key verification signature must be non-empty bytes")
+        try:
+            with tempfile.TemporaryDirectory(prefix="coevo-signature-verify-") as tmp:
+                payload_path = Path(tmp) / "payload.bin"
+                payload_path.write_bytes(bytes(payload))
+                result = self._run(
+                    "Verify",
+                    handle=reference.key_id,
+                    public_digest=reference.key_public_sha256,
+                    algorithm_oid=reference.algorithm_oid,
+                    parent_pinned_thumbprint=parent_pinned_thumbprint,
+                    payload_path=str(payload_path),
+                    signature_base64=base64.b64encode(bytes(signature)).decode("ascii"),
+                )
+                verified = result.get("result", {}).get("verified")
+                if not isinstance(verified, bool):
+                    raise PrivateKeyHandleError(
+                        "private-key helper returned no verification decision"
+                    )
+                helper_result = result.get("result", {})
+                if helper_result.get("certificate_id") != reference.bound_certificate_id:
+                    raise PrivateKeyHandleError(
+                        "private-key helper certificate binding mismatch"
+                    )
+                if helper_result.get("parent_thumbprint") != parent_pinned_thumbprint:
+                    raise PrivateKeyHandleError(
+                        "private-key helper parent pin binding mismatch"
+                    )
+                return verified
+        except subprocess.TimeoutExpired as exc:
+            raise PrivateKeyHandleError("private-key helper timed out") from exc
+
     def destroy(self, reference: PrivateKeyReference) -> None:
         try:
             self._run("Destroy", handle=reference.key_id, public_digest=reference.key_public_sha256)
@@ -338,6 +386,14 @@ class WindowsPrivateKeyStore:
             if "missing" in str(exc).lower():
                 raise PrivateKeyHandleUnavailableError(str(exc)) from exc
             raise
+
+    def revoke(self, reference: PrivateKeyReference, *, reason: str) -> None:
+        if not isinstance(reason, str) or not reason.strip():
+            raise PrivateKeyValidationError("revocation reason is required")
+        self._run(
+            "Revoke", handle=reference.key_id,
+            public_digest=reference.key_public_sha256, reason=reason,
+        )
 
     def verify_handle(self, reference: PrivateKeyReference) -> None:
         self._run("VerifyHandle", handle=reference.key_id, public_digest=reference.key_public_sha256)
@@ -441,6 +497,70 @@ class PrivateKeyService:
                      result_digest=hashlib.sha256(bytes(result)).hexdigest())
         return bytes(result)
 
+    def verify(
+        self,
+        reference: PrivateKeyReference,
+        payload: bytes,
+        signature: bytes,
+        *,
+        trusted_time: datetime,
+        actor_id: str = "system",
+        request_id: str | None = None,
+        expected_certificate_id: str,
+        expected_parent_thumbprint: str,
+        expected_public_sha256: str,
+        expected_algorithm_oid: str,
+    ) -> bool:
+        """Verify a signature after re-establishing the complete trust binding."""
+        self._require_actor(actor_id)
+        if trusted_time.tzinfo is None:
+            raise PrivateKeyUsageError("trusted_time must include timezone information")
+        current = trusted_time.astimezone(UTC)
+        signature_digest = (
+            hashlib.sha256(bytes(signature)).hexdigest()
+            if isinstance(signature, (bytes, bytearray))
+            else "-"
+        )
+        reason: str | None = None
+        if current < reference.valid_from or current >= reference.valid_to:
+            reason = "outside_validity_window"
+        elif reference.revoked:
+            reason = "revoked"
+        elif reference.bound_certificate_id != expected_certificate_id:
+            reason = "certificate_id_mismatch"
+        elif reference.key_public_sha256 != expected_public_sha256:
+            reason = "public_digest_mismatch"
+        elif reference.algorithm_oid != expected_algorithm_oid:
+            reason = "algorithm_oid_mismatch"
+        elif not isinstance(expected_parent_thumbprint, str) or not expected_parent_thumbprint:
+            reason = "parent_thumbprint_missing"
+        if reason is not None:
+            self._record(
+                action="private_key_verify", actor_id=actor_id,
+                request_id=request_id, reference=reference, result="rejected",
+                reason=reason, signature_digest=signature_digest,
+            )
+            raise PrivateKeyUsageError(f"signature trust binding rejected: {reason}")
+        try:
+            verified = self._backend.verify(
+                reference, payload, signature,
+                parent_pinned_thumbprint=expected_parent_thumbprint,
+            )
+        except (PrivateKeyHandleError, PrivateKeyUsageError) as exc:
+            self._record(
+                action="private_key_verify", actor_id=actor_id,
+                request_id=request_id, reference=reference, result="rejected",
+                reason=type(exc).__name__, signature_digest=signature_digest,
+            )
+            raise
+        result = "success" if verified else "rejected"
+        self._record(
+            action="private_key_verify", actor_id=actor_id,
+            request_id=request_id, reference=reference, result=result,
+            signature_digest=signature_digest,
+        )
+        return bool(verified)
+
     def revoke(self, reference: PrivateKeyReference, *, actor_id: str,
                reason: str = "") -> PrivateKeyReference:
         """Return a new :class:`PrivateKeyReference` flagged as revoked.
@@ -453,10 +573,20 @@ class PrivateKeyService:
         self._require_actor(actor_id)
         if not reason:
             raise PrivateKeyValidationError("revocation reason is required")
+        try:
+            self._backend.revoke(reference, reason=reason)
+        except PrivateKeyHandleError:
+            self._record(
+                action="private_key_revoke", actor_id=actor_id,
+                request_id=None, reference=reference, result="rejected",
+                reason_digest=hashlib.sha256(reason.encode()).hexdigest(),
+            )
+            raise
         revoked = replace(reference, revoked=True)
         self._record(action="private_key_revoke", actor_id=actor_id,
                      request_id=None, reference=revoked,
-                     result="success", reason=reason)
+                     result="success",
+                     reason_digest=hashlib.sha256(reason.encode()).hexdigest())
         return revoked
 
     def destroy(self, reference: PrivateKeyReference, *, actor_id: str) -> None:

@@ -33,6 +33,7 @@ escapes the local Windows CNG storage. Tests assert:
 from __future__ import annotations
 
 import copy
+import base64
 import hashlib
 import hmac
 import os
@@ -133,11 +134,32 @@ class InMemoryPrivateKeyStore:
         self.usage_log.append((reference.key_id, payload, signature))
         return signature
 
+    def verify(
+        self, reference: PrivateKeyReference, payload: bytes, signature: bytes,
+        *, parent_pinned_thumbprint: str,
+    ) -> bool:
+        if parent_pinned_thumbprint.lower() != CANONICAL_TRUSTED:
+            raise PrivateKeyHandleError("parent attestation certificate thumbprint is not trusted")
+        canonical = _canonical_id(reference.key_id)
+        record = self.handles.get(canonical)
+        if record is None:
+            raise PrivateKeyHandleUnavailableError("private-key handle is missing from local store")
+        if record["revoked"]:
+            raise PrivateKeyRevokedError("private-key handle has been revoked")
+        expected = hmac.new(record["secret"], payload, hashlib.sha256).digest()
+        return hmac.compare_digest(expected, signature)
+
     def destroy(self, reference: PrivateKeyReference) -> None:
         canonical = _canonical_id(reference.key_id)
         if canonical not in self.handles:
             raise PrivateKeyHandleUnavailableError("private-key handle has already been destroyed")
         del self.handles[canonical]
+
+    def revoke(self, reference: PrivateKeyReference, *, reason: str) -> None:
+        canonical = _canonical_id(reference.key_id)
+        if canonical not in self.handles:
+            raise PrivateKeyHandleUnavailableError("private-key handle is missing from local store")
+        self.handles[canonical]["revoked"] = True
 
     def verify_handle(self, reference: PrivateKeyReference) -> None:
         canonical = _canonical_id(reference.key_id)
@@ -285,6 +307,61 @@ class PrivateKeyServicePolicyTests(unittest.TestCase):
         # Public digest seen by tests; secret bytes never appear.
         self.assertNotIn(self.backend.handles[_canonical_id(reference.key_id)]["secret"], (signature,))
 
+    def test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only(self) -> None:
+        reference = self.service.store("cert-1", self.payload, actor_id="admin-1")
+        payload = b"receipt-payload"
+        signature = self.service.use(
+            reference, payload, trusted_time=datetime(2027, 1, 1, tzinfo=UTC),
+        )
+        verified = self.service.verify(
+            reference, payload, signature,
+            trusted_time=datetime(2027, 1, 1, tzinfo=UTC),
+            expected_certificate_id="cert-1",
+            expected_parent_thumbprint=PINNED_THUMBPRINT,
+            expected_public_sha256=reference.key_public_sha256,
+            expected_algorithm_oid=reference.algorithm_oid,
+        )
+        self.assertTrue(verified)
+        event = self.service.audit_trail[-1]
+        encoded = json.dumps(event, sort_keys=True)
+        self.assertEqual("private_key_verify", event["action"])
+        self.assertIn(hashlib.sha256(signature).hexdigest(), encoded)
+        self.assertNotIn(payload.decode(), encoded)
+        self.assertNotIn(base64.b64encode(signature).decode(), encoded)
+
+    def test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature(self) -> None:
+        reference = self.service.store("cert-1", self.payload)
+        signature = self.service.use(
+            reference, b"x", trusted_time=datetime(2027, 1, 1, tzinfo=UTC),
+        )
+        common = dict(
+            trusted_time=datetime(2027, 1, 1, tzinfo=UTC),
+            expected_certificate_id="cert-1",
+            expected_public_sha256=reference.key_public_sha256,
+            expected_algorithm_oid=reference.algorithm_oid,
+        )
+        with self.assertRaises(PrivateKeyHandleError):
+            self.service.verify(
+                reference, b"x", signature,
+                expected_parent_thumbprint="0" * 40, **common,
+            )
+        self.assertFalse(self.service.verify(
+            reference, b"x", b"bad",
+            expected_parent_thumbprint=PINNED_THUMBPRINT, **common,
+        ))
+        revoked = self.service.revoke(reference, actor_id="admin", reason="test")
+        with self.assertRaises(PrivateKeyUsageError):
+            self.service.verify(
+                revoked, b"x", signature,
+                expected_parent_thumbprint=PINNED_THUMBPRINT, **common,
+            )
+        self.service.destroy(reference, actor_id="admin")
+        with self.assertRaises(PrivateKeyHandleUnavailableError):
+            self.service.verify(
+                reference, b"x", signature,
+                expected_parent_thumbprint=PINNED_THUMBPRINT, **common,
+            )
+
     def test_use_outside_validity_window_is_rejected(self) -> None:
         reference = self.service.store("cert-1", self.payload)
         with self.assertRaises(PrivateKeyUsageError):
@@ -304,6 +381,8 @@ class PrivateKeyServicePolicyTests(unittest.TestCase):
         self.assertFalse(reference.revoked, "original reference remains usable until caller adopts the revoked instance")
         with self.assertRaises(PrivateKeyUsageError):
             self.service.use(revoked, b"x", trusted_time=datetime(2027, 1, 1, tzinfo=UTC))
+        with self.assertRaises(PrivateKeyUsageError):
+            self.service.use(reference, b"x", trusted_time=datetime(2027, 1, 1, tzinfo=UTC))
 
     def test_revoke_without_reason_is_rejected(self) -> None:
         reference = self.service.store("cert-1", self.payload)

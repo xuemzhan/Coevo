@@ -134,7 +134,18 @@ class WindowsCNGPrivateKeyTests(unittest.TestCase):
                 action="Use",
                 arguments={"handle": key_id, "public_digest": public_digest, "algorithm_oid": "1.2.840.113549.1.1.1", "payload_path": str(payload_path)},
             )
+            verify_signature_response = _call_helper(
+                action="Verify",
+                arguments={
+                    "handle": key_id, "public_digest": public_digest,
+                    "algorithm_oid": "1.2.840.113549.1.1.1",
+                    "payload_path": str(payload_path),
+                    "signature_base64": use_response["result"]["signature_base64"],
+                    "parent_pinned_thumbprint": PINNED_THUMBPRINT,
+                },
+            )
         signature = base64.b64decode(use_response["result"]["signature_base64"], validate=True)
+        self.assertTrue(verify_signature_response["result"]["verified"])
         expected = hashlib.sha256(payload_bytes).hexdigest()
         self.assertNotEqual(expected, signature.hex())
         # VerifyHandle: still alive, digest matches.
@@ -165,6 +176,35 @@ class WindowsCNGPrivateKeyTests(unittest.TestCase):
             payload_bytes = b"produced-from-python"
             signature = service.use(reference, payload_bytes, trusted_time=datetime(2027, 1, 1, tzinfo=UTC), actor_id="integration-test")
             self.assertEqual(len(signature), 256)
+            self.assertTrue(service.verify(
+                reference, payload_bytes, signature,
+                trusted_time=datetime(2027, 1, 1, tzinfo=UTC),
+                actor_id="integration-test",
+                expected_certificate_id="cert-it-2",
+                expected_parent_thumbprint=PINNED_THUMBPRINT,
+                expected_public_sha256=reference.key_public_sha256,
+                expected_algorithm_oid=reference.algorithm_oid,
+            ))
+            revoked = service.revoke(
+                reference, actor_id="integration-test", reason="integration rotation",
+            )
+            self.assertTrue(revoked.revoked)
+            with self.assertRaises(PrivateKeyError):
+                service.use(
+                    reference, payload_bytes,
+                    trusted_time=datetime(2027, 1, 1, tzinfo=UTC),
+                    actor_id="integration-test",
+                )
+            with self.assertRaises(PrivateKeyError):
+                service.verify(
+                    reference, payload_bytes, signature,
+                    trusted_time=datetime(2027, 1, 1, tzinfo=UTC),
+                    actor_id="integration-test",
+                    expected_certificate_id="cert-it-2",
+                    expected_parent_thumbprint=PINNED_THUMBPRINT,
+                    expected_public_sha256=reference.key_public_sha256,
+                    expected_algorithm_oid=reference.algorithm_oid,
+                )
         finally:
             service.destroy(reference, actor_id="integration-test")
 

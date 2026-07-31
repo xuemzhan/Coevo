@@ -59,6 +59,7 @@ from .replay_detector import (
     ProcessedPackage,
     ReplayDecision,
 )
+from .sm2_sign import compute_sm3_digest
 
 
 @dataclasses.dataclass(frozen=True)
@@ -135,7 +136,7 @@ class PackageImportService:
             return ProcessedPackageRecord(
                 package=ProcessedPackage(
                     package_id=env.package_id,
-                    package_digest=package.expected_total_length().__str__(),
+                    package_digest=compute_sm3_digest(package.to_bytes()),
                     sender_cert_id=env.sender_cert_id,
                     recipient_cert_id=env.recipient_cert_id,
                     project_id=env.project_id,

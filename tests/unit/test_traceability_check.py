@@ -153,3 +153,15 @@ class TraceabilityTests(unittest.TestCase):
         paths = [e["path"] for e in ac1["evidence"] if e["path"]]
         self.assertTrue(any(p.endswith("coevo/merge/__init__.py") for p in paths))
         self.assertTrue(any(p.endswith("tests/unit/test_merge_engine.py") for p in paths))
+    def test_us_13_ac_1_is_done_with_evidence(self):
+        result = trace.check("US-13")
+        by_ac = {item["ac"]: item for item in result["items"]}
+        self.assertIn("AC-1", by_ac)
+        self.assertEqual("done", by_ac["AC-1"]["status"])
+        self.assertTrue(all(bool(e["exists"]) for e in by_ac["AC-1"]["evidence"]))
+    def test_us_13_ac_1_matrix_lists_src_and_test(self):
+        result = trace.check("US-13", active_only=False)
+        by_ac = {item["ac"]: item for item in result["items"]}
+        paths = [e["path"] for e in by_ac["AC-1"]["evidence"] if e["path"]]
+        self.assertTrue(any(p.endswith("coevo/decision_brief/__init__.py") for p in paths))
+        self.assertTrue(any(p.endswith("tests/unit/test_decision_brief.py") for p in paths))
