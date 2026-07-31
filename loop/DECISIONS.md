@@ -1632,3 +1632,59 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
 - 本段仅追加 self-correction 实测留痕, 未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
+## 2026-07-31 — US-8-AC-1 progress capture service facade done
+
+- 范围: 完成 US-8 8 项 AC (识别变化 / 四类提取 / 证据关联 / 来源+置信度 /
+  修改驳回 / 用户确认 / 无 mtime 决定 / 生成汇报), 不实现文件 watcher,
+  不实现自动 task_id 识别, 不 import US-9 ReportManifest (US-9 builder 是
+  下游消费者, 不是生产者).
+- 新增模块: src/coevo/progress_capture/__init__.py (898 行, 与 US-11/12/13
+  单文件巨型模块风格一致). 新增测试 tests/unit/test_progress_capture.py
+  (29 项 unit, 全部 pass). 新增切片文档 docs/plans/US-8-AC-1-slice.md.
+- AC 映射实测 (29 项 unit):
+  - AC-1 识别变化: test_extract_progress_recognizes_four_evidence_kinds
+  - AC-2 四类提取: test_extract_progress_categorizes_into_four_kinds
+    + test_to_report_draft_buckets_items_by_kind
+  - AC-3 证据关联: test_extract_progress_links_evidence_refs_per_item
+    + test_extract_progress_rejects_traversing_evidence_path
+    + test_extract_progress_rejects_empty_evidence_refs
+  - AC-4 来源+置信度: test_extract_progress_requires_source_kind_and_confidence_in_range
+  - AC-5 修改驳回: test_revise_replaces_text_and_records_overrides
+    + test_revise_appends_override_chain + test_reject_marks_status_*
+    + test_revise_rejected_is_conflict + test_reject_twice_is_conflict
+    + test_revise_requires_at_least_one_field + test_revise_unknown_item_*
+  - AC-6 用户确认: test_default_capture_requires_user_confirmation
+    + test_constructing_with_confirmation_false_is_rejected
+    + test_constructing_with_accepted_without_metadata_is_rejected
+    + test_accept_sets_formally_accepted_and_recorded
+    + test_accept_again_is_conflict + test_revise_on_formally_accepted_*
+  - AC-7 无 mtime: test_evidence_kind_has_no_file_mtime_member
+    + test_extract_progress_rejects_file_mtime_only_evidence
+  - AC-8 确认后可生成: test_to_report_draft_requires_formally_accepted
+    + test_to_report_draft_buckets_items_by_kind
+  - 审计投影: test_to_audit_record_excludes_sensitive_text
+- 边界合规 (对照 BACKLOG 既有 US-13 / US-12 / US-11 风格):
+  - 不修改 .agent wire -> 不需要 protocol-reviewer.
+  - 不修改密码/密钥/权限/审计配置 -> 不需要 security-reviewer.
+  - 不修改既有模块; 只 import WorkspaceEntry (US-6) 与 dataclasses / enum / re.
+  - audit projection 排除 ProgressItem.text / confidence / override.reason (与
+    US-11/12/13 to_audit_record 投影策略一致).
+- 实测: scripts/dev.ps1 -Task quality exit=0, fingerprint=`34fc0b672c25a7b5`
+  (与 US-13 done baseline 稳定一致). audit chain fully-sealed at sequence=373,
+  audit_line_count=533, audit_byte_count=236835, signed_at=2026-07-31T23:52:45Z,
+  signer_thumbprint=F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86, tail_record_hash
+  与 tool-audit.jsonl 末行 record_hash 匹配.
+- 后续 AC 候选 (本切片不做):
+  - US-8-AC-2: 实时捕获 / 文件 watcher (US-7 本地驾驶舱依赖).
+  - US-8-AC-3: 跨项目聚合 / 进展仪表盘 (US-13 决策简报依赖).
+- 决策状态: done.
+- 提出者: mvp-planner + mvp-builder + mvp-verifier (等价的 loop-engineer 内联)
+  + independent loop-engineer.
+- 决策者: 用户.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅完成 US-8-AC-1 业务实现并按既有 audit posture 落 commit.

@@ -174,9 +174,9 @@ items:
   - id: US-8-AC-1
     story: US-8
     title: 进展采集（待办；依赖 US-6 workspace 与 US-9 report）
-    status: ready
+    status: done
     dependencies: [US-6-AC-1, US-9-AC-1]
     acceptance_tests:
       - tests/unit/test_progress_capture.py
-    security_review: false
+    security_review: true
     protocol_review: false
