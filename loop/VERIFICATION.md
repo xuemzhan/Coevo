@@ -16919,3 +16919,126 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-07-31T23:50:31.423346Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `1`
+```text
+e_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_invalid_receipt_hash_row_is_rejected_before_parse_atomically) ... ok
+test_invalid_receipt_id_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_invalid_receipt_id_row_is_rejected_before_parse_atomically) ... ok
+test_nonmonotonic_sender_recipient_project_sequence_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_nonmonotonic_sender_recipient_project_sequence_is_rejected_before_insert) ... ok
+test_oversized_history_is_rejected_before_parse_and_insert_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_history_is_rejected_before_parse_and_insert_atomically) ... ok
+test_oversized_payload_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_payload_row_is_rejected_before_parse_atomically) ... ok
+test_oversized_signature_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_signature_row_is_rejected_before_parse_atomically) ... ok
+test_package_id_and_digest_replay_are_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_package_id_and_digest_replay_are_rejected_before_insert) ... ok
+test_pre_insert_history_iteration_rejects_malformed_row_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_pre_insert_history_iteration_rejects_malformed_row_atomically) ... ok
+test_precommit_anchor_failure_leaves_rows_head_and_checkpoint_unchanged (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_precommit_anchor_failure_leaves_rows_head_and_checkpoint_unchanged) ... ok
+test_promote_failure_requires_recovery_and_reopen_commits_exactly_once (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_promote_failure_requires_recovery_and_reopen_commits_exactly_once) ... ok
+test_row_shape_validator_rejects_each_oversize_and_malformed_column (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_row_shape_validator_rejects_each_oversize_and_malformed_column) ... ok
+test_signed_chain_binds_store_head_sequence_and_previous_hash (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+======================================================================
+FAIL: test_python_environment_poisoning_is_removed_before_locked_script_launch (test_local_toolchain_security.LocalToolchainSecurityTest.test_python_environment_poisoning_is_removed_before_locked_script_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\security\test_local_toolchain_security.py", line 42, in test_python_environment_poisoning_is_removed_before_locked_script_launch
+    self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 69 : Coevo gate: locking verified toolchain (5421 runtime files)...
+locked Python launch failed: \ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\u03aa\ufffd\ufffdSystem.OutOfMemoryException\ufffd\ufffd\ufffd\ufffd\ufffd\ucce3\ufffd\ufffd
+
+
+----------------------------------------------------------------------
+Ran 91 tests in 399.202s
+
+FAILED (failures=1)
+
+```
+
+## 2026-07-31T23:52:44.198722Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+MergeReceiptRepositorySecurityTests.test_history_reorder_or_substitution_is_rejected_by_per_row_verification) ... ok
+test_invalid_receipt_hash_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_invalid_receipt_hash_row_is_rejected_before_parse_atomically) ... ok
+test_invalid_receipt_id_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_invalid_receipt_id_row_is_rejected_before_parse_atomically) ... ok
+test_nonmonotonic_sender_recipient_project_sequence_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_nonmonotonic_sender_recipient_project_sequence_is_rejected_before_insert) ... ok
+test_oversized_history_is_rejected_before_parse_and_insert_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_history_is_rejected_before_parse_and_insert_atomically) ... ok
+test_oversized_payload_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_payload_row_is_rejected_before_parse_atomically) ... ok
+test_oversized_signature_row_is_rejected_before_parse_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_oversized_signature_row_is_rejected_before_parse_atomically) ... ok
+test_package_id_and_digest_replay_are_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_package_id_and_digest_replay_are_rejected_before_insert) ... ok
+test_pre_insert_history_iteration_rejects_malformed_row_atomically (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_pre_insert_history_iteration_rejects_malformed_row_atomically) ... ok
+test_precommit_anchor_failure_leaves_rows_head_and_checkpoint_unchanged (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_precommit_anchor_failure_leaves_rows_head_and_checkpoint_unchanged) ... ok
+test_promote_failure_requires_recovery_and_reopen_commits_exactly_once (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_promote_failure_requires_recovery_and_reopen_commits_exactly_once) ... ok
+test_row_shape_validator_rejects_each_oversize_and_malformed_column (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_row_shape_validator_rejects_each_oversize_and_malformed_column) ... ok
+test_signed_chain_binds_store_head_sequence_and_previous_hash (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 91 tests in 182.500s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 92.968s
+
+OK
+audit seal: fully-sealed
+
+```
