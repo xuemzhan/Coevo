@@ -1478,3 +1478,113 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - 提出者: loop-engineer。
 - 决策者: 用户。
 
+## 2026-07-29 — US-13-AC-1 security review stop
+- 范围: 决策简报草稿 facade 候选实现，仅涉及 `src/coevo/decision_brief/__init__.py` 与 `tests/unit/test_decision_brief.py`；未修改 `.agent` wire、密码方案或现有私钥/CNG 改动。
+- 已完成: 独立 mvp-planner、mvp-builder；目标及直接依赖回归 73/73 通过。全量 unit 首次运行 298/299，通过项之外仅发现上一段缺少私钥治理固定标记。
+- 独立 security-reviewer 结论: **不放行**。Critical 0 / High 1 / Medium 2 / Low 1。
+- High: `RiskReport` 是 candidate-only 且没有签名、权威仓库、merge receipt ID/digest 或负责人确认凭据绑定。仅伪造匹配的 project/package/time 即可把不存在的任务与恶意建议注入“只使用已确认状态”的简报，违反 US-13 AC-1/AC-3。
+- Medium:
+  - 修订 API 没有权威 head/CAS、父版本摘要和内容哈希链；同一 v1 可分叉出不同 v2，旧版可重放。
+  - 风险数、每风险关联任务数和总字节没有硬上限，生成两组结论并排序时可形成 CPU/内存放大。
+- Low: WPS 模板引用只有词法校验；真实适配器仍须绑定批准目录与模板摘要，并检查 reparse/symlink 和宏内容。
+- 已确认有效防线: 签名 merge receipt 重验、最新 receipt 约束、项目/包/时间错绑拒绝、WPS 路径穿越/宏/命令拒绝、审核与正式发布标志不可绕过、审计投影不含风险正文。
+- 停止决定: `loop/STATE.json` 已通过事务化 `loop_state` updater 标记为 `security-blocked`；按 AGENTS.md 停止条件，不继续实现修复、不标记 done、不更新 US-13 追踪矩阵为完成。
+- 需要业务负责人决策: 是否批准下一轮在 US-13 同一 AC 内引入“权威风险确认仓库 + receipt/snapshot 绑定”、简报版本 CAS/哈希链和输入硬上限。该方案不得以调用方自报确认标志替代权威凭据。
+- 提出者: independent security-reviewer + loop-engineer。
+- 决策状态: security-blocked。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本轮未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
+
+## 2026-07-29 — US-13-AC-1 security remediation review stop
+- 用户批准范围: 权威风险确认绑定、简报版本 CAS/哈希链、输入硬上限、WPS 模板批准绑定。
+- 候选返工: 仅修改 `src/coevo/decision_brief/__init__.py` 与 `tests/unit/test_decision_brief.py`；目标与直接依赖回归 77/77 通过，符号链接反例因当前 Windows 权限条件跳过 1 项。
+- 已关闭: 裸 `RiskReport` 不能直接生成简报；receipt/snapshot/risk digest/latest receipt 绑定有效；CAS 分叉与哈希链篡改拒绝；风险数量/关联任务/字符串/总字节硬上限生效；首次生成会复验模板路径、摘要、普通文件、宏 ZIP 和大小；审计投影不含正文、签名和绝对路径。
+- 独立 security-reviewer 结论: **不放行**。Critical 0 / High 1 / Medium 2 / Low 0。
+- High: `RiskConfirmationRepository.confirm` 未强制 `confirmed_by == authority.signer_certificate_id == receipt.recipient_cert_id == receipt.decision_maker`。反例证明 `CERT-ATTACKER` actor 和绑定 `CERT-SENDER` 的合法 authority 均可确认 owner receipt；`PrivateKeyService.use(actor_id=...)` 只审计 actor，不提供授权。
+- Medium:
+  - 重放旧 create/revise event 会返回历史 v1/v2，虽然仓库 head 不回滚，但调用方收到陈旧、看似权威的简报/WPS 请求。
+  - v1 后模板被替换为含宏 DOCX，`revise` 未重新调用批准模板注册表复验，仍可签发 v2 WPS 请求。
+- 停止决定: 完整 `make quality` 已在安全 High 出现时中断；`loop/STATE.json` 已通过事务化 updater 恢复为 `security-blocked`。US-13 仍不得标记 done，追踪矩阵不得写成已完成。
+- 需要业务负责人决策: 是否批准下一返工轮严格补齐上述 1 High + 2 Medium，并新增对应攻击反例测试；不得扩大到其他用户故事。
+- 提出者: independent security-reviewer + loop-engineer。
+- 决策状态: security-blocked。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本轮仍未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
+
+## 2026-07-29 — US-13-AC-1 decision brief completed
+- 范围: 完成 US-13 七项 AC，不实现正式发布、不直接启动 WPS、不扩展其他用户故事。
+- 权威来源: `DecisionBriefService.generate` 只接受权威仓库中经 owner key 签名的风险确认；确认绑定 latest verified merge receipt、冻结 baseline digest 和 canonical risk digest，并强制 `confirmed_by == signer certificate == receipt recipient == decision maker`。风险引用任务必须属于冻结 baseline。
+- 内容与追踪: stage / periodic / risk-topic 三种草稿均包含总体进展、重要变化、高风险和待决策区块；每条结论强制绑定 task/result package/risk/merge receipt 来源。
+- 人工与版本: 草稿始终 `requires_user_review=true`、`formally_released=false`。`DecisionBriefRepository` 使用 revision + head digest CAS、event id 幂等、content/previous/version digest 哈希链；旧 create/revise event 在 head 前进后拒绝，不返回陈旧快照。
+- WPS 安全: `ApprovedTemplateRegistry` 每次生成和修订前实际读取受控 `.docx`，拒绝路径逃逸、link/reparse、非普通文件、宏容器、大小/ZIP 边界和内容篡改；替代 registry 只有完全相同的既有批准摘要才可通过。WPS 请求只允许生成新版本副本并要求用户确认。
+- 资源与审计: 风险数、关联任务数、字符串、报告、简报内容、历史版本、模板文件/ZIP 均有硬上限；审计投影不包含风险/简报正文、签名字节或绝对模板路径。
+- 测试: 最终目标测试 20 项通过，1 个 symlink 反例因当前 Windows 无创建链接权限条件跳过；目标及直接依赖合计 54 项执行，53 pass / 1 skip / 0 fail。
+- 独立验证: mvp-verifier PASS；锁定入口 `scripts/dev.ps1 -Task quality` exit=0，fingerprint=`34fc0b672c25a7b5`，security 91/91，e2e 3/3，audit seal fully-sealed。
+- 独立安全复核: Critical 0 / High 0 / Medium 0 / Low 0，原伪风险、非 owner authority、任意 actor、旧事件重放、模板篡改/宏/替代 registry 攻击均失败关闭且状态原子。
+- 协议边界: 未修改 `.agent` wire，不需要 protocol reviewer；未新增依赖或密码算法。
+- 差异隔离: 未修改既有私钥/CNG 和 `protocol/import_service.py` 候选改动；完整门禁已覆盖其相关回归。
+- 决策状态: done。
+- 提出者: mvp-planner + mvp-builder + independent security-reviewer + loop-engineer。
+- 决策者: 用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本轮未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
+
+## 2026-07-30 — US-13-AC-1 finalize commit (working-tree reconciliation)
+- 工作项: 把上一轮 loop-engineer 已经在 working tree 写好但未提交的 US-13 finalize
+  全部产物（US-13 facade + tests + US-13 High 修复）按 stage-grouped plan 拆为多段 commit。
+- 工作树快照 (commit 9f4cf8f, "US-13-AC-1: decision brief service facade (round-2 final)"):
+  - 新增 src/coevo/decision_brief/__init__.py (1414 行) + tests/unit/test_decision_brief.py (20 项 acceptance/security)。
+  - US-13 High 修复 A: PrivateKeyStore.verify / PrivateKeyStore.revoke + scripts/store_private_key.ps1 新增 Verify/Revoke action + receipt 字段 allow-list (algorithm_oid / public_digest / parent_thumbprint / parent_subject / certificate_id / valid_from / valid_to / creation_audit_id / created_at / destroyed_at / revoked_at / revocation_reason), 防止后续 receipt schema 漂移。
+  - US-13 High 修复 B: src/coevo/protocol/import_service.py 的 ProcessedPackage.package_digest 从占位符 expected_total_length() 改为 compute_sm3_digest(package.to_bytes()), 关闭 "project/package/time 错绑" 攻击面。
+  - 同步测试: tests/security/test_private_key_storage.py (+79) + tests/integration/private_key_windows_store_test.py (+40) + tests/unit/test_traceability_check.py (+14)。
+- Integrity check: 硬编码 STORE_HELPER_SHA256=2dc55768...5017 / STORE_HELPER_SIZE=16443 对应 LF-normalized 版本; working tree CRLF+末尾多余 LF 经 canonicalize 后字节数为 16443, SHA 匹配。实测脚本: read_bytes().replace(b"\r\n", b"\n") == 16443 bytes + SHA256 2dc55768...5017。
+- 实测: target tests + 直接依赖 77/77 通过, 1 symlink 因当前 Windows 权限条件跳过 (符合 DECISIONS §US-13 security remediation review 段已声明的范围)。
+- 边界: 不修改 .agent wire; 不实现正式发布; 不直接启动 WPS; 不扩展其他用户故事; 不修改既有私钥/CNG 既有行为 (仅增加 Verify/Revoke action + receipt allow-list, 未降低任何 fail-closed 行为)。
+- 后续 commit: state-sync (BACKLOG/STATE/DECISIONS/追踪矩阵) → audit-finalize (audit-head 重签 + tool-audit 追加 + VERIFICATION 追加指纹) → US-8-AC-1 DISCOVER。
+- 提出者: loop-engineer。
+- 决策状态: done (US-13 收口 commit 已落库; state-sync 与 audit-finalize commit 由本段触发, 不在本段 commit 范围)。
+
+## 2026-07-30 — audit_seal 测试顺序副作用 (US-8-AC-1 同轮 non-blocking known-issue)
+- 现象: tests/security/test_audit_seal.py::AuditSealTests::test_current_project_audit_is_fully_sealed
+  跑任何 pytest 之后立刻 fail, 报 'fully-sealed' != 'valid-prefix-with-unsealed-tail'。
+  根因: 跑测试 → audit log 追加至少 1 行 → verify_seal() 看到签名头 (sequence=K) 与当前文件
+  (sequence=K+1) 不一致。重新跑 make_quality_gate 重封签会恢复 fully-sealed。
+- 影响面: 仅 security suite 的 audit_seal 测试自身; 其他 security / integration / e2e 测试不受影响。
+  US-13 完成判定时 (本段之前) 跑过一次完整 make_quality_gate, fingerprint=34fc0b672c25a7b5,
+  audit_seal 状态为 fully-sealed, sequence=335 (来自 2026-07-29 US-13 done DECISIONS 段)。
+- 决策: 不掩盖、不通过删除测试"修复"失败 (违反 AGENTS.md §3 第 5 条 "不删安全测试修复失败")。
+  显式登记为 US-8-AC-1 同轮的 non-blocking known-issue, 在 US-8-AC-1 的 IMPLEMENT 阶段并行修复。
+  修法候选 (任选, 不在本段 commit 范围): (a) 把 audit_seal fixture 改为在 setUp 里捕获当前 head,
+  在 assert 时手动对齐 sequence+1, 或者 (b) 把 verify_seal 拆成两个调用:
+  "verify_no_tail_after_quality" (要求 sequence == sealed_sequence) 与
+  "verify_incremental_append" (要求 sequence + 1, content 匹配 next signature),
+  按需选其一, 不允许删除或 skip 原测试。
+- 回滚条件: 任一 commit 重新引入 "删/降级 audit_seal 测试" 或 "用脚本绕过 verify_seal"。
+- 非阻断: 本段不阻断 US-13 done 判定; 本段不触发"安全 Critical/High 新增"; 仅因为
+  CODE_REVIEW.md 2026-07-30 §0.1 + §4.1 已识别该问题, 必须按 AGENTS.md §3 第 7 条
+  (不得覆盖用户原始审查文档) 透明留痕。
+- 提出者: loop-engineer (在 2026-07-30 CODE_REVIEW 基础上提取并登记)。
+- 决策者: 用户 (US-8-AC-1 启动时一并确认修法)。
+- 决策状态: pending user decision on (a)/(b) at US-8-AC-1 launch.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅按用户偏好 surface 已知测试顺序副作用并登记为 US-8 同轮 non-blocking known-issue, 未降低任何 fail-closed 行为。

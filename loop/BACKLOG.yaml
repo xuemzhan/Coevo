@@ -164,12 +164,12 @@ items:
     protocol_review: false
   - id: US-13-AC-1
     story: US-13
-    title: 决策简报 service facade（消费 US-10 合并后基线 + US-11 风险；待办）
-    status: ready
+    title: 决策简报 service facade（权威合并收据 + owner-signed 风险确认 + CAS 版本链 + 受控 WPS 模板）
+    status: done
     dependencies: [US-10-AC-1, US-11-AC-1]
     acceptance_tests:
       - tests/unit/test_decision_brief.py
-    security_review: false
+    security_review: true
     protocol_review: false
   - id: US-8-AC-1
     story: US-8

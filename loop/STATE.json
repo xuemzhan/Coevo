@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
   "iteration": 13,
-  "current_story": "US-12",
-  "current_item": "US-12-AC-1",
-  "phase": "decide",
-  "status": "done",
+  "current_story": "US-8",
+  "current_item": "US-8-AC-1",
+  "phase": "discover",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "",
   "blocking_issue": "",
-  "updated_at": "2026-07-28T14:15:00Z"
+  "updated_at": "2026-07-30T12:49:33.499867Z"
 }
