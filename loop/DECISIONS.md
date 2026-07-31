@@ -1588,3 +1588,47 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
 - 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅按用户偏好 surface 已知测试顺序副作用并登记为 US-8 同轮 non-blocking known-issue, 未降低任何 fail-closed 行为。
+## 2026-07-31 — audit_seal test side-effect assumption: measured self-correction
+
+- 来源: 2026-07-30 CODE_REVIEW.md §0.1 + §4.1 报告
+  `tests/security/test_audit_seal.py::AuditSealTests::test_current_project_audit_is_fully_sealed`
+  跑任何 pytest 后立即 fail, 根因描述为 "跑测试 → audit log 追加至少 1 行 →
+  verify_seal 看到签名头与文件不一致"。
+- 本段实测 (2026-07-31, US-13 finalize commit 8ae4c52 之后, audit chain
+  sequence=370 fully-sealed):
+  1. `python -m unittest discover -s tests/unit`: returncode=0, audit
+     log_lines 531 -> 531 (无追加); head_sequence=370 不变;
+     audit_byte_count=236189 不变。
+  2. `python -m unittest tests.security.test_audit_seal -v`: 6/6 pass,
+     包括 `test_current_project_audit_is_fully_sealed` (期望 "fully-sealed"
+     实测 "fully-sealed") + `test_valid_append_is_reported_as_unsealed_tail`
+     (期望 "valid-prefix-with-unsealed-tail" 实测一致)。
+  3. 完整 `scripts/dev.ps1 -Task quality` 跑两次, fingerprint 均为
+     `34fc0b672c25a7b5`, exit_code=0, audit chain 自动重封为 fully-sealed。
+- 根因复盘: tests/security/test_audit_seal.py 第 20-22 行用
+  `shutil.copyfile(ROOT/loop/tool-audit.jsonl, audit)` + `tempfile.TemporaryDirectory`
+  把真实 audit log 拷贝到临时目录后才 `append_record(...)`, 故 `test_valid_append`
+  不会污染真实 audit log。其余 5 项测试亦只用 temp 或只读真实 head,
+  不会污染真实 log。该测试从初始 commit (87b1e99) 即如此设计, 未曾变更。
+- 结论: 在当前代码下, 2026-07-30 CODE_REVIEW §4.1 描述的 "测试顺序副作用"
+  **不可复现**, audit_seal 测试在 unit-tests 跑前/后状态完全相同, 与
+  上段 "US-8-AC-1 同轮 non-blocking known-issue" 假设矛盾。
+- 处理 (本段): 上一段 "audit_seal 测试顺序副作用" 登记状态从
+  "pending user decision on (a)/(b) at US-8-AC-1 launch" 改为
+  **superseded by measured numbers**; US-8-AC-1 启动时不需要再修该问题。
+  按 audit posture 不重写上一段历史, 仅以本段 self-correction 留痕,
+  保留对原始审查的尊重 (AGENTS.md §3 第 7 条)。
+- 仍建议 (低优先级, 不阻断 US-8): 在 US-13 done 的实测基线上, 加一条
+  单元测试断言 `unittest discover -s tests/unit` 不会修改 audit log 字节数
+  与行数, 把"测试不污染审计链"作为 US-0 audit 链不可变性的附加测试维度。
+  此项归 US-8-AC-1 之后任意后续 AC 处理, 不阻塞当前 US-13 finalize。
+- 决策状态: self-correction note, 无新 commit。
+- 提出者: loop-engineer (实测驱动)。
+- 决策者: 用户 (本段已记录)。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段仅追加 self-correction 实测留痕, 未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
