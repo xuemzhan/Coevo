@@ -189,3 +189,12 @@ items:
       - tests/unit/test_audit_governance.py
     security_review: true
     protocol_review: false
+  - id: US-4-AC-1
+    story: US-4
+    title: 运行中枢最小编排 facade（agent 注册表 + 5 步 MVP 固定链 + 人工确认 + 重试/跳过/转人工 + 审计记录）
+    status: ready
+    dependencies: [US-5-AC-3, US-10-AC-1]
+    acceptance_tests:
+      - tests/unit/test_orchestrator.py
+    security_review: true
+    protocol_review: false
