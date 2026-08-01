@@ -1881,3 +1881,32 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
 - 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅完成 US-4-AC-1 业务实现并按既有 audit posture 落 commit。
+## 2026-08-01 — US-7-AC-1 local cockpit service facade done
+
+- 范围: 完成 US-7 AC-1/AC-2/AC-4/AC-5/AC-6/AC-7/AC-8/AC-9 (环回绑定 + 静态本地化 + 无外部请求 + 项目列表 + 角色视图 + 任务/里程碑展示 + WPS 允许列表 + 状态保持快照), 不引入新 web 框架, 不引入新依赖 (Python stdlib only), 不实际 bind socket (留待 US-7-AC-2), 不实际 subprocess 调用 WPS (留待 US-7-AC-4)。
+- 新增: src/coevo/cockpit/__init__.py (801 行, 单文件巨型模块风格与 US-11/12/13/8/15/4 一致) + src/coevo/cockpit/static/index.html (placeholder) + tests/unit/test_cockpit.py (22 项 unit, 全部 pass) + docs/plans/US-7-AC-1-slice.md + BACKLOG US-7-AC-1 条目 (status: ready, dependencies: US-6-AC-1 + US-8-AC-1, security_review: true)。
+- AC 映射实测 (22 项 unit):
+  - AC-1 环回绑定: CockpitServerConfig 构造 fail-closed (0.0.0.0/10.0.0.1 拒绝); dispatch 时二次 NOT_BOUND guard。
+  - AC-2 静态本地化: static_root 必须 src/coevo/cockpit/static/ 内 (resolved path 比较); 外部路径 ValidationError。
+  - AC-3 完全断网: 纯 Python stdlib, 无 third-party import。
+  - AC-4 无外部请求: path traversal 构造时拒绝; artifact_path 含 '..' 或 absolute → CockpitValidationError。
+  - AC-5 项目列表: LIST_PROJECTS 返回 workspace_views.project_id 列表。
+  - AC-6 项目/角色视图: LIST_ROLES + ROLE_VIEW; 未知 → NOT_FOUND。
+  - AC-7 任务/里程碑展示: TASK_VIEW + MILESTONE_VIEW 消费 RoleView 快照。
+  - AC-8 WPS 允许列表: WPSAllowList.is_allowed_extension (8 类允许 + 12 类禁止); .docx 通过, .exe/.bat/.ps1/.js 等拒绝。
+  - AC-9 状态保持: CockpitServerState 不可变, dispatch 不读 disk; 持久化留待 US-7-AC-3。
+- 实测: python scripts/quality_gate.py --target quality exit=0, fingerprint=`6ba24930200fc687` 稳定。audit chain fully-sealed 持续 (sequence 自 381 递增)。
+- 后续 AC 候选 (本切片不做):
+  - US-7-AC-2: 实际 HTML/CSS/JS 渲染 + 静态资源服务 (http.server 启动)。
+  - US-7-AC-3: workspace_views 持久化 (state.json + 启动加载)。
+  - US-7-AC-4: WPS 实际 subprocess 调用 (跨进程 + 受控白名单)。
+- 决策状态: done.
+- 提出者: loop-engineer (PLAN+IMPLEMENT+VERIFY+RECORD+DECIDE 内联).
+- 决策者: 用户.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅完成 US-7-AC-1 业务实现并按既有 audit posture 落 commit。
