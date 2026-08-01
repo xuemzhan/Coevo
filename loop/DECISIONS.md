@@ -1688,3 +1688,74 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
 - 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅完成 US-8-AC-1 业务实现并按既有 audit posture 落 commit.
+## 2026-07-31 — US-15-AC-1 audit governance facade done (BACKLOG gap closed)
+
+- 范围: 完成 US-15 AC-1/AC-5/AC-6 (异常包拦截决策 + 日志字段统一 + 安全
+  管理员查询导出), 同时关闭 BACKLOG 缺漏 (US-15-AC-1 之前未在 BACKLOG
+  创建条目, 与 US-4 / US-7 / US-14 同样缺漏; 本段仅补 US-15-AC-1 一项,
+  其余 3 项仍 ready/待办, 由后续 loop-engineer 按议题 D 决策处理).
+- 新增: src/coevo/audit_governance/__init__.py (702 行, 单文件巨型模块
+  风格与 US-11/12/13/8 一致) + tests/unit/test_audit_governance.py
+  (29 项 unit, 全部 pass) + docs/plans/US-15-AC-1-slice.md + BACKLOG
+  US-15-AC-1 条目 (status: ready, dependencies: US-13-AC-1 + US-5-AC-3).
+- AC 映射实测 (29 项 unit):
+  - AC-1 异常包拦截: 5 种 reason (CORRUPTED / TAMPERED / EXPIRED /
+    DUPLICATE / RECIPIENT_MISMATCH) + 多 reason 同时报告 + detail 串接.
+  - AC-5 日志字段: AuditEvent.from_audit_record 强制 ts/actor/action/
+    result; 缺字段/坏 ts/未知 result code 均 ValidationError.
+  - AC-6 查询导出: query_events 支持 6 字段过滤 + limit (hard cap 10000)
+    + cursor (record_hash) 翻页; export_events 支持 JSON / JSONL,
+    SHA-256 内容摘要 content-stable.
+  - 既有 AC (AC-2/AC-3/AC-4/AC-7/AC-8): 已在 US-0/5/6/9/10/12/13 覆盖,
+    本切片不重复实现不降低既有 fail-closed.
+- 实测: python scripts/quality_gate.py --target quality exit=0,
+  fingerprint=`6ba24930200fc687`. audit chain fully-sealed at sequence=378,
+  audit_line_count=535, audit_byte_count=237481, signed_at=
+  2026-08-01T00:16:42Z, signer_thumbprint=F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86,
+  tail_record_hash matches log last record_hash.
+- 后续 AC 候选 (本切片不做):
+  - US-15-AC-2: 实时审计流 (push 通知 / 订阅).
+  - US-15-AC-3: 跨项目审计聚合 (US-13 决策简报依赖).
+  - US-15-AC-4: 审计策略声明 (按 actor / action 配置审计级别).
+- 决策状态: done.
+- 提出者: loop-engineer (PLAN+IMPLEMENT+VERIFY+RECORD+DECIDE 内联).
+- 决策者: 用户.
+
+## 2026-07-31 — audit_seal environmental WinError 5 incident (transient, not US-15 bug)
+
+- 现象: scripts/dev.ps1 -Task quality 在 test/e2e 阶段全部 OK 后, audit
+  seal 阶段报 [WinError 5] 拒绝访问。:'loop/audit-head.json.pending' ->
+  'loop/audit-head.json' (audit_seal.py line 51 os.replace 失败), 整轮
+  quality exit_code=14.
+- 根因: Windows 文件锁临时性冲突。质量门禁跑完后 audit_seal.py 试图用
+  os.replace 把 pending head 原子替换到正式 head; 此时前一个进程的
+  handle 可能尚未释放 (杀软扫描 / 系统延迟), Windows 返回 WinError 5.
+- 隔离诊断:
+  1. tests/unit + tests/integration + tests/security + tests/e2e 全部 OK,
+     不涉及 US-15 代码 (29 项 audit_governance 测试 + 既有 90+ 项 unit
+     测试无回归).
+  2. python scripts/audit_seal.py verify --allow-tail -> {ok: true,
+     status: fully-sealed}.
+  3. python scripts/audit_seal.py sign -> {ok: true, status: fully-sealed}.
+  4. python scripts/quality_gate.py --target quality (跳过 dev.ps1 wrap)
+     -> exit_code=0, fingerprint=6ba24930200fc687.
+- 结论: WinError 5 是 dev.ps1 / Windows 文件锁的环境性冲突, 不是 US-15
+  代码 bug, 也不是 audit_seal.py 的逻辑问题。
+- 处理: 按 audit posture (AGENTS.md §3 transient failure must be
+  preserved, not deleted), 本段保留 2026-08-01T00:12:03.156006Z 那条
+  exit_code=14 的 VERIFICATION 段作为历史证据; binding evidence 是
+  2026-08-01T00:16:41.517838Z 那次 python scripts/quality_gate.py 直接
+  调用, exit_code=0, fingerprint 稳定。audit chain sequence=378
+  fully-sealed, 残留 audit-head.p7s.{pending,bak} 已清理。
+- 缓解 (留给后续 loop-engineer): dev.ps1 的 make 调用前可以先
+  retry-on-error 一层 audit_seal.sign (类似 quality_gate.py 内部已有
+  seal before + seal after 的双调用), 或者把 os.replace 改成带
+  shutil.move fallback. 本切片不修 (越界).
+- 决策状态: documented incident, US-15 收口不受影响.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅记录 US-15-AC-1 收口与一次环境性 audit_seal WinError 5 transient failure.

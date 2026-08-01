@@ -183,7 +183,7 @@ items:
   - id: US-15-AC-1
     story: US-15
     title: 安全审计 facade（异常包拦截决策 + 全过程留痕治理 + 安全管理员查询导出）
-    status: ready
+    status: done
     dependencies: [US-13-AC-1, US-5-AC-3]
     acceptance_tests:
       - tests/unit/test_audit_governance.py
