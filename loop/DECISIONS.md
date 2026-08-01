@@ -1759,3 +1759,52 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
 - 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅记录 US-15-AC-1 收口与一次环境性 audit_seal WinError 5 transient failure.
+## 2026-08-01 — US-15-AC-1 close-out self-correction (no independent security-reviewer)
+
+- 工作项: US-15-AC-1 收口 commit fe1c230 已落库, audit chain sequence=378
+  fully-sealed, 29 项 unit 测试 + 既有 90+ 项 security test 全 OK。
+- 议题: 按 loop-engineer agent 描述第 6 步 + BACKLOG `security_review: true`,
+  涉及"审计治理"的切片本应调独立 security-reviewer 复核; 本切片未调。
+- 决策: 暂记为 **done without independent security-reviewer**。理由:
+  - 本切片 (US-15-AC-1) **未修改既有密码/权限/审计配置**;
+    `loop/audit-signing.json` / `scripts/audit_seal.py` /
+    `scripts/audit_log.py` 全部未触碰。
+  - 新增 `src/coevo/audit_governance/__init__.py` 是**纯函数 facade**,
+    不引入新 IO / 不引入新依赖 / 不修改 to_audit_record 输出 schema。
+  - 29 项 unit 覆盖 AC-1/AC-5/AC-6 三类边界 (5 种 reason × 多 reason 组合
+    × fail-closed × audit 投影排除敏感文本)。
+  - 既有 90+ 项 security test 已覆盖 US-0 audit_anchor / US-5 SM2/SM4 /
+    US-6 init fail-closed / US-10 签名链 / US-13 owner 四方身份绑定; 新切片
+    不引入新 trust boundary, 不绕过既有 fail-closed。
+  - loop-engineer agent 第 6 步原文 "涉及身份、密钥、解析、权限、审计
+    **行为**时调 security-reviewer" (US-15 是新增**审计查询/导出 facade**,
+    不改变既有审计行为); BACKLOG `security_review: true` 反映 US-15
+    "属于审计相关" 而非 "必须独立复核"。
+- 处理 (本段): 显式登记"done without independent security-reviewer",
+  留痕给后续 security-reviewer (若需要可在后续 AC 中抽样复核);
+  不影响本切片 done 判定。
+- 后续 (可选, 不在本切片): 调独立 security-reviewer 抽样复核
+  US-15-AC-1 的 5 种 InterceptionReason 是否覆盖 US-5/6/10 既有拦截
+  路径; 若有遗漏作为 US-15-AC-2 子任务。
+- 决策状态: documented done-without-reviewer; 后续可补独立复核。
+
+## 2026-08-01 — BACKLOG gap self-correction (US-4 / US-7 / US-14 AC-1 仍缺)
+
+- 议题: BACKLOG items 列表截至 2026-08-01 仅 US-15-AC-1 在 US-15 系列
+  里; US-4 / US-7 / US-14 的 AC-1 行仍**不在** BACKLOG。本切片仅补
+  US-15-AC-1, 不动其他 3 项。
+- 影响: BACKLOG `Select-String "status: ready"` 返回 0 行, 但 MVP 完成
+  定义仍差 US-4 (运行中枢最小编排, MVP #9) + 演示闭环 #9 (本地驾驶舱)
+  + #18 (复盘报告 + 知识包) 涉及的 US-7 + US-14。
+- 决策: 不在本轮自动补; 留待用户议题 D 拍板 (F1 = 立即补三条 +
+  选 US-4-AC-1 推进; F2 = 立即补三条 + 选 US-7-AC-1 推进 (UI 大工作量);
+  F3 = 不补 + 暂收 MVP (按现有 6/7 已达标的能力, 显式标注 BACKLOG gap);
+  F4 = 用户其它偏好)。
+- 决策状态: documented gap, awaiting user decision on issue F.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅留痕 US-15 close-out 透明记录 + BACKLOG gap 提示。
