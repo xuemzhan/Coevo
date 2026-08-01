@@ -216,3 +216,59 @@ items:
       - tests/unit/test_knowledge_base.py
     security_review: true
     protocol_review: false
+
+  # ---------- post-MVP follow-on ACs (slice: 2026-08-01) ----------
+  - id: US-4-AC-2
+    story: US-4
+    title: Orchestrator 真实调用 US-1/2/3 facade (MVP 固定链 5 步真实业务跑通)
+    status: ready
+    dependencies: [US-4-AC-1, US-1-AC-1, US-2-AC-1, US-3-AC-1]
+    acceptance_tests:
+      - tests/integration/test_orchestrator_real_facade_chain.py
+    security_review: false
+    protocol_review: false
+  - id: US-7-AC-2
+    story: US-7
+    title: Cockpit 实际 HTTP server 启动 (http.server + 真实 HTML/JS 渲染 + 静态资源服务)
+    status: ready
+    dependencies: [US-7-AC-1]
+    acceptance_tests:
+      - tests/integration/test_cockpit_http_server.py
+    security_review: true
+    protocol_review: false
+  - id: US-14-AC-2
+    story: US-14
+    title: KnowledgeBundle 持久化入库 (KnowledgeStore 写 disk / DB)
+    status: ready
+    dependencies: [US-14-AC-1]
+    acceptance_tests:
+      - tests/integration/test_knowledge_store.py
+    security_review: true
+    protocol_review: false
+  - id: US-7-AC-3
+    story: US-7
+    title: Cockpit 状态持久化 (workspace_views 启动加载 + 关闭落盘)
+    status: ready
+    dependencies: [US-7-AC-1]
+    acceptance_tests:
+      - tests/integration/test_cockpit_state_persistence.py
+    security_review: false
+    protocol_review: false
+  - id: US-8-AC-2
+    story: US-8
+    title: 实时文件 watcher (US-7 本地驾驶舱依赖)
+    status: ready
+    dependencies: [US-8-AC-1]
+    acceptance_tests:
+      - tests/integration/test_progress_watcher.py
+    security_review: false
+    protocol_review: false
+  - id: US-15-AC-2
+    story: US-15
+    title: 安全管理员实时审计流 (push 通知 / 订阅)
+    status: ready
+    dependencies: [US-15-AC-1]
+    acceptance_tests:
+      - tests/integration/test_audit_stream.py
+    security_review: true
+    protocol_review: false
