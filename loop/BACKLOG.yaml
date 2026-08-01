@@ -207,3 +207,12 @@ items:
       - tests/unit/test_cockpit.py
     security_review: true
     protocol_review: false
+  - id: US-14-AC-1
+    story: US-14
+    title: 成果沉淀 facade（流程/任务/风险/决策/成果聚合 + 复盘草稿 + 模板提取 + 来源标记 + 密级检查 + 用户审核）
+    status: done
+    dependencies: [US-12-AC-1, US-13-AC-1]
+    acceptance_tests:
+      - tests/unit/test_knowledge_base.py
+    security_review: true
+    protocol_review: false

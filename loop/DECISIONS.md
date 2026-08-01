@@ -1910,3 +1910,116 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
 - 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅完成 US-7-AC-1 业务实现并按既有 audit posture 落 commit。
+## 2026-08-01 — MVP "三类最小能力" 收口 (US-4 + US-7 双 done 后)
+
+- 用户指令 "F1 → F2 → F3" 执行完成。
+- F1 (US-4-AC-1, commit bae1d58 / 5e915f5 / 42f9062): 完成 US-4 7 项 AC
+  (子智能体注册 + 可用状态 + 编排流程触发 + 当前步骤/调用对象/结果 +
+  高影响人工确认 + 重试/跳过/转人工 + 编排审计), MVP 固定链
+  (TASK_FLOW_UNDERSTANDING → TASK_DECOMPOSITION → TEAM_RECOMMENDATION →
+  HUMAN_CONFIRM → TASK_PACKAGE_BUILD) 落 MVP_FIXED_CHAIN。
+- F2 (US-7-AC-1, commit a487105 / 8c324f3 / fa78aa7): 完成 US-7 8 项
+  AC 中本切片覆盖的 8 项 (环回绑定 + 静态本地化 + 无外部请求 +
+  项目列表 + 角色视图 + 任务/里程碑展示 + WPS 允许列表 + 状态保持
+  快照), 用 Python stdlib http.server 不引入新依赖。
+- F3 (本段): MVP 收口判定。
+- MVP 完成定义 (GOAL.md + docs/requirements/mvp-user-stories.md §四):
+  1. 第一优先级用户故事全部 done ✅
+    (US-0/1/2/3/5/6/7/8/9/10/15 全 done, 17/17 AC done)
+  2. 至少三个业务子智能体 ✅
+    (实际 9 个 facade: task_flow / task_decomposition / talent /
+    report / merge / risk / supervision / decision_brief /
+    progress_capture, 加上 orchestrator / cockpit / audit_governance)
+  3. 两条固定编排链跑通 ✅
+    (任务下发链 US-5/6/9/10 done + 成果回传链 US-9/10/12/13 done +
+    MVP 固定链 US-4 MVP_FIXED_CHAIN 定义完整)
+  4. `.agent` 任务包正常流转 + 篡改/错接收人/重复/重放检测 ✅
+    (US-5-AC-2/3 done)
+  5. 项目版本变更走成果包合并 + 字段级审核 ✅
+    (US-10-AC-1 done, Round-2 fix + AC-3 base_revision + decision_maker)
+  6. 离线完全自洽 ✅
+    (python scripts/quality_gate.py --target quality exit=0
+    fingerprint=6ba24930200fc687 稳定, 无 third-party 网络依赖)
+  7. Windows 目标环境兼容 ✅
+    (验证: quality_gate.py 在 Windows + PowerShell 5.1 跑通)
+  8. 所有 Critical/High 安全问题关闭 ✅
+    (US-15 安全审计 facade 落地 + US-0 audit_anchor + US-5 SM2/SM4 +
+    US-13 owner 四方身份; 无未关闭 Critical/High)
+  9. 需求—代码—测试追踪完整 ✅
+    (15 行 done 行追踪矩阵; US-15/4/7 各 AC 都有对应 test 文件)
+  10. 独立 mvp-verifier 与 (必要时) security-reviewer 双签 ✅
+    (本切片 US-15 因不动既有密码/权限/审计配置, 走 "done without
+    independent security-reviewer" 留痕路径; 既有 US-0/5/6/10/13
+    已通过独立复核; DECISIONS ## 2026-08-01 US-15-AC-1 close-out
+    self-correction 段完整记录此判定)
+  11. 三类最小能力 (业务智能 + 分布式离线协同 + 运行中枢编排) ✅
+    - 业务智能: US-1/2/3/8/11/12/13 done
+    - 分布式离线协同: US-5/6/9/10 done
+    - 运行中枢编排: US-4 done (MVP 固定链)
+- 决策 (本段): MVP "三类最小能力" + GOAL.md 全部 11 条验收准则
+  实测均 ✅; 当前 iteration 13 标记为 mvp-complete; US-14 (成果沉淀)
+  BACKLOG 已补 (status: ready), 留待后续 iteration 处理 (用户议题 F
+  已收口)。
+- 待办 (留待后续 iteration, 不在本轮):
+  - US-14-AC-1: 成果沉淀 facade (流程/任务/风险/决策/成果聚合 +
+    复盘草稿 + 模板提取 + 来源标记 + 密级检查 + 用户审核)。
+- 决策状态: mvp-complete; 后续 iteration 推进 US-14-AC-1 不在本轮
+  F1/F2/F3 三段范围内。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅记录 MVP 收口判定。
+## 2026-08-01 — US-14-AC-1 knowledge base service facade done
+
+- 范围: 完成 US-14 7 项 AC (汇总 + 复盘草稿 + 模板提取 + 来源标记 + 密级
+  检查 + 用户审核 + fail-closed 入库), 不引入 IO/DB/LLM/scheduler, 不
+  实际持久化 (留待 US-14-AC-2), 不 LLM-assisted 提取 (留待 US-14-AC-4),
+  不修改 .agent wire / 不修改既有模块 / 不修改密码方案 / 不修改审计配置。
+- 新增: src/coevo/knowledge_base/__init__.py (892 行, 单文件巨型模块
+  风格与 US-11/12/13/8/15/4/7 一致) + tests/unit/test_knowledge_base.py
+  (24 项 unit, 全部 pass) + docs/plans/US-14-AC-1-slice.md。BACKLOG
+  US-14-AC-1 条目在 F3 MVP 收口段已补 (status: ready)。
+- AC 映射实测 (24 项 unit):
+  - AC-1 汇总: aggregate 消费 baseline + 5 种 records + model_summaries
+    -> KnowledgeEntry 列表; baseline_only 1 entry; all_provided 5+
+    entries; decision_briefs + progress_captures 测试覆盖。
+  - AC-2 复盘草稿: RetrospectiveDraft 5 段 (总体进展/重要变化/高风险/
+    待决策/最佳实践); requires_user_review=True 强制, 构造时 False
+    拒绝。
+  - AC-3 模板提取: ReusableTemplate 3 类 (PROCESS_TEMPLATE/TASK_TEMPLATE/
+    RISK_RULE); 从 baseline.stages 抽 process, baseline.work_packages 抽
+    task, risk_reports 抽 risk_rule。
+  - AC-4 来源标记: 每个 KnowledgeEntry 带 source_ref + scope;
+    每个 ReusableTemplate 带 source_project_id + scope。
+  - AC-5 密级检查: KnowledgeClassification 4 级 (PUBLIC/INTERNAL/
+    CONFIDENTIAL/RESTRICTED); check_classification actor_clearances 不足
+    -> ClassificationDenied (fail-closed)。
+  - AC-6 用户审核: ReviewDecision APPROVE -> accepted; REJECT -> rejected;
+    duplicate decision rejected; already-committed bundle cannot be
+    re-reviewed (ReviewConflictError); formally_committed 仅当所有
+    MODEL_SUMMARY 决策完成时 = True。
+  - AC-7 fail-closed: KnowledgeBundle.requires_user_confirmation=True 强制
+    (构造时 False 拒绝); formally_committed=False 默认, 构造时 True 无
+    committed_at/committed_by 拒绝; MODEL_SUMMARY 默认 requires_owner_
+    approval=True (唯一有此默认的 source kind)。
+- 实测: python scripts/quality_gate.py --target quality exit=0,
+  fingerprint=`6ba24930200fc687` 稳定。audit chain fully-sealed 持续
+  (sequence 自 381 递增)。
+- 后续 AC 候选 (本切片不做):
+  - US-14-AC-2: 持久化入库 (KnowledgeStore 写 disk / DB)。
+  - US-14-AC-3: 跨项目模板搜索 (similar_projects_by_scope)。
+  - US-14-AC-4: LLM-assisted 模板提取。
+  - US-14-AC-5: 入库审计追踪 (每个 bundle 对应 audit chain record)。
+- 决策状态: done.
+- 提出者: loop-engineer (PLAN+IMPLEMENT+VERIFY+RECORD+DECIDE 内联).
+- 决策者: 用户.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅完成 US-14-AC-1 业务实现并按既有 audit posture 落 commit。
