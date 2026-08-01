@@ -198,3 +198,12 @@ items:
       - tests/unit/test_orchestrator.py
     security_review: true
     protocol_review: false
+  - id: US-7-AC-1
+    story: US-7
+    title: 本地驾驶舱 facade（环回绑定 + 静态本地化资源 + 项目/角色/任务视图 + WPS 允许列表 + 状态保持）
+    status: ready
+    dependencies: [US-6-AC-1, US-8-AC-1]
+    acceptance_tests:
+      - tests/unit/test_cockpit.py
+    security_review: true
+    protocol_review: false
