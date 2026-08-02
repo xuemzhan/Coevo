@@ -896,3 +896,20 @@ def _make_capture_id(project_id: str, now: str, item_count: int) -> str:
     # the project-wide safe-id regex (mirrors US-2/5/9/10/13 naming).
     safe_now = now.replace(":", "").replace("T", "t").replace(".", "p")
     return f"pc.{project_id}.{safe_now}.{item_count}"
+
+
+# ---------------------------------------------------------------------------
+# Real-time workspace watcher (US-8-AC-2)
+# ---------------------------------------------------------------------------
+#
+# Imported last: watcher.py imports the evidence types defined above.
+
+from .watcher import (  # noqa: E402
+    DEFAULT_MAX_EVENTS,
+    DEFAULT_POLL_INTERVAL_SEC,
+    DEFAULT_STABILITY_CHECKS,
+    FileChangeEvent,
+    FileEventKind,
+    FileSnapshot,
+    WorkspaceWatcher,
+)
