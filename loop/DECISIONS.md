@@ -2719,3 +2719,46 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+## 2026-08-02 -- Win7 专项 + 审计流持久化/鉴权 + 会话轮换 + 记录归档 done
+
+### WIN7-AC-1 Win7 兼容独立分支专项 done（实机验证待办）
+- 创建独立分支 win7-compat；docs/architecture/win7-compat-branch.md 定义
+  冻结依赖（stdlib + 锁定工具链）、功能范围（支持/降级/不支持）、安全补偿、
+  测试计划；tests/win7/test_win7_compat_profile.py（stdlib-only 导入、
+  禁 runtime 依赖、离线约束）4/4；scripts/win7-compat-check.ps1。
+- 状态: 本机为 Win10+，实机 Win7 验证标记 pending-win7-runtime，须在
+  Win7 SP1 x64 环境执行分支专项后关闭。
+
+### STREAM-PERSIST-1 审计流持久化与订阅鉴权 done
+- AuditStreamStore: JSONL + SHA-256 哈希链（prev/record_hash），显式
+  create/open，open 全链校验、篡改拒开，大小上限（默认 16MB，可配），
+  events() 回放；AuditStreamHub 可注入 store（发布先持久化，失败
+  fail-closed）与 authorizer（订阅要求 is_allowed(actor, "audit:subscribe")）；
+  subscribe(replay=True) 对新订阅者回放已持久化事件。
+- 验证: unit 5/5（store 链/篡改/上限/回放）+ 既有 10/10 + integration 7/7
+  （含跨 hub 回放、订阅授权拒绝/放行）。
+
+### SESSION-ROTATE-1 会话令牌轮换 done
+- CockpitSessionManager.rotate(old, now): 撤销旧令牌并签发新令牌；
+  max_session_age_sec: 会话超过最大期限后 validate 失败（强制轮换/重登）。
+- 验证: unit 27/27（含 rotate 撤销旧令牌、未知令牌拒绝、期限强制）。
+
+### RECORDS-ARCHIVE-1 记录归档策略 done
+- src/coevo/records_archive.py 纯函数（分区 + archive_plan）；
+  scripts/archive_records.py --dry-run/--apply，按策略阈值归档到
+  loop/archive/YYYYMMDD/；docs/process/records-archiving-policy.md。
+- 当前 dry-run: 三文件均无需归档（记录均为近期）。
+- 验证: unit 5/5。
+
+### ⑤ 只读沙箱独立双签（进行中，结果追加于后）
+- 使用 git worktree 隔离沙箱 + 两个子代理在沙箱内独立验证/审查，
+  主仓库只读；结果见下一条目。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.

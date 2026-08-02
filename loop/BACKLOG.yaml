@@ -375,3 +375,41 @@ items:
       - tests/e2e/test_cockpit_offline_frontend.py
     security_review: false
     protocol_review: false
+  # ---------- win7 branch + stream persistence/auth + session rotation + records archiving (2026-08-02) ----------
+  - id: WIN7-AC-1
+    story: ENG-BASE
+    title: Win7 兼容独立分支专项（分支 win7-compat + 范围/降级/安全补偿文档 + tests/win7 专项 + 检查脚本）
+    status: done
+    dependencies: [ENG-LOOP-ENV-AC-1]
+    acceptance_tests:
+      - tests/win7/test_win7_compat_profile.py
+    security_review: false
+    protocol_review: false
+  - id: STREAM-PERSIST-1
+    story: US-15
+    title: 审计流持久化（JSONL 哈希链 store + 重启回放）+ 订阅鉴权（authorizer + permission）
+    status: done
+    dependencies: [US-15-AC-2]
+    acceptance_tests:
+      - tests/unit/test_audit_stream_store.py
+      - tests/integration/test_audit_stream.py
+    security_review: true
+    protocol_review: false
+  - id: SESSION-ROTATE-1
+    story: US-7
+    title: 会话令牌轮换（rotate + max_session_age_sec 强制期限）
+    status: done
+    dependencies: [US-7-AC-2]
+    acceptance_tests:
+      - tests/unit/test_cockpit_http.py
+    security_review: true
+    protocol_review: false
+  - id: RECORDS-ARCHIVE-1
+    story: ENG-BASE
+    title: 循环记录归档策略（纯函数规划 + scripts/archive_records.py --dry-run/--apply + 策略文档）
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_records_archive.py
+    security_review: false
+    protocol_review: false
