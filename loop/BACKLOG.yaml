@@ -326,4 +326,13 @@ items:
       - tests/security/test_private_key_handles_bindings.py
     security_review: true
     protocol_review: false
-
+  # ---------- performance benchmark suite (2026-08-02) ----------
+  - id: BENCH-AC-1
+    story: ENG-BASE
+    title: 离线性能基准套件（对照参考架构 14 SLA：页面/任务/小包校验/目录发现/打包成功率）
+    status: done
+    dependencies: [DEMO-AC-1]
+    acceptance_tests:
+      - tests/unit/test_benchmark_suite.py
+    security_review: false
+    protocol_review: false

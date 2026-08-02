@@ -2643,3 +2643,32 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+## 2026-08-02 -- 性能基准套件 done（ENG-BASE BENCH-AC-1）
+
+- 背景: 全局复盘指出参考架构 14 的 SLA 从未被测量。本切片建立可重复、
+  离线、不进质量门禁（计时环境相关）的基准套件。
+- 新增:
+  - `src/coevo/benchmarks/__init__.py`: SLA_TARGETS 表（page_open ≤3s、
+    task_query ≤2s、package_check ≤10s、dir_discovery ≤5s、
+    package_generation ≥95%）+ measure（le/ge 比较、采样、JSON 报告）;
+  - `scripts/benchmark.py`: 真实样例（50 项目/50 角色/5000 任务视图、
+    200 文件 watcher、真实 GmSSL 加密小包解析与构建）; `--check` 模式
+    任一 SLA 未达标即退出非零; 构建失败保留首异常到 detail 便于诊断;
+  - `tests/unit/test_benchmark_suite.py` (8 项): SLA 表完整性、measure
+    逻辑、报告结构。
+- 实测（2026-08-02，本机）: page_open 0.000s / task_query 0.000s /
+  dir_discovery 0.276s / package_check 0.0001s / package_generation
+  100.0%，all_ok=true，`--check` exit=0。
+- 边界: 计时类基准不进 `make quality`（避免环境相关 flaky）；后续可接
+  CI 定时任务做趋势记录。
+- BACKLOG: BENCH-AC-1 done。追溯矩阵新增行。STATE: iteration 21 -> 22。
+- 提出者: loop-engineer（Codex）。决策者: 用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
