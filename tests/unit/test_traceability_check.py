@@ -8,7 +8,10 @@ class TraceabilityTests(unittest.TestCase):
         for value in ("../x","C:/x"):
             with self.assertRaises(ValueError): trace.safe_path(value)
     def test_eng_base_is_fully_covered(self):
-        result=trace.check("ENG-BASE"); self.assertEqual(1,result["checked"]); self.assertEqual(0,result["missing"])
+        result=trace.check("ENG-BASE")
+        self.assertEqual(2,result["checked"])
+        self.assertEqual(0,result["missing"])
+        self.assertTrue(all(item["status"] == "done" for item in result["items"]))
     def test_eng_loop_env_is_fully_covered(self):
         result=trace.check("ENG-LOOP-ENV"); self.assertEqual(1,result["checked"]); self.assertEqual(0,result["missing"])
         self.assertEqual("done",result["items"][0]["status"])

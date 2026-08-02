@@ -25,6 +25,12 @@ Policy rationale:
 
 These tests assert the CURRENT state. If the policy is intentionally
 changed, update both tests and DECISIONS.md in one commit.
+
+2026-08-02 update: the business owner approved scrubbing the receipts from
+git history (ENG-HISTORY-SCRUB-1). The DECISIONS pin below therefore now
+expects "historical git blobs were scrubbed" instead of "historical git
+blobs remain"; the new invariant is enforced by
+tests/security/test_private_key_handles_bindings.py.
 """
 from __future__ import annotations
 import json
@@ -151,7 +157,7 @@ class PrivateKeyHandlesBindingsTests(unittest.TestCase):
             ".gitignore",
             "git rm --cached",
             "local runtime file preserved",
-            "historical git blobs remain",
+            "historical git blobs were scrubbed",
         ):
             self.assertIn(
                 marker,
