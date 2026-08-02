@@ -18,6 +18,12 @@ Coevo 的 Loop 开发环境是仓库本地、锁版本且默认离线的。当�
 ```
 
 入口会在修改当前会话 PATH 前验证 OpenCode、CPython 与 Make 的锁定信息，重新编译仓库自有 Make 兼容入口，并为已验证的可执行文件和源码持续持有拒绝写入/删除句柄。Make 在 Python 子进程退出前逐文件锁定运行时和 `scripts/*.py`，清除继承的 `PYTHON*` 变量并使用隔离启动参数。入口不修改注册表、永久 PATH 或 `%ProgramData%`，也不联网下载；关闭终端后临时环境和句柄自动释放。
+
+每次入口都会在 `.tools\bin-<PID>` 下编译本会话专用的 Make 兼容入口并加入当前 PATH。该临时目录的生命周期受控：
+
+- `.\scripts\dev.ps1` 与 `.\scripts\run-loop.ps1` 在任务结束（含失败与 `exit` 路径）时通过 `finally` 显式关闭句柄并删除本会话的 `bin-<PID>` 目录；
+- 入口再次启动时会先清扫历史残留：仅删除目录名匹配 `bin-<数字>`、路径位于 `.tools` 内、不是重解析点、且对应 PID 已不存在的目录（正在运行的其他会话因句柄锁定会安全跳过，由下一次入口继续清理）；
+- 交互式点加载（`. .\scripts\enter-dev-environment.ps1`）未显式收尾时，残留目录由下一次入口自动清扫。
 The entry point canonicalizes duplicate Windows `Path` / `PATH` variables into one process-scoped key. The strict `env-check` reports locking progress and verifies the final merged OpenCode configuration: auto-update and LSP download remain disabled, while external-directory, web-fetch, and web-search permissions remain denied.
 
 

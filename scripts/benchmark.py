@@ -121,6 +121,85 @@ def _package_fixture():
     return provider, sender, recipient, package
 
 
+def _dag_probe():
+    """Build a large stage-ordered DAG (3k tasks / 30 packages)."""
+    from src.coevo.task_decomposition.baseline import BaselineInput, build_baseline
+    from src.coevo.task_decomposition.models import Deliverable, Task, WorkPackage
+
+    packages = 30
+    tasks_per_package = 100
+    work_packages = tuple(
+        WorkPackage(
+            work_package_id=f"wp.{pkg}",
+            standard_stage="execution",
+            title=f"package {pkg}",
+            tasks=tuple(
+                Task(
+                    task_id=f"t.{pkg}.{idx}",
+                    title=f"task {pkg}.{idx}",
+                    responsible_role="role.eng",
+                    plan_start="2026-08-01T00:00:00Z",
+                    plan_end="2026-08-31T00:00:00Z",
+                    deliverables=(
+                        Deliverable(
+                            deliverable_id=f"d.{pkg}.{idx}",
+                            title=f"output {pkg}.{idx}",
+                            kind="document",
+                            acceptance_criteria=("accepted_by_reviewer",),
+                        ),
+                    ),
+                )
+                for idx in range(tasks_per_package)
+            ),
+        )
+        for pkg in range(packages)
+    )
+    project_input = BaselineInput(
+        project_id="PRJ-BIG",
+        title="large DAG probe",
+        objective="measure dependency-graph scalability",
+        plan_start="2026-08-01T00:00:00Z",
+        plan_end="2026-08-31T00:00:00Z",
+        responsible_units=("unit_a",),
+        process_flow_ref=("unit_a", 1),
+        work_packages=work_packages,
+    )
+    baseline = build_baseline(project_input)
+    return baseline
+
+
+def _registry_probe(records: int = 20_000):
+    """Construct a large processed-package registry directly."""
+    from src.coevo.protocol.processed_package_store import (
+        ProcessedPackageRecord,
+        ProcessedPackageStore,
+    )
+    from src.coevo.protocol.replay_detector import ProcessedPackage
+
+    entries = tuple(
+        ProcessedPackageRecord(
+            package=ProcessedPackage(
+                package_id=f"pkg.{index:06d}",
+                package_digest=f"{index:064x}",
+                sender_cert_id="CERT-SENDER",
+                recipient_cert_id="CERT-RECIPIENT",
+                project_id="PRJ001",
+                sequence_no=index + 1,
+            ),
+            package_type="RESULT_SUBMISSION",
+            processed_at="2026-08-02T00:00:00Z",
+            result="committed",
+            revision=f"PRJ001-R{index + 1:04d}",
+        )
+        for index in range(records)
+    )
+    return ProcessedPackageStore(
+        _records=entries,
+        _by_id=tuple((e.package.package_id, i) for i, e in enumerate(entries)),
+        _by_digest=tuple((e.package.package_digest, i) for i, e in enumerate(entries)),
+    )
+
+
 def run(samples: int = 1) -> tuple:
     results = []
 
@@ -226,6 +305,119 @@ def run(samples: int = 1) -> tuple:
             samples=1,
         )
     )
+
+    # ---- scalability probes (2026-08-02 optimization slice) ----
+    baseline = _dag_probe()
+    graph = build_dependency_graph_from_baseline(baseline)
+
+    def dag_build() -> None:
+        build_dependency_graph_from_baseline(baseline)
+
+    results.append(
+        measure(
+            "dag_toposort",
+            "large DAG build + topological sort (3k tasks / 30 packages)",
+            dag_build,
+            limit=5.0,
+            unit="seconds",
+            samples=1,
+        )
+    )
+
+    def adjacency_lookups() -> None:
+        for task_id in graph.task_ids:
+            graph.predecessors(task_id)
+            graph.successors(task_id)
+
+    results.append(
+        measure(
+            "graph_lookup",
+            "3k x (predecessors+successors) adjacency lookups",
+            adjacency_lookups,
+            limit=1.0,
+            unit="seconds",
+            samples=1,
+        )
+    )
+
+    def talent_probe() -> None:
+        from src.coevo.talent.models import AvailabilityWindow, SkillTag, Talent, TalentPool, RedactedIdentity
+        from src.coevo.talent.recommender import TaskRequirement, recommend
+
+        pool = TalentPool(
+            pool_code="pool.big",
+            schema_version="1.0",
+            talents=tuple(
+                Talent(
+                    talent_code=f"t.{index:03d}",
+                    skill_tags=(
+                        SkillTag(f"tech:skill_{index % 20}"),
+                        SkillTag(f"domain:domain_{index % 5}"),
+                    ),
+                    credentials=("cert.pmp",),
+                    current_task_count=index % 5,
+                    max_parallel_tasks=8,
+                    availability=AvailabilityWindow("2026-08-01T00:00:00Z", "2026-09-30T00:00:00Z"),
+                    redacted_identity=RedactedIdentity("pool.big", f"h{index:03d}", "0" * 64),
+                )
+                for index in range(200)
+            ),
+        )
+        requirements = tuple(
+            TaskRequirement(
+                task_type=f"slot.{slot}",
+                required_skill_tags=(f"tech:skill_{slot % 20}",),
+                required_credentials=(),
+                window=AvailabilityWindow("2026-08-10T00:00:00Z", "2026-08-20T00:00:00Z"),
+            )
+            for slot in range(50)
+        )
+        recommend(pool, requirements, limit=5)
+
+    results.append(
+        measure(
+            "talent_recommend",
+            "200 talents x 50 task slots (hoisted scoring)",
+            talent_probe,
+            limit=5.0,
+            unit="seconds",
+            samples=1,
+        )
+    )
+
+    def registry_probe() -> None:
+        store = _registry_probe()
+        for index in range(20_000):
+            store.get(f"pkg.{index:06d}")
+            store.by_digest(f"{index:064x}")
+
+    results.append(
+        measure(
+            "registry_lookup",
+            "20k processed-package get/by_digest lookups",
+            registry_probe,
+            limit=1.0,
+            unit="seconds",
+            samples=1,
+        )
+    )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        for index in range(200):
+            (root / f"doc-{index}.md").write_text(f"content {index}", encoding="utf-8")
+        watcher = _watcher_scan(root)
+        watcher()  # warm the snapshot + digests
+        results.append(
+            measure(
+                "watcher_rescan",
+                "rescan of 200 unchanged files (incremental digest reuse)",
+                watcher,
+                limit=1.0,
+                unit="seconds",
+                samples=1,
+            )
+        )
     if _LAST_GENERATION_ERROR:
         last = results[-1]
         results = results[:-1] + [
@@ -236,6 +428,13 @@ def run(samples: int = 1) -> tuple:
             ),
         ]
     return tuple(results)
+
+
+def build_dependency_graph_from_baseline(baseline):
+    """Rebuild the DependencyGraph object from a baseline's packages."""
+    from src.coevo.task_decomposition.dependency_graph import build_dependency_graph
+
+    return build_dependency_graph(baseline.work_packages, explicit_edges=baseline.dependencies)
 
 
 _LAST_GENERATION_ERROR: str = ""

@@ -5,20 +5,20 @@ Scope and non-goals
 This module implements ONLY:
 
 * encoding/decoding of the **Fixed Header** (``docs/protocol/agent-package-protocol.md``
-  闂?7.1) in big-endian / network byte order, with strict
+  § 7.1) in big-endian / network byte order, with strict
   byte-exact layout and fail-closed parsing;
 * construction, validation and canonical JSON serialisation of the
-  **Envelope Header** (闂?7.2) using the project's canonical-JSON rules
-  (闂?10);
+  **Envelope Header** (§ 7.2) using the project's canonical-JSON rules
+  (§ 10);
 * project / sequence / package_id semantics needed to detect replay
-  and out-of-order packets (闂?16, 闂?17).
+  and out-of-order packets (§ 16, § 17).
 
 It does NOT implement:
 
-* payload encryption (SM4 AEAD 闂?requires an approved SM4 product,
-  AGENTS.md 闂? stop condition, deferred to a future AC);
+* payload encryption (SM4 AEAD — requires an approved SM4 product,
+  AGENTS.md § 6 stop condition, deferred to a future AC);
 * SM2 key encapsulation (requires approved SM2 product + the
-  US-0-AC-2 stored private key 闂?see ``coevo.identity.private_keys``);
+  US-0-AC-2 stored private key — see ``coevo.identity.private_keys``);
 * manifest signing or verification (depends on US-0 signed anchors);
 * decryption / atomic-import (US-6 territory).
 
@@ -76,7 +76,7 @@ INSTANT_RE = re.compile(
 # Tight limits to keep malicious envelopes from forcing work on the
 # parser. These are well above any realistic package size but BELOW
 # plausible DoS targets.
-ENVELOPE_MAX_BYTES = 64 * 1024               # 64 KiB 闂?small relative to typical payloads
+ENVELOPE_MAX_BYTES = 64 * 1024               # 64 KiB — small relative to typical payloads
 PROJECT_ID_MAX = 64                           # characters
 CERT_ID_MAX = 64                              # characters
 NONCE_BASE64_MAX = 128                        # characters
@@ -150,7 +150,7 @@ class AgentPackageFlags(IntFlag):
 
 @dataclass(frozen=True)
 class EnvelopeHeader:
-    """The Envelope Header (闂?7.2) 闂?canonical UTF-8 JSON, sorted keys.
+    """The Envelope Header (§ 7.2) — canonical UTF-8 JSON, sorted keys.
 
     Use :meth:`canonical_bytes` to obtain the exact signed/verified bytes,
     and :meth:`from_mapping` for strict validation on read.
@@ -197,7 +197,7 @@ class EnvelopeHeader:
     def canonical_bytes(envelope: "EnvelopeHeader") -> bytes:
         """Return the exact UTF-8 bytes used for signing/verification.
 
-        Per 闂?10:
+        Per § 10:
         * UTF-8 encoding;
         * no BOM;
         * object keys sorted lexicographically;
@@ -355,7 +355,7 @@ class EnvelopeHeader:
             raise AgentPackageEnvelopeError("expires_at must be strictly after created_at")
         if envelope.payload_length > 0 and envelope.nonce == "":
             raise AgentPackageEnvelopeError("nonce must not be empty when payload_length is nonzero")
-        if envelope.payload_length > (1 << 40):  # 1 TiB hard cap 闂?even worst case far below
+        if envelope.payload_length > (1 << 40):  # 1 TiB hard cap — even worst case far below
             raise AgentPackageEnvelopeError(
                 "payload_length exceeds the protocol's 1 TiB hard limit"
             )
@@ -397,7 +397,7 @@ class EnvelopeHeader:
 
 @dataclass(frozen=True)
 class FixedHeader:
-    """Decoded Fixed Header 闂?enough bytes to drive routing decisions."""
+    """Decoded Fixed Header — enough bytes to drive routing decisions."""
 
     major: int
     minor: int
@@ -495,7 +495,7 @@ def decode_envelope(blob: bytes) -> EnvelopeHeader:
         raise AgentPackageEnvelopeError(
             f"envelope exceeds maximum size of {ENVELOPE_MAX_BYTES} bytes"
         )
-    # Reject BOM aggressively 闂?the protocol forbids BOM (闂?10).
+    # Reject BOM aggressively — the protocol forbids BOM (§ 10).
     if blob.startswith(b"\xef\xbb\xbf"):
         raise AgentPackageEnvelopeError("envelope must not start with a UTF-8 BOM")
     try:
@@ -611,7 +611,7 @@ def build_envelope_template(
     Defaults produce a syntactically-valid, future-timestamped envelope
     that tests and tooling can use directly. ``nonce_b64`` is provided by
     the caller to bind the package to the encrypted session key; empty
-    string is permitted in the template 闂?it surfaces as the literal
+    string is permitted in the template — it surfaces as the literal
     string ``""`` in canonical JSON, and the receiver MUST treat an
     empty nonce as a failed integrity claim (encoded payload length 0).
     """

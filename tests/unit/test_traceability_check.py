@@ -9,12 +9,12 @@ class TraceabilityTests(unittest.TestCase):
             with self.assertRaises(ValueError): trace.safe_path(value)
     def test_eng_base_is_fully_covered(self):
         result=trace.check("ENG-BASE")
-        self.assertEqual(6,result["checked"])
+        self.assertEqual(8,result["checked"])
         self.assertEqual(0,result["missing"])
         self.assertTrue(all(item["status"] == "done" for item in result["items"]))
     def test_eng_loop_env_is_fully_covered(self):
-        result=trace.check("ENG-LOOP-ENV"); self.assertEqual(1,result["checked"]); self.assertEqual(0,result["missing"])
-        self.assertEqual("done",result["items"][0]["status"])
+        result=trace.check("ENG-LOOP-ENV"); self.assertEqual(2,result["checked"]); self.assertEqual(0,result["missing"])
+        self.assertTrue(all(item["status"] == "done" for item in result["items"]))
     def test_us_0_ac_1_is_fully_covered(self):
         result=trace.check("US-0"); by_ac={item["ac"]:item for item in result["items"]}
         self.assertIn("AC-1", by_ac)

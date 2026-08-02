@@ -17,12 +17,18 @@ Algorithm
   has not provided explicit edges yet.
 * Detect cycles using iterative DFS with a permanent / temporary mark
   (CLRS, ch. 20). Raise :class:`TaskDecompositionValidationError`
-  with the offending component if a cycle is found.
-* Compute a stable topological order via Kahn's algorithm with
-  lexical tie-breaking on task IDs (deterministic across calls).
+  with the offending component if a cycle is found. The traversal is
+  iterative (explicit stack) so very large graphs never hit Python's
+  recursion limit.
+* Compute a stable topological order via Kahn's algorithm using a
+  binary heap for the ready set (lexical tie-breaking on task IDs),
+  which is deterministic across calls and runs in
+  ``O((V + E) log V)`` instead of the previous quadratic
+  ``list.pop(0)`` + re-sort per insertion.
 """
 from __future__ import annotations
 
+import heapq
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -41,15 +47,37 @@ class DependencyGraph:
     edges: tuple[DependencyEdge, ...]
     topo_order: tuple[str, ...]
 
-    def predecessors(self, task_id: str) -> tuple[str, ...]:
-        return tuple(
-            e.predecessor_task_id for e in self.edges if e.successor_task_id == task_id
+    def __post_init__(self) -> None:
+        # Build O(1) adjacency indexes once. The index fields are
+        # private and deliberately excluded from equality / hashing
+        # (dataclass only considers declared fields).
+        successors: dict[str, list[str]] = {}
+        predecessors: dict[str, list[str]] = {}
+        for edge in self.edges:
+            successors.setdefault(edge.predecessor_task_id, []).append(
+                edge.successor_task_id
+            )
+            predecessors.setdefault(edge.successor_task_id, []).append(
+                edge.predecessor_task_id
+            )
+        object.__setattr__(
+            self,
+            "_successor_index",
+            {key: tuple(value) for key, value in successors.items()},
+        )
+        object.__setattr__(
+            self,
+            "_predecessor_index",
+            {key: tuple(value) for key, value in predecessors.items()},
         )
 
+    def predecessors(self, task_id: str) -> tuple[str, ...]:
+        """Return predecessor task IDs of ``task_id`` (O(1) lookup)."""
+        return self._predecessor_index.get(task_id, ())
+
     def successors(self, task_id: str) -> tuple[str, ...]:
-        return tuple(
-            e.successor_task_id for e in self.edges if e.predecessor_task_id == task_id
-        )
+        """Return successor task IDs of ``task_id`` (O(1) lookup)."""
+        return self._successor_index.get(task_id, ())
 
 
 def cycle_in_components(edges: Iterable[DependencyEdge]) -> list[DependencyEdge]:
@@ -57,7 +85,9 @@ def cycle_in_components(edges: Iterable[DependencyEdge]) -> list[DependencyEdge]
 
     The search uses DFS with white / gray / black marks; edges that
     reach a gray node are the back edges. The returned list is
-    deterministic (sorted by ``(predecessor, successor)``).
+    deterministic (sorted by ``(predecessor, successor)``). The
+    traversal is iterative (explicit stack) so graph size is not
+    bounded by the interpreter recursion limit.
     """
     adj: dict[str, list[str]] = {}
     edge_by_pair: dict[tuple[str, str], DependencyEdge] = {}
@@ -68,18 +98,29 @@ def cycle_in_components(edges: Iterable[DependencyEdge]) -> list[DependencyEdge]
     color: dict[str, int] = {node: WHITE for node in adj}
     cycle_pairs: set[tuple[str, str]] = set()
 
-    def visit(node: str) -> None:
-        color[node] = GRAY
-        for nxt in adj.get(node, ()):
-            if color.get(nxt, WHITE) == GRAY:
-                cycle_pairs.add((node, nxt))
-            elif color.get(nxt, WHITE) == WHITE:
-                visit(nxt)
-        color[node] = BLACK
-
     for node in sorted(adj):
         if color[node] == WHITE:
-            visit(node)
+            color[node] = GRAY
+            # Explicit stack of (node, iterator over its adjacency).
+            # The iterator retains its position across the child's
+            # sub-traversal, giving the exact DFS semantics of the
+            # recursive formulation without recursion.
+            stack: list[tuple[str, object]] = [(node, iter(adj.get(node, ())))]
+            while stack:
+                current, adjacency = stack[-1]
+                descended = False
+                for nxt in adjacency:  # type: ignore[union-attr]
+                    mark = color.get(nxt, WHITE)
+                    if mark == GRAY:
+                        cycle_pairs.add((current, nxt))
+                    elif mark == WHITE:
+                        color[nxt] = GRAY
+                        stack.append((nxt, iter(adj.get(nxt, ()))))
+                        descended = True
+                        break
+                if not descended:
+                    color[current] = BLACK
+                    stack.pop()
 
     return [edge_by_pair[p] for p in sorted(cycle_pairs)]
 
@@ -91,15 +132,23 @@ def topological_order(
     """Return a deterministic topological order over ``task_ids``.
 
     Uses Kahn's algorithm with lexical tie-breaking on task IDs so
-    the order is stable across calls. Raises
+    the order is stable across calls. The ready set is maintained in
+    a binary heap, giving ``O((V + E) log V)`` overall. Raises
     :class:`TaskDecompositionValidationError` if a cycle is detected.
     """
     nodes = sorted(set(task_ids))
+    node_set = set(nodes)
     succ: dict[str, list[str]] = {n: [] for n in nodes}
     pred_count: dict[str, int] = {n: 0 for n in nodes}
     edge_pairs: set[tuple[str, str]] = set()
     for e in edges:
-        if e.predecessor_task_id not in nodes or e.successor_task_id not in nodes:
+        # ``node_set`` (not the sorted list) is used here: an ``in``
+        # test against the list would be O(V) per edge and make the
+        # whole pass O(V * E) on large DAGs.
+        if (
+            e.predecessor_task_id not in node_set
+            or e.successor_task_id not in node_set
+        ):
             raise TaskDecompositionValidationError(
                 f"edge references unknown task: ({e.predecessor_task_id!r}, "
                 f"{e.successor_task_id!r})"
@@ -118,16 +167,15 @@ def topological_order(
         succ[k] = sorted(set(succ[k]))
 
     ready: list[str] = sorted(n for n, c in pred_count.items() if c == 0)
+    heapq.heapify(ready)
     out: list[str] = []
     while ready:
-        node = ready.pop(0)
+        node = heapq.heappop(ready)
         out.append(node)
         for nxt in succ[node]:
             pred_count[nxt] -= 1
             if pred_count[nxt] == 0:
-                # Insert into ready list maintaining lexical order
-                ready.append(nxt)
-                ready = sorted(ready)
+                heapq.heappush(ready, nxt)
     if len(out) != len(nodes):
         cyclic = cycle_in_components(
             DependencyEdge(p, s, "fs") for p, s in edge_pairs

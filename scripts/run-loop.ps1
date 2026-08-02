@@ -16,27 +16,31 @@ param(
 $ErrorActionPreference='Stop'
 $Root=Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $Root
-. (Join-Path $PSScriptRoot 'enter-dev-environment.ps1') -Quiet
-$OpenCode=$env:COEVO_OPENCODE_PATH
+try {
+  . (Join-Path $PSScriptRoot 'enter-dev-environment.ps1') -Quiet
+  $OpenCode=$env:COEVO_OPENCODE_PATH
 
-Write-Host "Coevo / Loop running from: $Root"
-for($i=1;$i -le $MaxIterations;$i++){
-    Write-Host "=== Loop iteration $i / $MaxIterations ==="
-    $Arguments=@('run','--command','loop','--title',"$TitlePrefix $i")
-    if($Model){ $Arguments+=@('--model',$Model) }
-    if($Item){ $Arguments+=@('--',$Item) }
-    if($Arguments -contains '--auto'){ throw 'Automatic permission approval is forbidden.' }
-    & $OpenCode @Arguments
-    if($LASTEXITCODE -ne 0){ Write-Error "opencode run failed in iteration $i (exit=$LASTEXITCODE)"; exit 30 }
+  Write-Host "Coevo / Loop running from: $Root"
+  for($i=1;$i -le $MaxIterations;$i++){
+      Write-Host "=== Loop iteration $i / $MaxIterations ==="
+      $Arguments=@('run','--command','loop','--title',"$TitlePrefix $i")
+      if($Model){ $Arguments+=@('--model',$Model) }
+      if($Item){ $Arguments+=@('--',$Item) }
+      if($Arguments -contains '--auto'){ throw 'Automatic permission approval is forbidden.' }
+      & $OpenCode @Arguments
+      if($LASTEXITCODE -ne 0){ Write-Error "opencode run failed in iteration $i (exit=$LASTEXITCODE)"; exit 30 }
 
-    & $env:COEVO_MAKE_PATH verify-loop-state | Out-Null
-    switch($LASTEXITCODE){
-      0 { Write-Host 'MVP stop condition reached.'; exit 0 }
-      10 { Write-Host 'Current item finished; another fresh session may continue.' }
-      20 { Write-Error 'Loop is blocked and requires human decision.'; exit 20 }
-      default { Write-Error "Unknown loop state (exit=$LASTEXITCODE)"; exit 40 }
-    }
-    $Item=$null
+      & $env:COEVO_MAKE_PATH verify-loop-state | Out-Null
+      switch($LASTEXITCODE){
+        0 { Write-Host 'MVP stop condition reached.'; exit 0 }
+        10 { Write-Host 'Current item finished; another fresh session may continue.' }
+        20 { Write-Error 'Loop is blocked and requires human decision.'; exit 20 }
+        default { Write-Error "Unknown loop state (exit=$LASTEXITCODE)"; exit 40 }
+      }
+      $Item=$null
+  }
+  Write-Host "Maximum iteration count reached ($MaxIterations); a fresh session may continue."
+  exit 10
+} finally {
+  if(Get-Command -Name Clear-CoevoDevelopmentEnvironment -ErrorAction SilentlyContinue){ Clear-CoevoDevelopmentEnvironment }
 }
-Write-Host "Maximum iteration count reached ($MaxIterations); a fresh session may continue."
-exit 10

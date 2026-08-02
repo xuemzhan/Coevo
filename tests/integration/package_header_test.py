@@ -16,7 +16,7 @@ It does NOT exercise:
 
 * manifest signing/verification (US-5 AC-3);
 * SM4 inner-payload decryption (requires approved SM4 product;
-  AGENTS.md 闂? stop condition);
+  AGENTS.md § 6 stop condition);
 * SM2 key-wrap over the session key (depends on US-0-AC-2 store +
   approved SM2 product).
 

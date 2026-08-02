@@ -84,12 +84,34 @@ def score_candidate(
     Pure function. Deterministic. The tuple shapes match what
     :class:`Recommendation` consumes.
     """
+    return _score_candidate(
+        talent,
+        requirement,
+        skill_values=frozenset(tag.value for tag in talent.skill_tags),
+        credential_values=frozenset(talent.credentials),
+    )
+
+
+def _score_candidate(
+    talent: Talent,
+    requirement: TaskRequirement,
+    *,
+    skill_values: frozenset[str],
+    credential_values: frozenset[str],
+) -> tuple[float, tuple[RecommendationReason, ...], tuple[LoadAlert, ...]]:
+    """Scoring core with pre-computed candidate indexes.
+
+    ``skill_values`` / ``credential_values`` are hoisted out of the
+    per-requirement loop so a full ``recommend(pool, requirements)``
+    run pays O(tags + credentials) per talent exactly once instead of
+    once per requirement (this is the dominant cost when scoring a
+    large pool against many task slots).
+    """
     reasons: list[RecommendationReason] = []
     alerts: list[LoadAlert] = []
     score = 0.0
 
     # Skill match
-    skill_values = {tag.value for tag in talent.skill_tags}
     for required in requirement.required_skill_tags:
         if required in skill_values:
             score += _W_SKILL
@@ -102,9 +124,8 @@ def score_candidate(
             )
 
     # Credential match
-    cred_set = set(talent.credentials)
     for required in requirement.required_credentials:
-        if required in cred_set:
+        if required in credential_values:
             score += _W_CREDENTIAL
             reasons.append(
                 RecommendationReason(
@@ -219,10 +240,25 @@ def recommend(
         )
 
     out: list[Recommendation] = []
+    # Precompute per-talent set indexes once for the whole call so the
+    # inner loop is O(R x N) with O(1) set lookups instead of O(R x N x S).
+    indexed_talents: list[tuple[Talent, frozenset[str], frozenset[str]]] = [
+        (
+            talent,
+            frozenset(tag.value for tag in talent.skill_tags),
+            frozenset(talent.credentials),
+        )
+        for talent in pool.talents
+    ]
     for req in reqs:
         scored: list[tuple[float, Talent, tuple[RecommendationReason, ...], tuple[LoadAlert, ...]]] = []
-        for talent in pool.talents:
-            s, reasons, alerts = score_candidate(talent, req)
+        for talent, skill_values, credential_values in indexed_talents:
+            s, reasons, alerts = _score_candidate(
+                talent,
+                req,
+                skill_values=skill_values,
+                credential_values=credential_values,
+            )
             scored.append((s, talent, reasons, alerts))
         # Sort by score DESC, then talent_code ASC (deterministic tie-break)
         scored.sort(key=lambda item: (-item[0], item[1].talent_code))

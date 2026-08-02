@@ -5,6 +5,7 @@ import time
 import unittest
 
 from src.coevo.benchmarks import (
+    SCALABILITY_PROBES,
     SLA_TARGETS,
     BenchmarkResult,
     measure,
@@ -23,6 +24,33 @@ class SlaTableTests(unittest.TestCase):
         self.assertEqual(3.0, page.limit_value)
         generation = next(target for target in SLA_TARGETS if target.name == "package_generation")
         self.assertEqual("ge", generation.comparison)
+
+
+class ScalabilityProbeTableTests(unittest.TestCase):
+    """The 2026-08-02 optimization probes are additive to the SLA table."""
+
+    def test_probe_table_has_expected_scenarios(self):
+        names = {target.name for target in SCALABILITY_PROBES}
+        self.assertEqual(
+            {
+                "dag_toposort",
+                "graph_lookup",
+                "watcher_rescan",
+                "talent_recommend",
+                "registry_lookup",
+            },
+            names,
+        )
+
+    def test_probes_are_le_comparisons_with_positive_limits(self):
+        for target in SCALABILITY_PROBES:
+            self.assertEqual("le", target.comparison)
+            self.assertGreater(target.limit_value, 0.0)
+
+    def test_probes_do_not_overlap_reference_sla_targets(self):
+        sla_names = {target.name for target in SLA_TARGETS}
+        probe_names = {target.name for target in SCALABILITY_PROBES}
+        self.assertTrue(sla_names.isdisjoint(probe_names))
 
 
 class MeasureTests(unittest.TestCase):

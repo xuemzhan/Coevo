@@ -52,43 +52,45 @@ class DemoRunnerTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             result = run_demo_pipeline(Path(tmp))
-            self.assertEqual(
-                OrchestrationOutcome.COMPLETED.value,
-                result.outcome,
-            )
-            self.assertIsNotNone(result.package_path)
-            self.assertTrue(result.package_path.is_file())
-            self.assertEqual(64, len(result.package_wire_sha256))
-            self.assertEqual(3, result.audit_event_count)
-            self.assertTrue(result.store.verify_audit_chain())
-
-            # The exported package must be a real signed/encrypted .agent
-            # that parses, decrypts and verifies back.
-            provider = GmsslPrototypeProvider(ROOT)
-            sender = provider.sender_handle(DEMO_PROFILE, "CERT-SENDER")
-            recipient = provider.recipient_handle(DEMO_PROFILE, "CERT-RECIPIENT")
-            wire = result.package_path.read_bytes()
-            parsed = parse_package_bytes(wire)
-            opened = open_encrypted_package(
-                parsed,
-                provider=provider,
-                recipient_handle=recipient,
-                sender_handle=sender,
-            )
-            self.assertEqual("t.1", opened.manifest["task_id"])
-            self.assertTrue(opened.signature.signature)
-
-            # Knowledge bundle must be persisted and reloadable.
-            store = KnowledgeStore.open(
-                result.runtime_dir / "knowledge.db"
-            )
             try:
-                bundle = store.load(result.knowledge_bundle_id)
-                self.assertIsNotNone(bundle)
-                self.assertEqual("PRJ001", bundle.project_id)
+                self.assertEqual(
+                    OrchestrationOutcome.COMPLETED.value,
+                    result.outcome,
+                )
+                self.assertIsNotNone(result.package_path)
+                self.assertTrue(result.package_path.is_file())
+                self.assertEqual(64, len(result.package_wire_sha256))
+                self.assertEqual(3, result.audit_event_count)
+                self.assertTrue(result.store.verify_audit_chain())
+
+                # The exported package must be a real signed/encrypted .agent
+                # that parses, decrypts and verifies back.
+                provider = GmsslPrototypeProvider(ROOT)
+                sender = provider.sender_handle(DEMO_PROFILE, "CERT-SENDER")
+                recipient = provider.recipient_handle(DEMO_PROFILE, "CERT-RECIPIENT")
+                wire = result.package_path.read_bytes()
+                parsed = parse_package_bytes(wire)
+                opened = open_encrypted_package(
+                    parsed,
+                    provider=provider,
+                    recipient_handle=recipient,
+                    sender_handle=sender,
+                )
+                self.assertEqual("t.1", opened.manifest["task_id"])
+                self.assertTrue(opened.signature.signature)
+
+                # Knowledge bundle must be persisted and reloadable.
+                store = KnowledgeStore.open(
+                    result.runtime_dir / "knowledge.db"
+                )
+                try:
+                    bundle = store.load(result.knowledge_bundle_id)
+                    self.assertIsNotNone(bundle)
+                    self.assertEqual("PRJ001", bundle.project_id)
+                finally:
+                    store.close()
             finally:
-                store.close()
-            result.store.close()
+                result.store.close()
 
     def test_cli_smoke_run_exits_zero(self):
         with tempfile.TemporaryDirectory() as tmp:

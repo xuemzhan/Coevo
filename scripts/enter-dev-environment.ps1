@@ -3,6 +3,86 @@ param([switch]$Quiet)
 
 . (Join-Path $PSScriptRoot 'windows-native-security.ps1')
 
+function Clear-CoevoDevelopmentEnvironment {
+  # Idempotent teardown: release the locked-tool handles and remove the
+  # session's .tools\bin-<PID> temporary directory. The path is accepted
+  # only when it stays inside .tools, its leaf matches ^bin-\d+$ and it
+  # is not a reparse point. Safe to call more than once (globals are
+  # nulled after the first run) and safe to call with explicit values
+  # from a failed initialization.
+  [CmdletBinding()]
+  param(
+    [System.Collections.IEnumerable]$Handles,
+    [string]$ToolsRoot='',
+    [string]$Bin=''
+  )
+  $ErrorActionPreference='Stop'
+  Set-StrictMode -Version Latest
+  if($null -eq $Handles){
+    $Current=Get-Variable -Name CoevoDevelopmentEnvironmentHandles -Scope Global -ErrorAction SilentlyContinue
+    if($Current){ $Handles=$Current.Value }
+  }
+  if(-not $ToolsRoot){
+    $Current=Get-Variable -Name CoevoDevelopmentEnvironmentToolsRoot -Scope Global -ErrorAction SilentlyContinue
+    if($Current){ $ToolsRoot=[string]$Current.Value }
+  }
+  if(-not $Bin){
+    $Current=Get-Variable -Name CoevoDevelopmentEnvironmentBin -Scope Global -ErrorAction SilentlyContinue
+    if($Current){ $Bin=[string]$Current.Value }
+  }
+  if($null -ne $Handles){ Close-CoevoDirectoryHandles $Handles }
+  if($ToolsRoot -and $Bin){
+    try {
+      $RootFull=[IO.Path]::GetFullPath($ToolsRoot).TrimEnd('\')
+      $BinFull=[IO.Path]::GetFullPath($Bin).TrimEnd('\')
+      $Leaf=[IO.Path]::GetFileName($BinFull)
+      if($BinFull.StartsWith($RootFull+'\',[StringComparison]::OrdinalIgnoreCase) -and $Leaf -match '^bin-\d+$' -and [IO.Directory]::Exists($BinFull)){
+        $Item=Get-Item -LiteralPath $BinFull -Force -ErrorAction Stop
+        if(($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0){
+          [IO.Directory]::Delete($BinFull,$true)
+        }
+      }
+    } catch { }
+  }
+  Remove-Variable -Name CoevoDevelopmentEnvironmentHandles -Scope Global -ErrorAction SilentlyContinue
+  Remove-Variable -Name CoevoDevelopmentEnvironmentToolsRoot -Scope Global -ErrorAction SilentlyContinue
+  Remove-Variable -Name CoevoDevelopmentEnvironmentBin -Scope Global -ErrorAction SilentlyContinue
+}
+
+function Remove-StaleDevelopmentEnvironmentBins {
+  # Sweep leftovers from dead sessions. A bin-<PID> directory is removed
+  # only when: the leaf matches ^bin-\d+$, the path is inside .tools, it
+  # is not a reparse point, and no process with that PID is alive (a live
+  # owner still holds directory/file locks and must never be disturbed).
+  # Deletion is best-effort: a directory that is currently locked by a
+  # running session fails harmlessly and is left for the next entry.
+  [CmdletBinding()]
+  param(
+    [string]$ToolsRoot,
+    [string]$CurrentBin=''
+  )
+  $ErrorActionPreference='Stop'
+  Set-StrictMode -Version Latest
+  $RootFull=[IO.Path]::GetFullPath($ToolsRoot).TrimEnd('\')
+  if(-not [IO.Directory]::Exists($RootFull)){ return }
+  $CurrentLeaf=''
+  if($CurrentBin){ $CurrentLeaf=[IO.Path]::GetFileName([IO.Path]::GetFullPath($CurrentBin).TrimEnd('\')) }
+  foreach($Candidate in [IO.Directory]::EnumerateDirectories($RootFull)){
+    $Leaf=[IO.Path]::GetFileName($Candidate)
+    if($Leaf -notmatch '^bin-\d+$'){ continue }
+    if($Leaf -eq $CurrentLeaf){ continue }
+    $OwnerPid=0
+    if(-not [int]::TryParse($Leaf.Substring(4),[ref]$OwnerPid)){ continue }
+    $Alive=Get-Process -Id $OwnerPid -ErrorAction SilentlyContinue
+    if($null -ne $Alive){ continue }
+    try {
+      $Item=Get-Item -LiteralPath $Candidate -Force -ErrorAction Stop
+      if(($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0){ continue }
+      [IO.Directory]::Delete($Candidate,$true)
+    } catch { }
+  }
+}
+
 function Initialize-CoevoDevelopmentEnvironment {
   [CmdletBinding()]
   param([switch]$Quiet)
@@ -14,6 +94,7 @@ function Initialize-CoevoDevelopmentEnvironment {
   Import-Module $SecurityModule -ErrorAction Stop
   $Root=Split-Path -Parent $PSScriptRoot
   $ToolsRoot=[IO.Path]::GetFullPath((Join-Path $Root '.tools'))
+  $Bin=''
   function LockedToolPath([string]$Relative){
     if([IO.Path]::IsPathRooted($Relative)){ throw 'Locked tool path must be relative.' }
     if(@($Relative -split '[\\/]' | Where-Object {$_ -eq '..'}).Count){ throw 'Locked tool path contains traversal.' }
@@ -24,6 +105,8 @@ function Initialize-CoevoDevelopmentEnvironment {
   }
   $Previous=Get-Variable -Name CoevoDevelopmentEnvironmentHandles -Scope Global -ErrorAction SilentlyContinue
   if($Previous){ Close-CoevoDirectoryHandles $Previous.Value; Remove-Variable -Name CoevoDevelopmentEnvironmentHandles -Scope Global }
+  Remove-Variable -Name CoevoDevelopmentEnvironmentToolsRoot -Scope Global -ErrorAction SilentlyContinue
+  Remove-Variable -Name CoevoDevelopmentEnvironmentBin -Scope Global -ErrorAction SilentlyContinue
   $LockedHandles=New-Object System.Collections.ArrayList
   $Ready=$false
   try {
@@ -45,6 +128,7 @@ function Initialize-CoevoDevelopmentEnvironment {
   if($Signature.Status -ne 'Valid' -or $Signature.SignerCertificate.Thumbprint -ne $OpenCode.executable.signer_thumbprint){ throw 'OpenCode Authenticode signer validation failed.' }
 
   $Bin=Join-Path $ToolsRoot ("bin-$PID")
+  Remove-StaleDevelopmentEnvironmentBins -ToolsRoot $ToolsRoot -CurrentBin $Bin
   foreach($Handle in (Enter-CoevoSecureDirectoryChain $ToolsRoot $Bin)){ $null=$LockedHandles.Add($Handle) }
   $MakeSource=Join-Path $Root 'scripts\tool-shims\make.cs'
   $MakeSourceHash=(Get-FileHash -LiteralPath $MakeSource -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -145,8 +229,10 @@ function Initialize-CoevoDevelopmentEnvironment {
   $env:COEVO_CONTROL_SHA256=[string]$Manifest.tools.control_archive.sha256
   if(-not $Quiet){ Write-Host 'Coevo development environment ready'; & $Executable --version; & $Make --version }
   $Global:CoevoDevelopmentEnvironmentHandles=$LockedHandles.ToArray()
+  $Global:CoevoDevelopmentEnvironmentBin=$Bin
+  $Global:CoevoDevelopmentEnvironmentToolsRoot=$ToolsRoot
   $Ready=$true
-  } finally { if(-not $Ready){ Close-CoevoDirectoryHandles $LockedHandles } }
+  } finally { if(-not $Ready){ Clear-CoevoDevelopmentEnvironment -Handles $LockedHandles -ToolsRoot $ToolsRoot -Bin $Bin } }
 }
 
 try { Initialize-CoevoDevelopmentEnvironment -Quiet:$Quiet }

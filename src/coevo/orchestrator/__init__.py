@@ -240,15 +240,21 @@ class AgentRegistry:
 
     _by_id: tuple[AgentRegistration, ...] = field(default_factory=tuple)
 
+    def __post_init__(self) -> None:
+        # Lazy O(1) agent_id -> registration index. Private and
+        # excluded from equality / hashing.
+        object.__setattr__(self, "_id_cache", None)
+
     @classmethod
     def empty(cls) -> "AgentRegistry":
         return cls(_by_id=tuple())
 
     def get(self, agent_id: str) -> AgentRegistration | None:
-        for reg in self._by_id:
-            if reg.spec.agent_id == agent_id:
-                return reg
-        return None
+        cache = self._id_cache
+        if cache is None:
+            cache = {reg.spec.agent_id: reg for reg in self._by_id}
+            object.__setattr__(self, "_id_cache", cache)
+        return cache.get(agent_id)
 
     def list_available(self) -> tuple[AgentRegistration, ...]:
         return tuple(r for r in self._by_id if r.status == AgentStatus.AVAILABLE)

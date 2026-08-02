@@ -11,6 +11,13 @@ The watcher detects file changes in a workspace and emits bounded
 * Write stability: a change is emitted only after the same fingerprint
   (size, mtime, digest) is observed ``stability_checks`` consecutive
   scans, so half-written files do not produce events.
+* Incremental digesting: files whose ``(size, mtime_ns)`` are unchanged
+  since the previous scan reuse their stored digest, so a quiet
+  workspace costs O(entries) metadata stat calls instead of re-hashing
+  every file (an O(bytes) operation) on every poll. Content changes
+  that preserve both size and mtime are out of scope for the reuse
+  shortcut; callers that need byte-exact detection on every scan can
+  set ``reuse_digest_on_unchanged=False`` (default True).
 * Bounded event queue with optional background polling thread.
 
 No new dependency; Python stdlib only.
@@ -136,6 +143,7 @@ class WorkspaceWatcher:
         stability_checks: int = DEFAULT_STABILITY_CHECKS,
         max_digest_bytes: int = DEFAULT_MAX_DIGEST_BYTES,
         allow_extensions: frozenset[str] | None = None,
+        reuse_digest_on_unchanged: bool = True,
     ) -> None:
         if not isinstance(root, Path):
             raise ProgressCaptureValidationError("root must be a Path")
@@ -173,12 +181,17 @@ class WorkspaceWatcher:
             raise ProgressCaptureValidationError(
                 "allow_extensions must be None or a frozenset of '.ext' strings"
             )
+        if not isinstance(reuse_digest_on_unchanged, bool):
+            raise ProgressCaptureValidationError(
+                "reuse_digest_on_unchanged must be a bool"
+            )
         self._root = resolved
         self._poll_interval_sec = float(poll_interval_sec)
         self._max_events = max_events
         self._stability_checks = stability_checks
         self._max_digest_bytes = max_digest_bytes
         self._allow_extensions = allow_extensions
+        self._reuse_digest_on_unchanged = reuse_digest_on_unchanged
         self._snapshot: dict[str, FileSnapshot] = {}
         self._pending: dict[str, tuple[tuple[int, int, str], int]] = {}
         self._events: deque[FileChangeEvent] = deque(maxlen=max_events)
@@ -199,7 +212,7 @@ class WorkspaceWatcher:
         now = now or _now_utc_iso_z()
         if not _ISO_UTC_Z.match(now):
             raise ProgressCaptureValidationError("now must be ISO-8601 UTC Z")
-        current = self._collect()
+        current = self._collect(self._snapshot)
         events: list[FileChangeEvent] = []
         for path in sorted(set(self._snapshot) | set(current)):
             old = self._snapshot.get(path)
@@ -358,7 +371,20 @@ class WorkspaceWatcher:
 
     # -- internals ----------------------------------------------------------
 
-    def _collect(self) -> dict[str, FileSnapshot]:
+    def _collect(
+        self,
+        previous: dict[str, FileSnapshot] | None = None,
+    ) -> dict[str, FileSnapshot]:
+        """Collect snapshots for the workspace tree.
+
+        ``previous`` is the last observed snapshot; files whose
+        ``(size, mtime_ns)`` pair is unchanged reuse the stored digest
+        unless reuse was disabled at construction. The returned dict is
+        byte-identical to a full re-hash for every file the caller can
+        actually observe as changed (new, deleted, or size/mtime
+        changed), so event semantics are preserved.
+        """
+        previous = previous if self._reuse_digest_on_unchanged else {}
         result: dict[str, FileSnapshot] = {}
         for dirpath, dirnames, filenames in os.walk(self._root, followlinks=False):
             dirnames[:] = [name for name in dirnames if not name.startswith(".")]
@@ -381,12 +407,22 @@ class WorkspaceWatcher:
                     resolved.relative_to(self._root)
                 except (OSError, ValueError):
                     continue
-                digest = self._digest(full, stat.st_size)
+                size = int(stat.st_size)
+                mtime_ns = int(stat.st_mtime_ns)
+                prior = previous.get(relative)
+                if (
+                    prior is not None
+                    and prior.size_bytes == size
+                    and prior.mtime_ns == mtime_ns
+                ):
+                    digest = prior.digest_hex
+                else:
+                    digest = self._digest(full, size)
                 media = mimetypes.guess_type(name)[0] or "application/octet-stream"
                 result[relative] = FileSnapshot(
                     relative,
-                    int(stat.st_size),
-                    int(stat.st_mtime_ns),
+                    size,
+                    mtime_ns,
                     digest,
                     media,
                 )

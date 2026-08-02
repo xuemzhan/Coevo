@@ -50,9 +50,11 @@ def apply_mapping(
 
     Algorithm
     ---------
-    * Sort rules by ``(priority ASC, rule_id ASC)``.
-    * For each node, scan rules in order; first rule whose
-      ``unit_stage_hint`` matches :attr:`Node.stage_hint.value` wins.
+    * Sort rules by ``(priority ASC, rule_id ASC)`` and build a
+      ``hint -> best rule`` dictionary once (the first rule in the
+      sorted order per hint is the winner by definition).
+    * For each node, resolve its ``unit_stage_hint`` with a single
+      O(1) dictionary lookup instead of scanning the whole table.
     * If no rule matches, raise :class:`ProcessFlowError`.
 
     The rule table MUST contain :data:`DEFAULT_MAPPING_RULES` plus
@@ -62,17 +64,18 @@ def apply_mapping(
     if not rule_list:
         raise ProcessFlowError("mapping rule table must be non-empty")
     sorted_rules = sorted(rule_list, key=lambda r: (r.priority, r.rule_id))
+    best_rule_by_hint: dict[str, MappingRule] = {}
+    for rule in sorted_rules:
+        # The first rule encountered for a hint is the winner because
+        # the list is ordered by (priority ASC, rule_id ASC).
+        best_rule_by_hint.setdefault(rule.unit_stage_hint, rule)
 
     mapped: list[MappedNode] = []
     seen: set[str] = set()
     for stage in flow.stages:
         for node in stage.nodes:
             hint = node.stage_hint.value
-            match_rule: MappingRule | None = None
-            for r in sorted_rules:
-                if r.unit_stage_hint == hint:
-                    match_rule = r
-                    break
+            match_rule = best_rule_by_hint.get(hint)
             if match_rule is None:
                 raise ProcessFlowError(
                     f"no mapping rule matches stage_hint {hint!r} for "

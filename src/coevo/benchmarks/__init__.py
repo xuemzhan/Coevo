@@ -40,6 +40,23 @@ SLA_TARGETS: tuple[SlaTarget, ...] = (
 )
 
 
+# Scalability probes (2026-08-02 optimization slice)
+# ---------------------------------------------------
+# These are NOT reference-architecture SLA targets; they are
+# reproducible probes for the algorithmic hot paths added during the
+# performance review (large DAG construction + topological sort,
+# O(1) adjacency lookups, incremental watcher rescan, hoisted talent
+# scoring, and cached registry lookups). They live in the same harness
+# so regressions in asymptotic behaviour are visible in the report.
+SCALABILITY_PROBES: tuple[SlaTarget, ...] = (
+    SlaTarget("dag_toposort", "large DAG build + topological sort", 5.0, "seconds", "le"),
+    SlaTarget("graph_lookup", "adjacency lookups on a 3k-task DAG", 1.0, "seconds", "le"),
+    SlaTarget("watcher_rescan", "rescan of 200 unchanged files", 1.0, "seconds", "le"),
+    SlaTarget("talent_recommend", "200 talents x 50 task slots", 5.0, "seconds", "le"),
+    SlaTarget("registry_lookup", "20k processed-package get/by_digest", 1.0, "seconds", "le"),
+)
+
+
 @dataclass(frozen=True)
 class BenchmarkResult:
     """A single measured result against its SLA target."""

@@ -77,21 +77,33 @@ class ProcessedPackageStore:
     _by_id: tuple[tuple[str, int], ...] = field(default_factory=tuple)        # (id, idx)
     _by_digest: tuple[tuple[str, int], ...] = field(default_factory=tuple)     # (digest, idx)
 
+    def __post_init__(self) -> None:
+        # Lazy O(1) lookup caches, built from the immutable index
+        # tuples on first access. Private and excluded from equality /
+        # hashing (declared fields only). Each store instance builds
+        # its cache at most once.
+        object.__setattr__(self, "_id_cache", None)
+        object.__setattr__(self, "_digest_cache", None)
+
     @classmethod
     def empty(cls) -> "ProcessedPackageStore":
         return cls(_records=tuple(), _by_id=tuple(), _by_digest=tuple())
 
     def get(self, package_id: str) -> ProcessedPackageRecord | None:
-        for key, idx in self._by_id:
-            if key == package_id:
-                return self._records[idx]
-        return None
+        cache = self._id_cache
+        if cache is None:
+            cache = dict(self._by_id)
+            object.__setattr__(self, "_id_cache", cache)
+        idx = cache.get(package_id)
+        return self._records[idx] if idx is not None else None
 
     def by_digest(self, package_digest: str) -> ProcessedPackageRecord | None:
-        for key, idx in self._by_digest:
-            if key == package_digest:
-                return self._records[idx]
-        return None
+        cache = self._digest_cache
+        if cache is None:
+            cache = dict(self._by_digest)
+            object.__setattr__(self, "_digest_cache", cache)
+        idx = cache.get(package_digest)
+        return self._records[idx] if idx is not None else None
 
     def by_scope(
         self,

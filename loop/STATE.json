@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "iteration": 24,
-  "current_story": "ENG-BASE",
-  "current_item": "WIN7-AC-1",
+  "iteration": 27,
+  "current_story": "ENG-LOOP-ENV",
+  "current_item": "ENG-LOOP-ENV-BIN-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "",
   "blocking_issue": "",
-  "updated_at": "2026-08-02T08:03:38.091036Z"
+  "updated_at": "2026-08-02T15:54:04.944557Z"
 }

@@ -109,23 +109,26 @@ class StageGraph:
     node_to_stage: tuple[tuple[str, str], ...]
     standard_stage_by_node: tuple[tuple[str, StandardStage], ...]
 
+    def __post_init__(self) -> None:
+        # O(1) lookup indexes; private, excluded from equality.
+        object.__setattr__(
+            self, "_node_to_stage_index", dict(self.node_to_stage)
+        )
+        object.__setattr__(
+            self, "_membership_index", dict(self.stage_membership)
+        )
+        object.__setattr__(
+            self, "_standard_stage_index", dict(self.standard_stage_by_node)
+        )
+
     def stage_id_for_node(self, node_id: str) -> str | None:
-        for nid, sid in self.node_to_stage:
-            if nid == node_id:
-                return sid
-        return None
+        return self._node_to_stage_index.get(node_id)
 
     def nodes_in_stage(self, stage_id: str) -> tuple[str, ...]:
-        for sid, members in self.stage_membership:
-            if sid == stage_id:
-                return members
-        return tuple()
+        return self._membership_index.get(stage_id, ())
 
     def standard_stage_for(self, node_id: str) -> StandardStage | None:
-        for nid, stage in self.standard_stage_by_node:
-            if nid == node_id:
-                return stage
-        return None
+        return self._standard_stage_index.get(node_id)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -142,14 +145,16 @@ class ReviewerView:
     flow: ProcessFlow
     _confidence_index: tuple[tuple[str, float], ...]
 
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "_confidence_dict", dict(self._confidence_index)
+        )
+
     def source_mapping_lookup(self, path: str) -> str | None:
         return self.flow.source_mapping.get(path)
 
     def confidence_for(self, path: str) -> float | None:
-        for p, c in self._confidence_index:
-            if p == path:
-                return c
-        return None
+        return self._confidence_dict.get(path)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -184,6 +189,12 @@ class FlowUnderstandingService:
         )
         if not self._rules:
             raise TaskFlowValidationError("mapping rule table must be non-empty")
+        # Pre-sort once so every understand() call skips the per-call
+        # sort in apply_mapping (semantically identical, O(R log R)
+        # paid once instead of once per parse).
+        self._sorted_rules: tuple[MappingRule, ...] = tuple(
+            sorted(self._rules, key=lambda r: (r.priority, r.rule_id))
+        )
 
     @property
     def rules(self) -> tuple[MappingRule, ...]:
@@ -208,7 +219,7 @@ class FlowUnderstandingService:
             )
         try:
             flow = parse_flow(raw)
-            mapped = apply_mapping(flow, self._rules)
+            mapped = apply_mapping(flow, self._sorted_rules)
         except ProcessFlowError as exc:  # parser + mapping both raise subclasses
             raise TaskFlowValidationError(str(exc)) from exc
 

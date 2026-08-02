@@ -64,6 +64,8 @@ DEFAULT_MAX_SESSIONS: Final[int] = 64
 DEFAULT_SESSION_TIMEOUT_SEC: Final[int] = 8 * 3600
 CSRF_HEADER_VALUE: Final[str] = "coevo-cockpit"
 AUDIT_MAXLEN: Final[int] = 200
+STATIC_CACHE_MAX_ENTRIES: int = 64
+STATIC_CACHE_MAX_BYTES: int = 8 * 1024 * 1024
 DEFAULT_ALLOWED_HOSTS: Final[frozenset[str]] = frozenset({
     "127.0.0.1", "localhost", "::1",
 })
@@ -344,6 +346,89 @@ class SingleInstanceLock:
 
 
 # ---------------------------------------------------------------------------
+# Static asset cache
+# ---------------------------------------------------------------------------
+
+
+class _StaticAssetCache:
+    """Bounded, mtime-validated cache for static assets.
+
+    Repeated page loads currently re-read ``index.html`` / CSS / JS from
+    disk on every request. This cache keeps the resolved bytes in memory
+    and re-validates ``(mtime_ns, size)`` against the filesystem on each
+    hit, so a file edited on disk is picked up on the next request while
+    unchanged files avoid repeated reads. Thread-safe; bounded by entry
+    count and total bytes (FIFO eviction).
+    """
+
+    def __init__(
+        self,
+        *,
+        max_entries: int = STATIC_CACHE_MAX_ENTRIES,
+        max_bytes: int = STATIC_CACHE_MAX_BYTES,
+    ) -> None:
+        if not isinstance(max_entries, int) or max_entries < 1:
+            raise CockpitValidationError("max_entries must be a positive integer")
+        if not isinstance(max_bytes, int) or max_bytes < 1:
+            raise CockpitValidationError("max_bytes must be a positive integer")
+        self._max_entries = max_entries
+        self._max_bytes = max_bytes
+        self._entries: dict[str, tuple[int, int, bytes]] = {}
+        self._total_bytes = 0
+        self._lock = threading.Lock()
+
+    def get(self, path: Path) -> bytes | None:
+        """Return cached bytes when the file is unchanged, else None."""
+        try:
+            stat = path.stat()
+        except OSError:
+            return None
+        key = str(path)
+        with self._lock:
+            entry = self._entries.get(key)
+        if (
+            entry is not None
+            and entry[0] == stat.st_mtime_ns
+            and entry[1] == stat.st_size
+        ):
+            return entry[2]
+        return None
+
+    def put(self, path: Path, body: bytes) -> None:
+        """Cache ``body`` for ``path`` after validating current stat."""
+        if len(body) > self._max_bytes:
+            return
+        try:
+            stat = path.stat()
+        except OSError:
+            return
+        key = str(path)
+        with self._lock:
+            old = self._entries.pop(key, None)
+            if old is not None:
+                self._total_bytes -= len(old[2])
+            self._entries[key] = (stat.st_mtime_ns, stat.st_size, body)
+            self._total_bytes += len(body)
+            while (
+                len(self._entries) > self._max_entries
+                or self._total_bytes > self._max_bytes
+            ):
+                oldest_key = next(iter(self._entries))
+                removed = self._entries.pop(oldest_key)
+                self._total_bytes -= len(removed[2])
+
+    @property
+    def size(self) -> int:
+        with self._lock:
+            return len(self._entries)
+
+    @property
+    def total_bytes(self) -> int:
+        with self._lock:
+            return self._total_bytes
+
+
+# ---------------------------------------------------------------------------
 # Static path policy
 # ---------------------------------------------------------------------------
 
@@ -523,9 +608,13 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         if index is None:
             self._send_json(404, {"error": "index.html missing"})
             return
+        body = self.server.static_cache.get(index)
+        if body is None:
+            body = index.read_bytes()
+            self.server.static_cache.put(index, body)
         self._send_bytes(
             200,
-            index.read_bytes(),
+            body,
             "text/html; charset=utf-8",
             extra_headers={
                 "Content-Security-Policy": (
@@ -544,9 +633,13 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         media_type = mimetypes.guess_type(candidate.name)[0] or "application/octet-stream"
         if not media_type.startswith("text/"):
             media_type = f"{media_type}; charset=utf-8"
+        body = self.server.static_cache.get(candidate)
+        if body is None:
+            body = candidate.read_bytes()
+            self.server.static_cache.put(candidate, body)
         self._send_bytes(
             200,
-            candidate.read_bytes(),
+            body,
             media_type,
             extra_headers={"Cache-Control": "public, max-age=300"},
         )
@@ -771,6 +864,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
             now=started_at,
         )
         self._audit_log: deque[dict[str, Any]] = deque(maxlen=AUDIT_MAXLEN)
+        self.static_cache = _StaticAssetCache()
         self._log_writer = (
             _CockpitLogWriter(config.log_path)
             if config.log_path is not None

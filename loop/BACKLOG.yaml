@@ -413,3 +413,35 @@ items:
       - tests/unit/test_records_archive.py
     security_review: false
     protocol_review: false
+  # ---------- read-only review sandbox governance (2026-08-02) ----------
+  - id: REVIEW-SANDBOX-1
+    story: ENG-BASE
+    title: 只读审查沙箱治理（review_sandbox.py prepare/check/discard + 独立双签治理文档 + 超时/越权处置规则）
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_review_sandbox.py
+    security_review: false
+    protocol_review: false
+  # ---------- full review + performance / scalability optimization (2026-08-02) ----------
+  - id: OPT-PERF-1
+    story: ENG-BASE
+    title: 全盘性能审查与优化：依赖图 O(V*E)->O(E) 成员检查修复 + heap Kahn 拓扑排序 O((V+E)logV) + 迭代环检测（无递归上限）+ 六处 O(1) 索引（DependencyGraph/StageGraph/SourceMapping/ReviewerView/TalentPool/ProcessedPackageStore/AgentRegistry）+ 映射 hint->best-rule 字典 + 人才推荐集合预热 + watcher 未变化文件免重哈希（严格模式可关）+ cockpit 静态资源 mtime 校验有界缓存 + 代码注释编码修复 + 5 项可扩展性基准探针
+    status: done
+    dependencies: [BENCH-AC-1]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+      - tests/unit/test_benchmark_suite.py
+    security_review: false
+    protocol_review: false
+  # ---------- .tools bin lifecycle fix (2026-08-02) ----------
+  - id: ENG-LOOP-ENV-BIN-1
+    story: ENG-LOOP-ENV
+    title: 修复 .tools bin-<PID> 生命周期：dev.ps1/run-loop.ps1 finally 显式关闭句柄并删除本会话 bin 目录（含失败/exit 路径）；入口启动时按 PID 存活判断清扫历史残留（目录名 ^bin-\d+$ + .tools 内 + 非重解析点三重门禁，锁定目录安全跳过）；初始化失败路径 finally 兜底清理；docs/development-environment.md 同步
+    status: done
+    dependencies: [ENG-LOOP-ENV-AC-1]
+    acceptance_tests:
+      - tests/integration/test_dev_environment_entry.py
+      - tests/security/test_local_toolchain_security.py
+    security_review: false
+    protocol_review: false

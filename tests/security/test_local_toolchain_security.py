@@ -12,11 +12,27 @@ class LocalToolchainSecurityTest(unittest.TestCase):
             for value in forbidden: self.assertNotIn(value,text,relative)
             self.assertIn('windows-native-security.ps1',text,relative)
 
+    def test_entry_bin_cleanup_is_scope_guarded(self):
+        text=(ROOT/'scripts/enter-dev-environment.ps1').read_text(encoding='utf-8')
+        for evidence in (
+            'Clear-CoevoDevelopmentEnvironment',
+            'Remove-StaleDevelopmentEnvironmentBins',
+            '^bin-\\d+$',
+            'Get-Process -Id',
+            '[IO.FileAttributes]::ReparsePoint',
+            'EnumerateDirectories',
+        ):
+            self.assertIn(evidence,text)
+        for relative in ('scripts/dev.ps1','scripts/run-loop.ps1'):
+            launcher=(ROOT/relative).read_text(encoding='utf-8')
+            self.assertIn('Clear-CoevoDevelopmentEnvironment',launcher)
+            self.assertIn('finally',launcher)
+
     def test_poisoned_opencode_overrides_are_replaced_and_resolved_policy_is_denied(self):
         command=("$env:OPENCODE_CONFIG='C:\\missing\\evil.json'; "
                  "$env:OPENCODE_CONFIG_CONTENT='{\"autoupdate\":true,\"lsp\":true,\"permission\":{\"external_directory\":\"allow\",\"webfetch\":\"allow\",\"websearch\":\"allow\"}}'; "
                  "$env:OPENCODE_PERMISSION='{\"external_directory\":\"allow\",\"webfetch\":\"allow\"}'; "
-                 ". .\\scripts\\enter-dev-environment.ps1 -Quiet; & $env:COEVO_MAKE_PATH env-check; exit $LASTEXITCODE")
+                 ". .\\scripts\\enter-dev-environment.ps1 -Quiet; & $env:COEVO_MAKE_PATH env-check; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE")
         result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
@@ -28,7 +44,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
                  "$env:COEVO_PYTHON_PATH,(Join-Path (Resolve-Path .) 'scripts\\tool-shims\\make.cs')); "
                  "foreach($path in $locked){try{$stream=[IO.File]::Open($path,'Open','Write','Read');$stream.Dispose();exit 73}"
                  "catch [IO.IOException]{}}; "
-                 "& $env:COEVO_MAKE_PATH --version; exit $LASTEXITCODE")
+                 "& $env:COEVO_MAKE_PATH --version; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE")
         result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('Coevo Make compatibility shim 1.0',result.stdout)
@@ -37,7 +53,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
         command=("$env:PYTHONHOME=(Resolve-Path .).Path; $env:PYTHONPATH=(Resolve-Path .).Path; "
                  "$env:PYTHONINSPECT='1'; $env:PYTHONSTARTUP='C:\\missing\\attack.py'; "
                  ". .\\scripts\\enter-dev-environment.ps1 -Quiet; "
-                 "& $env:COEVO_MAKE_PATH env-check; exit $LASTEXITCODE")
+                 "& $env:COEVO_MAKE_PATH env-check; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE")
         result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('PASS OpenCode resolved security policy denied',result.stdout)
@@ -106,7 +122,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
 
     def test_inherited_windir_cannot_select_make_compiler(self):
         command=("$env:WINDIR=(Resolve-Path .).Path; . .\\scripts\\enter-dev-environment.ps1 -Quiet; "
-                 "& $env:COEVO_MAKE_PATH --version; exit $LASTEXITCODE")
+                 "& $env:COEVO_MAKE_PATH --version; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE")
         result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('Coevo Make compatibility shim 1.0',result.stdout)
@@ -121,7 +137,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
                 changed=True
             except PermissionError:
                 return  # The outer quality gate already holds the stronger write/delete lock.
-            command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; & $env:COEVO_MAKE_PATH env-check; exit $LASTEXITCODE"
+            command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; & $env:COEVO_MAKE_PATH env-check; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE"
             result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
             self.assertEqual(69,result.returncode,result.stdout+result.stderr)
             self.assertIn('locked file mismatch',result.stderr)
@@ -168,7 +184,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
         self.assertNotIn('[System.IO.File]::Move(',text)
 
     def test_make_rejects_unknown_and_injected_targets(self):
-        command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; & make 'quality;whoami'; exit $LASTEXITCODE"
+        command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; & make 'quality;whoami'; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE"
         result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
         self.assertEqual(64,result.returncode,result.stdout+result.stderr)
         self.assertIn('usage: make',result.stderr)

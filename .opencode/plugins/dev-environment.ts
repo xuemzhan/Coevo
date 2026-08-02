@@ -26,9 +26,9 @@ export default async ({ directory }: { directory: string }) => ({
       [required.COEVO_MAKE_PATH!,required.COEVO_MAKE_SHA256!],
       [required.COEVO_EXTERNAL_MAKE_PATH!,required.COEVO_EXTERNAL_MAKE_SHA256!],
       [required.COEVO_PYTHON_PATH!,required.COEVO_PYTHON_SHA256!],
-    ]
       [required.COEVO_NODE_PATH!,required.COEVO_NODE_SHA256!],
       [required.COEVO_CONTROL_ARCHIVE!,required.COEVO_CONTROL_SHA256!],
+    ]
     for(const [candidate,expected] of lockedFiles){
       const resolved=path.resolve(candidate)
       if(!resolved.startsWith(path.resolve(directory)+path.sep)) throw new Error("locked tool escapes repository")

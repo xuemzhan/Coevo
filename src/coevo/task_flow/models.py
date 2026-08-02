@@ -149,11 +149,18 @@ class SourceMapping:
 
     entries: tuple[tuple[str, str], ...]
 
+    def __post_init__(self) -> None:
+        # O(1) lookup index over the entry pairs. ``setdefault`` keeps
+        # the FIRST value for a duplicated path, matching the original
+        # linear-scan semantics exactly. Private and excluded from
+        # equality / hashing (declared fields only).
+        index: dict[str, str] = {}
+        for key, value in self.entries:
+            index.setdefault(key, value)
+        object.__setattr__(self, "_index", index)
+
     def get(self, key: str) -> str | None:
-        for k, v in self.entries:
-            if k == key:
-                return v
-        return None
+        return self._index.get(key)
 
 
 @dataclass(frozen=True)

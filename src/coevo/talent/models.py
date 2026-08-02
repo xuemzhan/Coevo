@@ -197,12 +197,14 @@ class TalentPool:
                 raise TalentValidationError(
                     f"talent {t.talent_code!r} identity pool_code does not match pool"
                 )
+        # O(1) code -> talent index. Private and excluded from
+        # equality / hashing (declared fields only).
+        object.__setattr__(
+            self, "_code_index", {t.talent_code: t for t in self.talents}
+        )
 
     def by_code(self, talent_code: str) -> Talent | None:
-        for t in self.talents:
-            if t.talent_code == talent_code:
-                return t
-        return None
+        return self._code_index.get(talent_code)
 
 
 class OverloadReason(enum.Enum):
