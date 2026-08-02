@@ -113,6 +113,7 @@ class CockpitHttpServerTests(unittest.TestCase):
                 bind_port=self.port,
                 request_timeout_sec=3,
                 session_timeout_sec=60,
+                lock_path=None,
             ),
             workspace_views=(_workspace_view(),),
             role_views=(_role_view(),),
@@ -125,6 +126,14 @@ class CockpitHttpServerTests(unittest.TestCase):
     def test_index_requires_token(self):
         status, _, _ = _request(f"{self.base}/")
         self.assertEqual(401, status)
+
+    def test_healthz_is_unauthenticated_and_ok(self):
+        status, _, body = _request(f"{self.base}/healthz")
+        self.assertEqual(200, status)
+        data = json.loads(body)
+        self.assertEqual("ok", data["status"])
+        self.assertEqual("coevo-cockpit", data["service"])
+        self.assertIn("uptime_sec", data)
 
     def test_index_with_token_serves_page_with_csp(self):
         status, headers, body = _request(f"{self.base}/?token={self.token}")
@@ -256,6 +265,7 @@ class CockpitHttpServerTimeoutTests(unittest.TestCase):
                 bind_port=port,
                 request_timeout_sec=3,
                 session_timeout_sec=1,
+                lock_path=None,
             ),
             workspace_views=(_workspace_view(),),
             role_views=(),
@@ -271,6 +281,38 @@ class CockpitHttpServerTimeoutTests(unittest.TestCase):
             self.assertEqual(401, status)
         finally:
             server.stop()
+
+
+class CockpitLogPersistenceTests(unittest.TestCase):
+    def test_access_log_is_written_to_disk(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            port = _free_port()
+            log_path = Path(tmp) / "cockpit-access.jsonl"
+            server = CockpitHttpServer(
+            CockpitHttpConfig(
+                bind_port=port,
+                request_timeout_sec=3,
+                log_path=log_path,
+                lock_path=None,
+            ),
+                workspace_views=(_workspace_view(),),
+                role_views=(),
+            )
+            server.start()
+            try:
+                token = server.session_manager.create()
+                base = f"http://127.0.0.1:{port}"
+                status, _, _ = _request(f"{base}/api/list_projects", token=token)
+                self.assertEqual(200, status)
+            finally:
+                server.stop()
+            self.assertTrue(log_path.is_file())
+            lines = log_path.read_text(encoding="utf-8").splitlines()
+            self.assertGreaterEqual(len(lines), 1)
+            record = json.loads(lines[-1])
+            self.assertEqual("list_projects", record["route"])
+            self.assertEqual("ok", record["status"])
+            self.assertEqual(0, server.log_errors)
 
 
 class CockpitSingleInstanceTests(unittest.TestCase):

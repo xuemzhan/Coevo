@@ -28,9 +28,10 @@ import re
 import secrets
 import socket
 import threading
+import time
 import urllib.parse
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -66,6 +67,12 @@ AUDIT_MAXLEN: Final[int] = 200
 DEFAULT_ALLOWED_HOSTS: Final[frozenset[str]] = frozenset({
     "127.0.0.1", "localhost", "::1",
 })
+
+
+def _default_lock_path() -> Path:
+    """Default single-instance lock under the user's local app data."""
+    base = os.environ.get("LOCALAPPDATA") or str(Path.home())
+    return Path(base) / "KaiwuAgent" / "cockpit.lock"
 
 
 def now_utc_iso_z() -> str:
@@ -184,8 +191,9 @@ class CockpitHttpConfig:
     request_timeout_sec: int = 5
     session_timeout_sec: int = DEFAULT_SESSION_TIMEOUT_SEC
     allowed_hosts: frozenset[str] = DEFAULT_ALLOWED_HOSTS
-    lock_path: Path | None = None
+    lock_path: Path | None = field(default_factory=_default_lock_path)
     state_path: Path | None = None
+    log_path: Path | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.bind_host, str) or self.bind_host != LOOPBACK_HOST:
@@ -232,10 +240,14 @@ class CockpitHttpConfig:
             raise CockpitValidationError("lock_path must be a Path or None")
         if self.state_path is not None and not isinstance(self.state_path, Path):
             raise CockpitValidationError("state_path must be a Path or None")
+        if self.log_path is not None and not isinstance(self.log_path, Path):
+            raise CockpitValidationError("log_path must be a Path or None")
 
 
 class SingleInstanceLock:
     """Exclusive-create lock file (Windows-safe) for cockpit single instance."""
+
+    STALE_AFTER_SECONDS: int = 600
 
     def __init__(self, path: Path) -> None:
         if not isinstance(path, Path):
@@ -247,16 +259,44 @@ class SingleInstanceLock:
         if self._fd is not None:
             return
         self._path.parent.mkdir(parents=True, exist_ok=True)
+        if not self._try_create():
+            if not self._recover_stale() or not self._try_create():
+                raise CockpitValidationError(
+                    f"cockpit single instance already running ({self._path})"
+                )
+        if self._fd is None:
+            raise CockpitValidationError(
+                f"cockpit single instance already running ({self._path})"
+            )
+        try:
+            os.write(self._fd, str(os.getpid()).encode("ascii"))
+        except OSError:
+            pass
+
+    def _try_create(self) -> bool:
         try:
             self._fd = os.open(
                 str(self._path),
                 os.O_CREAT | os.O_EXCL | os.O_WRONLY,
                 0o600,
             )
-        except FileExistsError as exc:
-            raise CockpitValidationError(
-                f"cockpit single instance already running ({self._path})"
-            ) from exc
+            return True
+        except FileExistsError:
+            return False
+
+    def _recover_stale(self) -> bool:
+        """Take over a lock file left by a crashed process (mtime heuristic)."""
+        try:
+            age_seconds = time.time() - self._path.stat().st_mtime
+        except OSError:
+            return False
+        if age_seconds < self.STALE_AFTER_SECONDS:
+            return False
+        try:
+            self._path.unlink()
+            return True
+        except OSError:
+            return False
 
     def release(self) -> None:
         if self._fd is None:
@@ -343,6 +383,20 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 return
             parsed = urllib.parse.urlsplit(self.path)
             path = parsed.path
+            if method == "GET" and path == "/healthz":
+                # Process-supervisor probe: loopback + Host checked above;
+                # intentionally unauthenticated, returns no sensitive data.
+                self._send_json(
+                    200,
+                    {
+                        "status": "ok",
+                        "service": "coevo-cockpit",
+                        "uptime_sec": round(
+                            time.monotonic() - self.server._started_monotonic, 1
+                        ),
+                    },
+                )
+                return
             if method == "GET":
                 if path == "/":
                     self._serve_index(parsed.query)
@@ -611,6 +665,34 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
 # ---------------------------------------------------------------------------
 
 
+class _CockpitLogWriter:
+    """Append-only JSONL access log with fail-isolated writes."""
+
+    def __init__(self, path: Path) -> None:
+        self._path = path
+        self._lock = threading.Lock()
+        self.errors = 0
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._stream = path.open("a", encoding="utf-8")
+
+    def write(self, record: dict) -> None:
+        try:
+            line = json.dumps(
+                record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+            ) + "\n"
+            with self._lock:
+                self._stream.write(line)
+                self._stream.flush()
+        except OSError:
+            self.errors += 1
+
+    def close(self) -> None:
+        try:
+            self._stream.close()
+        except OSError:
+            pass
+
+
 class CockpitHttpServer(ThreadingHTTPServer):
     """Threading loopback HTTP server hosting the cockpit facade."""
 
@@ -664,6 +746,12 @@ class CockpitHttpServer(ThreadingHTTPServer):
             now=started_at,
         )
         self._audit_log: deque[dict[str, Any]] = deque(maxlen=AUDIT_MAXLEN)
+        self._log_writer = (
+            _CockpitLogWriter(config.log_path)
+            if config.log_path is not None
+            else None
+        )
+        self._started_monotonic = time.monotonic()
         try:
             super().__init__(
                 (config.bind_host, config.bind_port),
@@ -671,6 +759,8 @@ class CockpitHttpServer(ThreadingHTTPServer):
                 bind_and_activate=True,
             )
         except OSError as exc:
+            if self._log_writer is not None:
+                self._log_writer.close()
             if self._lock is not None:
                 self._lock.release()
             raise CockpitValidationError(
@@ -684,6 +774,12 @@ class CockpitHttpServer(ThreadingHTTPServer):
 
     def append_audit(self, record: dict[str, Any]) -> None:
         self._audit_log.append(record)
+        if self._log_writer is not None:
+            self._log_writer.write(record)
+
+    @property
+    def log_errors(self) -> int:
+        return self._log_writer.errors if self._log_writer is not None else 0
 
     def recent_audit(self) -> tuple[dict[str, Any], ...]:
         return tuple(self._audit_log)
@@ -704,5 +800,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
                 self.state.workspace_views,
                 self.state.role_views,
             )
+        if self._log_writer is not None:
+            self._log_writer.close()
         if self._lock is not None:
             self._lock.release()

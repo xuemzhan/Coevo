@@ -72,6 +72,7 @@ class CockpitStatePersistenceTests(unittest.TestCase):
                     bind_port=port,
                     request_timeout_sec=3,
                     state_path=state_path,
+                    lock_path=None,
                 ),
                 workspace_views=(_workspace_view(),),
                 role_views=(_role_view(),),
@@ -85,6 +86,7 @@ class CockpitStatePersistenceTests(unittest.TestCase):
                     bind_port=_free_port(),
                     request_timeout_sec=3,
                     state_path=state_path,
+                    lock_path=None,
                 ),
             )
             second.start()
@@ -105,6 +107,7 @@ class CockpitStatePersistenceTests(unittest.TestCase):
                     bind_port=_free_port(),
                     request_timeout_sec=3,
                     state_path=state_path,
+                    lock_path=None,
                 ),
                 workspace_views=(_workspace_view(),),
                 role_views=(_role_view(),),
@@ -144,6 +147,7 @@ class CockpitStatePersistenceTests(unittest.TestCase):
                         bind_port=_free_port(),
                         request_timeout_sec=3,
                         state_path=state_path,
+                        lock_path=None,
                     ),
                 )
 

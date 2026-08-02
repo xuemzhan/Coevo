@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import tempfile
+import os
+import time
 import unittest
 from pathlib import Path
 
@@ -61,6 +63,11 @@ class CockpitHttpConfigTests(unittest.TestCase):
     def test_lock_path_must_be_path(self):
         with self.assertRaises(CockpitValidationError):
             CockpitHttpConfig(lock_path="C:\\lock")  # type: ignore[arg-type]
+
+    def test_lock_path_defaults_to_single_instance(self):
+        config = CockpitHttpConfig()
+        self.assertIsNotNone(config.lock_path)
+        self.assertTrue(str(config.lock_path).endswith("cockpit.lock"))
 
 
 class CockpitSessionManagerTests(unittest.TestCase):
@@ -134,6 +141,20 @@ class SingleInstanceLockTests(unittest.TestCase):
             first.release()
             second.acquire()
             second.release()
+
+    def test_stale_lock_is_recovered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cockpit.lock"
+            path.write_text(str(os.getpid()), encoding="ascii")
+            old = time.time() - SingleInstanceLock.STALE_AFTER_SECONDS - 60
+            os.utime(path, (old, old))
+            lock = SingleInstanceLock(path)
+            lock.acquire()
+            try:
+                self.assertTrue(path.exists())
+            finally:
+                lock.release()
+            self.assertFalse(path.exists())
 
     def test_context_manager(self):
         with tempfile.TemporaryDirectory() as tmp:

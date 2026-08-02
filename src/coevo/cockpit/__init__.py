@@ -822,3 +822,14 @@ from .state_store import (  # noqa: E402
     deserialize_views,
     serialize_views,
 )
+
+# ---------------------------------------------------------------------------
+# Controlled WPS launcher (US-7-AC-4)
+# ---------------------------------------------------------------------------
+
+from .wps import (  # noqa: E402
+    MAX_DOCUMENT_BYTES,
+    WpsLaunchDecision,
+    WpsLaunchResult,
+    WpsLauncher,
+)
