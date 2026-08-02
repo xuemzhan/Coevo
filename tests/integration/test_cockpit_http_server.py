@@ -84,14 +84,14 @@ def _request(url, *, token="", headers=None, method="GET", body=None):
         method = "POST"
     request = urllib.request.Request(url, data=data, headers=request_headers, method=method)
     try:
-        with urllib.request.urlopen(request, timeout=5) as response:
+        with urllib.request.urlopen(request, timeout=20) as response:
             return response.status, dict(response.headers), response.read()
     except urllib.error.HTTPError as exc:
         return exc.code, dict(exc.headers), exc.read()
 
 
 def _raw_request(port: int, payload: bytes) -> bytes:
-    with socket.create_connection(("127.0.0.1", port), timeout=5) as sock:
+    with socket.create_connection(("127.0.0.1", port), timeout=20) as sock:
         sock.sendall(payload)
         chunks = []
         while True:
@@ -226,6 +226,15 @@ class CockpitHttpServerTests(unittest.TestCase):
         wps_records = [r for r in records if r["route"] == "wps_open"]
         self.assertGreaterEqual(len(wps_records), 1)
         self.assertEqual(16, len(wps_records[-1]["artifact_path_hash"]))
+
+    def test_abrupt_client_disconnect_does_not_break_server(self):
+        # A client that opens a connection and vanishes mid-request must not
+        # wedge the listener: the next well-formed request still succeeds.
+        with socket.create_connection(("127.0.0.1", self.port), timeout=5) as sock:
+            sock.sendall(b"GET / HTTP/1.1\r\nHost: 127.0.0.1\r\n")
+        status, _, body = _request(f"{self.base}/api/list_projects", token=self.token)
+        self.assertEqual(200, status)
+        self.assertIn(b"PRJ001", body)
 
     def test_unknown_path_is_404(self):
         status, _, _ = _request(f"{self.base}/nope", token=self.token)

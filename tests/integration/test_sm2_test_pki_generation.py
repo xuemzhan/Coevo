@@ -29,6 +29,29 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _assert_no_launcher_helpers_remain(
+    helper_runtime: Path,
+    timeout_seconds: float = 20.0,
+) -> None:
+    """Assert the launcher leaves no ephemeral ``helper-*.exe`` behind.
+
+    The launcher deletes its own ephemeral helper after the helper exits.
+    On Windows a killed helper's image file can remain transiently locked
+    (process handle / AV scan) for a moment, so the assertion polls briefly
+    instead of checking the instant the launcher returns. A permanent
+    leftover still fails.
+    """
+    deadline = time.monotonic() + timeout_seconds
+    while True:
+        leftover = list(helper_runtime.glob("helper-*.exe"))
+        if not leftover:
+            return
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(0.25)
+    raise AssertionError(f"launcher left ephemeral helper exes: {leftover}")
+
+
 def pem_der(path: Path) -> bytes:
     text = path.read_text(encoding="ascii").replace("\r\n", "\n")
     match = re.fullmatch(
@@ -249,7 +272,7 @@ class Sm2TestPkiTests(unittest.TestCase):
         self.assertFalse(self.output.exists())
         self.assertEqual([], list(self.output.parent.glob(".staging-*")))
         helper_runtime = ROOT / ".tools" / "runtime" / "sm2-test-pki-helper"
-        self.assertEqual([], list(helper_runtime.glob("helper-*.exe")))
+        _assert_no_launcher_helpers_remain(helper_runtime)
 
     def test_helper_is_static_no_child_and_launcher_has_no_job_or_native_directory_layer(self) -> None:
         launcher = SCRIPT.read_text(encoding="utf-8")
@@ -284,7 +307,7 @@ class Sm2TestPkiTests(unittest.TestCase):
         self.assertFalse(self.output.exists())
         self.assertEqual([], list(runtime_root.glob(".staging-*")))
         helper_runtime = ROOT / ".tools" / "runtime" / "sm2-test-pki-helper"
-        self.assertEqual([], list(helper_runtime.glob("helper-*.exe")))
+        _assert_no_launcher_helpers_remain(helper_runtime)
 
     def test_helper_owns_handle_identity_reparse_rename_and_strict_recovery(self) -> None:
         source = HELPER_SOURCE.read_text(encoding="utf-8")
@@ -472,7 +495,7 @@ class Sm2TestPkiTests(unittest.TestCase):
         )
         self.assertEqual(0, result.returncode, result.stderr)
         runtime = ROOT / ".tools" / "runtime" / "sm2-test-pki-helper"
-        self.assertEqual([], list(runtime.glob("helper-*.exe")))
+        _assert_no_launcher_helpers_remain(runtime)
 
     def _compile_ephemeral_helper(self) -> Path:
         helper_lock = self.tool["helper"]

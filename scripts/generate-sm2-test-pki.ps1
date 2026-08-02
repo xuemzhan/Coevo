@@ -29,6 +29,16 @@ function Assert-RegularFile([string]$Path, [string]$Label) {
   if (-not ($item -is [IO.FileInfo]) -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw "$Label must be a regular non-reparse file" }
 }
 
+function Remove-CoevoEphemeralHelper {
+  param([Parameter(Mandatory = $true)][string]$Path)
+  # Windows can briefly keep a just-exited helper executable locked. Retry for
+  # up to ~2.5s so a loaded CI run never leaves (or trips on) a stale helper;
+  # give up silently if the lock outlives the window (the next launch cleans it).
+  for ($attempt = 1; $attempt -le 25; $attempt++) {
+    try { [IO.File]::Delete($Path); return } catch [IO.IOException] { Start-Sleep -Milliseconds 100 }
+  }
+}
+
 function Test-FixedTimeEqual([byte[]]$Left, [byte[]]$Right) {
   if ($Left.Length -ne $Right.Length) { return $false }
   $difference = 0
@@ -137,7 +147,7 @@ $Helper = $null
 try {
   foreach ($handle in (Enter-CoevoSecureDirectoryChain $ToolsRoot $HelperRuntime)) { $null = $secureHandles.Add($handle) }
   foreach ($staleHelper in @(Get-ChildItem -LiteralPath $HelperRuntime -Filter 'helper-*.exe' -File -Force -ErrorAction SilentlyContinue)) {
-    if (($staleHelper.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0) { try { [IO.File]::Delete($staleHelper.FullName) } catch [IO.IOException] { } }
+    if (($staleHelper.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0) { Remove-CoevoEphemeralHelper -Path $staleHelper.FullName }
   }
   $null = $secureHandles.Add((Open-CoevoLockedFile $HelperSource ([int64]$helperLock.source_size) ([string]$helperLock.source_sha256)))
   $null = $secureHandles.Add((Open-CoevoLockedFile $Compiler ([int64]$helperLock.compiler_lock.size) ([string]$helperLock.compiler_lock.sha256)))
@@ -183,5 +193,5 @@ try {
   } finally { [Array]::Clear($nonce, 0, $nonce.Length) }
 } finally {
   Close-CoevoDirectoryHandles $secureHandles
-  if ($null -ne $Helper -and (Test-Path -LiteralPath $Helper -PathType Leaf)) { [IO.File]::Delete($Helper) }
+  if ($null -ne $Helper -and (Test-Path -LiteralPath $Helper -PathType Leaf)) { Remove-CoevoEphemeralHelper -Path $Helper }
 }

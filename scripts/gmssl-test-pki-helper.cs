@@ -33,7 +33,12 @@ internal static class GmsslTestPkiHelper
     private const int FileDispositionInfo = 4;
     private const int ErrorSharingViolation = 32;
     private const int DirectoryLockAttempts = 4;
-    private const int DirectoryLockRetryDelayMilliseconds = 10;
+    // Bounded wait between directory-lock retries. Windows transient holders
+    // (antivirus scans, search indexer, or a sibling process still tearing
+    // down) can hold a directory open for far longer than 10ms; 250ms keeps
+    // the fail-closed attempt count (4) unchanged while covering those
+    // transients under loaded CI runs.
+    private const int DirectoryLockRetryDelayMilliseconds = 250;
     private const int FileTypePipe = 3;
     private const uint LoadLibrarySearchDllLoadDir = 0x00000100;
     private const uint LoadLibrarySearchSystem32 = 0x00000800;

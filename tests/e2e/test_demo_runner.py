@@ -22,6 +22,31 @@ from src.coevo.protocol import (  # noqa: E402
 
 
 class DemoRunnerTests(unittest.TestCase):
+    def test_pipeline_with_cockpit_server_serves_and_stops(self):
+        import socket
+        import urllib.request
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with socket.socket() as probe:
+                probe.bind(("127.0.0.1", 0))
+                port = probe.getsockname()[1]
+            result = run_demo_pipeline(
+                Path(tmp),
+                with_cockpit=True,
+                cockpit_port=port,
+            )
+            try:
+                self.assertTrue(result.cockpit_url)
+                self.assertIsNotNone(result.cockpit_server)
+                token = result.cockpit_server.session_manager.create()
+                page_url = result.cockpit_url + "?token=" + token
+                with urllib.request.urlopen(page_url, timeout=20) as resp:
+                    self.assertLess(resp.status, 400)
+            finally:
+                if result.cockpit_server is not None:
+                    result.cockpit_server.stop()
+                result.store.close()
+
     def test_pipeline_completes_with_real_package_and_persistence(self):
         from src.coevo.crypto import GmsslPrototypeProvider
 

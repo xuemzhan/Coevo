@@ -222,6 +222,7 @@ class DemoResult:
     cockpit_url: str
     store: Any
     hub: Any
+    cockpit_server: Any | None = None
 
 
 def ensure_demo_profile() -> Path:
@@ -559,4 +560,5 @@ def run_demo_pipeline(
         cockpit_url=cockpit_url,
         store=store,
         hub=hub,
+        cockpit_server=server,
     )

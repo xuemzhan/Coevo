@@ -59,6 +59,9 @@ def main(argv: list[str] | None = None) -> int:
                 time.sleep(3600)
         except KeyboardInterrupt:
             pass
+        finally:
+            if getattr(result, "cockpit_server", None) is not None:
+                result.cockpit_server.stop()
     return 0
 
 

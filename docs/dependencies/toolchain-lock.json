@@ -42,12 +42,12 @@
         "name": "Coevo isolated GmSSL test-PKI helper",
         "protocol": "COEVOPKI/2",
         "source": "scripts/gmssl-test-pki-helper.cs",
-        "source_size": 61783,
-        "source_sha256": "09c0decf04d1455ffc0fbcf97ce3bac40d963f4f00d18e36f4586060a2d6f13a",
+        "source_size": 62127,
+        "source_sha256": "82b33f092fe1548cf9caacc64d0312e2f46b19daefaf33e960b1b283efc86262",
         "launcher": {
           "path": "scripts/generate-sm2-test-pki.ps1",
-          "size": 10721,
-          "sha256": "4ec02e2269683774e699691d03a1287df9ca7737bc8fb15f365effd2dcb0978d"
+          "size": 11208,
+          "sha256": "ca6f65f9e070e079ec953eb8e081b4b732b3401a0a297fcbe5638929793b21fc"
         },
         "compile_command": "csc.exe /nologo /noconfig /nostdlib+ /reference:<locked-mscorlib> /reference:<locked-System> /target:exe /platform:x64 /optimize+ /debug- /checked+ /out:<create-new-runtime-helper> <locked-source>",
         "build_output_is_deterministic": false,

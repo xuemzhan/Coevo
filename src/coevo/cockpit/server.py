@@ -334,6 +334,10 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         self._handle("POST")
 
     def _handle(self, method: str) -> None:
+        # One request per connection: rejections never leave an unread body
+        # to poison a reused keep-alive socket, and Windows client-abort
+        # races cannot wedge a pooled connection.
+        self.close_connection = True
         try:
             if not self._check_host():
                 return
@@ -358,6 +362,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             if not self.server.session_manager.validate(
                 self._bearer_token(), self._now()
             ):
+                self._drain_body()
                 self._send_json(401, {"error": "authentication required"})
                 return
             if not self._check_csrf():
@@ -383,12 +388,42 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
     def _check_csrf(self) -> bool:
         origin_host = _hostname_of(self.headers.get("Origin", ""))
         if origin_host not in self.server.config.allowed_hosts:
+            self._drain_body()
             self._send_json(403, {"error": "invalid Origin header"})
             return False
         if self.headers.get("X-Requested-With", "") != CSRF_HEADER_VALUE:
+            self._drain_body()
             self._send_json(403, {"error": "CSRF header required"})
             return False
         return True
+
+    def _drain_body(self) -> None:
+        """Consume an unread request body before rejecting the request.
+
+        Closing a connection with unread request bytes pending can make the
+        client observe a TCP reset (WinError 10053) instead of the response.
+        Reading and discarding the body first lets the rejection finish with
+        a clean FIN. Bounded: oversized or malformed bodies are left for the
+        connection close and never buffered unboundedly.
+        """
+        length_header = self.headers.get("Content-Length", "")
+        if not length_header:
+            return
+        try:
+            length = int(length_header)
+        except ValueError:
+            return
+        if length < 0 or length > self.server.config.max_request_bytes * 4:
+            return
+        remaining = length
+        try:
+            while remaining > 0:
+                chunk = self.rfile.read(min(65536, remaining))
+                if not chunk:
+                    return
+                remaining -= len(chunk)
+        except OSError:
+            return
 
     def _bearer_token(self) -> str:
         authorization = self.headers.get("Authorization", "")
@@ -559,7 +594,13 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             self.send_header(key, value)
         self.end_headers()
         if body:
-            self.wfile.write(body)
+            try:
+                self.wfile.write(body)
+            except OSError:
+                # The client disconnected mid-response (e.g. user closed the
+                # browser tab). There is nothing further to deliver; swallow
+                # so the handler thread ends cleanly without a traceback.
+                return
 
     def _now(self) -> str:
         return now_utc_iso_z()
