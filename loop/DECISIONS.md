@@ -2578,6 +2578,146 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+## 2026-08-03 -- 稳定性与运维加固（ENG-BASE STABILITY-1 done）
+
+### 背景
+- 质量门禁序列曾观察到一次 e2e demo 的 `GmsslPrototypeError: GCP-E-LAUNCH`（单独重跑即绿，
+  判定为 helper 启动级瞬时竞争）；此前 DECISIONS 已记录过同类 flaky
+  （staging-directory-identity-lock，重试间隔 10ms→250ms 修复）。
+- 生产启动器（run_cockpit）此前仅手工冒烟验证，无自动化生命周期测试。
+- supervision 632 行仍为超长单文件。
+
+### 本轮完成
+1. **GmSSL helper 启动有界重试**（src/coevo/crypto/gmssl_provider.py）：
+   - `_invoke` 默认 1 次额外尝试，0.25s×attempt 退避，仅重试启动级瞬时失败
+     （subprocess OSError/TimeoutExpired、或 helper 返回非零且无可识别 GCP-E-* 诊断）；
+   - helper 报告的具体密码级错误（GCP-E-SIGN 等）绝不重试（避免掩盖真实故障）；
+   - 敏感请求 bytearray（可能含被封装密钥材料）以 try/finally 归零。
+   - 单元测试 5 项（瞬态重试成功/有界失败/密码级错误不重试/OSError 重试/参数校验）；
+     真实 GmSSL 集成测试 5/5 回归通过。
+2. **生产启动器 E2E**（tests/e2e/test_cockpit_launcher.py）：真实子进程启动
+   run_cockpit → /healthz 200 → CTRL+BREAK → 退出码 0 → 状态/访问日志落盘 → 锁释放；
+   AppConfig 新增 `COEVO_LOCK_PATH`（仅显式配置才覆盖默认锁路径，保证多实例与测试隔离）。
+3. **supervision 拆分**：632 → models(18)/service(8) + `__init__` 再导出（含 `__all__`），
+   公共 API 不变，10 项测试回归通过。
+4. **版本 0.1.0 → 0.2.0**（生产可用化里程碑，语义版本非时间戳）。
+
+### 验证
+- unit 643/643（skipped=2）+ integration 209 回归 + GmSSL 真实集成 5/5 + e2e 12/12；
+  `make quality` exit=0 fingerprint=`6ba24930200fc687`；audit fully-sealed；
+  安全自查 Critical/High=0/0。
+- STATE: iteration 29 -> 30，current_item=STABILITY-1，phase=decide，status=done。
+- 未 git push / 未合并 / 未打 tag。
+- 提出者：loop-engineer（Codex）。决策者：用户（“继续开发”授权）。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
+## 2026-08-03 -- 交付收口（ENG-BASE DELIVERY-1 done）
+
+### 交付差距审计（对照 loop/GOAL.md 完成定义）
+- BACKLOG 46 项全部 done；第一优先级故事与三个业务子智能体已发布；
+  `.agent` 流转/篡改/错接收人/重放/冲突测试齐备；离线自洽；追踪矩阵无悬空。
+- 可补齐缺口：**成果回传链此前只有集成测试，无 E2E**（完成定义第 3 条要求两条固定
+  编排链通过 E2E）。
+- 外部依赖缺口（本轮无法在本机关闭，如实留痕）：Win7 64-bit 存量环境实机验证
+  （仅分支专项与仿真测试，标记 pending-win7-runtime）；独立 mvp-verifier /
+  security-reviewer 双签（三次子代理尝试均因越权/停滞失败，需只读沙箱复核者或
+  合规 CI runner，见 REVIEW-SANDBOX-1 与 governance 文档）；正式环境批准的
+  SM2/SM4 密码产品与受保护密钥句柄（现为 mvp-prototype 作用域）。
+
+### 本轮完成
+1. **成果回传链 E2E**（tests/e2e/test_return_chain.py）：真实 SM2/SM4 加密
+   RESULT_SUBMISSION 包 → parse/open 解封验签 → 重放门禁 + 原子导入 COMMITTED →
+   MergeEngine.merge_and_analyze（签名收据 + 新主版本 PRJ001-R0002）→
+   RiskConfirmationRepository 确认（时间界：合并 ≤ 分析 ≤ 确认，已按校验规则校准）→
+   DecisionBriefService 阶段简报 → KnowledgeBaseFacade 聚合 + KnowledgeStore
+   持久化重开。实测通过（12-16s/次）。
+2. **app 组合根拆分**：`src/coevo/app/__init__.py` 564 → demo_support
+   （DemoSigner/DemoFreshnessAuthority/ensure_demo_profile/样例输入，显式非生产）
+   + pipeline（run_demo_pipeline/DemoResult）+ `__init__` 再导出，公共 API 不变。
+3. **README.md 重写**：现状、快速开始、文档索引、交付边界；去除陈旧文案。
+4. **最终安全自查**：本轮新增/拆分模块无 eval/exec/shell=True/网络直连模式；
+   唯一 subprocess 为既有固定脚本路径的 demo PKI 引导；配置/日志/启动入口均失败关闭；
+   Critical/High=0/0。
+
+### 验证
+- e2e 4/4（demo 下发链 3 + 回传链 1）；unit 637 + integration 209 回归全绿；
+  `make quality` exit=0 fingerprint=`6ba24930200fc687`；audit fully-sealed。
+- STATE: iteration 28 -> 29，current_item=DELIVERY-1，phase=decide，status=done。
+- 未 git push / 未合并 / 未打 tag；用户原始文档未动（README 为工程文档，按交付需要更新）。
+- 提出者：loop-engineer（Codex）。决策者：用户（已授权“设计需要同意的我都同意，
+  一直开发直到可交付”）。
+
+### 交付结论
+以本机可验证范围为界，MVP 已达到 GOAL.md 完成定义的 9/11 项（第 8 项 Win7 实机、
+第 11 项独立双签依赖外部条件），满足“三类最小能力 + 两条编排链 E2E + 离线自洽 +
+质量门禁全绿”的可交付状态；正式部署放行前需补齐上述三项外部条件。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
+## 2026-08-03 -- MVP 生产可用化专项（ENG-BASE PROD-HARDEN-1 done）
+
+### 架构与性能复查结论
+- 分层架构（纯函数 facade → SQLite/JSONL 存储 → HTTP 驾驶舱 → 离线 .agent 流）职责清晰，
+  冻结不可变模型与失败关闭到位；上一轮已完成的算法优化（依赖图 O(V·E)→O(E)、heap 拓扑排序、
+  六处 O(1) 索引、watcher 增量摘要等）在本轮拆分后**无性能回退**（基准 --check 全绿，
+  dag_toposort 0.46s）。
+- 本轮主要问题：**超长单文件**影响可维护性与并行协作——decision_brief 1414 行、merge 1188、
+  orchestrator 988、progress_capture 915、knowledge_base 907、cockpit 835、server 925；
+  以及生产可运维性缺口（无统一配置、无应用日志、无优雅停机、无版本元数据、无部署文档）。
+
+### 长文件拆分（公共 API 与行为不变）
+- 按 REFACTOR-AUDIT-1 既有模式（models + service/facade/repositories + __init__ 再导出）拆分：
+  decision_brief → models(59)/repositories(3)/service(1)；merge → models(12)/engine(1)；
+  orchestrator → models(23)/service(1)；progress_capture → models(23)/service(4)；
+  knowledge_base → models(19)/facade(10)；cockpit → models(21)/facade(1)；
+  cockpit/server 925 → sessions(会话管理)/static(静态缓存与路径策略)/server(处理与生命周期) 737。
+- 拆分工具 `.omo/split_packages.py` / `.omo/split_server.py`（gitignored，可复现）：
+  AST 源段切片保留注释与装饰器、按引用自动裁剪各模块导入、自动生成跨模块与再导出导入、
+  相对导入置于 __init__ 再导出之后以避免 watcher/store/server 的循环导入。
+- 修复 merge `__all__` 既有瑕疵：补入 canonical_baseline_digest（原缺失）、移除
+  _hold_with_conflict（方法名，本就不可能从模块导入）。
+- 验证：unit 637（含 13 新增）+ integration 209 + e2e 10 全绿。
+
+### 生产支持层（补充必要功能，全部 stdlib，零新依赖）
+- `src/coevo/version.py`：语义版本 0.1.0（禁时间戳代替版本）。
+- `src/coevo/config.py`：AppConfig.from_env 环境驱动配置，环回绑定/端口/日志级别/路径
+  失败关闭，非法值抛 ConfigError。
+- `src/coevo/logging_setup.py`：轮转文件（5MB×5）+ 控制台日志；与应用审计链严格隔离。
+- `scripts/run_cockpit.py`：生产启动入口（--check/--version），SIGINT/SIGTERM/SIGBREAK
+  优雅停机（后台线程 serve_forever 避免信号处理器与 stop() 同线程死锁——已在实现中实测
+  发现并修复），停机落盘状态、关闭访问日志与单实例锁，退出码 0/1/2 语义化。
+- run_demo.py 增 --version；docs/production-readiness.md 部署说明。
+- 实测：run_cockpit 启动 → /healthz 200 → CTRL_BREAK → 退出码 0 → 状态文件与访问日志落盘。
+
+### 边界与留痕
+- 拆分未改变任何业务语义、协议、审计链或安全测试；未新增第三方依赖；
+  LOOPBACK_HOST/STATIC_ROOT 常量的归属由 __init__ 迁移至 cockpit/models.py（再导出不变，
+  STATIC_ROOT 基于 __file__ 解析结果不变）。
+- 未 git push / 未合并 / 未打 tag；用户原始文档未动。
+- STATE: iteration 27 -> 28，current_item=PROD-HARDEN-1，phase=decide，status=done。
+- 提出者：loop-engineer（Codex）。决策者：用户（授权“补充必要的功能，让其具有生产可用”）。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
 ## 2026-08-02 -- .tools bin-<PID> 生命周期修复（ENG-LOOP-ENV BIN-1 done）
 
 ### 问题

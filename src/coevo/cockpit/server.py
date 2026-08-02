@@ -1,74 +1,105 @@
-"""US-7-AC-2 real local cockpit HTTP server (Python stdlib only).
+"""US-7-AC-2 local cockpit HTTP server (loopback-only, authenticated).
 
-This layer sits in front of the pure :mod:`coevo.cockpit` facade and
-adds the actual socket, authentication, and request-governance surface
-mandated by the technical constraints (section 5):
-
-* loopback-only bind (``127.0.0.1``), enforced at config construction;
-* local identity bearer token + in-memory sessions with inactivity
-  timeout (only the SHA-256 token hash is retained);
-* ``Host`` header validation on every request and ``Origin`` + custom
-  header validation (CSRF) on state-changing ``POST`` requests;
-* write-op double confirmation (``wps_open`` requires ``confirm: true``);
-* static assets served only from ``src/coevo/cockpit/static/`` with an
-  extension allow-list, traversal rejection, and bounded sizes;
-* per-request audit rows kept in a bounded in-memory log;
-* optional single-instance lock file.
-
-No third-party imports, no external URLs, no token/key material in
-logs. WPS subprocess invocation is deferred to US-7-AC-4.
+Session management lives in :mod:`.sessions`; the static asset cache
+and path policy live in :mod:`.static`. This module keeps the request
+handler, server lifecycle and single-instance lock.
 """
+
 from __future__ import annotations
 
-import hashlib
+
+
 import json
+
 import mimetypes
+
 import os
+
 import re
-import secrets
+
 import socket
+
 import threading
+
 import time
+
 import urllib.parse
+
 from collections import deque
+
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
 from pathlib import Path
+
 from typing import Any, Final
 
+
+
 from . import (
+
     LOOPBACK_HOST,
+
     STATIC_ROOT,
+
     CockpitFacade,
+
     CockpitRequest,
+
     CockpitResponse,
+
     CockpitResponseStatus,
+
     CockpitRoute,
+
     CockpitServerState,
+
     CockpitValidationError,
+
 )
+
 from .state_store import CockpitStateStore
 
+from .sessions import (
 
-_ISO_UTC_Z: Final[re.Pattern[str]] = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$"
+    DEFAULT_MAX_SESSIONS,
+
+    DEFAULT_SESSION_TIMEOUT_SEC,
+
+    CockpitSessionManager,
+
+    _ISO_UTC_Z,
+
+    now_utc_iso_z,
+
+)
+
+from .static import (
+
+    STATIC_ALLOWED_EXTENSIONS,
+
+    STATIC_CACHE_MAX_BYTES,
+
+    STATIC_CACHE_MAX_ENTRIES,
+
+    STATIC_MAX_BYTES,
+
+    _StaticAssetCache,
+
+    resolve_static_path,
+
 )
 _HOST_LITERAL: Final[re.Pattern[str]] = re.compile(r"^[a-z0-9.:\[\]-]+$")
 
-STATIC_ALLOWED_EXTENSIONS: Final[frozenset[str]] = frozenset({
-    ".html", ".css", ".js", ".png", ".svg", ".ico", ".txt", ".json", ".woff2",
-})
-STATIC_MAX_BYTES: Final[int] = 2 * 1024 * 1024
-DEFAULT_MAX_SESSIONS: Final[int] = 64
-DEFAULT_SESSION_TIMEOUT_SEC: Final[int] = 8 * 3600
 CSRF_HEADER_VALUE: Final[str] = "coevo-cockpit"
+
 AUDIT_MAXLEN: Final[int] = 200
-STATIC_CACHE_MAX_ENTRIES: int = 64
-STATIC_CACHE_MAX_BYTES: int = 8 * 1024 * 1024
+
 DEFAULT_ALLOWED_HOSTS: Final[frozenset[str]] = frozenset({
     "127.0.0.1", "localhost", "::1",
 })
+
 
 
 def _default_lock_path() -> Path:
@@ -76,10 +107,6 @@ def _default_lock_path() -> Path:
     base = os.environ.get("LOCALAPPDATA") or str(Path.home())
     return Path(base) / "KaiwuAgent" / "cockpit.lock"
 
-
-def now_utc_iso_z() -> str:
-    """Return the current UTC time as an ISO-8601 ``Z`` string."""
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _hostname_of(value: str) -> str:
@@ -93,113 +120,6 @@ def _hostname_of(value: str) -> str:
     hostname = parsed.hostname
     return hostname.lower() if isinstance(hostname, str) else ""
 
-
-def _iso_seconds(iso_z: str) -> float:
-    parsed = datetime.fromisoformat(iso_z.replace("Z", "+00:00"))
-    return parsed.timestamp()
-
-
-# ---------------------------------------------------------------------------
-# Sessions
-# ---------------------------------------------------------------------------
-
-
-class CockpitSessionManager:
-    """In-memory bearer-token sessions with inactivity timeout.
-
-    Only the SHA-256 digest of each raw token is stored; the raw token is
-    returned exactly once from :meth:`create` and never retained.
-    """
-
-    def __init__(
-        self,
-        *,
-        timeout_sec: int = DEFAULT_SESSION_TIMEOUT_SEC,
-        max_sessions: int = DEFAULT_MAX_SESSIONS,
-        max_session_age_sec: int | None = None,
-    ) -> None:
-        if not isinstance(timeout_sec, int) or timeout_sec <= 0:
-            raise CockpitValidationError("session timeout_sec must be a positive integer")
-        if not isinstance(max_sessions, int) or max_sessions < 1:
-            raise CockpitValidationError("max_sessions must be a positive integer")
-        if max_session_age_sec is not None and (
-            not isinstance(max_session_age_sec, int) or max_session_age_sec <= 0
-        ):
-            raise CockpitValidationError(
-                "max_session_age_sec must be a positive integer or None"
-            )
-        self._timeout_sec = timeout_sec
-        self._max_sessions = max_sessions
-        self._max_session_age_sec = max_session_age_sec
-        self._sessions: dict[str, tuple[str, str]] = {}
-
-    def create(self, now: str | None = None) -> str:
-        """Issue a fresh raw bearer token; only its digest is retained."""
-        now = now or now_utc_iso_z()
-        if not _ISO_UTC_Z.match(now):
-            raise CockpitValidationError("now must be ISO-8601 UTC Z")
-        token = secrets.token_urlsafe(32)
-        self._sessions[self._digest(token)] = (now, now)
-        self._evict_if_needed()
-        return token
-
-    def validate(self, token: str, now: str | None = None) -> bool:
-        """Return True and touch the session when the token is valid."""
-        if not isinstance(token, str) or not token:
-            return False
-        now = now or now_utc_iso_z()
-        if not _ISO_UTC_Z.match(now):
-            return False
-        digest = self._digest(token)
-        entry = self._sessions.get(digest)
-        if entry is None:
-            return False
-        created_at, last_seen = entry
-        if (
-            self._max_session_age_sec is not None
-            and _iso_seconds(now) - _iso_seconds(created_at) > self._max_session_age_sec
-        ):
-            del self._sessions[digest]
-            return False
-        if _iso_seconds(now) - _iso_seconds(last_seen) > self._timeout_sec:
-            del self._sessions[digest]
-            return False
-        self._sessions[digest] = (created_at, now)
-        return True
-
-    def revoke(self, token: str) -> bool:
-        """Revoke a session by raw token (best effort, constant-ish cost)."""
-        if not isinstance(token, str) or not token:
-            return False
-        return self._sessions.pop(self._digest(token), None) is not None
-
-    def rotate(self, token: str, now: str | None = None) -> str:
-        """Revoke an old token and issue a fresh one (token rotation)."""
-        if not isinstance(token, str) or not token:
-            raise CockpitValidationError("token must be a non-empty string")
-        now = now or now_utc_iso_z()
-        if not _ISO_UTC_Z.match(now):
-            raise CockpitValidationError("now must be ISO-8601 UTC Z")
-        if not self.revoke(token):
-            raise CockpitValidationError("token is not a valid session")
-        return self.create(now=now)
-
-    @property
-    def session_count(self) -> int:
-        return len(self._sessions)
-
-    def _evict_if_needed(self) -> None:
-        if len(self._sessions) <= self._max_sessions:
-            return
-        for digest in sorted(
-            self._sessions,
-            key=lambda item: self._sessions[item][1],
-        )[: len(self._sessions) - self._max_sessions]:
-            del self._sessions[digest]
-
-    @staticmethod
-    def _digest(token: str) -> str:
-        return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 # ---------------------------------------------------------------------------
@@ -269,6 +189,7 @@ class CockpitHttpConfig:
             raise CockpitValidationError("state_path must be a Path or None")
         if self.log_path is not None and not isinstance(self.log_path, Path):
             raise CockpitValidationError("log_path must be a Path or None")
+
 
 
 class SingleInstanceLock:
@@ -344,118 +265,6 @@ class SingleInstanceLock:
     def __exit__(self, *exc: object) -> None:
         self.release()
 
-
-# ---------------------------------------------------------------------------
-# Static asset cache
-# ---------------------------------------------------------------------------
-
-
-class _StaticAssetCache:
-    """Bounded, mtime-validated cache for static assets.
-
-    Repeated page loads currently re-read ``index.html`` / CSS / JS from
-    disk on every request. This cache keeps the resolved bytes in memory
-    and re-validates ``(mtime_ns, size)`` against the filesystem on each
-    hit, so a file edited on disk is picked up on the next request while
-    unchanged files avoid repeated reads. Thread-safe; bounded by entry
-    count and total bytes (FIFO eviction).
-    """
-
-    def __init__(
-        self,
-        *,
-        max_entries: int = STATIC_CACHE_MAX_ENTRIES,
-        max_bytes: int = STATIC_CACHE_MAX_BYTES,
-    ) -> None:
-        if not isinstance(max_entries, int) or max_entries < 1:
-            raise CockpitValidationError("max_entries must be a positive integer")
-        if not isinstance(max_bytes, int) or max_bytes < 1:
-            raise CockpitValidationError("max_bytes must be a positive integer")
-        self._max_entries = max_entries
-        self._max_bytes = max_bytes
-        self._entries: dict[str, tuple[int, int, bytes]] = {}
-        self._total_bytes = 0
-        self._lock = threading.Lock()
-
-    def get(self, path: Path) -> bytes | None:
-        """Return cached bytes when the file is unchanged, else None."""
-        try:
-            stat = path.stat()
-        except OSError:
-            return None
-        key = str(path)
-        with self._lock:
-            entry = self._entries.get(key)
-        if (
-            entry is not None
-            and entry[0] == stat.st_mtime_ns
-            and entry[1] == stat.st_size
-        ):
-            return entry[2]
-        return None
-
-    def put(self, path: Path, body: bytes) -> None:
-        """Cache ``body`` for ``path`` after validating current stat."""
-        if len(body) > self._max_bytes:
-            return
-        try:
-            stat = path.stat()
-        except OSError:
-            return
-        key = str(path)
-        with self._lock:
-            old = self._entries.pop(key, None)
-            if old is not None:
-                self._total_bytes -= len(old[2])
-            self._entries[key] = (stat.st_mtime_ns, stat.st_size, body)
-            self._total_bytes += len(body)
-            while (
-                len(self._entries) > self._max_entries
-                or self._total_bytes > self._max_bytes
-            ):
-                oldest_key = next(iter(self._entries))
-                removed = self._entries.pop(oldest_key)
-                self._total_bytes -= len(removed[2])
-
-    @property
-    def size(self) -> int:
-        with self._lock:
-            return len(self._entries)
-
-    @property
-    def total_bytes(self) -> int:
-        with self._lock:
-            return self._total_bytes
-
-
-# ---------------------------------------------------------------------------
-# Static path policy
-# ---------------------------------------------------------------------------
-
-
-def resolve_static_path(static_root: Path, relative: str) -> Path | None:
-    """Resolve a static asset inside the root, or return None (fail-closed)."""
-    if not isinstance(relative, str) or not relative:
-        return None
-    if relative.startswith("/") or "\\" in relative or "\x00" in relative:
-        return None
-    parts = relative.split("/")
-    if any(part in ("", ".", "..") for part in parts):
-        return None
-    try:
-        root = static_root.resolve(strict=True)
-        candidate = (root / relative).resolve(strict=False)
-        candidate.relative_to(root)
-    except (OSError, ValueError):
-        return None
-    if candidate.suffix.lower() not in STATIC_ALLOWED_EXTENSIONS:
-        return None
-    try:
-        if not candidate.is_file() or candidate.stat().st_size > STATIC_MAX_BYTES:
-            return None
-    except OSError:
-        return None
-    return candidate
 
 
 # ---------------------------------------------------------------------------
@@ -778,6 +587,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         return now_utc_iso_z()
 
 
+
 # ---------------------------------------------------------------------------
 # HTTP server
 # ---------------------------------------------------------------------------
@@ -809,6 +619,7 @@ class _CockpitLogWriter:
             self._stream.close()
         except OSError:
             pass
+
 
 
 class CockpitHttpServer(ThreadingHTTPServer):
@@ -923,3 +734,4 @@ class CockpitHttpServer(ThreadingHTTPServer):
             self._log_writer.close()
         if self._lock is not None:
             self._lock.release()
+

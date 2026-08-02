@@ -11,6 +11,7 @@ import json
 import re
 import struct
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
@@ -128,9 +129,17 @@ class GmsslPrototypeProvider:
         if not isinstance(handle, GmsslPrototypeHandle) or handle.role != role:
             raise GmsslPrototypeError(f"{role} handle is required")
 
-    def _invoke(self, action: int, profile: str, *frames: bytes) -> tuple[bytes, ...]:
+    def _invoke(
+        self,
+        action: int,
+        profile: str,
+        *frames: bytes,
+        retries: int = 1,
+    ) -> tuple[bytes, ...]:
         if not _SAFE.fullmatch(profile) or not 1 <= len(frames) <= 5:
             raise GmsslPrototypeError("invalid provider request")
+        if not isinstance(retries, int) or not 0 <= retries <= 3:
+            raise ValueError("retries must be an integer in 0..3")
         values: list[bytes] = []
         for value in frames:
             if not isinstance(value, bytes) or len(value) > _MAX_FRAME:
@@ -150,27 +159,49 @@ class GmsslPrototypeProvider:
             "-HelperTimeoutMilliseconds", str(max(100, int(self._timeout * 1000))),
         ]
         environment = {"SystemRoot": system_root, "WINDIR": system_root}
+        attempt = 0
         try:
-            completed = subprocess.run(
-                command,
-                cwd=self._root,
-                input=bytes(request),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=environment,
-                timeout=self._timeout + 5.0,
-                check=False,
-            )
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            raise GmsslPrototypeError("crypto helper launch failed") from exc
+            while True:
+                attempt += 1
+                request_payload = bytes(request)
+                try:
+                    completed = subprocess.run(
+                        command,
+                        cwd=self._root,
+                        input=request_payload,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        env=environment,
+                        timeout=self._timeout + 5.0,
+                        check=False,
+                    )
+                except (OSError, subprocess.TimeoutExpired) as exc:
+                    if attempt <= retries:
+                        time.sleep(0.25 * attempt)
+                        continue
+                    raise GmsslPrototypeError("GCP-E-LAUNCH") from exc
+                if completed.returncode == 0:
+                    return self._decode(completed.stdout)
+                diagnostic = completed.stderr.decode("ascii", "replace").strip()
+                if not re.fullmatch(
+                    r"(?:GCP-E-[A-Z0-9-]+|.*GCP-E-[A-Z0-9-]+.*)",
+                    diagnostic,
+                    re.DOTALL,
+                ):
+                    # Launch-level failure with an unrecognised diagnostic is
+                    # transient (helper lock contention / AV scan / process
+                    # spawn race); retry a bounded number of times. Recognised
+                    # GCP-E-* diagnostics from the helper are authoritative
+                    # and are NEVER retried.
+                    diagnostic = "GCP-E-LAUNCH"
+                    if attempt <= retries:
+                        time.sleep(0.25 * attempt)
+                        continue
+                raise GmsslPrototypeError(diagnostic)
         finally:
+            # Hygiene: never leave request bytes (which may embed wrapped
+            # key material) resident in the Python heap after the call.
             request[:] = b"\x00" * len(request)
-        if completed.returncode != 0:
-            diagnostic = completed.stderr.decode("ascii", "replace").strip()
-            if not re.fullmatch(r"(?:GCP-E-[A-Z0-9-]+|.*GCP-E-[A-Z0-9-]+.*)", diagnostic, re.DOTALL):
-                diagnostic = "GCP-E-LAUNCH"
-            raise GmsslPrototypeError(diagnostic)
-        return self._decode(completed.stdout)
 
     @staticmethod
     def _decode(data: bytes) -> tuple[bytes, ...]:

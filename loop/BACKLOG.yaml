@@ -445,3 +445,46 @@ items:
       - tests/security/test_local_toolchain_security.py
     security_review: false
     protocol_review: false
+  # ---------- production readiness hardening (2026-08-03) ----------
+  - id: PROD-HARDEN-1
+    story: ENG-BASE
+    title: MVP 生产可用化：6 个超长单文件拆分（decision_brief 1414/merge 1188/orchestrator 988/progress_capture 915/knowledge_base 907/cockpit 835+server 925 → models/service/facade/repositories/__init__ 再导出，公共 API 与行为不变）+ 生产支持层（version 语义版本/config 环境驱动失败关闭/logging 轮转日志/run_cockpit 环回启动+优雅停机 SIGINT/SIGTERM/SIGBREAK）+ 注释与模块文档补齐 + docs/production-readiness.md
+    status: done
+    dependencies: [OPT-PERF-1, ENG-LOOP-ENV-BIN-1]
+    acceptance_tests:
+      - tests/unit/test_production_support.py
+      - tests/unit/test_merge_engine.py
+      - tests/unit/test_decision_brief.py
+      - tests/unit/test_orchestrator.py
+      - tests/unit/test_progress_capture.py
+      - tests/unit/test_knowledge_base.py
+      - tests/unit/test_cockpit.py
+      - tests/unit/test_cockpit_http.py
+      - tests/integration/test_cockpit_http_server.py
+    security_review: false
+    protocol_review: false
+  # ---------- delivery closure (2026-08-03) ----------
+  - id: DELIVERY-1
+    story: ENG-BASE
+    title: 交付收口：成果回传链 E2E（真实 SM2/SM4 加密成果包 → 解封验签 → 原子导入 → 合并+签名收据 → 风险 → 决策简报 → 知识沉淀入库，补齐 GOAL.md 完成定义第 3 条“两条固定编排链通过 E2E”）；app 组合根拆分（demo 专用件与生产管线分离）；README/交付文档重写；最终安全自查与全量门禁收口
+    status: done
+    dependencies: [PROD-HARDEN-1]
+    acceptance_tests:
+      - tests/e2e/test_return_chain.py
+      - tests/e2e/test_demo_runner.py
+      - tests/unit/test_production_support.py
+    security_review: true
+    protocol_review: false
+  # ---------- stability hardening (2026-08-03) ----------
+  - id: STABILITY-1
+    story: ENG-BASE
+    title: 稳定性与运维加固：GmSSL 原型 helper 启动有界重试（仅重试 GCP-E-LAUNCH/OSError/Timeout 等启动级瞬时失败，helper 报告的密码级 GCP-E-* 绝不重试；敏感请求缓冲归零）+ 生产启动器 E2E（真实子进程 healthz + CTRL+BREAK 优雅退出码 0 + 状态/访问日志落盘 + 锁释放，COEVO_LOCK_PATH 隔离）+ supervision 632 行拆分 models/service（公共 API 不变）+ 版本推进 0.2.0
+    status: done
+    dependencies: [DELIVERY-1]
+    acceptance_tests:
+      - tests/unit/test_gmssl_provider_retry.py
+      - tests/e2e/test_cockpit_launcher.py
+      - tests/unit/test_supervision_meeting.py
+      - tests/unit/test_production_support.py
+    security_review: true
+    protocol_review: false

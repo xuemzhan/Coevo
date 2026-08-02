@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "iteration": 27,
-  "current_story": "ENG-LOOP-ENV",
-  "current_item": "ENG-LOOP-ENV-BIN-1",
+  "iteration": 30,
+  "current_story": "ENG-BASE",
+  "current_item": "STABILITY-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "",
   "blocking_issue": "",
-  "updated_at": "2026-08-02T15:54:04.944557Z"
+  "updated_at": "2026-08-02T21:05:07.482026Z"
 }

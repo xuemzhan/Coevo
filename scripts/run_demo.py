@@ -30,7 +30,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--port", type=int, default=12751)
     parser.add_argument("--no-server", action="store_true")
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--version", action="store_true")
     args = parser.parse_args(argv)
+    if args.version:
+        from src.coevo.version import version_string
+
+        print(version_string())
+        return 0
 
     result = run_demo_pipeline(
         Path(args.runtime_dir),
