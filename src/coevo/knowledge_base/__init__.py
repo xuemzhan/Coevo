@@ -890,3 +890,18 @@ def _generate_retrospective(
         generated_at=now,
         requires_user_review=True,
     )
+
+# ---------------------------------------------------------------------------
+# Persistent knowledge bundle store (US-14-AC-2)
+# ---------------------------------------------------------------------------
+#
+# Imported last: store.py imports the bundle types defined above.
+
+from .store import (  # noqa: E402
+    AUDIT_ACTION_STORE,
+    KnowledgeStore,
+    KnowledgeStoreConflictError,
+    KnowledgeStoreError,
+    bundle_to_payload,
+    payload_to_bundle,
+)
