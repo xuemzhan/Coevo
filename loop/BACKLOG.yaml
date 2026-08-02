@@ -220,12 +220,21 @@ items:
   # ---------- post-MVP follow-on ACs (slice: 2026-08-01) ----------
   - id: US-4-AC-2
     story: US-4
-    title: Orchestrator 真实调用 US-1/2/3 facade (MVP 固定链 5 步真实业务跑通)
-    status: ready
+    title: Orchestrator ???? US-1/2/3 facade (MVP ??? 5 ???????; 2026-08-02 ??? GmSSL ?? provider ??)
+    status: done
     dependencies: [US-4-AC-1, US-1-AC-1, US-2-AC-1, US-3-AC-1]
     acceptance_tests:
       - tests/integration/test_orchestrator_real_facade_chain.py
-    security_review: false
+    security_review: true
+    protocol_review: false
+  - id: US-4-AC-2-PATH
+    story: US-4
+    title: ??????/????????????CryptoProvider ?? + ProviderScope ????? + ?????????
+    status: done
+    dependencies: [US-4-AC-2]
+    acceptance_tests:
+      - tests/unit/test_crypto_contract.py
+    security_review: true
     protocol_review: false
   - id: US-7-AC-2
     story: US-7
@@ -270,5 +279,16 @@ items:
     dependencies: [US-15-AC-1]
     acceptance_tests:
       - tests/integration/test_audit_stream.py
+    security_review: true
+    protocol_review: false
+
+  # ---------- US-9 AC-3 fail-open fix (slice: 2026-08-02) ----------
+  - id: US-9-AC-3-fix
+    story: US-9
+    title: ReportBuilder ??? base_revision fail-closed ???AC-3?????????? <project_id>-R<NNNN>?
+    status: done
+    dependencies: [US-9-AC-1]
+    acceptance_tests:
+      - tests/unit/test_report_builder.py
     security_review: true
     protocol_review: false

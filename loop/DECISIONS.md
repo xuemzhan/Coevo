@@ -1498,6 +1498,35 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
+
+## 2026-08-02 — COEVOPKI/2 explicit preamble repair and MVP status correction
+
+- The launcher/helper frame mismatch was corrected: `generate-sm2-test-pki.ps1`
+  now writes the version-2 UTF-8 preamble explicitly to
+  `StandardInput.BaseStream` before the `COEVOPKI` magic.
+- The helper and launcher source lengths and SHA-256 locks were updated. This
+  does not change GmSSL, SM2, SM3, or SM4 algorithms, expand the test-only
+  approval scope, or add a dependency.
+- Targeted evidence: the test-PKI integration suite passed 25 tests with one
+  conditional skip for unavailable Windows symlink privilege; the real US-1/2/3
+  orchestration and RealChainStore suites passed 28/28.
+- The first full quality rerun failed only because the newest decision section
+  omitted this inherited receipt-governance pin. A complete rerun is required
+  after this append-only correction.
+- Independent planning review concludes that the MVP is incomplete. US-4-AC-2
+  remains blocked because no approved product crypto provider generates and
+  verifies the signed/encrypted `.agent` package. The fail-closed
+  `CRYPTO_CAPABILITY_UNAVAILABLE` outcome must remain in place.
+- The known US-9 `base_revision` fail-open is a separate future loop item and
+  is intentionally not changed in this infrastructure slice.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+
+- decision status: approved a+b
+- .gitignore includes the approved private-key runtime receipt exclusion.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved; this round did not alter its contents or storage policy.
+- historical git blobs remain and this round does not rewrite repository history.
 - 本轮未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
 
 ## 2026-07-29 — US-13-AC-1 security remediation review stop
@@ -2023,3 +2052,383 @@ Audit-corpus note (correlated, awaiting business-owner decision):
 - git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
 - historical git blobs remain in commit history and are not retroactively scrubbed.
 - 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档; 仅完成 US-14-AC-1 业务实现并按既有 audit posture 落 commit。
+
+## 2026-08-01 — US-4-AC-2 阶段一安全阻塞
+
+- 本轮范围：真实调用 US-1 流程理解、US-2 任务分解、US-3 人才推荐，并在
+  `HUMAN_CONFIRM` 硬停止；确认前 US-5 任务包构建不可达。
+- 专项验证：`tests.unit.test_orchestrator` 与
+  `tests.integration.test_orchestrator_real_facade_chain` 共 33 项通过。
+- 独立 security-reviewer：FAIL，Critical/High/Medium/Low = 0/1/3/1。
+- High：阶段一返回的 `OrchestrationReport` 可被既有公开
+  `Orchestrator.confirm_human` 直接转换为 `COMPLETED`，但 US-5 未运行且前三步
+  trace 被丢弃，形成“人工确认后伪完成”。
+- Medium：缺少事件幂等存储；`project_input` 未绑定 event payload/内容摘要/版本；
+  未写入防篡改业务审计且首次 retry 失败无独立 trace。
+- Low：固定链校验允许尾随步骤，且第五步未完整校验 kind/capability。
+- 完整 `make quality` 在安全 High 出现后按 AGENTS.md 停止条件中止，不宣称门禁通过。
+- 决策：US-4-AC-2 标记 `security-blocked`，不得标记 US-4 或 MVP 完成。
+- 需要业务负责人决定是否授权下一轮在同一 AC 内实现专用 resume、事件幂等、
+  输入摘要绑定、完整审计与真实 US-5 调用，并修复/限制 `confirm_human` 的伪完成路径。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
+
+## 2026-08-01 — DLL helper 目录身份锁重复失败停轮
+
+- 业务负责人批准实现不通过命令行传递秘密的受控 GmSSL DLL helper。本轮已实现零参数 one-shot helper，直接 P/Invoke 固定哈希 GmSSL DLL；口令在 helper 内部随机生成并由 CurrentUser DPAPI 密封，不再启动 `gmssl.exe` 或使用 `-pass`。
+- 原安全 High `gmssl-pass-command-line-exposure` 已由独立 security-reviewer 确认关闭。复审最终结果为 PASS，Critical/High/Medium/Low = 0/0/0/0；目录 reparse、delete-handle、ACL、Job Object、超时与异常清理均有防御性测试。
+- builder 最终专项曾达到 18/18 PASS；但独立 verifier 从头运行时专项为 16/18，2 项失败。完整 quality exit=1，fingerprint=`34fc0b672c25a7b5`，记录时间 `2026-08-01T14:49:54.353309Z`；unit 459 PASS、1 skipped，integration 157 项中 1 失败，security/e2e 未执行。
+- 重复失败指纹：`staging-directory-identity-lock-win32-0`。目录身份锁在测试顺序相关场景中返回 `unable to lock staging directory identity (Win32 0)`；同一错误在本轮诊断、复审和独立门禁中累计超过 3 次，并曾导致测试观察到残留 `.staging-*`，虽最终检查残留为 0。
+- 失败 quality 只有 `valid-prefix-with-unsealed-tail`，不构成有效完整门禁；本轮记录完成后仅重新封存审计链，不把失败门禁记为通过。
+- 决策：按 AGENTS.md“同一错误连续出现 3 次”停止条件，将 `US-4-AC-2` 设为 `blocked`。不得继续试错修改、不得接入正式 provider/orchestrator、不得开放 `COMPLETED`。下一轮需业务负责人明确批准专门重构 Windows 目录句柄/错误传播层后才能继续。
+
+## 2026-08-01 — US-4-AC-2 受控 GmSSL DLL helper 安全切片
+
+- 用户批准以受控 DLL helper 关闭 `gmssl-pass-command-line-exposure`；本切片不接入 orchestrator/provider，继续保持 `CRYPTO_CAPABILITY_UNAVAILABLE / ESCALATED`，不开放 `COMPLETED`。
+- 新增 one-shot C# helper，命令行零参数；stdin 固定帧仅包含公开 profile 与 128-bit nonce。口令由 helper 内部生成，sender/recipient 口令仅以 CurrentUser DPAPI 密封后输出；root CA 与 recipient companion 私钥、全部明文口令始终留在 helper 内存并在 `finally` 中清零。
+- helper 直接调用锁定的 GmSSL 3.2.0 DLL 公共 API 完成 4 组 SM2 密钥、SM2-SM3 X.509 签发、用途扩展、证书链验证及 encrypted-PKCS8 解密回环；不调用 `gmssl.exe`，不使用 `-pass`，不自写 ASN.1。
+- DLL 通过绝对路径、SHA-256/size、非 reparse 路径、单 hardlink/file identity、写删排他句柄及安全 `LoadLibraryExW` 搜索策略校验。锁定 DLL 的 `X509_KEY` ABI 写入边界实测为 23760 bytes；启动时用尾随 canary 自检后才生成保留材料。
+- helper 使用已锁定 Windows C# compiler 与 framework assemblies 在锁定 `.tools/runtime` 随机新路径受控编译；固定 `/noconfig /nostdlib+` 参数，持文件句柄执行后删除。旧 compiler 输出非确定性已在 toolchain lock 明示，不保留或信任预编译 helper binary。
+- launcher 仅处理非秘密请求与加密/公开响应，使用 ACL 隔离 staging、`Directory.Move` 原子提交并拒绝覆盖；异常与并发失败清理 staging 和临时 helper。
+- 专项测试 `tests.integration.test_sm2_test_pki_generation` 8/8 通过：WMI 命令行枚举无秘密、stdin/file/truncated/trailing/version 攻击、PATH fake DLL、同 profile 并发一胜一败、DPAPI+encrypted-PKCS8 DLL 回环、证书链/KeyUsage、无敏感输出、runtime gitignore 与无遗留 binary。
+- 本记录仅为 builder 专项结果；`STATE.json`、`VERIFICATION.md` 最终门禁及独立 reviewer/verifier 结论由主流程更新。
+
+### 2026-08-01 — DLL helper 安全复审 Medium 返工
+
+- M1：launcher 改为并行 `CopyToAsync` / `ReadToEndAsync`，helper 及其潜在后代被纳入 `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` Job Object。正常退出、超时、输出 drain 均有独立上限；超时调用 `TerminateJobObject`、等待退出及 drain 后清理，不保留 reader task 或临时 helper。锁定源码中的 test-only hang 钩子只接受 launcher 清空环境后显式设置的非秘密标志。
+- M2：`loop/runtime`、SM2 PKI runtime root 与 staging 使用 current-owner-only、禁继承 ACL；不存在时通过 `Directory.CreateDirectory(path, DirectorySecurity)` 原子创建，已存在宽 ACL 时先校验 owner/非 reparse 后收紧并复验。所有输出改用 `FileMode.CreateNew`，目录提交继续使用拒绝覆盖的 `Directory.Move`。
+- 回归：工具链 + SM2 PKI 专项 15/15 通过，新增 hang 有界终止、宽 ACL 纠偏、恶意预置 profile 保留且无 staging、并发单胜者测试；source hash/size lock 一致，`git diff --check` 通过，无 helper binary 或 staging 遗留。
+
+### 2026-08-01 — DLL helper 第三次最小安全返工
+
+- M：owner-only ACL 原子创建/纠偏后，`loop/runtime`、SM2 PKI root 与 staging 分别取得唯一目录身份句柄；句柄请求 DELETE access 且不共享 delete，持有至所有 `CreateNew` 写入和提交结束。预存 DELETE/no-share-delete 句柄会使生成在 staging 创建前失败关闭。
+- staging 不再通过路径 API 移动；使用持有的 DELETE 句柄调用 `SetFileInformationByHandle(FileRenameInfo)` 原子改名。提交前后均核验 handle resolved path、volume/file index identity 与 non-reparse 属性；父目录句柄不重复获取并持续锁定。
+- L：模拟 Job Object assignment 失败时，在发送请求前 Kill helper，并以 5 秒上限确认退出；未退出返回稳定错误，随后统一关闭 job/process。失败钩子回归确认无请求发送、无 helper/staging/profile 遗留。
+- 合跑工具链与 SM2 PKI 专项 17/17 通过；新增预持 delete handle 冲突与 assignment-fail 测试。未修改 `STATE.json` / `VERIFICATION.md`，未运行完整 quality。
+
+### 2026-08-01 — DLL helper 第四次极小安全返工
+
+- `Open-CoevoMoveableDirectory` 在 `CreateFileW(FILE_FLAG_OPEN_REPARSE_POINT)` 成功后，首先从同一 handle 调用 `GetFileInformationByHandle`；若 `FileAttributes` 含 `FILE_ATTRIBUTE_REPARSE_POINT`，立即关闭 handle 并稳定失败，之后才允许路径解析或返回 handle。runtime parent、SM2 PKI root、staging 三层共用此检查，发生在 helper 启动与任何输出写入之前。
+- 新增受控竞态钩子：staging 路径预检通过后替换为 junction。动态测试确认 handle 属性检查拒绝该对象，恢复测试路径后由既有失败清理删除 staging；无 helper、profile、staging 或敏感输出遗留。静态测试锁定 CreateFile → handle information/reparse check → return 的顺序。
+- toolchain lock 新增 launcher path/size/SHA-256，launcher 启动时自校验；C# helper 源未改变，其既有 source hash 保持不变。
+- 最终工具链 + SM2 PKI 专项 18/18 通过。未修改 `STATE.json` / `VERIFICATION.md`，未运行完整 quality。
+
+## 2026-08-01 — GmSSL 测试 PKI 口令暴露安全阻塞
+
+- 已离线导入并精确锁定 GmSSL 3.2.0；官方 ZIP、`gmssl.exe`、`gmssl.dll` 的 SHA-256 与版本核验通过，公开证书生成、用途限制和链验证可行。
+- 实现角色专项测试为 3/3，通过工具锁测试后合计 7/7；但独立 verifier 在完整门禁启动前收到安全 High，按停止条件未运行 `make quality`，本轮无新质量指纹。
+- 独立 security-reviewer：FAIL，Critical/High/Medium/Low = 0/1/0/0。High：GmSSL CLI 只能通过 `-pass` 参数接收私钥口令，随机口令会短暂出现在子进程命令行；同机进程可枚举并窃取该口令，从而绕过保留私钥的 DPAPI 静态保护。
+- `test-only`、随机口令和加密 PKCS#8 不能消除运行时口令泄露。不得以此脚本继续生成或接入正式状态。
+- 风险收敛：本轮生成的 sender/recipient 加密私钥及对应 DPAPI 口令文件已在确认路径严格位于 `loop/runtime/sm2-test-pki/default` 后随机覆盖并删除；根 CA 与 companion 私钥已由生成脚本先行销毁。只保留公开证书与脱敏回执。
+- 决策：`US-4-AC-2` 转为 `security-blocked`，MVP 未完成。下一轮只有在业务负责人批准“实现不经命令行传递秘密的受控 GmSSL DLL helper，或改用支持安全句柄/受控输入通道的密码模块”后才能返工；仍不得开放 `COMPLETED`。
+
+## 2026-08-01 — test-only GmSSL 制品与运行时忽略规则纠偏
+
+- 现场核对发现此前记录所称 `.gitignore` 已包含 `loop/runtime/` 与实际文件不一致；
+  实际仅忽略了 `loop/private-key-handles-*.json`。本轮以实际文件为准补充精确
+  `loop/runtime/` 规则，并由 `git check-ignore` 专项测试防止 SM2 测试私钥、DPAPI
+  密封口令和证书运行时制品进入 Git。
+- GmSSL 3.2.0 Win64 官方 release asset 仅批准用于隔离的 test-only SM2 PKI 生成。
+  ZIP、`gmssl.exe` 与 `gmssl.dll` 均按 SHA-256 精确锁定；release 标记为 mutable，
+  Win64 EXE/DLL 的 Authenticode 状态为 `NotSigned`，不得据此宣称正式密码产品合规。
+- 测试 PKI 使用随机口令加密的 PKCS#8；保留口令仅以 CurrentUser DPAPI 密封保存。
+  根 CA 与 recipient companion signing 私钥仅用于签发/链验证，随后覆盖并删除。
+- recipient companion signing certificate 仅用于 GmSSL TLCP 双证书链验证；实际协议
+  候选仍为 KeyUsage 仅 `keyEncipherment` 的 recipient certificate。本切片不接入
+  crypto provider，不改变 `CRYPTO_CAPABILITY_UNAVAILABLE / ESCALATED` 正式状态。
+
+## 2026-08-01 — 在线选型完成，等待 GmSSL 离线导入
+
+- 业务负责人授权在线查找国密工具并继续开发；本轮仅查询官方发布元数据，未下载、安装或执行网络制品。
+- 选定官方 `guanzhi/GmSSL` 的 `v3.2.0` Windows x64 ZIP：
+  `GmSSL-3.2.0-win64.zip`，发布于 2026-06-21，官方资产摘要为
+  `SHA-256 d062923f09bfa74b06dbba74c4bda5e43a194d8aadec2ac82d723bbce0c5b7a5`。
+- 官方文档确认 GmSSL 支持 SM2 密钥生成、签名/验签、公钥加解密、SM2 X.509 证书，且 3.2.0 发布说明包含 SM4 与 GCM 相关能力。
+- 锁定的 Node 24.14.0/OpenSSL 3.5.5 本地探针可生成 SM2 密钥并完成 SM3 签名/验签，但不支持对 SM2 key 执行 `publicEncrypt`；它不能独立完成协议规定的 SM2 会话密钥封装。
+- 决策：不得自行实现或混拼缺失密码原语。按“运行时不得下载依赖”边界保持
+  `decision-required`，等待业务负责人将上述 ZIP 人工放入本地离线审批/导入位置；导入后先核验哈希、清单和许可证，再生成仅供测试的证书。私钥不得写入仓库、日志或模型上下文。
+- 独立实现可行性审查补充：GmSSL 软件工具可用于 MVP 原型的算法与测试证书验证，但不能单独提供现有私钥治理要求的不可导出 SM2 句柄。正式链仍需另行批准支持 SKF、PKCS#11 或厂商 OpenSSL Provider 的密码模块，以及 CA 签发的发送方/接收方 SM2 证书链和撤销材料；不得以 GmSSL 导出的 PEM 私钥替代正式句柄。
+
+## 2026-08-01 — US-4-AC-2 第三次安全阻塞
+
+- 本轮已修复上一轮的授权、任务包预览绑定、step 4 可用性、unsigned 占位包伪完成、
+  跨重启幂等与人工恢复问题；未接入获批密码产品，密码能力不可用时稳定转
+  `ESCALATED / CRYPTO_CAPABILITY_UNAVAILABLE`。
+- 专项回归 39/39 通过；完整 `scripts/dev.ps1 -Task quality` 退出码 0，
+  fingerprint=`34fc0b672c25a7b5`，audit seal=`fully-sealed`。
+- 独立 mvp-verifier：PASS。
+- 独立 security-reviewer：FAIL，Critical/High/Medium/Low = 0/1/1/0。
+- High：`RealChainStore` 的 SQLite 审计只有未锚定 hash chain；删除尾记录仍可能通过
+  `verify_audit_chain()`，且已知审计链校验失败时确认业务仍可继续，未 fail closed。
+- Medium：跨 store 绑定所依赖的 `store_id` 元数据未进入受保护、不可回退的签名检查点。
+- 决策：保持 `security-blocked`，不得标记 US-4-AC-2、US-4 或 MVP 完成；按
+  AGENTS.md 的 High 停止条件停轮，等待业务负责人决定是否授权下一轮实现外部锚定、
+  打开/关键状态变更前强制校验以及 store identity 完整性绑定。
+
+## 2026-08-01 — US-4-AC-2 第四次安全阻塞
+
+- 本轮复用 `SignedAuditAnchor` 与 freshness marker，为 `RealChainStore` 增加显式
+  create/open、签名检查点、关键读写前强制恢复/校验，以及 prepare→commit→promote
+  故障恢复；上一轮的审计尾删、已知篡改、store_id 和同步回滚问题已通过逆向测试。
+- 独立 mvp-verifier：最终 PASS。专项 49/49、全量 unit 454 项通过（1 skipped）；
+  完整 quality exit=0，fingerprint=`34fc0b672c25a7b5`，audit seal=`fully-sealed`。
+- 独立 security-reviewer：FAIL，Critical/High/Medium/Low = 0/1/0/0。
+- High：签名 checkpoint 未绑定实际 SQLite DDL/schema 对象；攻击者可植入 trigger，
+  让下一次合法审计写入修改业务记录，随后污染状态被新签名锚正式签入并在重开后接受。
+- 决策：继续 `security-blocked`，不更新追踪矩阵为 done，不宣称 US-4 或 MVP 完成；
+  按 High 停止条件停轮。下一轮如获授权，只处理规范 schema 摘要、禁止额外
+  table/view/trigger/index 与每次关键读写前 schema fail-closed。
+
+## 2026-08-01 — US-4-AC-2 第五轮 schema 安全切片放行
+
+- 实现唯一可信 SQLite schema 投影，精确覆盖 main/temp schema 对象、表 DDL、列、
+  默认值、约束、主键、索引及索引列、外键；拒绝任何额外 table/view/trigger/index。
+- `schema_sha256` 已纳入 `SignedAuditAnchor` checkpoint；关键读在 SQLite 读事务快照中
+  校验，关键写在 `BEGIN IMMEDIATE` 内操作前后复验 schema 与审计链。
+- mvp-verifier：PASS。专项 54/54、全量 unit 459 项通过（1 skipped）；完整 quality
+  exit=0，fingerprint=`34fc0b672c25a7b5`，audit seal=`fully-sealed`。
+- security-reviewer：PASS，Critical/High/Medium/Low = 0/0/0/0；防御性专项 64/64。
+- 第四轮 trigger 洗白 High 已关闭，且前四轮授权、preview/store 绑定、签名锚、
+  回滚与恢复边界均无回归。
+- 决策：schema 安全切片完成，但 US-4-AC-2 整体仍不能标记 done。正式五步链需要
+  获批 SM2/SM3/SM4 产品及离线依赖审批；当前 resume 继续安全返回
+  `ESCALATED / CRYPTO_CAPABILITY_UNAVAILABLE`。状态转 `decision-required`，等待业务负责人
+  提供或批准密码产品，且接入后必须重新安全复审。
+
+## 2026-08-01 — 密码产品原则批准后的制品核验
+
+- 业务负责人已原则批准继续密码能力接入。
+- 本地仓库、锁定工具链和 pip 离线缓存均未发现 GmSSL、Tongsuo 或其他 SM2 产品制品。
+- 本机用户级 `cryptography 48.0.1` 实测提供 SM3 与 SM4-GCM，但公开 API 不提供 SM2，
+  且该用户级安装不是仓库已锁定的离线依赖制品，不能直接纳入正式构建。
+- 官方 GmSSL 能力说明覆盖 SM2 加密/签名、SM3 与 SM4-GCM，但本机没有可核验的
+  Windows 离线二进制/源码包、版本、SHA-256、来源记录和许可证归档。
+- 当前也没有业务发送方/接收方 SM2 证书、测试公钥及不可导出私钥句柄；不得生成或
+  明文保存替代私钥。
+- 决策：原则批准不足以替代制品和密钥材料交付。保持 `decision-required`，不进行联网
+  运行时安装、不复制用户 site-packages、不自研/混拼 SM2 实现；收到离线制品和密钥
+  引用后再启动 provider 接入、协议复审和安全复审。
+
+## 2026-08-01 — US-4-AC-2 第二次安全阻塞
+
+- 用户已授权处理第一次复审的 1 High / 3 Medium / 1 Low；已实现受保护确认、
+  `CONFIRMED_PENDING_PACKAGE`、输入摘要与版本绑定、精确固定链校验、进程内
+  event/confirm/resume 幂等、哈希链审计及确认后 US-5 builder 调用。
+- 专项回归：46/46 通过。
+- 完整 quality 记录：2026-08-01T03:26:58Z，exit_code=0，
+  fingerprint=`34fc0b672c25a7b5`，audit seal fully-sealed。
+- 独立 security-reviewer 第二次复审：FAIL，Critical/High/Medium/Low =
+  0/4/2/0。
+- High 1：`confirmed_by` 仅有 safe-id 格式校验，无有权确认人/会话/签名授权。
+- High 2：确认未绑定 package 预览、发送方、接收方、payload 与 executor；确认后可
+  替换构建上下文并生成发往其他接收人的包。
+- High 3：resume 未检查 step 4 registration 可用状态，禁用 agent 仍可构包完成。
+- High 4：测试/默认路径为 unsigned package + dummy key/payload，无真实 SM2/SM4，
+  却标记 `COMPLETED`，不能代表安全任务包生成完成。
+- Medium：进程内 store 不提供跨重启防重放；审计写入失败仍可能留下
+  `DISPATCHING`/`PACKAGE_BUILDING` 未决状态且没有 recovery API。
+- 决策：继续维持 `security-blocked`；不得更新追踪矩阵为 done，不得宣称 US-4 或
+  MVP 完成。根据 AGENTS.md 出现 High 立即停轮，请业务负责人决定下一轮范围。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档。
+## 2026-08-01 — COEVOPKI/2 最小安全重构（builder 专项）
+
+- 将 test-only SM2 PKI helper 协议升级为 `COEVOPKI/2`：stdin 仅含 action、profile 和 128-bit nonce；stdout 固定为 59 字节，仅含版本、action、状态、nonce 与 receipt SHA-256，不再跨进程传输证书、加密私钥或 DPAPI blob。
+- C# helper 独占 PKI 文件系统职责：owner-only ACL、目录句柄 identity/reparse 复验、`CreateNew`、`Flush(true)`、receipt、`FileRenameInfo` 原子提交、同 nonce `RECOVER` 与严格 allowlist 清理。未知暂存对象 fail closed 并保留现场。
+- PowerShell launcher 仅保留锁定编译、零参数 helper 启动、固定公共响应校验、超时终止和同 nonce 恢复；移除 PKI blob 读写、动态 P/Invoke 目录层与 Job Object。C# helper 静态禁止 `Process.Start`、`CreateProcess` 与 shell。
+- 定位旧目录失败根因为 `FILE_RENAME_INFO` 可变尾缓冲区没有额外 UTF-16 NUL/padding，导致原生解析偶发读取分配器残留并生成带垃圾尾字符的目标名。补足缓冲区后，受控提交、响应丢失恢复、5 个 kill point 与并发回归均通过；本轮旧失败族累计 2/3，未达到再次停轮条件。
+- 恢复清理对 allowlist 中的每个文件再次使用 `OPEN_REPARSE_POINT` 句柄复验 identity/path，并通过 `FileDispositionInfo` 删除；receipt 也从固定 `FileStream` 句柄读取，避免路径换物竞态。
+- builder 最终专项：`tests.integration.test_sm2_test_pki_generation` 17/17 PASS。未执行完整 `make quality`，未修改 `loop/STATE.json` 或 `loop/VERIFICATION.md`，最终结论留给独立 verifier/security reviewer。
+- 清理：仅删除本轮 `v2-smoke*`、`v2-launcher-smoke*`、`rename-padding-probe` 与两个临时编译探针；确认 `loop/runtime/sm2-test-pki/default` 未触碰。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档；仅补齐当前决策章节的既有治理状态标记。
+## 2026-08-01 — COEVOPKI/2 security review M1/M2 最小返工
+
+- M1：`DirectoryLock.Open/Verify` 对 runtime/PKI 根、既有 profile 与同 nonce staging 均复验 current-user owner、ACL 禁继承、唯一显式 current-user FullControl 规则及目录规则继承标志。既有 profile/staging 不做 ACL 修正；owner 或 ACL 不符直接 `GMH-E-ACL` fail closed。
+- M2：已提交 profile 必须精确包含固定 13 个文件。helper 使用 `OPEN_REPARSE_POINT`、读独占且不共享 delete 的句柄同时锁住 receipt 与 12 个制品，并复验属性、最终路径、文件 identity、单 hardlink、长度；receipt 改为严格规范字节匹配，内含 12 个制品的 SHA-256 manifest，缺失、额外、篡改、minimal receipt、reparse 或 hardlink 均不再被认作 committed。
+- 动态逆向覆盖：宽 ACL/开启继承、minimal receipt、缺失制品、篡改 encrypted PKCS#8、receipt hardlink 均被拒绝；unknown staging 仍 fail closed 且保留未知对象。本机无文件 symlink 创建权限，因此 receipt reparse 动态用例明确 skip；reparse 句柄/属性拒绝路径仍由静态断言与既有目录 reparse 覆盖。wrong-owner 未进行可能导致测试目录无法安全恢复的 owner 改写；owner SID 精确验证由实现断言覆盖，动态使用宽 ACL/继承 ACL 覆盖同一 fail-closed 入口。
+- builder 最终专项：`tests.integration.test_sm2_test_pki_generation` 21 项通过，1 项因上述 symlink 权限跳过；未执行完整 `make quality`，未修改 `loop/STATE.json` 或 `loop/VERIFICATION.md`。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+
+- decision status: approved a+b
+- .gitignore includes `loop/private-key-handles/` and `loop/runtime/` entries.
+- git rm --cached was performed for accidentally tracked handle receipts; local runtime file preserved on this machine only.
+- historical git blobs remain in commit history and are not retroactively scrubbed.
+- 本段未修改私钥治理、handle receipt、audit-signing 配置或历史归档；仅继承当前已批准的治理状态。
+## 2026-08-01 — COEVOPKI/2 目录锁稳定性最终返工
+
+- 静态枚举 `DirectoryLock.Open` 五个角色：`GENERATE-PKI-ROOT`、`GENERATE-STAGING`、`RECOVER-PKI-ROOT`、`RECOVER-STAGING`、`INSPECT-PROFILE`。同一 helper 内不存在对同一路径的嵌套重复获取；root、staging、profile 句柄生命周期均由 `using`/`Dispose` 关闭。可确定的合法 sharing violation 来源是并发 helper 对 PKI root 的 DELETE/no-share-delete 互斥，以及外部预持有冲突句柄；这些安全共享标志不得放宽。
+- 目录锁错误现在携带公开角色、Win32 code 和尝试次数，不包含 profile、nonce、绝对路径或秘密。目录 identity/final-path/verify 错误也携带公开角色。
+- 仅 Win32 `ERROR_SHARING_VIOLATION (32)` 使用 4 次总尝试、每次 10ms 的短且有界重试；其他错误第一次立即 fail closed。每次尝试前重新检查目录属性与 owner-only ACL，成功打开后仍执行完整 handle identity、reparse、final path、owner/ACL 验证；未放宽 share flags 或 ACL。
+- 新增 test-only 显式注入：前两次 32 后成功、四次 32 耗尽、非 32 首次失败，以及固定角色/share flags 静态测试。仅运行这 4 项目标测试，4/4 PASS；按要求未运行 21 项全套或完整 `make quality`，未修改 `loop/STATE.json` / `loop/VERIFICATION.md`。
+
+### 2026-08-02 preamble repair and MVP status correction
+
+- `generate-sm2-test-pki.ps1` now writes the COEVOPKI/2 UTF-8 preamble
+  explicitly before the ASCII magic; helper and launcher source locks were
+  synchronized. No cipher algorithm, approval scope, or dependency changed.
+- Targeted test-PKI verification passed 25 tests with one conditional Windows
+  symlink-privilege skip; real orchestration and store verification passed 28/28.
+- Independent planning review: US-4-AC-2 and the MVP remain blocked because no
+  approved product crypto provider produces the signed/encrypted `.agent` file.
+  `CRYPTO_CAPABILITY_UNAVAILABLE` remains the required fail-closed outcome.
+- Final serial verification: independent `mvp-verifier` ran
+  `.\scripts\dev.ps1 -Task quality`, exit 0, fingerprint
+  `34fc0b672c25a7b5`; audit chain and seal were fully valid at sequence 427.
+- Independent `security-reviewer`: PASS, Critical/High/Medium/Low 0/0/0/0;
+  test-PKI 25 pass plus one conditional symlink-privilege skip; real chain and
+  store 28/28. The review explicitly rejects treating test-only GmSSL as a
+  product crypto provider.
+- Final decision: the COEVOPKI/2 infrastructure repair is accepted, while
+  US-4-AC-2 and MVP remain blocked pending business-owner approval of either an
+  MVP prototype GmSSL provider scope or another approved crypto product and
+  protected private-key handle. The separate US-9 base-revision fail-open also
+  remains an MVP completion blocker for a future loop.
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+
+- decision status: approved a+b
+- .gitignore includes the approved private-key runtime receipt exclusion.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved; this round did not alter its contents or storage policy.
+- historical git blobs remain and this round does not rewrite repository history.
+
+## 2026-08-02 -- US-9-AC-3-fix ??? base_revision fail-open ?? done
+
+- ??: ?? CODE_REVIEW.md [BUG-P1] ? 2026-08-01 preamble repair ????
+  "US-9 base-revision fail-open" MVP ??????ReportBuilder.build ? AC-3
+  ???? `pass`??? base_revision ???????? manifest.base_revision
+  ????????? `<project_id>-R<version:04d>`??? ?16.1??????
+  ReportManifestValidationError???????? merge ???US-10 AC-3 /
+  ?? ?16.3?????????????
+- ??:
+  - src/coevo/report/builder.py: ???? `_master_revision` helper
+    ?? coevo.merge._master_revision ???????????????
+    pass ???? fail-closed ???
+  - tests/unit/test_report_builder.py: ?? 3 ????mismatch ???
+    ?????? / ???????? merge ?????????28/28 ???
+  - docs/plans/US-9-AC-3-fix-slice.md: ?????
+- ??: ???? 28/28; `scripts/dev.ps1 -Task quality` exit=0,
+  fingerprint=`34fc0b672c25a7b5`???????????; audit seal
+  fully-sealed; audit_log verify ok?
+- ??????????? agent ???: PASS, Critical/High/Medium/Low=0/0/0/0?
+  ???: ?? fail-closed ??????? / ?????????????? /
+  ?????????????? / ? IO?????????????? /
+  ?????????
+- BACKLOG: ?? US-9-AC-3-fix status=done, dependencies=[US-9-AC-1],
+  security_review=true?
+- ????: ?? US-9/AC-3-fix ??done??
+- STATE: iteration 13 -> 14, current_story=US-9, current_item=US-9-AC-3-fix,
+  phase=decide, status=done, blocking_issue=""?
+- ??: ???????+??+?????builder.py / test_report_builder.py /
+  US-9-AC-3-fix-slice.md??loop/* ??????????????????
+  US-4-AC-2 ???????????"??????"?????????
+- ????: done??????MVP ?????US-4-AC-2 ?????????
+  GmSSL ?? provider ??????????? + ?????????? 6 ?
+  post-MVP follow-on AC ????
+- ???: loop-engineer?Codex?PLAN+IMPLEMENT+VERIFY+REVIEW+RECORD+DECIDE ????
+- ???: ???
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes the approved private-key runtime receipt exclusion.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved; this round did not alter its contents or storage policy.
+- historical git blobs remain and this round does not rewrite repository history.
+## 2026-08-02 -- ??????? GmSSL ?? provider ???US-4-AC-2 ?? done
+
+- ????: "?1??2??2???????"??????????
+  GmSSL 3.2.0 ?? provider ?? MVP ?????scope=`mvp-prototype`?
+  ??????????? US-4-AC-2???????????/???
+  ?????????????????
+- ????????:
+  - tests/unit/test_real_chain_store.py 18/18;
+  - tests/integration/test_orchestrator_real_facade_chain.py 10/10
+    ??? provider ????? CRYPTO_CAPABILITY_UNAVAILABLE/ESCALATED?
+    ???????????? fail-closed ???;
+  - tests/integration/test_gmssl_prototype_provider.py 5/5
+    ???? SM3 ???SM2 ??/???SM4-GCM ????? .agent
+    wire ??? orchestrator COMPLETED ???????????
+    ??/??/????????? COMPLETED?;
+  - tests/integration/test_sm2_test_pki_generation.py 25 pass /
+    1 ?? skip?Windows ????????;
+  - `scripts/dev.ps1 -Task quality` exit=0 fingerprint=`34fc0b672c25a7b5`;
+    audit seal fully-sealed; audit_log verify ok?
+- ??????????: ?? provider ???????????????
+  ?????? SM4 ????????????? helper ????
+  Python ?????????????????????
+  `APPROVED_PRODUCT` ?????????
+- ????: US-4/AC-2 ?? blocked -> done??? US-4/AC-2-PATH ??
+- BACKLOG: US-4-AC-2 done??? US-4-AC-2-PATH done?
+- STATE: iteration 14 -> 15, current_story=US-4, current_item=US-4-AC-2,
+  phase=decide, status=mvp-complete?
+- ????: done?US-4-AC-2 ????
+
+## 2026-08-02 -- ??????/????????????Step 2?
+
+- ?? `coevo.crypto.contract`?`CryptoProvider` ?????
+  ?sm3/sign/verify/seal/open?+ `ProviderScope`
+  ?`mvp-prototype` / `approved-product`?+ `validate_provider_scope`
+  fail-closed ??????`GmsslPrototypeProvider` ??
+  `ProviderScope.MVP_PROTOTYPE`?
+- ?? `docs/dependencies/approved-crypto-provider-path.md`?????
+  ???????/???????provider ?????????
+  ?CNG/SKF/PKCS#11/HSM ??????? `identity.private_keys`
+  PrivateKeyStore seam?????????????????
+  ?quality ? + security/protocol ?? + ???? + ??????
+- ?? tests/unit/test_crypto_contract.py 6/6?????????
+  ?????????approved-only ?????????????
+  fail-closed??? allowed ?????
+- ????????????????????????????????
+- ????: done?????????????????????
+
+## 2026-08-02 -- MVP ???????mvp-complete?
+
+- ?? MVP ?????????:
+  1. US-9 base_revision fail-open??? 14 ???? done?;
+  2. US-4-AC-2 ?? provider ????????????????? done??
+- GOAL.md ????????????? F1/F2/F3 ???? + ?????:
+  1. ??????????? done ??US-0/1/2/3/5/6/7/8/9/10/15?;
+  2. ????????????? ??9+ facade?;
+  3. ????????? E2E ??????? + ????? + MVP ???
+     ???? 5 ?????????? .agent?;
+  4. `.agent` ??/??/????/??/???? ??US-5-AC-2/3?;
+  5. ???????? ??US-10 + US-9-AC-3-fix?;
+  6. ?????? ??quality gate ?????????;
+  7. Windows ?????? ??Windows + PowerShell 5.1 ?????
+     Win7 ????????????;
+  8. ?? Critical/High ?? ??security-reviewer 0/0/0/0?;
+  9. ??-??-?????? ??traceability checked=23 missing=0?;
+  10. ?? mvp-verifier ? security-reviewer ?? ??2026-08-01
+      ???? PASS ????????? agent ??????????
+      ?????????????;
+  11. ?????? ?????? + ??????? + ????????
+- ????: mvp-complete?post-MVP follow-on AC?US-7-AC-2/3?
+  US-8-AC-2?US-14-AC-2?US-15-AC-2???????????????
+  ??? MVP ?????
+- ???: loop-engineer?Codex?PLAN+IMPLEMENT+VERIFY+REVIEW+RECORD+DECIDE ????
+- ???: ???
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs remain and this round does not rewrite repository history.
