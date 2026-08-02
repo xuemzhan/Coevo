@@ -700,3 +700,18 @@ def _event_to_export_row(event: AuditEvent) -> dict:
         "fingerprint": event.fingerprint,
         "record_hash": event.record_hash,
     }
+
+# ---------------------------------------------------------------------------
+# Real-time audit stream (US-15-AC-2)
+# ---------------------------------------------------------------------------
+#
+# Imported last: stream.py imports the AuditEvent types defined above.
+
+from .stream import (  # noqa: E402
+    AuditStreamError,
+    AuditStreamHub,
+    AuditSubscription,
+    DEFAULT_MAX_QUEUED,
+    DEFAULT_MAX_SUBSCRIBERS,
+    DEFAULT_HISTORY_LEN,
+)
