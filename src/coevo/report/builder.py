@@ -160,15 +160,15 @@ class ReportBuilder:
                 f"manifest.project_id {manifest.project_id!r} does not match "
                 f"baseline.project_id {baseline.project_id!r} (AC-3)"
             )
-        if manifest.base_revision != baseline.process_flow_ref[0]:
-            # baseline.process_flow_ref is (unit_id, version);
-            # for US-9 the "base_revision" identifier is the
-            # baseline's project_id or its version. We accept the
-            # baseline's process_flow_ref[0] (the unit_id) for
-            # protocol § 16.2 compatibility, with the per-baseline
-            # version surfaced separately.
-            pass  # accept — the report's base_revision is itself
-            # the canonical id (typically "{project_id}-R{version}").
+        expected_base_revision = _master_revision(
+            baseline.project_id, baseline.version
+        )
+        if manifest.base_revision != expected_base_revision:
+            raise ReportManifestValidationError(
+                f"manifest.base_revision {manifest.base_revision!r} does not "
+                f"match baseline master revision {expected_base_revision!r} "
+                f"(AC-3, fail-closed)"
+            )
         # AC-4: sequence_no is taken from the monotonic counter.
         next_seq = sequence.peek()
         if manifest.sequence_no != next_seq:
@@ -285,6 +285,21 @@ class ReportBuilder:
             "baseline_version": baseline_version,
             "filename": report.expected_filename(),
         }
+
+
+def _master_revision(project_id: str, version_number: int) -> str:
+    """Render a project master revision in the protocol 16.1 format.
+
+    ``<project_id>-R<NNNN>`` (zero-padded to 4 digits; the format
+    is a token rule, not a numerical invariant). Mirrors
+    :func:`coevo.merge._master_revision` so the sender-side AC-3
+    check uses the identical canonical identifier as the receiver.
+    """
+    if not isinstance(project_id, str) or not project_id:
+        raise ReportBuilderError("project_id must be a non-empty string")
+    if not isinstance(version_number, int) or version_number < 0:
+        raise ReportBuilderError("version_number must be a non-negative integer")
+    return f"{project_id}-R{version_number:04d}"
 
 
 def _one_year_after(iso_z: str) -> str:

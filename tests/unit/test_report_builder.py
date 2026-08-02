@@ -317,6 +317,46 @@ class TestReportBuilder(unittest.TestCase):
                 manifest=self.manifest, baseline=bad_baseline, sequence=self.sequence,
             )
 
+    def test_build_rejects_mismatched_base_revision(self):
+        # AC-3 fail-closed: a report that references a base_revision
+        # different from the baseline master revision must be rejected
+        # at generation time (previously this was a silent pass).
+        bad_manifest = _manifest(base_revision="PRJ001-R9999")
+        with self.assertRaises(ReportManifestValidationError):
+            self.builder.build(
+                manifest=bad_manifest, baseline=self.baseline, sequence=self.sequence,
+            )
+
+    def test_build_accepts_canonical_master_revision_for_baseline_version(self):
+        from dataclasses import replace
+        advanced = replace(self.baseline, version=3)
+        ok_manifest = _manifest(base_revision="PRJ001-R0003")
+        result = self.builder.build(
+            manifest=ok_manifest, baseline=advanced, sequence=self.sequence,
+        )
+        self.assertIsInstance(result, ReportPackage)
+        with self.assertRaises(ReportManifestValidationError):
+            self.builder.build(
+                manifest=_manifest(base_revision="PRJ001-R0002"),
+                baseline=advanced,
+                sequence=self.sequence,
+            )
+
+    def test_base_revision_format_matches_merge_master_revision(self):
+        # Lock the sender-side canonical format to the receiver-side
+        # merge helper so both ends render identical master revisions.
+        from dataclasses import replace
+        from src.coevo.merge import _master_revision as merge_master_revision
+        for version in (1, 7, 123):
+            baseline = replace(self.baseline, version=version)
+            canonical = merge_master_revision("PRJ001", version)
+            result = self.builder.build(
+                manifest=_manifest(base_revision=canonical),
+                baseline=baseline,
+                sequence=self.sequence,
+            )
+            self.assertIsInstance(result, ReportPackage)
+
     def test_build_rejects_mismatched_sequence_no(self):
         bad_manifest = _manifest(sequence_no=99)  # does not match sequence.peek() = 1
         with self.assertRaises(ReportManifestValidationError):
