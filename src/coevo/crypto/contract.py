@@ -94,3 +94,40 @@ def validate_provider_scope(
             f"allowed={[item.value for item in allowed]}"
         )
     return scope
+
+
+class ProviderRegistry:
+    """Named, scope-aware provider registry with fail-closed resolution."""
+
+    def __init__(self) -> None:
+        self._providers: dict[str, Any] = {}
+
+    def register(self, name: str, provider: Any) -> None:
+        if not isinstance(name, str) or not name:
+            raise TypeError("provider name must be a non-empty string")
+        if name in self._providers:
+            raise ValueError(f"provider {name!r} is already registered")
+        if not isinstance(provider, CryptoProvider):
+            raise TypeError("provider must satisfy the CryptoProvider contract")
+        declared_scope(provider)
+        self._providers[name] = provider
+
+    def resolve(self, name: str) -> Any:
+        try:
+            return self._providers[name]
+        except KeyError as exc:
+            raise KeyError(f"no crypto provider named {name!r}") from exc
+
+    def names(self) -> tuple[str, ...]:
+        return tuple(sorted(self._providers))
+
+    def require_approved(self, name: str) -> Any:
+        """Resolve and enforce the approved-product + key-handle policy."""
+        provider = self.resolve(name)
+        validate_provider_scope(provider, (ProviderScope.APPROVED_PRODUCT,))
+        if getattr(provider, "key_handle_backed", False) is not True:
+            raise ValueError(
+                "approved-product providers must be backed by a protected "
+                "non-exportable key handle"
+            )
+        return provider

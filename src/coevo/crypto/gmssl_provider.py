@@ -59,6 +59,7 @@ class GmsslPrototypeProvider:
 
     name = "gmssl-3.2.0-mvp-prototype"
     scope: Final[ProviderScope] = ProviderScope.MVP_PROTOTYPE
+    key_handle_backed: Final[bool] = False
 
     def __init__(self, repository_root: str | Path, *, timeout_seconds: float = 10.0) -> None:
         root = Path(repository_root).resolve(strict=True)
