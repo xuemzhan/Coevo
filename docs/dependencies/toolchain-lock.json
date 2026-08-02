@@ -4,6 +4,121 @@
   "approved_by": "repository owner",
   "runtime_downloads_allowed": false,
   "tools": {
+    "gmssl_test_pki": {
+      "name": "GmSSL",
+      "version": "3.2.0",
+      "scope": "test-only SM2 PKI prototype; not approved for production cryptography",
+      "source_repository": "https://github.com/guanzhi/GmSSL",
+      "release_url": "https://github.com/guanzhi/GmSSL/releases/tag/v3.2.0",
+      "release_metadata_evidence_path": "docs/dependencies/evidence/gmssl-v3.2.0-win64-release-asset.json",
+      "published_at": "2026-06-21T03:06:35Z",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/guanzhi/GmSSL/blob/v3.2.0/LICENSE",
+      "license_in_binary_archive": false,
+      "archive": {
+        "path": ".tools/GmSSL-3.2.0-win64.zip",
+        "asset_api_id": 453478095,
+        "entry_count": 76,
+        "size": 3768399,
+        "sha256": "d062923f09bfa74b06dbba74c4bda5e43a194d8aadec2ac82d723bbce0c5b7a5",
+        "digest_source": "GitHub release asset metadata and local verification"
+      },
+      "runtime": {
+        "root": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64",
+        "executable": {
+          "path": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.exe",
+          "size": 1626112,
+          "sha256": "d07cf6b3e56918d8b163d5ba8d21cf54c97eff0ce89aaa98711b7bd2535d48a7",
+          "authenticode_status": "NotSigned"
+        },
+        "library": {
+          "path": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.dll",
+          "size": 1665024,
+          "sha256": "9da9cc70507ce7a124b67cfc10c32a6c8c14f08caa6f50a19ecfa21c8f75deb0",
+          "authenticode_status": "NotSigned"
+        }
+      },
+      "helper": {
+        "name": "Coevo isolated GmSSL test-PKI helper",
+        "protocol": "COEVOPKI/2",
+        "source": "scripts/gmssl-test-pki-helper.cs",
+        "source_size": 61783,
+        "source_sha256": "09c0decf04d1455ffc0fbcf97ce3bac40d963f4f00d18e36f4586060a2d6f13a",
+        "launcher": {
+          "path": "scripts/generate-sm2-test-pki.ps1",
+          "size": 10721,
+          "sha256": "4ec02e2269683774e699691d03a1287df9ca7737bc8fb15f365effd2dcb0978d"
+        },
+        "compile_command": "csc.exe /nologo /noconfig /nostdlib+ /reference:<locked-mscorlib> /reference:<locked-System> /target:exe /platform:x64 /optimize+ /debug- /checked+ /out:<create-new-runtime-helper> <locked-source>",
+        "build_output_is_deterministic": false,
+        "build_output_policy": "Compile into a fresh random-name path below locked .tools/runtime, pin the resulting file handle through execution, then delete it; never trust or retain a precompiled helper binary.",
+        "compiler_lock": {
+          "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+          "size": 2569832,
+          "sha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+          "authenticode_status": "Valid",
+          "signer_subject": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+          "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+        },
+        "framework_references": [
+          {
+            "name": "mscorlib.dll",
+            "size": 5445432,
+            "sha256": "a8cae3d326f7d973ca79cba849939d4837ad18d507ef6d5f6ebab802b7fb157a",
+            "authenticode_status": "Valid",
+            "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+          },
+          {
+            "name": "System.dll",
+            "size": 3545264,
+            "sha256": "2b3c17c6208a0b4b6beb94e1a066f99ba06cdb2ea919479e99d47e8c6d96dc71",
+            "authenticode_status": "Valid",
+            "signer_thumbprint": "DC91E564D5BC1E3A8E02D6A8508682ABEA8A2443"
+          }
+        ],
+        "network_access": false,
+        "secret_transport": "No command-line or environment secrets; fixed one-shot stdin request contains only action, profile, and nonce; the fixed response contains only action, status, nonce, and receipt SHA-256. Passwords and all PKI blobs remain inside the helper, which owns filesystem publication and same-nonce recovery."
+      },
+      "network_access": false,
+      "risk_note": "The official Win64 asset is not Authenticode-signed. It is accepted only by exact official-asset SHA-256 pinning for the MVP prototype and isolated test PKI generation; it is not evidence of production cryptographic compliance."
+    },
+    "gmssl_prototype_provider": {
+      "name": "GmSSL MVP prototype provider",
+      "version": "3.2.0",
+      "scope": "MVP prototype SM3, SM2 signing/key transport and SM4-GCM; not approved for production cryptography",
+      "runtime": {
+        "library": {
+          "path": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.dll",
+          "size": 1665024,
+          "sha256": "9da9cc70507ce7a124b67cfc10c32a6c8c14f08caa6f50a19ecfa21c8f75deb0",
+          "authenticode_status": "NotSigned"
+        }
+      },
+      "helper": {
+        "protocol": "COEVOCRYPTO/1",
+        "source": "scripts/gmssl-crypto-helper.cs",
+        "source_size": 17161,
+        "source_sha256": "71d32ecab3f91a78cd2d4666fba366a488bad80758c0a4d93f4e6ea8edb48b7a",
+        "launcher": {
+          "path": "scripts/invoke-gmssl-crypto.ps1",
+          "size": 5753,
+          "sha256": "2104af797795f79584f52c9a279fefd811046adeaff0c59848d4effa5c101cc1"
+        },
+        "compiler_lock": {
+          "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+          "size": 2569832,
+          "sha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+          "authenticode_status": "Valid",
+          "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+        },
+        "framework_references": [
+          {"name": "mscorlib.dll", "size": 5445432, "sha256": "a8cae3d326f7d973ca79cba849939d4837ad18d507ef6d5f6ebab802b7fb157a"},
+          {"name": "System.dll", "size": 3545264, "sha256": "2b3c17c6208a0b4b6beb94e1a066f99ba06cdb2ea919479e99d47e8c6d96dc71"}
+        ],
+        "secret_transport": "No secrets in argv, environment, stdout, stderr, logs, or Python objects; encrypted key files and DPAPI password blobs are opened by the one-shot helper, and unwrapped SM4 keys remain helper-side.",
+        "network_access": false
+      }
+    },
     "opencode": {
       "name": "OpenCode CLI",
       "version": "1.18.2",

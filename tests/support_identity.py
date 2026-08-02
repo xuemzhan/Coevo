@@ -6,7 +6,14 @@ import os
 import uuid
 from pathlib import Path
 
-from coevo.identity.audit_anchor import AuditAnchorError, canonical
+if __name__.startswith("tests."):
+    # Unit/integration modules under the repository package import production
+    # code through ``src.coevo``.
+    from src.coevo.identity.audit_anchor import AuditAnchorError, canonical
+else:
+    # Security/e2e discovery adds ``src`` to sys.path and imports the installed
+    # package shape directly as ``coevo``.
+    from coevo.identity.audit_anchor import AuditAnchorError, canonical
 
 ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATE_DER = (ROOT / "loop" / "audit-signing-public.cer").read_bytes()

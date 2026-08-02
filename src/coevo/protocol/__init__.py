@@ -114,8 +114,11 @@ from .replay_detector import (
 )
 from .package_builder import (
     BuiltPackage,
+    OpenedPackage,
+    build_encrypted_package,
     build_signed_payload,
     build_unsigned_package,
+    open_encrypted_package,
     parse_package_bytes,
 )
 from .import_transaction import (
@@ -164,6 +167,7 @@ __all__ = [
     "AgentPackageVersionError",
     "AtomicImporter",
     "BuiltPackage",
+    "OpenedPackage",
     "DEFAULT_EMPTY_STORE",
     "ENVELOPE_MAX_BYTES",
     "EnvelopeHeader",
@@ -200,6 +204,7 @@ __all__ = [
     "KeyTransportBlock",
     "assemble_payload_block",
     "build_envelope_template",
+    "build_encrypted_package",
     "build_key_transport_block",
     "build_signature_record",
     "build_signed_payload",
@@ -222,6 +227,7 @@ __all__ = [
     "generate_payload_nonce",
     "generate_session_key",
     "parse_package_bytes",
+    "open_encrypted_package",
     "parse_package_header",
     "require_supported_key_algorithm",
     "sign_manifest",

@@ -13,3 +13,4 @@ loop/*.tmp
 loop/*.bak
 loop/*.lock
 loop/private-key-handles-*.json
+loop/runtime/

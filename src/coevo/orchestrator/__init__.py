@@ -44,6 +44,25 @@ from dataclasses import dataclass, field
 
 from src.coevo.workspace.models import WorkspaceEntry
 
+from ._real_chain import (
+    REAL_EXECUTION_MODE,
+    PackagePreview,
+    RealChainExecutor,
+    RealChainOutcome,
+    confirm_real_chain,
+    dispatch_real_chain,
+    recover_real_chain,
+    resume_real_chain,
+)
+from .real_chain_store import (
+    RealChainAuditEntry,
+    RealChainStore,
+    RealChainStoreError,
+    RealChainStoreRecoveryRequired,
+    canonical_digest,
+    canonical_json_bytes,
+)
+
 
 # ---------------------------------------------------------------------------
 # Helpers / regex
@@ -150,6 +169,7 @@ class OrchestrationOutcome(enum.Enum):
 
     COMPLETED = "completed"
     HELD_AT_CONFIRM = "held_at_confirm"
+    CONFIRMED_PENDING_PACKAGE = "confirmed_pending_package"
     ESCALATED = "escalated"
     FAILED = "failed"
 
@@ -431,6 +451,7 @@ class OrchestrationReport:
     outcome: OrchestrationOutcome
     trace: tuple[OrchestrationTrace, ...]
     completed_at: str
+    execution_mode: str = ""
 
     def __post_init__(self) -> None:
         for label, value in (
@@ -457,6 +478,8 @@ class OrchestrationReport:
             raise OrchestratorValidationError(
                 f"completed_at must be ISO-8601 UTC 'Z'; got {self.completed_at!r}"
             )
+        if not isinstance(self.execution_mode, str):
+            raise OrchestratorValidationError("execution_mode must be a string")
 
 
 # ---------------------------------------------------------------------------
@@ -715,6 +738,12 @@ class Orchestrator:
             raise OrchestratorValidationError(
                 "report must be an OrchestrationReport instance"
             )
+        if report.execution_mode == REAL_EXECUTION_MODE or any(
+            trace.trace_id.endswith(".real") for trace in report.trace
+        ):
+            raise OrchestratorConflictError(
+                "protected real-chain reports require confirm_real_chain"
+            )
         if not isinstance(confirmed_by, str) or not _SAFE_ID.match(confirmed_by):
             raise OrchestratorValidationError(
                 f"confirmed_by must be safe-id; got {confirmed_by!r}"
@@ -760,6 +789,97 @@ class Orchestrator:
         )
 
     @staticmethod
+    def dispatch_event_with_real_facades(
+        registry: AgentRegistry,
+        chain: OrchestrationChain,
+        event: OrchestrationEvent,
+        *,
+        workspace: WorkspaceEntry,
+        executor: RealChainExecutor,
+        project_input: "Mapping[str, Any]",
+        store: RealChainStore,
+        now: str,
+    ) -> RealChainOutcome:
+        """Run real US-1/2/3 facades and stop at the human gate.
+
+        This phase-one API deliberately cannot invoke US-5.  Package creation
+        requires a separate, future explicit resume API.
+        """
+        return dispatch_real_chain(
+            registry,
+            chain,
+            event,
+            workspace=workspace,
+            executor=executor,
+            project_input=project_input,
+            store=store,
+            now=now,
+        )
+
+    @staticmethod
+    def confirm_real_chain(
+        held_outcome: RealChainOutcome,
+        *,
+        preview: PackagePreview,
+        actor: "Actor",
+        authorizer: "Authorizer",
+        store: RealChainStore,
+        now: str,
+    ) -> RealChainOutcome:
+        """Confirm a protected real-chain hold without building a package."""
+        return confirm_real_chain(
+            held_outcome, preview=preview, actor=actor,
+            authorizer=authorizer, store=store, now=now
+        )
+
+    @staticmethod
+    def resume_real_chain(
+        confirmed_outcome: RealChainOutcome,
+        *,
+        registry: AgentRegistry,
+        chain: OrchestrationChain,
+        event: OrchestrationEvent,
+        workspace: WorkspaceEntry,
+        executor: RealChainExecutor,
+        store: RealChainStore,
+        now: str,
+        crypto_provider: object | None = None,
+        sender_handle: object | None = None,
+        recipient_handle: object | None = None,
+    ) -> RealChainOutcome:
+        """Resume a stored confirmation and call US-5 at most once."""
+        _validate_registry = registry  # force public API type validation below
+        if not isinstance(_validate_registry, AgentRegistry):
+            raise OrchestratorValidationError("registry must be an AgentRegistry")
+        return resume_real_chain(
+            confirmed_outcome,
+            registry=registry,
+            chain=chain,
+            event=event,
+            workspace=workspace,
+            executor=executor,
+            store=store,
+            now=now,
+            crypto_provider=crypto_provider,
+            sender_handle=sender_handle,
+            recipient_handle=recipient_handle,
+        )
+
+    @staticmethod
+    def recover_real_chain(
+        event_id: str,
+        *,
+        actor: "Actor",
+        authorizer: "Authorizer",
+        store: RealChainStore,
+        now: str,
+    ) -> object:
+        """Authorize and manually escalate an interrupted real chain."""
+        return recover_real_chain(
+            event_id, actor=actor, authorizer=authorizer, store=store, now=now
+        )
+
+    @staticmethod
     def to_audit_record(report: OrchestrationReport) -> dict:
         """AC-7: project the report into an audit row.
 
@@ -798,6 +918,7 @@ class Orchestrator:
             "step_count": len(report.trace),
             "steps": steps_summary,
             "completed_at": report.completed_at,
+            "execution_mode": report.execution_mode,
         }
 
 

@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "repository": "guanzhi/GmSSL",
+  "release_id": 342445905,
+  "immutable": false,
+  "tag_name": "v3.2.0",
+  "published_at": "2026-06-21T03:06:35Z",
+  "asset": {
+    "name": "GmSSL-3.2.0-win64.zip",
+    "asset_id": 453478095,
+    "size": 3768399,
+    "sha256": "d062923f09bfa74b06dbba74c4bda5e43a194d8aadec2ac82d723bbce0c5b7a5",
+    "uploader": "github-actions[bot]",
+    "updated_at": "2026-06-21T05:01:31Z"
+  },
+  "local_runtime": {
+    "gmssl_exe_sha256": "d07cf6b3e56918d8b163d5ba8d21cf54c97eff0ce89aaa98711b7bd2535d48a7",
+    "gmssl_dll_sha256": "9da9cc70507ce7a124b67cfc10c32a6c8c14f08caa6f50a19ecfa21c8f75deb0",
+    "authenticode_status": "NotSigned"
+  },
+  "scope": "test-only isolated SM2 PKI generation",
+  "risk_note": "The release is mutable and the Win64 binaries are not Authenticode-signed. Exact archive and runtime hashes are mandatory; this artifact must not be treated as an approved production cryptographic product."
+}

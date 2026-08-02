@@ -35,6 +35,7 @@ Non-goals
 from __future__ import annotations
 
 import base64
+import binascii
 import datetime as dt
 import hashlib
 import json
@@ -143,6 +144,16 @@ def compute_sm3_digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def compute_real_sm3_digest(data: bytes, *, provider: Any) -> str:
+    """Compute SM3 through an explicitly injected approved prototype provider."""
+    if not isinstance(data, bytes) or not callable(getattr(provider, "sm3", None)):
+        raise AgentPackageCryptoUnavailableError("an SM3 provider is required")
+    digest = provider.sm3(data)
+    if not isinstance(digest, bytes) or len(digest) != SM3_DIGEST_SIZE:
+        raise AgentPackageCryptoUnavailableError("SM3 provider returned an invalid digest")
+    return digest.hex()
+
+
 def _canonicalise_object(value: Any, *, path: str = "$") -> Any:
     """Apply 协议 § 10 canonicalisation recursively.
 
@@ -243,6 +254,8 @@ def sign_manifest(
     *,
     signer_cert_id: str,
     signed_at: str | None = None,
+    provider: Any | None = None,
+    signer_handle: Any | None = None,
 ) -> SignatureRecord:
     """Sign the manifest with the sender's SM2 private key.
 
@@ -254,9 +267,17 @@ def sign_manifest(
     """
     if not isinstance(manifest, Mapping):
         raise AgentPackageCanonicalizationError("manifest must be a mapping")
-    record = build_signature_record(
-        manifest, signer_cert_id=signer_cert_id, signed_at=signed_at
-    )
+    if provider is not None and callable(getattr(provider, "sign", None)):
+        canonical = canonical_manifest_bytes(manifest)
+        digest = compute_real_sm3_digest(canonical, provider=provider)
+        signature = provider.sign(signer_handle, canonical)
+        if not isinstance(signature, bytes) or not signature:
+            raise AgentPackageCryptoUnavailableError("SM2 provider returned an empty signature")
+        return SignatureRecord(
+            SIGNATURE_ALGORITHM, signer_cert_id, SIGNED_OBJECT_NAME, digest,
+            base64.b64encode(signature).decode("ascii"), signed_at or _now_utc_iso_z(),
+        )
+    record = build_signature_record(manifest, signer_cert_id=signer_cert_id, signed_at=signed_at)
     raise AgentPackageCryptoUnavailableError(
         "SM2 signature requires an approved SM2 product; "
         "AGENTS.md §6 forbids silent fallback. Wire encoding is ready; "
@@ -269,6 +290,8 @@ def verify_signature(
     *,
     manifest: Mapping[str, Any],
     expected_signer_cert_id: str | None = None,
+    provider: Any | None = None,
+    signer_handle: Any | None = None,
 ) -> None:
     """Verify a SignatureRecord against the canonical manifest.
 
@@ -288,7 +311,10 @@ def verify_signature(
             "expected_signer_cert_id must be a non-empty string when provided"
         )
     canonical = canonical_manifest_bytes(manifest)
-    digest_hex = compute_sm3_digest(canonical)
+    digest_hex = (
+        compute_real_sm3_digest(canonical, provider=provider)
+        if provider is not None else compute_sm3_digest(canonical)
+    )
     if digest_hex != record.manifest_sm3:
         raise AgentPackageCryptoVerifyError(
             "manifest SM3 digest does not match signature record"
@@ -306,8 +332,14 @@ def verify_signature(
         raise AgentPackageCryptoVerifyError(
             "signature is empty; approved SM2 product has not signed this manifest"
         )
-    # If a future slice fills the signature, this is the branch that
-    # will run the SM2 verify call. Today it remains unreachable.
+    if provider is not None and callable(getattr(provider, "verify", None)):
+        try:
+            signature = base64.b64decode(record.signature, validate=True)
+        except (ValueError, binascii.Error) as exc:
+            raise AgentPackageCryptoVerifyError("signature is not canonical base64") from exc
+        if not provider.verify(signer_handle, canonical, signature):
+            raise AgentPackageCryptoVerifyError("SM2 signature verification failed")
+        return
     raise AgentPackageCryptoVerifyError(
         "SM2 signature verification requires an approved SM2 product; "
         "AGENTS.md §6 forbids silent fallback."

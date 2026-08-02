@@ -35,7 +35,12 @@ Non-goals
 from __future__ import annotations
 
 import dataclasses
+import base64
+import binascii
+import json
+import os
 from dataclasses import dataclass
+from typing import Any, Mapping
 
 from .agent_package import (
     AgentPackageError,
@@ -56,6 +61,7 @@ from .agent_payload import (
     PAYLOAD_NONCE_SIZE,
     PAYLOAD_TAG_SIZE,
     decode_payload_header,
+    encode_payload_header,
 )
 from .sm2_keywrap import (
     AgentPackageCryptoUnavailableError as KeywrapCryptoUnavailable,
@@ -64,6 +70,13 @@ from .sm2_keywrap import (
     encode_key_transport_bytes,
 )
 from .sm2_sign import SignatureRecord
+
+
+@dataclass(frozen=True)
+class OpenedPackage:
+    manifest: Mapping[str, Any]
+    content: bytes
+    signature: SignatureRecord
 
 
 @dataclass(frozen=True)
@@ -295,3 +308,105 @@ def build_signed_payload(
     raise AgentPackageCryptoUnavailableError(
         "sign_manifest is awaiting an approved SM2 product"
     )
+
+
+def build_encrypted_package(
+    *, envelope: EnvelopeHeader, manifest: Mapping[str, Any], content: bytes,
+    provider: Any, sender_handle: Any, recipient_handle: Any,
+    signed_at: str | None = None,
+) -> BuiltPackage:
+    """Build a real signed/encrypted package with an explicitly injected provider."""
+    from .sm2_keywrap import build_key_transport_block
+    from .sm2_sign import sign_manifest
+    if not isinstance(content, bytes):
+        raise AgentPackageError("content must be bytes")
+    if (getattr(sender_handle, "certificate_id", None) != envelope.sender_cert_id
+            or getattr(recipient_handle, "certificate_id", None) != envelope.recipient_cert_id):
+        raise AgentPackageError("cryptographic handles do not match envelope certificates")
+    signature = sign_manifest(
+        manifest, signer_cert_id=envelope.sender_cert_id, signed_at=signed_at,
+        provider=provider, signer_handle=sender_handle,
+    )
+    inner = json.dumps(
+        {
+            "content": base64.b64encode(content).decode("ascii"),
+            "manifest.json": manifest,
+            "sender.sig": signature.to_mapping(),
+        },
+        ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")
+    nonce = os.urandom(PAYLOAD_NONCE_SIZE)
+    envelope = dataclasses.replace(
+        envelope,
+        nonce=base64.b64encode(nonce).decode("ascii"),
+        payload_length=PAYLOAD_HEADER_SIZE + PAYLOAD_NONCE_SIZE + len(inner) + PAYLOAD_TAG_SIZE,
+    )
+    aad = encode_envelope(envelope)
+    sealed = provider.seal(recipient_handle, inner, associated_data=aad, nonce=nonce)
+    key_block = build_key_transport_block(
+        recipient_cert_id=envelope.recipient_cert_id,
+        wrapped_key_b64=base64.b64encode(sealed.wrapped_key).decode("ascii"),
+        # GmSSL's standard SM2 ciphertext carries C1 (the ephemeral public
+        # point) inside wrapped_key, so this compatibility field is empty.
+        ephemeral_public_key_b64="",
+    )
+    payload = PayloadBlock(
+        header=encode_payload_header(),
+        nonce=sealed.nonce, ciphertext=sealed.ciphertext, tag=sealed.tag,
+    )
+    return BuiltPackage(
+        FixedHeader(PROTOCOL_MAJOR, PROTOCOL_MINOR, 0, 0, 0,
+                    AgentPackageFlags.KEY_BLOCK_PRESENT | AgentPackageFlags.PAYLOAD_PRESENT),
+        envelope, key_block, payload, signature,
+    )
+
+
+def open_encrypted_package(
+    package: BuiltPackage, *, provider: Any, recipient_handle: Any,
+    sender_handle: Any,
+) -> OpenedPackage:
+    """Decrypt, strictly parse, digest-check and verify the inner payload."""
+    from src.coevo.crypto import SealedPayload
+    from .sm2_sign import decode_signature_record, verify_signature
+    if not isinstance(package, BuiltPackage):
+        raise AgentPackageError("package must be BuiltPackage")
+    if package.key_block.recipient_cert_id != package.envelope.recipient_cert_id:
+        raise AgentPackageError("key block recipient does not match envelope")
+    if (getattr(recipient_handle, "certificate_id", None) != package.envelope.recipient_cert_id
+            or getattr(sender_handle, "certificate_id", None) != package.envelope.sender_cert_id):
+        raise AgentPackageError("cryptographic handles do not match package certificates")
+    try:
+        wrapped = base64.b64decode(package.key_block.wrapped_key, validate=True)
+    except (ValueError, binascii.Error) as exc:
+        raise AgentPackageError("wrapped key is not canonical base64") from exc
+    sealed = SealedPayload(
+        wrapped, package.payload_block.nonce,
+        package.payload_block.ciphertext, package.payload_block.tag,
+    )
+    plaintext = provider.open(
+        recipient_handle, sealed, associated_data=encode_envelope(package.envelope)
+    )
+    def unique(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise AgentPackageError("inner payload contains duplicate JSON keys")
+            result[key] = value
+        return result
+    try:
+        inner = json.loads(plaintext.decode("utf-8"), object_pairs_hook=unique)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise AgentPackageError("inner payload is not valid canonical JSON") from exc
+    if not isinstance(inner, dict) or set(inner) != {"content", "manifest.json", "sender.sig"}:
+        raise AgentPackageError("inner payload field set is invalid")
+    signature = decode_signature_record(inner["sender.sig"])
+    verify_signature(
+        signature, manifest=inner["manifest.json"],
+        expected_signer_cert_id=package.envelope.sender_cert_id,
+        provider=provider, signer_handle=sender_handle,
+    )
+    try:
+        content = base64.b64decode(inner["content"], validate=True)
+    except (ValueError, binascii.Error, TypeError) as exc:
+        raise AgentPackageError("inner content is not canonical base64") from exc
+    return OpenedPackage(inner["manifest.json"], content, signature)
