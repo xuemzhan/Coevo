@@ -31,6 +31,7 @@ from . import (
     AuditEventValidationError,
     AuditGovernanceError,
 )
+from .stream_store import AuditStreamStore, AuditStreamStoreError
 
 
 _SAFE_ID: Final[re.Pattern[str]] = re.compile(
@@ -133,6 +134,8 @@ class AuditStreamHub:
         *,
         max_subscribers: int = DEFAULT_MAX_SUBSCRIBERS,
         history_len: int = DEFAULT_HISTORY_LEN,
+        store: AuditStreamStore | None = None,
+        authorizer: Any | None = None,
     ) -> None:
         if not isinstance(max_subscribers, int) or max_subscribers < 1:
             raise AuditStreamError("max_subscribers must be a positive integer")
@@ -143,6 +146,8 @@ class AuditStreamHub:
         self._subscriptions: dict[str, AuditSubscription] = {}
         self._history: deque[AuditEvent] = deque(maxlen=history_len)
         self._event_count = 0
+        self._store = store
+        self._authorizer = authorizer
 
     @property
     def subscriber_count(self) -> int:
@@ -161,10 +166,20 @@ class AuditStreamHub:
         *,
         event_filter: Callable[[AuditEvent], bool] | None = None,
         max_queued: int = DEFAULT_MAX_QUEUED,
+        permission: str = "audit:subscribe",
+        replay: bool = False,
     ) -> AuditSubscription:
         """Register a subscriber; returns a handle to unsubscribe/drain."""
         if not isinstance(actor, str) or not _SAFE_ID.match(actor):
             raise AuditEventValidationError("actor must be a safe-id")
+        if self._authorizer is not None:
+            is_allowed = getattr(self._authorizer, "is_allowed", None)
+            if not callable(is_allowed):
+                raise AuditStreamError("authorizer must implement is_allowed")
+            if not is_allowed(actor, permission):
+                raise AuditStreamError(
+                    f"subscription denied: {actor!r} lacks {permission!r}"
+                )
         if not callable(callback):
             raise AuditEventValidationError("callback must be callable")
         if event_filter is not None and not callable(event_filter):
@@ -183,7 +198,11 @@ class AuditStreamHub:
                 self,
             )
             self._subscriptions[subscription.subscription_id] = subscription
-            return subscription
+        if replay and self._store is not None:
+            for event in self._store.events():
+                if subscription.matches(event):
+                    subscription.deliver(event)
+        return subscription
 
     def unsubscribe(self, subscription: AuditSubscription) -> None:
         """Deactivate and remove a subscription (idempotent)."""
@@ -200,6 +219,13 @@ class AuditStreamHub:
         """Deliver an event to every matching subscriber (fail-isolated)."""
         if not isinstance(event, AuditEvent):
             raise AuditEventValidationError("publish requires an AuditEvent")
+        if self._store is not None:
+            try:
+                self._store.append(event)
+            except AuditStreamStoreError as exc:
+                raise AuditStreamError(
+                    f"audit stream persistence failed ({exc})"
+                ) from exc
         with self._lock:
             subscribers = tuple(self._subscriptions.values())
             self._history.append(event)

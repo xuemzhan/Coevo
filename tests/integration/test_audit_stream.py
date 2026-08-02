@@ -2,15 +2,20 @@
 from __future__ import annotations
 
 import threading
+import tempfile
 import unittest
+from pathlib import Path
 
 from src.coevo.audit_governance import (
     AuditEvent,
     AuditEventResult,
     AuditEventSource,
     AuditEventValidationError,
+    AuditStreamError,
     AuditStreamHub,
+    AuditStreamStore,
 )
+from src.coevo.identity.service import StaticAuthorizer
 
 
 NOW = "2026-08-22T00:00:00Z"
@@ -116,6 +121,37 @@ class AuditStreamIntegrationTests(unittest.TestCase):
         hub = AuditStreamHub()
         with self.assertRaises(AuditEventValidationError):
             hub.subscribe("not safe", lambda event: None)
+
+    def test_subscription_requires_authorization(self):
+        authorizer = StaticAuthorizer({
+            "u.auditor": frozenset({"audit:subscribe"}),
+        })
+        hub = AuditStreamHub(authorizer=authorizer)
+        received: list[AuditEvent] = []
+        hub.subscribe("u.auditor", received.append)
+        with self.assertRaises(AuditStreamError):
+            hub.subscribe("u.other", received.append)
+
+    def test_persisted_stream_replays_across_hubs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "audit-stream.jsonl"
+            store = AuditStreamStore.create(path)
+            first = AuditStreamHub(store=store)
+            first.publish(
+                AuditEvent.from_audit_record(
+                    _record(action="package.export", result="ok"),
+                    source=AuditEventSource.STATE,
+                )
+            )
+            store.close()
+
+            reopened = AuditStreamStore.open(path)
+            second = AuditStreamHub(store=reopened)
+            replayed: list[AuditEvent] = []
+            second.subscribe("u.auditor", replayed.append, replay=True)
+            self.assertEqual(1, len(replayed))
+            self.assertEqual("package.export", replayed[0].action)
+            reopened.close()
 
 
 if __name__ == "__main__":

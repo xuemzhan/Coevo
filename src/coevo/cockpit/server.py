@@ -114,13 +114,21 @@ class CockpitSessionManager:
         *,
         timeout_sec: int = DEFAULT_SESSION_TIMEOUT_SEC,
         max_sessions: int = DEFAULT_MAX_SESSIONS,
+        max_session_age_sec: int | None = None,
     ) -> None:
         if not isinstance(timeout_sec, int) or timeout_sec <= 0:
             raise CockpitValidationError("session timeout_sec must be a positive integer")
         if not isinstance(max_sessions, int) or max_sessions < 1:
             raise CockpitValidationError("max_sessions must be a positive integer")
+        if max_session_age_sec is not None and (
+            not isinstance(max_session_age_sec, int) or max_session_age_sec <= 0
+        ):
+            raise CockpitValidationError(
+                "max_session_age_sec must be a positive integer or None"
+            )
         self._timeout_sec = timeout_sec
         self._max_sessions = max_sessions
+        self._max_session_age_sec = max_session_age_sec
         self._sessions: dict[str, tuple[str, str]] = {}
 
     def create(self, now: str | None = None) -> str:
@@ -145,6 +153,12 @@ class CockpitSessionManager:
         if entry is None:
             return False
         created_at, last_seen = entry
+        if (
+            self._max_session_age_sec is not None
+            and _iso_seconds(now) - _iso_seconds(created_at) > self._max_session_age_sec
+        ):
+            del self._sessions[digest]
+            return False
         if _iso_seconds(now) - _iso_seconds(last_seen) > self._timeout_sec:
             del self._sessions[digest]
             return False
@@ -156,6 +170,17 @@ class CockpitSessionManager:
         if not isinstance(token, str) or not token:
             return False
         return self._sessions.pop(self._digest(token), None) is not None
+
+    def rotate(self, token: str, now: str | None = None) -> str:
+        """Revoke an old token and issue a fresh one (token rotation)."""
+        if not isinstance(token, str) or not token:
+            raise CockpitValidationError("token must be a non-empty string")
+        now = now or now_utc_iso_z()
+        if not _ISO_UTC_Z.match(now):
+            raise CockpitValidationError("now must be ISO-8601 UTC Z")
+        if not self.revoke(token):
+            raise CockpitValidationError("token is not a valid session")
+        return self.create(now=now)
 
     @property
     def session_count(self) -> int:

@@ -85,6 +85,30 @@ class CockpitSessionManagerTests(unittest.TestCase):
         self.assertFalse(manager.validate(token, now=T0))
         self.assertEqual(0, manager.session_count)
 
+    def test_rotate_issues_fresh_token_and_revokes_old(self):
+        manager = CockpitSessionManager(timeout_sec=60)
+        old = manager.create(now=T0)
+        new = manager.rotate(old, now=T0)
+        self.assertNotEqual(old, new)
+        self.assertFalse(manager.validate(old, now=T0))
+        self.assertTrue(manager.validate(new, now=T0))
+        self.assertEqual(1, manager.session_count)
+
+    def test_rotate_unknown_token_is_rejected(self):
+        manager = CockpitSessionManager(timeout_sec=60)
+        with self.assertRaises(CockpitValidationError):
+            manager.rotate("unknown-token", now=T0)
+
+    def test_max_session_age_forces_rotation(self):
+        manager = CockpitSessionManager(
+            timeout_sec=600,
+            max_session_age_sec=60,
+        )
+        token = manager.create(now="2026-08-22T00:00:00Z")
+        self.assertTrue(manager.validate(token, now="2026-08-22T00:00:30Z"))
+        self.assertFalse(manager.validate(token, now="2026-08-22T00:01:30Z"))
+        self.assertEqual(0, manager.session_count)
+
     def test_inactivity_timeout_expires_session(self):
         manager = CockpitSessionManager(timeout_sec=1)
         token = manager.create(now="2026-08-22T00:00:00Z")

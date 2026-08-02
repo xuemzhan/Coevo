@@ -1,0 +1,209 @@
+"""US-15-AC-2 durable audit stream store (JSONL + hash chain, fail-closed).
+
+The real-time hub is in-memory; this store gives the stream a durable,
+append-only journal so late subscribers can replay the event history:
+
+* explicit ``create`` / ``open`` only;
+* each line is canonical JSON bound to a SHA-256 hash chain
+  (``prev_hash`` -> ``record_hash``);
+* ``open`` verifies the whole chain before use; tampering is rejected;
+* payload size is bounded; no free-form sensitive text beyond the
+  already-sanitized ``AuditEvent`` fields.
+
+No new dependency; Python stdlib only.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Final
+
+from . import AuditEvent, AuditEventSource
+
+
+SCHEMA_VERSION: str = "1.0"
+STORE_MAX_BYTES: int = 16 * 1024 * 1024
+GENESIS: Final[str] = "GENESIS"
+
+
+class AuditStreamStoreError(Exception):
+    """Base class for stream-store failures (fail-closed)."""
+
+
+def _now_utc_iso_z() -> str:
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+
+
+def event_to_mapping(event: AuditEvent) -> dict[str, Any]:
+    """Canonical, JSON-safe mapping of an AuditEvent (enums -> values)."""
+    if not isinstance(event, AuditEvent):
+        raise AuditStreamStoreError("event must be an AuditEvent")
+    return {
+        "ts": event.ts,
+        "actor": event.actor,
+        "source": event.source.value,
+        "action": event.action,
+        "project_id": event.project_id,
+        "task_id": event.task_id,
+        "result": event.result.value,
+        "tool": event.tool,
+        "detail": event.detail,
+        "fingerprint": event.fingerprint,
+        "record_hash": event.record_hash,
+    }
+
+
+def mapping_to_event(mapping: dict[str, Any]) -> AuditEvent:
+    """Strictly reconstruct an AuditEvent from a stored mapping."""
+    if not isinstance(mapping, dict):
+        raise AuditStreamStoreError("stored event must be a JSON object")
+    source_raw = mapping.get("source")
+    if not isinstance(source_raw, str):
+        raise AuditStreamStoreError("stored event is missing source")
+    try:
+        source = AuditEventSource(source_raw)
+    except ValueError as exc:
+        raise AuditStreamStoreError("stored event has an invalid source") from exc
+    record = {
+        "ts": mapping.get("ts", ""),
+        "actor": mapping.get("actor", ""),
+        "action": mapping.get("action", ""),
+        "result": mapping.get("result", ""),
+        "project_id": mapping.get("project_id", ""),
+        "task_id": mapping.get("task_id", ""),
+        "tool": mapping.get("tool", ""),
+        "detail": mapping.get("detail", {}),
+        "fingerprint": mapping.get("fingerprint", ""),
+        "record_hash": mapping.get("record_hash", ""),
+    }
+    return AuditEvent.from_audit_record(record, source=source)
+
+
+class AuditStreamStore:
+    """Append-only, hash-chained JSONL store for audit events."""
+
+    def __init__(
+        self, path: Path, stream, last_hash: str, max_bytes: int = STORE_MAX_BYTES
+    ) -> None:
+        self._path = path
+        self._stream = stream
+        self._last_hash = last_hash
+        self._max_bytes = max_bytes
+
+    @property
+    def path(self) -> Path:
+        return self._path
+
+    @property
+    def last_hash(self) -> str:
+        return self._last_hash
+
+    @classmethod
+    def create(
+        cls, path: Path, *, max_bytes: int = STORE_MAX_BYTES
+    ) -> "AuditStreamStore":
+        if not isinstance(path, Path):
+            raise AuditStreamStoreError("path must be a Path")
+        if path.exists():
+            raise AuditStreamStoreError("audit stream store already exists")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        stream = path.open("a", encoding="utf-8")
+        store = cls(path, stream, GENESIS, max_bytes)
+        store._append_record({"schema_version": SCHEMA_VERSION}, action="init")
+        return store
+
+    @classmethod
+    def open(
+        cls, path: Path, *, max_bytes: int = STORE_MAX_BYTES
+    ) -> "AuditStreamStore":
+        if not isinstance(path, Path):
+            raise AuditStreamStoreError("path must be a Path")
+        if not path.is_file():
+            raise AuditStreamStoreError("audit stream store does not exist")
+        store = cls(path, path.open("a", encoding="utf-8"), GENESIS, max_bytes)
+        if not store.verify_chain():
+            store.close()
+            raise AuditStreamStoreError("audit stream store chain is invalid")
+        return store
+
+    def append(self, event: AuditEvent) -> str:
+        mapping = event_to_mapping(event)
+        return self._append_record(mapping, action="publish")
+
+    def _append_record(self, payload: dict[str, Any], *, action: str) -> str:
+        canonical = json.dumps(
+            payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        )
+        if self._path.stat().st_size + len(canonical.encode("utf-8")) > self._max_bytes:
+            raise AuditStreamStoreError("audit stream store exceeds size limit")
+        record = {
+            "schema_version": SCHEMA_VERSION,
+            "ts": _now_utc_iso_z(),
+            "action": action,
+            "payload": payload,
+            "prev_hash": self._last_hash,
+        }
+        record["record_hash"] = _chain_hash(record)
+        line = json.dumps(
+            record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ) + "\n"
+        self._stream.write(line)
+        self._stream.flush()
+        self._last_hash = record["record_hash"]
+        return record["record_hash"]
+
+    def events(self) -> tuple[AuditEvent, ...]:
+        """Return all published events (verifying the chain)."""
+        rows = self._read_rows()
+        events: list[AuditEvent] = []
+        for row in rows:
+            if row.get("action") != "publish":
+                continue
+            events.append(mapping_to_event(row["payload"]))
+        return tuple(events)
+
+    def verify_chain(self) -> bool:
+        try:
+            previous = GENESIS
+            for row in self._read_rows():
+                if row.get("prev_hash") != previous:
+                    return False
+                if row.get("record_hash") != _chain_hash(row):
+                    return False
+                previous = row["record_hash"]
+            return True
+        except (OSError, json.JSONDecodeError, KeyError, TypeError):
+            return False
+
+    def _read_rows(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        with self._path.open("r", encoding="utf-8") as stream:
+            for line in stream:
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                if not isinstance(row, dict):
+                    raise AuditStreamStoreError("stored row must be an object")
+                rows.append(row)
+        return rows
+
+    def close(self) -> None:
+        self._stream.close()
+
+
+def _chain_hash(record: dict[str, Any]) -> str:
+    payload = json.dumps(
+        {
+            "schema_version": record["schema_version"],
+            "ts": record["ts"],
+            "action": record["action"],
+            "payload": record["payload"],
+            "prev_hash": record["prev_hash"],
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()

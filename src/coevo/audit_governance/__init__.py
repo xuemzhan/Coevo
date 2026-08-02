@@ -24,6 +24,7 @@ from .stream import (
     DEFAULT_MAX_SUBSCRIBERS,
     DEFAULT_HISTORY_LEN,
 )
+from .stream_store import AuditStreamStore, AuditStreamStoreError
 
 __all__ = [
     "AuditEvent", "AuditEventResult", "AuditEventSource",
@@ -32,5 +33,6 @@ __all__ = [
     "AuditQueryValidationError", "InterceptionDecision", "InterceptionReason",
     "SecurityAuditFacade",
     "AuditStreamError", "AuditStreamHub", "AuditSubscription",
+    "AuditStreamStore", "AuditStreamStoreError",
     "DEFAULT_MAX_QUEUED", "DEFAULT_MAX_SUBSCRIBERS", "DEFAULT_HISTORY_LEN",
 ]
