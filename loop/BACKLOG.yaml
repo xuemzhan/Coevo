@@ -268,10 +268,11 @@ items:
   - id: US-8-AC-2
     story: US-8
     title: 实时文件 watcher (US-7 本地驾驶舱依赖)
-    status: ready
+    status: done
     dependencies: [US-8-AC-1]
     acceptance_tests:
       - tests/integration/test_progress_watcher.py
+      - tests/unit/test_progress_watcher.py
     security_review: false
     protocol_review: false
   - id: US-15-AC-2
