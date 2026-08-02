@@ -220,7 +220,7 @@ items:
   # ---------- post-MVP follow-on ACs (slice: 2026-08-01) ----------
   - id: US-4-AC-2
     story: US-4
-    title: Orchestrator ???? US-1/2/3 facade (MVP ??? 5 ???????; 2026-08-02 ??? GmSSL ?? provider ??)
+    title: Orchestrator 真实调用 US-1/2/3 facade (MVP 固定链 5 步真实业务跑通; 2026-08-02 已批准 GmSSL 原型 provider 范围)
     status: done
     dependencies: [US-4-AC-1, US-1-AC-1, US-2-AC-1, US-3-AC-1]
     acceptance_tests:
@@ -229,7 +229,7 @@ items:
     protocol_review: false
   - id: US-4-AC-2-PATH
     story: US-4
-    title: ??????/????????????CryptoProvider ?? + ProviderScope ????? + ?????????
+    title: 获批密码产品/受保护密钥句柄接入路径（CryptoProvider 契约 + ProviderScope 作用域治理 + 离线导入审批流程）
     status: done
     dependencies: [US-4-AC-2]
     acceptance_tests:
@@ -290,10 +290,40 @@ items:
   # ---------- US-9 AC-3 fail-open fix (slice: 2026-08-02) ----------
   - id: US-9-AC-3-fix
     story: US-9
-    title: ReportBuilder ??? base_revision fail-closed ???AC-3?????????? <project_id>-R<NNNN>?
+    title: ReportBuilder 发送端 base_revision fail-closed 修复（AC-3：严格等于基线主版本 <project_id>-R<NNNN>）
     status: done
     dependencies: [US-9-AC-1]
     acceptance_tests:
       - tests/unit/test_report_builder.py
     security_review: true
     protocol_review: false
+
+  # ---------- composition + provider-policy + history-scrub (2026-08-02) ----------
+  - id: DEMO-AC-1
+    story: DEMO
+    title: 组装层与离线演示 runner：composition root 串通真实五步链 + 加密 .agent 包回环 + cockpit 服务 + 知识库入库 + 审计流
+    status: done
+    dependencies: [US-4-AC-2, US-7-AC-2, US-14-AC-2, US-15-AC-2]
+    acceptance_tests:
+      - tests/e2e/test_demo_runner.py
+    security_review: true
+    protocol_review: false
+  - id: US-4-AC-2-PATH2
+    story: US-4
+    title: 获批密码接入路径：ProviderRegistry.require_approved + 受保护密钥句柄契约（key_handle_backed）fail-closed
+    status: done
+    dependencies: [US-4-AC-2-PATH]
+    acceptance_tests:
+      - tests/unit/test_crypto_provider_registry.py
+    security_review: true
+    protocol_review: false
+  - id: ENG-HISTORY-SCRUB-1
+    story: ENG-BASE
+    title: 授权清理 git 历史中 loop/private-key-handles-* 收据（filter-branch + reflog/gc），并固化不变量测试
+    status: done
+    dependencies: []
+    acceptance_tests:
+      - tests/security/test_private_key_handles_bindings.py
+    security_review: true
+    protocol_review: false
+
