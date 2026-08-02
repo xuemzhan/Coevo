@@ -47,6 +47,7 @@ from . import (
     CockpitServerState,
     CockpitValidationError,
 )
+from .state_store import CockpitStateStore
 
 
 _ISO_UTC_Z: Final[re.Pattern[str]] = re.compile(
@@ -184,6 +185,7 @@ class CockpitHttpConfig:
     session_timeout_sec: int = DEFAULT_SESSION_TIMEOUT_SEC
     allowed_hosts: frozenset[str] = DEFAULT_ALLOWED_HOSTS
     lock_path: Path | None = None
+    state_path: Path | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.bind_host, str) or self.bind_host != LOOPBACK_HOST:
@@ -228,6 +230,8 @@ class CockpitHttpConfig:
                 )
         if self.lock_path is not None and not isinstance(self.lock_path, Path):
             raise CockpitValidationError("lock_path must be a Path or None")
+        if self.state_path is not None and not isinstance(self.state_path, Path):
+            raise CockpitValidationError("state_path must be a Path or None")
 
 
 class SingleInstanceLock:
@@ -591,10 +595,23 @@ class CockpitHttpServer(ThreadingHTTPServer):
         )
         if self._lock is not None:
             self._lock.acquire()
+        self._state_store = (
+            CockpitStateStore(config.state_path)
+            if config.state_path is not None
+            else None
+        )
         self.session_manager = session_manager or CockpitSessionManager(
             timeout_sec=config.session_timeout_sec
         )
         started_at = started_at or now_utc_iso_z()
+        if (
+            not workspace_views
+            and not role_views
+            and self._state_store is not None
+        ):
+            loaded = self._state_store.load()
+            if loaded is not None:
+                workspace_views, role_views = loaded
         self.state: CockpitServerState = CockpitFacade.start_server(
             bind_host=config.bind_host,
             bind_port=config.bind_port,
@@ -641,5 +658,10 @@ class CockpitHttpServer(ThreadingHTTPServer):
     def stop(self) -> None:
         self.shutdown()
         self.server_close()
+        if self._state_store is not None:
+            self._state_store.save(
+                self.state.workspace_views,
+                self.state.role_views,
+            )
         if self._lock is not None:
             self._lock.release()

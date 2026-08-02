@@ -817,3 +817,8 @@ from .server import (  # noqa: E402
     now_utc_iso_z,
     resolve_static_path,
 )
+from .state_store import (  # noqa: E402
+    CockpitStateStore,
+    deserialize_views,
+    serialize_views,
+)
