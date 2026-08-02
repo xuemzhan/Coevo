@@ -799,3 +799,21 @@ def _hash_path(path: str) -> str:
     """Stable, audit-friendly path summary (NOT cryptographic commitment)."""
     import hashlib
     return hashlib.sha256(path.encode("utf-8")).hexdigest()[:16]
+
+
+# ---------------------------------------------------------------------------
+# Real HTTP server layer (US-7-AC-2)
+# ---------------------------------------------------------------------------
+#
+# Imported last: server.py imports the facade types defined above, so
+# this re-export must not run before those names are bound.
+
+from .server import (  # noqa: E402
+    CSRF_HEADER_VALUE,
+    CockpitHttpConfig,
+    CockpitHttpServer,
+    CockpitSessionManager,
+    SingleInstanceLock,
+    now_utc_iso_z,
+    resolve_static_path,
+)
