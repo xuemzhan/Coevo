@@ -336,3 +336,42 @@ items:
       - tests/unit/test_benchmark_suite.py
     security_review: false
     protocol_review: false
+  # ---------- ops + refactor + wps + frontend-e2e (2026-08-02) ----------
+  - id: COCKPIT-OPS-1
+    story: US-7
+    title: 驾驶舱健康端点 /healthz + JSONL 访问日志落盘 + 单实例锁默认开启（含陈旧锁恢复）
+    status: done
+    dependencies: [US-7-AC-2]
+    acceptance_tests:
+      - tests/integration/test_cockpit_http_server.py
+      - tests/unit/test_cockpit_http.py
+    security_review: true
+    protocol_review: false
+  - id: REFACTOR-AUDIT-1
+    story: ENG-BASE
+    title: 巨型单文件拆分：audit_governance 拆为 models.py + facade.py + 再导出 __init__.py（公共 API 不变）
+    status: done
+    dependencies: [US-15-AC-1]
+    acceptance_tests:
+      - tests/unit/test_audit_governance.py
+      - tests/unit/test_audit_stream.py
+    security_review: false
+    protocol_review: false
+  - id: WPS-AC-4
+    story: US-7
+    title: WPS 受控子进程启动层（路径白名单/穿越与符号链接拒绝/显式可执行文件/dry-run 与注入 runner）
+    status: done
+    dependencies: [US-7-AC-1]
+    acceptance_tests:
+      - tests/unit/test_wps_launcher.py
+    security_review: true
+    protocol_review: false
+  - id: FRONTEND-E2E-1
+    story: US-7
+    title: 离线前端 E2E（HTTP+静态策略：本地资源/CSP/API 驱动/无外部 URL；真实浏览器工具本会话不可用，已留痕）
+    status: done
+    dependencies: [US-7-AC-2]
+    acceptance_tests:
+      - tests/e2e/test_cockpit_offline_frontend.py
+    security_review: false
+    protocol_review: false

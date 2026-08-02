@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "iteration": 22,
-  "current_story": "ENG-BASE",
-  "current_item": "BENCH-AC-1",
+  "iteration": 23,
+  "current_story": "US-7",
+  "current_item": "COCKPIT-OPS-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "",
   "blocking_issue": "",
-  "updated_at": "2026-08-02T05:45:00.465601Z"
+  "updated_at": "2026-08-02T07:44:13.061117Z"
 }

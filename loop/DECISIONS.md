@@ -2672,3 +2672,50 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+## 2026-08-02 -- 驾驶舱运维 + 模块拆分 + WPS 受控启动 + 离线前端 E2E done
+
+### COCKPIT-OPS-1 驾驶舱运维 done
+- /healthz 无鉴权探活端点（仍先做环回/Host 校验；返回 status/service/uptime，
+  无敏感数据），供进程管理器探测。
+- CockpitHttpConfig.log_path 开启 JSONL 访问日志落盘：每请求 audit 记录
+  追加写（线程锁 + flush），写失败仅计入 log_errors 不阻断请求。
+- 单实例锁默认开启：LOCALAPPDATA/KaiwuAgent/cockpit.lock，锁文件含 PID；
+  新增 mtime 超时（10 分钟）陈旧锁接管，避免崩溃残留阻塞后续启动。
+- 验证: unit 24/24（含默认锁/陈旧锁恢复）+ integration 18/18（含
+  healthz、日志落盘断言）。
+
+### REFACTOR-AUDIT-1 巨型单文件拆分 done
+- src/coevo/audit_governance 由 717 行单体拆为 models.py（454 行，
+  错误/枚举/AuditEvent/查询/导出数据类）+ facade.py（250 行，
+  SecurityAuditFacade + 内部 helper）+ __init__.py（36 行显式再导出）。
+  公共 API 不变；compileall + 既有 29+10 测试全绿。
+- 后续同类拆分（merge/decision_brief/knowledge_base 等）按同一模式推进。
+
+### WPS-AC-4 WPS 受控子进程启动层 done
+- src/coevo/cockpit/wps.py：路径须为工作区相对 + WPSAllowList 通过；
+  解析后必须位于 workspace_root 内且为普通文件（符号链接/reparse 拒绝、
+  64MB 上限）；可执行文件显式（COEVO_WPS_EXE 或注入 runner），缺失返回
+  NOT_AVAILABLE；dry-run 全检查不启动；不接受包控制任意启动参数。
+- 安全边界: 仅打开文档不执行宏自动化；WPS 宿主宏执行风险如实标注。
+- 验证: unit 8/8 + 1 条件 skip（Windows 无符号链接特权）。
+
+### FRONTEND-E2E-1 离线前端 E2E done（真实浏览器不可用，已留痕）
+- 本会话无浏览器自动化工具（node_repl js / 浏览器 MCP 均不可用），
+  按技能回退规则以 HTTP+静态策略 E2E 替代：索引页本地资源链接与 CSP、
+  静态资源 200 且 JS 不含外部 URL、API 驱动 UI、未知资源 404。
+- 真实浏览器离线 E2E 留待人工/CI 环境执行（已写入后续维护事项）。
+
+### 验证与记录
+- 完整 `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit
+  seal fully-sealed；traceability checked=38 missing=0。
+- BACKLOG 新增 4 项 done；矩阵新增 4 行；STATE: iteration 22 -> 23。
+- 提出者: loop-engineer（Codex）。决策者: 用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
