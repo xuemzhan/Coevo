@@ -7,6 +7,18 @@ from .contract import (
     declared_scope,
     validate_provider_scope,
 )
+from .cng_handle import (
+    CngKekError,
+    CngKekReference,
+    CngKekStore,
+    CngKekUnavailableError,
+    CngKekValidationError,
+    CngProtectedKeyHandle,
+    CngWrappedKeyRegistry,
+    KEK_NAME_RE,
+    KEK_PREFIX,
+    SM2_KEY_ALGORITHM_OID,
+)
 from .key_handle import (
     KeyHandleBacked,
     ProtectedKeyHandle,
@@ -22,9 +34,20 @@ from .sm3 import (
     sm3_digest,
     sm3_hexdigest,
 )
+from .protected_provider import GmsslProtectedProvider
 
 __all__ = [
     "CryptoProvider",
+    "CngKekError",
+    "CngKekReference",
+    "CngKekStore",
+    "CngKekUnavailableError",
+    "CngKekValidationError",
+    "CngProtectedKeyHandle",
+    "CngWrappedKeyRegistry",
+    "GmsslProtectedProvider",
+    "KEK_NAME_RE",
+    "KEK_PREFIX",
     "GmsslPrototypeError",
     "GmsslPrototypeHandle",
     "GmsslPrototypeProvider",
@@ -33,6 +56,7 @@ __all__ = [
     "ProviderScope",
     "ProviderRegistry",
     "SealedPayload",
+    "SM2_KEY_ALGORITHM_OID",
     "declared_scope",
     "require_key_handle_backed",
     "sm3_digest",

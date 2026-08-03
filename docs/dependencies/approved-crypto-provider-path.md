@@ -112,3 +112,25 @@ PLAN -> IMPLEMENT (adapter implementing `CryptoProvider` with
 `APPROVED_PRODUCT` scope + key-handle integration) -> VERIFY ->
 REVIEW (security + protocol) -> RECORD -> DECIDE. No runtime
 downloads and no silent fallback to the prototype are permitted.
+
+## 8. Status on protected key handle (2026-08-03, HANDLE-1 / HANDLE-2)
+
+The protected-key-handle path is partially implemented:
+
+* **Done (HANDLE-1)**: `coevo.crypto.CngKekStore` creates / opens /
+  destroys a **non-exportable CNG RSA-2048 KEK** (ExportPolicy=None) via
+  the controlled `scripts/cng-kek.ps1`; SM2 private-key material is
+  wrapped at rest under that KEK (RSA-OAEP-SHA256) and only ciphertext +
+  metadata are persisted in `CngWrappedKeyRegistry` (append-only SHA-256
+  hash chain, tamper-rejecting open, revoke/destroy lifecycle).
+  `GmsslProtectedProvider` (`key_handle_backed=True`, scope
+  `APPROVED_PRODUCT`) satisfies the policy surface; `sm3` / `seal` /
+  `verify` (public-key side) are functional today.
+* **Remaining (HANDLE-2)**: a crypto-helper action that consumes the
+  wrapped SM2 blob + KEK name **inside the helper**, unwraps with the
+  CNG handle, and performs SM2 sign / open without ever returning the
+  key to Python. Until wired, `sign` / `open` fail closed on
+  `GmsslProtectedProvider`.
+* **External**: a nationally certified SM2/SM3/SM4 module (SKF /
+  PKCS#11 / validated hardware) still requires vendor procurement; the
+  adapter contract in §4 and acceptance gates in §6 apply unchanged.
