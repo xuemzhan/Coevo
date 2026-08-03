@@ -85,7 +85,7 @@
     "gmssl_prototype_provider": {
       "name": "GmSSL MVP prototype provider",
       "version": "3.2.0",
-      "scope": "MVP prototype SM3, SM2 signing/key transport and SM4-GCM; not approved for production cryptography",
+      "scope": "MVP functional engine (business-approved 2026-08-03): real SM3, SM2 signing/key transport and SM4-GCM via open-source GmSSL 3.2.0; not a nationally certified module; protected key handle required for APPROVED_PRODUCT scope",
       "runtime": {
         "library": {
           "path": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.dll",

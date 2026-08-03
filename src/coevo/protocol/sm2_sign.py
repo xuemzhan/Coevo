@@ -37,7 +37,6 @@ from __future__ import annotations
 import base64
 import binascii
 import datetime as dt
-import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -119,29 +118,20 @@ _HEX_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def compute_sm3_digest(data: bytes) -> str:
-    """Compute the SM3 digest.
+    """Compute the real SM3 digest (GB/T 32905) as 64-char lowercase hex.
 
-    **P1 stand-in**: this slice ships a *deterministic* digest
-    implementation that uses SHA-256 instead of SM3 (Windows CNG
-    does not natively support SM3 either). The wire format
-    (64-char lowercase hex) matches SM3's output size, so a future
-    SM3 product plug-in is a one-line swap.
-
-    The function is named ``compute_sm3_digest`` and never claims
-    to be SM3 — the failure message surfaces the limitation.
-
-    NOTE: returning SHA-256 here is intentionally NOT a silent
-    fallback for crypto: the output is wired through the same
-    digest field as SM3 would be, but callers MUST be aware that
-    the audit log records ``compute_sm3_digest`` invocations
-    with the stand-in flag set. The fail-closed path for signing
-    itself remains :class:`AgentPackageCryptoUnavailableError`.
+    CRYPTO-1 (2026-08-03): the business owner approved replacing the
+    previous SHA-256 stand-in with a real SM3 implementation
+    (:mod:`coevo.crypto.sm3`), so protocol digests now match the SM3
+    algorithm the wire format always claimed (协议 § 12 / cipher suite
+    ``CS-SM2-SM4-AEAD-SM3-01``). Signer and verifier use this function
+    consistently; historical SHA-256-based digests are not recomputed.
     """
     if not isinstance(data, bytes):
         raise AgentPackageCanonicalizationError("digest input must be bytes")
-    # P1 stand-in: SHA-256 over the canonical bytes.
-    # Future slice: replace with SM3 via the approved product.
-    return hashlib.sha256(data).hexdigest()
+    from src.coevo.crypto.sm3 import sm3_hexdigest
+
+    return sm3_hexdigest(data)
 
 
 def compute_real_sm3_digest(data: bytes, *, provider: Any) -> str:
@@ -260,10 +250,9 @@ def sign_manifest(
     """Sign the manifest with the sender's SM2 private key.
 
     **Fail-closed**: raises :class:`AgentPackageCryptoUnavailableError`
-    unconditionally until an approved SM2 product is wired in. The
-    digest computation (above) is a P1 stand-in via SHA-256 (SM3 is
-    not native to Windows CNG). The SM2 sign step itself is the
-    operation that requires an approved product.
+    when no SM2 provider is injected. The digest computation (above)
+    uses real SM3 (GB/T 32905); the SM2 sign step itself requires an
+    injected provider (open-source GmSSL 3.2.0 engine, CRYPTO-1).
     """
     if not isinstance(manifest, Mapping):
         raise AgentPackageCanonicalizationError("manifest must be a mapping")

@@ -13,8 +13,9 @@ envelope). Sub-modules:
   wire encoding (header + nonce + ciphertext + tag). The crypto
   operation is fail-closed in P1.
 * ``sm2_sign`` — US-5-AC-2 (§ 9 + § 12): canonical manifest bytes
-  + SM3 stand-in digest + signature-record wire encoding. SM2 sign
-  / verify is fail-closed in P1.
+  + real SM3 digest (GB/T 32905) + signature-record wire encoding.
+  SM2 sign / verify requires an injected provider (fail-closed
+  otherwise).
 * ``sm2_keywrap`` — US-5-AC-2 (§ 7.3): SM2 key-transport block
   wire encoding. SM2 wrap / unwrap is fail-closed in P1.
 * ``replay_detector`` — US-5-AC-2 (§ 17): duplicate / replay /

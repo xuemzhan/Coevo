@@ -64,7 +64,8 @@ class GmsslPrototypeProviderTests(unittest.TestCase):
         tool = lock["tools"]["gmssl_prototype_provider"]
         helper = tool["helper"]
         self.assertEqual("3.2.0", tool["version"])
-        self.assertIn("not approved for production", tool["scope"])
+        self.assertIn("business-approved 2026-08-03", tool["scope"])
+        self.assertIn("not a nationally certified module", tool["scope"])
         self.assertEqual("COEVOCRYPTO/1", helper["protocol"])
         for field, name in (("source", "source_sha256"),):
             path = ROOT / helper[field]

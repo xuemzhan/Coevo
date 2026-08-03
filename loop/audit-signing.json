@@ -7,5 +7,5 @@
     "public_certificate_sha256": "bbd51fafe9185e59d515514984f9ee9feb989c2e5862fcd22d1a15758e6bbe92",
     "signature_algorithm": "RSA-PKCS1-v1_5",
     "digest_algorithm": "SHA-256",
-    "formal_replacement": "approved SM2 product required"
+    "formal_replacement": "open-source GmSSL 3.2.0 (Apache-2.0) + pure-Python SM3 approved 2026-08-03; national certification + protected key handle remain long-term"
 }

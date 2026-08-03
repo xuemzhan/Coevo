@@ -8,12 +8,17 @@
 
 ## 1. Boundary
 
-The locked GmSSL 3.2.0 MVP prototype
-(`coevo.crypto.GmsslPrototypeProvider`, scope `MVP_PROTOTYPE`) is
-approved **for MVP demonstration only**: test PKI, DPAPI-encrypted key
-files, one-shot controlled helper. It is NOT the approved-product path
-and MUST NOT be presented as production cryptography. The formal path
-below is the replacement.
+The locked open-source GmSSL 3.2.0 engine
+(`coevo.crypto.GmsslPrototypeProvider`, Apache-2.0) is the project's
+**functional crypto engine** since 2026-08-03 (business-owner approval
+to use an open-source third-party library): real SM2 sign/verify, SM2
+key transport, SM4-GCM authenticated encryption, and SM3 digests
+(default digest paths use the pure-Python `coevo.crypto.sm3`
+implementation, cross-checked against GmSSL). It is NOT a nationally
+certified module and still uses test PKI + DPAPI key files, so it does
+not satisfy the protected-key-handle requirement below. The formal
+path below remains the long-term target for certified products and
+protected handles.
 
 ## 2. Required artifacts for approval
 

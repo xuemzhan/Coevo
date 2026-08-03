@@ -72,7 +72,7 @@ class ReportArtifact:
     role: str           # closed set, validated at construction
     media_type: str
     size: int
-    digest_hex: str     # 64-char lowercase hex (SM3 stand-in; SHA-256 OK)
+    digest_hex: str     # 64-char lowercase hex (SM3, GB/T 32905)
     classification: str  # "INTERNAL" / "CONFIDENTIAL" / etc.
     required: bool
 

@@ -18,6 +18,10 @@ from .gmssl_provider import (
     GmsslPrototypeProvider,
     SealedPayload,
 )
+from .sm3 import (
+    sm3_digest,
+    sm3_hexdigest,
+)
 
 __all__ = [
     "CryptoProvider",
@@ -31,5 +35,7 @@ __all__ = [
     "SealedPayload",
     "declared_scope",
     "require_key_handle_backed",
+    "sm3_digest",
+    "sm3_hexdigest",
     "validate_provider_scope",
 ]

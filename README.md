@@ -63,7 +63,8 @@ python "%LOCALAPPDATA%\KaiwuAgent\app\<version>\scripts\run_cockpit.py"
 
 ## 交付边界
 
-MVP 已验证“业务智能、分布式离线协同、运行中枢编排”三类最小能力并全部可离线复现。
-正式部署仍需三项外部条件：批准的 SM2/SM4 密码产品与受保护密钥句柄、独立审计节点与
-合规双签复核、Win7 存量环境实机验证（见 `loop/DECISIONS.md` 与
-`docs/production-readiness.md`）。
+MVP 已验证"业务智能、分布式离线协同、运行中枢编排"三类最小能力并全部可离线复现。
+密码方案已按业务负责人批准落地为开源引擎（GmSSL 3.2.0，Apache-2.0）+ 纯 Python SM3
+（GB/T 32905），真实 SM2/SM3/SM4 全链路可用。正式部署仍剩余三项外部条件：受保护密钥
+句柄与国密认证模块（长期目标）、独立审计节点与合规双签复核、Win7 存量环境实机验证
+（见 `loop/DECISIONS.md` 与 `docs/dependencies/approved-crypto-provider-path.md`）。

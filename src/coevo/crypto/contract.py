@@ -6,9 +6,12 @@ Coevo distinguishes two provider scopes:
 
 * ``MVP_PROTOTYPE`` -- the locked GmSSL 3.2.0 prototype
   (:class:`coevo.crypto.GmsslPrototypeProvider`). It is approved for
-  MVP demonstration only: test PKI, DPAPI-encrypted key files, and a
-  one-shot controlled helper. It MUST NOT be presented as production
-  cryptography.
+  the project's *functional* path since 2026-08-03 (business-owner
+  approval to use the open-source GmSSL 3.2.0 engine, Apache-2.0):
+  real SM2 signing/verification, SM2 key transport, SM3 digests and
+  SM4-GCM via a one-shot controlled helper. It still uses test PKI
+  and DPAPI-encrypted key files, and is NOT a nationally certified
+  module.
 * ``APPROVED_PRODUCT`` -- a formally approved cryptographic product
   (SKF / PKCS#11 / vendor OpenSSL provider / validated hardware
   module) that was imported offline, hash-locked in
@@ -17,6 +20,11 @@ Coevo distinguishes two provider scopes:
   protected private-key handle (non-exportable CNG / Smart Card /
   HSM); raw key bytes never enter the repository, logs, or model
   context.
+
+The ``MVP_PROTOTYPE`` scope satisfies functional correctness but not
+the protected-key-handle requirement; ``require_approved`` continues
+to reject it wherever a protected key handle is mandatory (see
+``docs/dependencies/approved-crypto-provider-path.md``).
 
 The orchestration layer receives providers by explicit injection only
 (see ``coevo.orchestrator._real_chain.resume_real_chain``); a provider
