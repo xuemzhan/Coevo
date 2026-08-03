@@ -179,8 +179,8 @@
       "sha256": "c2e06563ca38b22386d094317fb17074b61a0592f0d5f3d4adb69bba0fe058d0",
       "format": "deterministic ZIP_STORED; sorted fixed entries; DOS epoch",
       "audit_signature_path": "scripts/audit_signature.ps1",
-      "audit_signature_size": 5994,
-      "audit_signature_sha256": "e87681df0c40d13df675c67794f6f9589bac74edf5ebb1f2996e9ec348212a60"
+      "audit_signature_size": 5993,
+      "audit_signature_sha256": "f558826f8f809591beee788094480c9af1ec7320549eb0a4a8d9b78fdf9a13d0"
     },
     "make_compatibility_shim": {
       "node": {
@@ -213,11 +213,11 @@
       "name": "Coevo Make compatibility shim",
       "version": "1.0",
       "source": "scripts/tool-shims/make.cs",
-      "source_sha256": "b427f1004f57afa57f61c2f10dda5938be28873120d506fa84cdfb78cb1426ff",
+      "source_sha256": "cc4b172e7f0353be6b9d2d8781351e00651e8c675d72dc154d88f638e0ed201d",
       "script_inventory": {
         "path": "docs/dependencies/python-script-lock.tsv",
         "size": 950,
-        "sha256": "ca44afe03b2231bd5d648a6bb6781060e6d6129caacdd62aa0138918a00e4ba8"
+        "sha256": "aeb4eb1e7b5e1cef2bbaaa62ca87a8c5cb43ee4caebb277309bfcba53781b1ae"
       },
       "compiler": "%WINDIR%/Microsoft.NET/Framework64/v4.0.30319/csc.exe",
       "compiler_lock": {
@@ -230,7 +230,7 @@
       },
       "license": "repository license",
       "network_access": false,
-      "source_size": 12967
+      "source_size": 12965
     }
   }
 }

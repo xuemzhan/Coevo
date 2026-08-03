@@ -11,9 +11,9 @@ using System.Text;
 internal static class CoevoMake
 {
     private const string RuntimeInventorySha256 = "829b9f4c69430fe1ed18573bedd828552eca242f8c5d128324ad2b1a844534c2";
-    private const string ScriptInventorySha256 = "ca44afe03b2231bd5d648a6bb6781060e6d6129caacdd62aa0138918a00e4ba8";
+    private const string ScriptInventorySha256 = "aeb4eb1e7b5e1cef2bbaaa62ca87a8c5cb43ee4caebb277309bfcba53781b1ae";
     private const string ControlArchiveSha256 = "c2e06563ca38b22386d094317fb17074b61a0592f0d5f3d4adb69bba0fe058d0";
-    private const string AuditSignatureSha256 = "e87681df0c40d13df675c67794f6f9589bac74edf5ebb1f2996e9ec348212a60";
+    private const string AuditSignatureSha256 = "f558826f8f809591beee788094480c9af1ec7320549eb0a4a8d9b78fdf9a13d0";
 
     private static readonly HashSet<string> Targets = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -202,7 +202,7 @@ internal static class CoevoMake
             LockInventory(runtimeInventory, RuntimeInventorySha256, runtime, false, files, directories);
             LockInventory(scriptInventory, ScriptInventorySha256, root, false, files, directories);
             files.Add(OpenLockedFile(control, 37388, ControlArchiveSha256));
-            files.Add(OpenLockedFile(auditSignature, 5994, AuditSignatureSha256));
+            files.Add(OpenLockedFile(auditSignature, 5993, AuditSignatureSha256));
 
             string module;
             string extra;
