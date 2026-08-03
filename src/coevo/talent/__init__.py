@@ -28,7 +28,7 @@ AC test matrix (each TestCase class locks one AC):
 What this is NOT
 ----------------
 * No I/O. The pool is supplied as a Python object. Persistence +
-  redaction-on-import live in a separate slice (US-3-AC-2).
+  redaction-on-import live in ``store.py`` (US-3-AC-2).
 * No LLM call. Recommendations are produced by a deterministic
   scoring function; the production 团队推荐 agent is a future slice.
 * No PII leak. The redaction layer is irreversible within the slice.
@@ -55,6 +55,13 @@ from .recommender import (
     score_candidate,
 )
 from .service import TalentRecommenderService
+from .store import (
+    TalentStore,
+    TalentStoreDuplicateError,
+    TalentStoreError,
+    TalentStoreIntegrityError,
+    talent_from_import,
+)
 
 __all__ = [
     "AvailabilityWindow",
@@ -68,9 +75,14 @@ __all__ = [
     "TalentPool",
     "TalentRecommenderError",
     "TalentRecommenderService",
+    "TalentStore",
+    "TalentStoreDuplicateError",
+    "TalentStoreError",
+    "TalentStoreIntegrityError",
     "TalentValidationError",
     "recommend",
     "redact_identity",
     "score_candidate",
     "stable_pool_code",
+    "talent_from_import",
 ]
