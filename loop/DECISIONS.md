@@ -3321,3 +3321,40 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- US-2-AC-2 用户任务编辑操作 done（Phase 2 Track B 第四项）
+
+- 用户确认按 C→A→B 推进，B 轨内先 US-13-AC-2~7 后 US-2 剩余 AC。
+- DISCOVER 结论：US-2-AC-1（done）已覆盖 AC-1（输入解析）、AC-4（Task 字段：
+  交付物/责任角色/计划时间/验收标准齐备）、AC-5（依赖图确定性种子 + 环
+  fail-closed + 拓扑序）、AC-7（confirm_baseline/with_overrides 单调版本）。
+  剩余确定性缺口为 AC-6（用户新增/删除/修改/重排任务）；AC-3 的"智能体自动
+  生成"已有确定性 propose()（每阶段一个工作包、每节点一个任务、里程碑派生），
+  仅"更智能的自然语言分解"才涉及模型方案（见下决策点）。
+- 实现：`editing.py` 四个纯函数 add_task/remove_task/update_task/reorder_tasks；
+  每次编辑经 build_baseline 全量重校验并返回 version+1 基线，追加 Override
+  审计记录；remove 拒绝清空工作包；reorder 要求精确排列；update 至少一个字段。
+- 验证：tests/unit/test_task_decomposition_editing.py 8/8；`make quality`
+  exit=0 fingerprint=`34fc0b672c25a7b5`，audit fully-sealed。
+- 安全审查（内联）：纯函数编辑，无 IO/文件/密钥/权限/审计链变更，
+  Critical/High 0。protocol 不涉及。
+- **决策点（AC-3 模型方案，留待业务负责人）**：US-2 剩余仅 AC-3 的"增强分解"
+  可选接入模型能力。选项：
+  A. 维持确定性 decompose_from_flow（当前实现，零依赖、离线、可验证），
+     AC-3 视为已满足；
+  B. 引入 LLM 辅助分解（候选 edge 提议 / 更细任务拆分），需先定模型来源、
+     离线审批依赖、fail-closed 与人工确认边界，且不得把模型输出直接写成
+     正式状态（AGENTS.md §3）。未获指令前不擅自实现 B。
+- 记录：BACKLOG US-2-AC-2 新增 done；追溯矩阵新增行（commit c05823e）；
+  STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION 追加门禁
+  记录。
+- 提出者：loop-engineer（Codex）。决策者：用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.

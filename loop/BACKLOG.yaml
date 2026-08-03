@@ -530,3 +530,13 @@ items:
       - tests/unit/test_decision_brief.py
     security_review: false
     protocol_review: false
+  # ---------- phase 2 track B: user task editing (2026-08-03) ----------
+  - id: US-2-AC-2
+    story: US-2
+    title: 用户任务编辑操作（AC-6）：add/remove/update/reorder 四个纯函数，每次编辑产出版本+1 基线并追加 Override 审计记录；经 build_baseline 全量重校验（任务 ID 唯一、ISO-Z 窗口、交付物封闭枚举、依赖环 fail-closed、里程碑重建）
+    status: done
+    dependencies: [US-2-AC-1]
+    acceptance_tests:
+      - tests/unit/test_task_decomposition_editing.py
+    security_review: false
+    protocol_review: false
