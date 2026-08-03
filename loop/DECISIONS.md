@@ -3572,6 +3572,30 @@ security-reviewer 双签门禁。
   真实行为差异时按 git 历史回退 `d3297d4`。
 - 提出者：loop-engineer（Codex）。决策者：用户（规范文档与注释，向生产落地靠近）。
 
+## 2026-08-03 -- CRYPTO-1 正式密码方案落地为功能可用版本 done（用户批准开源三方库）
+
+- 用户决策：正式密码产品"做一个简单功能可用版本或者使用开源第三方包库"。
+  选定：采用开源 GmSSL 3.2.0（Apache-2.0，已在锁工具链中且真实支持 SM2/SM3/SM4）
+  作为功能密码引擎，并新增纯 Python SM3（GB/T 32905）替换协议摘要的 SHA-256 占位。
+- 实现（commit `69fe4c2`，13 文件，+312/-45）：
+  ① `src/coevo/crypto/sm3.py` 纯 Python SM3（官方向量 + 与 GmSSL 引擎交叉验证，
+  边界 55/56/63/64/127/128/1000 字节；修正 _rotl j>=32 旋转为 mod 32）；
+  ② `compute_sm3_digest` 由 SHA-256 替身切换为真实 SM3——协议摘要与声明的
+  CS-SM2-SM4-AEAD-SM3-01 对齐，收发双方一致；
+  ③ 治理同步：crypto/contract.py scope 说明、toolchain-lock.json scope 文本、
+  approved-crypto-provider-path.md §1、README 交付边界、
+  loop/audit-signing.json formal_replacement。
+- 边界/保留：受保护密钥句柄（CNG/HSM/智能卡）与国密认证模块仍为
+  APPROVED_PRODUCT scope 硬性前置（`require_approved` 与 key_handle_backed
+  检查不变），属长期目标；GmsslPrototypeProvider 仍用测试 PKI + DPAPI 密钥文件，
+  不作为认证产品呈现。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 800 / integration 242 / security 97 / e2e 12 全绿；真实 SM2/SM4 E2E 回归；
+  内联 verifier + security-reviewer + protocol-reviewer 均 PASS（Critical/High 0）。
+- 回滚条件：任一 SM3 向量/交叉验证测试失败、真实 E2E 回传链失败、或门禁指纹
+  变化未复核时按 git 历史回退 `69fe4c2`（同时回退 audit-signing.json 字段）。
+- 提出者：loop-engineer（Codex）。决策者：用户（批准开源三方库方案）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

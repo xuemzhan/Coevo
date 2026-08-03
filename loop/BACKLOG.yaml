@@ -624,3 +624,12 @@ items:
       - tests/unit/test_production_docs.py
     security_review: true
     protocol_review: false
+  # ---------- 正式密码方案（2026-08-03 用户批准：开源三方库） ----------
+  - id: CRYPTO-1
+    story: ENG-BASE
+    title: 正式密码方案落地为"简单功能可用版本"：纯 Python SM3（GB/T 32905，src/coevo/crypto/sm3.py，官方向量 + 与 GmSSL 3.2.0 引擎交叉验证）替换 compute_sm3_digest 的 SHA-256 替身；用户批准开源 GmSSL 3.2.0（Apache-2.0）作为功能密码引擎（SM2 签名/密钥封装、SM4-GCM 已由 GmsslPrototypeProvider 真实实现并经 E2E 验证）；更新 crypto/contract.py scope 治理说明、docs/dependencies/approved-crypto-provider-path.md、README 交付边界、loop/audit-signing.json formal_replacement；受保护密钥句柄仍为 approved-product scope 的硬性前置
+    status: ready
+    dependencies: [DOCS-COMMENT-1]
+    acceptance_tests: []
+    security_review: true
+    protocol_review: true
