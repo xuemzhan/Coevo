@@ -24,6 +24,10 @@ python scripts\health_check.py --install-root "%LOCALAPPDATA%\KaiwuAgent"
 
 可接入监控/计划任务定期执行；本脚本只读、不修改任何状态。
 
+进程内状态端点：`GET /api/health`（需会话令牌，认证只读）返回 service、version、
+started_at、uptime_sec、session_count、request_count、audit_records、log_errors，
+供已登录管理端/运维脚本即时查看运行实例状态。
+
 ## 2. 自启守护（登录启动驾驶舱）
 
 ```powershell

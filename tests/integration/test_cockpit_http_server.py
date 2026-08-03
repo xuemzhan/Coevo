@@ -135,6 +135,29 @@ class CockpitHttpServerTests(unittest.TestCase):
         self.assertEqual("coevo-cockpit", data["service"])
         self.assertIn("uptime_sec", data)
 
+    def test_api_health_requires_token(self):
+        status, _, _ = _request(f"{self.base}/api/health")
+        self.assertEqual(401, status)
+
+    def test_api_health_returns_in_process_status(self):
+        status, _, body = _request(f"{self.base}/api/health", token=self.token)
+        self.assertEqual(200, status)
+        data = json.loads(body)
+        self.assertTrue(data["service"])
+        for field in (
+            "service",
+            "version",
+            "started_at",
+            "uptime_sec",
+            "session_count",
+            "request_count",
+            "audit_records",
+            "log_errors",
+        ):
+            self.assertIn(field, data, field)
+        self.assertGreaterEqual(data["request_count"], 1)
+        self.assertGreaterEqual(data["session_count"], 1)
+
     def test_index_with_token_serves_page_with_csp(self):
         status, headers, body = _request(f"{self.base}/?token={self.token}")
         self.assertEqual(200, status)

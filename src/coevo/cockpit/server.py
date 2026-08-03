@@ -94,6 +94,8 @@ from .static import (
     resolve_static_path,
 
 )
+from src.coevo.version import APP_DISPLAY_NAME, VERSION
+
 _HOST_LITERAL: Final[re.Pattern[str]] = re.compile(r"^[a-z0-9.:\[\]-]+$")
 
 CSRF_HEADER_VALUE: Final[str] = "coevo-cockpit"
@@ -348,6 +350,10 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 ):
                     self._send_json(401, {"error": "authentication required"})
                     return
+                self.server._count_request()
+                if path == "/api/health":
+                    self._serve_api_health()
+                    return
                 if path.startswith("/static/"):
                     self._serve_static(path[len("/static/"):])
                 elif path.startswith("/api/"):
@@ -355,6 +361,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 else:
                     self._send_json(404, {"error": "not found"})
                 return
+            self.server._count_request()
             if not self.server.session_manager.validate(
                 self._bearer_token(), self._now()
             ):
@@ -504,6 +511,24 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             ts=self._now(),
         )
         self._dispatch_and_send(request)
+
+    def _serve_api_health(self) -> None:
+        """METRICS-1: authenticated, read-only in-process status payload."""
+        self._send_json(
+            200,
+            {
+                "service": APP_DISPLAY_NAME,
+                "version": VERSION,
+                "started_at": self.server._started_at,
+                "uptime_sec": round(
+                    time.monotonic() - self.server._started_monotonic, 1
+                ),
+                "session_count": self.server.session_manager.session_count,
+                "request_count": self.server.request_count,
+                "audit_records": len(self.server.recent_audit()),
+                "log_errors": self.server.log_errors,
+            },
+        )
 
     def _serve_wps_open(self) -> None:
         length_header = self.headers.get("Content-Length", "")
@@ -748,6 +773,9 @@ class CockpitHttpServer(ThreadingHTTPServer):
             else None
         )
         self._started_monotonic = time.monotonic()
+        self._started_at = started_at
+        self._request_count = 0
+        self._request_lock = threading.Lock()
         self._concurrency = threading.BoundedSemaphore(
             config.max_concurrent_requests
         )
@@ -784,6 +812,15 @@ class CockpitHttpServer(ThreadingHTTPServer):
 
     def recent_audit(self) -> tuple[dict[str, Any], ...]:
         return tuple(self._audit_log)
+
+    def _count_request(self) -> None:
+        with self._request_lock:
+            self._request_count += 1
+
+    @property
+    def request_count(self) -> int:
+        with self._request_lock:
+            return self._request_count
 
     def process_request(self, request: Any, client_address: Any) -> None:
         """Bound concurrent handler threads; reject overflow with 503."""
