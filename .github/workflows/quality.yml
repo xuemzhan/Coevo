@@ -1,0 +1,66 @@
+name: coevo-quality
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, "agent/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: Coevo verification-side gates (Windows)
+    runs-on: windows-latest
+    env:
+      COEVO_REPO_ROOT: ${{ github.workspace }}
+      COEVO_POWERSHELL_PATH: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore locked toolchain (pinned artifact)
+        shell: powershell
+        run: |
+          .\scripts\ci-restore-toolchain.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Output "COEVO_PYTHON_PATH=$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding ascii
+          Write-Output "COEVO_NODE_PATH=$env:COEVO_REPO_ROOT\.tools\node\24.14.0\node.exe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding ascii
+          Write-Output "COEVO_CONTROL_ARCHIVE=$env:COEVO_REPO_ROOT\.tools\control\control.pyz" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding ascii
+
+      - name: fmt (compileall)
+        shell: powershell
+        run: & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" scripts\quality_gate.py --target fmt
+
+      - name: lint (config / traceability / audit verify)
+        shell: powershell
+        run: & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" scripts\quality_gate.py --target lint
+
+      - name: unit + integration
+        shell: powershell
+        run: & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" scripts\quality_gate.py --target test
+
+      - name: security
+        shell: powershell
+        run: & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" scripts\quality_gate.py --target test-security
+
+      - name: e2e
+        shell: powershell
+        run: & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" scripts\quality_gate.py --target test-e2e
+
+      - name: Upload gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coevo-gate-evidence
+          path: |
+            loop/VERIFICATION.md
+            loop/tool-audit.jsonl
+            loop/audit-head.json
+
+      - name: Fail if any verification-side gate failed
+        if: failure()
+        run: |
+          Write-Error "One or more verification-side gates failed. Note: the sealed 'quality' target (audit signing) runs on the maintainer machine because the non-exportable signer key cannot be provisioned on runners; CI validates the same tests and the existing audit chain with public-key verification."
+          exit 1
