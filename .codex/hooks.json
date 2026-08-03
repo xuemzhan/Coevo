@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "node E:\\Workspace\\Coevo\\.codex\\hooks\\loop-guard.mjs" }
+        ]
+      }
+    ]
+  }
+}

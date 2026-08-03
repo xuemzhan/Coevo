@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.tools/
+.loop-smoke/
+.loop-smoke-verification.tmp
+.omo/
+debug_quality.py
+temp_*
+loop/*.tmp
+loop/*.bak
+loop/*.lock
+loop/private-key-handles-*.json
+loop/runtime/

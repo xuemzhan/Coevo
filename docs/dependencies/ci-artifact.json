@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "name": "coevo-toolchain-win64",
+  "format": "zip",
+  "url_pattern": "https://github.com/xuemzhan/Coevo/releases/download/toolchain-<version>/coevo-toolchain-win64-<version>.zip",
+  "version": "pending",
+  "url": "",
+  "sha256": "pending",
+  "contents": [
+    ".tools/python/3.14.3/python.exe",
+    ".tools/node/24.14.0/node.exe",
+    ".tools/control/control.pyz",
+    ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.dll"
+  ],
+  "publish_instructions": "Build a zip of the repository .tools/ directory (excluding .tools/runtime and .tools/bin-*), publish it as a GitHub Release asset named coevo-toolchain-win64-<version>.zip on the toolchain-<version> tag, then pin version/url/sha256 here. The restore script refuses to run while sha256 is 'pending'."
+}

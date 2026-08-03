@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "iteration": 30,
+  "current_story": "ENG-BASE",
+  "current_item": "CI-1",
+  "phase": "decide",
+  "status": "done",
+  "failed_verifications": 0,
+  "last_failure_fingerprint": "",
+  "last_verified_commit": "53cad86a7a4cac7b586992254d847375b0a45d2b",
+  "blocking_issue": "",
+  "updated_at": "2026-08-03T14:34:32.372740Z"
+}

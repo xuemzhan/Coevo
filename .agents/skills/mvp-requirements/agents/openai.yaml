@@ -1,0 +1,7 @@
+interface:
+  display_name: "MVP 需求"
+  short_description: "定位需求、用户故事、验收标准与完成定义，输出 AC 到测试的映射"
+  default_prompt: "使用 $mvp-requirements 定位工作项需求。"
+
+policy:
+  allow_implicit_invocation: true

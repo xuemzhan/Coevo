@@ -1,0 +1,7 @@
+interface:
+  display_name: "MVP 独立验证"
+  short_description: "独立执行 make quality 门禁并逐 AC 复核实现与测试证据，不修改代码"
+  default_prompt: "使用 $mvp-verifier 独立验证本轮实现。"
+
+policy:
+  allow_implicit_invocation: true

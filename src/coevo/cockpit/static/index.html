@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coevo Cockpit</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>Coevo Cockpit</h1>
+    <span id="conn" class="pill">local</span>
+  </header>
+  <aside id="sidebar">
+    <h2>Projects</h2>
+    <ul id="project-list"></ul>
+  </aside>
+  <main id="main">
+    <section id="status">
+      <p>Loading?</p>
+    </section>
+    <section id="detail" hidden>
+      <h2 id="detail-title"></h2>
+      <div id="roles"></div>
+      <h3>Tasks</h3>
+      <ul id="tasks"></ul>
+      <h3>Milestones</h3>
+      <ul id="milestones"></ul>
+      <h3>Artifacts</h3>
+      <ul id="artifacts"></ul>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

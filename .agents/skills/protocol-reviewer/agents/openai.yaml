@@ -1,0 +1,7 @@
+interface:
+  display_name: ".agent 协议审查"
+  short_description: "只读审查 .agent 任务包协议改动：包头、规范化、版本、签名、重放与原子导入"
+  default_prompt: "使用 $protocol-reviewer 审查本轮协议改动。"
+
+policy:
+  allow_implicit_invocation: true

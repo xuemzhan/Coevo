@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "prototype": true,
+  "store": "CurrentUser/My",
+  "thumbprint": "F6DE13A4ADF56B9D66902B8E3055DCCA8B702D86",
+  "public_certificate": "loop/audit-signing-public.cer",
+  "public_certificate_sha256": "bbd51fafe9185e59d515514984f9ee9feb989c2e5862fcd22d1a15758e6bbe92",
+  "signature_algorithm": "RSA-PKCS1-v1_5",
+  "digest_algorithm": "SHA-256",
+  "formal_replacement": "approved SM2 product required"
+}

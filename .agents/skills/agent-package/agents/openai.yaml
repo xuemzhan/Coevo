@@ -1,0 +1,7 @@
+interface:
+  display_name: ".agent 任务包协议"
+  short_description: ".agent 任务包的封装、加密、签名、重放检测、冲突处理与原子导入守则"
+  default_prompt: "使用 $agent-package 处理 .agent 协议改动。"
+
+policy:
+  allow_implicit_invocation: true

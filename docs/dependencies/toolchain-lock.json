@@ -1,0 +1,236 @@
+{
+  "schema_version": "1.0",
+  "approved_at": "2026-07-16",
+  "approved_by": "repository owner",
+  "runtime_downloads_allowed": false,
+  "tools": {
+    "gmssl_test_pki": {
+      "name": "GmSSL",
+      "version": "3.2.0",
+      "scope": "test-only SM2 PKI prototype; not approved for production cryptography",
+      "source_repository": "https://github.com/guanzhi/GmSSL",
+      "release_url": "https://github.com/guanzhi/GmSSL/releases/tag/v3.2.0",
+      "release_metadata_evidence_path": "docs/dependencies/evidence/gmssl-v3.2.0-win64-release-asset.json",
+      "published_at": "2026-06-21T03:06:35Z",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/guanzhi/GmSSL/blob/v3.2.0/LICENSE",
+      "license_in_binary_archive": false,
+      "archive": {
+        "path": ".tools/GmSSL-3.2.0-win64.zip",
+        "asset_api_id": 453478095,
+        "entry_count": 76,
+        "size": 3768399,
+        "sha256": "d062923f09bfa74b06dbba74c4bda5e43a194d8aadec2ac82d723bbce0c5b7a5",
+        "digest_source": "GitHub release asset metadata and local verification"
+      },
+      "runtime": {
+        "root": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64",
+        "executable": {
+          "path": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.exe",
+          "size": 1626112,
+          "sha256": "d07cf6b3e56918d8b163d5ba8d21cf54c97eff0ce89aaa98711b7bd2535d48a7",
+          "authenticode_status": "NotSigned"
+        },
+        "library": {
+          "path": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.dll",
+          "size": 1665024,
+          "sha256": "9da9cc70507ce7a124b67cfc10c32a6c8c14f08caa6f50a19ecfa21c8f75deb0",
+          "authenticode_status": "NotSigned"
+        }
+      },
+      "helper": {
+        "name": "Coevo isolated GmSSL test-PKI helper",
+        "protocol": "COEVOPKI/2",
+        "source": "scripts/gmssl-test-pki-helper.cs",
+        "source_size": 62127,
+        "source_sha256": "82b33f092fe1548cf9caacc64d0312e2f46b19daefaf33e960b1b283efc86262",
+        "launcher": {
+          "path": "scripts/generate-sm2-test-pki.ps1",
+          "size": 11208,
+          "sha256": "ca6f65f9e070e079ec953eb8e081b4b732b3401a0a297fcbe5638929793b21fc"
+        },
+        "compile_command": "csc.exe /nologo /noconfig /nostdlib+ /reference:<locked-mscorlib> /reference:<locked-System> /target:exe /platform:x64 /optimize+ /debug- /checked+ /out:<create-new-runtime-helper> <locked-source>",
+        "build_output_is_deterministic": false,
+        "build_output_policy": "Compile into a fresh random-name path below locked .tools/runtime, pin the resulting file handle through execution, then delete it; never trust or retain a precompiled helper binary.",
+        "compiler_lock": {
+          "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+          "size": 2569832,
+          "sha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+          "authenticode_status": "Valid",
+          "signer_subject": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+          "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+        },
+        "framework_references": [
+          {
+            "name": "mscorlib.dll",
+            "size": 5445432,
+            "sha256": "a8cae3d326f7d973ca79cba849939d4837ad18d507ef6d5f6ebab802b7fb157a",
+            "authenticode_status": "Valid",
+            "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+          },
+          {
+            "name": "System.dll",
+            "size": 3545264,
+            "sha256": "2b3c17c6208a0b4b6beb94e1a066f99ba06cdb2ea919479e99d47e8c6d96dc71",
+            "authenticode_status": "Valid",
+            "signer_thumbprint": "DC91E564D5BC1E3A8E02D6A8508682ABEA8A2443"
+          }
+        ],
+        "network_access": false,
+        "secret_transport": "No command-line or environment secrets; fixed one-shot stdin request contains only action, profile, and nonce; the fixed response contains only action, status, nonce, and receipt SHA-256. Passwords and all PKI blobs remain inside the helper, which owns filesystem publication and same-nonce recovery."
+      },
+      "network_access": false,
+      "risk_note": "The official Win64 asset is not Authenticode-signed. It is accepted only by exact official-asset SHA-256 pinning for the MVP prototype and isolated test PKI generation; it is not evidence of production cryptographic compliance."
+    },
+    "gmssl_prototype_provider": {
+      "name": "GmSSL MVP prototype provider",
+      "version": "3.2.0",
+      "scope": "MVP functional engine (business-approved 2026-08-03): real SM3, SM2 signing/key transport and SM4-GCM via open-source GmSSL 3.2.0; not a nationally certified module; protected key handle required for APPROVED_PRODUCT scope",
+      "runtime": {
+        "library": {
+          "path": ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.dll",
+          "size": 1665024,
+          "sha256": "9da9cc70507ce7a124b67cfc10c32a6c8c14f08caa6f50a19ecfa21c8f75deb0",
+          "authenticode_status": "NotSigned"
+        }
+      },
+      "helper": {
+        "protocol": "COEVOCRYPTO/1",
+        "source": "scripts/gmssl-crypto-helper.cs",
+        "source_size": 17161,
+        "source_sha256": "71d32ecab3f91a78cd2d4666fba366a488bad80758c0a4d93f4e6ea8edb48b7a",
+    "launcher": {
+      "path": "scripts/invoke-gmssl-crypto.ps1",
+      "size": 6309,
+      "sha256": "7d6a99731490656c96a324d2be835271104e7bec8e24cda69530d9d42913d1bf"
+    },
+        "compiler_lock": {
+          "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+          "size": 2569832,
+          "sha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+          "authenticode_status": "Valid",
+          "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+        },
+        "framework_references": [
+          {"name": "mscorlib.dll", "size": 5445432, "sha256": "a8cae3d326f7d973ca79cba849939d4837ad18d507ef6d5f6ebab802b7fb157a"},
+          {"name": "System.dll", "size": 3545264, "sha256": "2b3c17c6208a0b4b6beb94e1a066f99ba06cdb2ea919479e99d47e8c6d96dc71"}
+        ],
+        "secret_transport": "No secrets in argv, environment, stdout, stderr, logs, or Python objects; encrypted key files and DPAPI password blobs are opened by the one-shot helper, and unwrapped SM4 keys remain helper-side.",
+        "network_access": false
+      }
+    },
+    "opencode": {
+      "name": "OpenCode CLI",
+      "version": "1.18.2",
+      "source_repository": "https://github.com/anomalyco/opencode",
+      "release_url": "https://github.com/anomalyco/opencode/releases/tag/v1.18.2",
+      "release_metadata_evidence_path": "docs/dependencies/evidence/opencode-v1.18.2-release-asset.json",
+      "published_at": "2026-07-15T16:15:38Z",
+      "license": "MIT",
+      "license_url": "https://github.com/anomalyco/opencode/blob/v1.18.2/LICENSE",
+      "license_path": "docs/dependencies/licenses/opencode-MIT.txt",
+      "archive": {
+        "path": ".tools/downloads/opencode-windows-x64.zip",
+        "asset_api_id": 478101580,
+        "size": 59152788,
+        "sha256": "aca23b18d03639c6bd576a2dd23cebfa6dab80d31358f17cfa03fd1f2a5c41fd",
+        "digest_source": "GitHub release asset metadata"
+      },
+      "executable": {
+        "path": ".tools/opencode/v1.18.2/opencode.exe",
+        "size": 173071752,
+        "sha256": "a610d2704ca43e328ae28d34e94d3e725d6435a282c8a654cfb9f184a8b7ab5b",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=\"Anomaly Innovations, Inc https://anoma.ly/\", O=\"Anomaly Innovations, Inc https://anoma.ly/\", L=Dover, S=Delaware, C=US",
+        "signer_thumbprint": "7C13FB1468AB0B9DC6931A4CAE3CC189119A1DD8"
+      },
+      "external_runtime_dependencies": [],
+      "bundled_dependency_inventory": "Inherited from the upstream self-contained release artifact; no separate runtime packages are resolved by Coevo."
+    },
+    "python": {
+      "name": "CPython",
+      "version": "3.14.3",
+      "source_url": "https://www.python.org/downloads/release/python-3143/",
+      "offline_source": "C:/Python314 official signed installation",
+      "artifact_root": ".tools/python/3.14.3",
+      "file_count": 5421,
+      "total_size": 163694479,
+      "license": "Python Software Foundation License Version 2",
+      "license_path": ".tools/python/3.14.3/LICENSE.txt",
+      "executable": {
+        "path": ".tools/python/3.14.3/python.exe",
+        "size": 106328,
+        "sha256": "cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=Python Software Foundation, O=Python Software Foundation, L=Beaverton, S=Oregon, C=US",
+        "signer_thumbprint": "AB0D2A5429F749A63EF2197B112857BEA6767CB0"
+      },
+      "inventory": {
+        "path": ".tools/python/3.14.3-files.lock",
+        "size": 591052,
+        "sha256": "829b9f4c69430fe1ed18573bedd828552eca242f8c5d128324ad2b1a844534c2",
+        "format": "sha256-tab-size-tab-relative-path"
+      },
+      "network_access": false
+    },
+    "control_archive": {
+      "path": ".tools/control/control.pyz",
+      "size": 37388,
+      "sha256": "c2e06563ca38b22386d094317fb17074b61a0592f0d5f3d4adb69bba0fe058d0",
+      "format": "deterministic ZIP_STORED; sorted fixed entries; DOS epoch",
+      "audit_signature_path": "scripts/audit_signature.ps1",
+      "audit_signature_size": 5994,
+      "audit_signature_sha256": "e87681df0c40d13df675c67794f6f9589bac74edf5ebb1f2996e9ec348212a60"
+    },
+    "make_compatibility_shim": {
+      "node": {
+        "name": "Node.js",
+        "version": "24.14.0",
+        "offline_source": "D:/Program Files/nodejs/node.exe",
+        "license": "MIT",
+        "license_url": "https://github.com/nodejs/node/blob/v24.14.0/LICENSE",
+        "executable": {
+          "path": ".tools/node/24.14.0/node.exe",
+          "size": 91380224,
+          "sha256": "63c259c81e5d472b5f11c8d506070130cb04a1ecf84b80377a34ed6ec9048088",
+          "authenticode_status": "Valid",
+          "signer_subject": "CN=OpenJS Foundation, O=OpenJS Foundation, L=San Francisco, S=California, C=US",
+          "signer_thumbprint": "1E5F84AB818EBC0E2ABD161659EF6DF5E9203773"
+        },
+        "network_access": false
+      },
+      "windows_powershell": {
+        "name": "Windows PowerShell",
+        "version": "10.0.26100.8875",
+        "windows_directory_relative_path": "System32/WindowsPowerShell/v1.0/powershell.exe",
+        "size": 454656,
+        "sha256": "0ff6f2c94bc7e2833a5f7e16de1622e5dba70396f31c7d5f56381870317e8c46",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+        "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79",
+        "network_access": false
+      },
+      "name": "Coevo Make compatibility shim",
+      "version": "1.0",
+      "source": "scripts/tool-shims/make.cs",
+      "source_sha256": "b427f1004f57afa57f61c2f10dda5938be28873120d506fa84cdfb78cb1426ff",
+      "script_inventory": {
+        "path": "docs/dependencies/python-script-lock.tsv",
+        "size": 950,
+        "sha256": "ca44afe03b2231bd5d648a6bb6781060e6d6129caacdd62aa0138918a00e4ba8"
+      },
+      "compiler": "%WINDIR%/Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+      "compiler_lock": {
+        "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
+        "size": 2569832,
+        "sha256": "46809206887326d2d24db1eff1f3064de972c3451abe766b49111450a5e08e00",
+        "authenticode_status": "Valid",
+        "signer_subject": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+        "signer_thumbprint": "FACDE3D80E99AFCC15E08AC5A69BD22785287F79"
+      },
+      "license": "repository license",
+      "network_access": false,
+      "source_size": 12967
+    }
+  }
+}
