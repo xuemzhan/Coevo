@@ -51,6 +51,12 @@ from .baseline import (
     confirm_baseline,
 )
 from .service import TaskDecompositionService
+from .editing import (
+    add_task,
+    remove_task,
+    reorder_tasks,
+    update_task,
+)
 
 __all__ = [
     "BaselineInput",
@@ -64,8 +70,12 @@ __all__ = [
     "TaskDecompositionService",
     "TaskDecompositionValidationError",
     "WorkPackage",
+    "add_task",
     "build_baseline",
     "confirm_baseline",
     "cycle_in_components",
+    "remove_task",
+    "reorder_tasks",
     "topological_order",
+    "update_task",
 ]
