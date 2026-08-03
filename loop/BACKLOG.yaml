@@ -678,3 +678,12 @@ items:
     acceptance_tests: []
     security_review: true
     protocol_review: false
+  # ---------- 备份/恢复工具 + 恢复故障注入测试（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: BACKUP-1
+    story: ENG-BASE
+    title: 备份/恢复工具与恢复故障注入测试：scripts/backup_state.py（stdlib，backup/verify/restore/list）——备份驾驶舱状态（cockpit-state.json/access.jsonl/current/releases.json/封装注册表）+ 审计链（loop/audit-*、tool-audit.jsonl、audit-signing*）+ manifests，带 SHA-256 清单、原子写入、路径穿越守卫、运行中锁时拒绝恢复、恢复前预备份 .pre-restore；tests/unit/test_backup_state.py（清单往返/路径守卫/运行锁拒绝/列表）；tests/integration/test_recovery_faults.py（状态存储中断保存→旧状态完整、安装器升级中断→指针不变且 --force 可恢复）
+    status: ready
+    dependencies: [OPS-1]
+    acceptance_tests: []
+    security_review: true
+    protocol_review: false

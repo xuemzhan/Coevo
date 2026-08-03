@@ -3705,6 +3705,28 @@ security-reviewer 双签门禁。
   未复核时按 git 历史回退 `2d1fb28`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- BACKUP-1 备份/恢复工具 + 恢复故障注入测试 done
+
+- 用户指令：继续对项目进行生产落地优化。本项落地备份/恢复工具化与断电/中断
+  恢复测试（此前审查 P2"并发与断电故障注入测试补强"）。
+- 实现（commit `16c5f0e`，4 文件，+530/-7）：
+  ① `scripts/backup_state.py`（stdlib）——backup/verify/restore/list：备份驾驶舱
+  状态（cockpit-state/access.jsonl/current/releases.json/wrapped-keys.json/
+  manifests）+ 审计链（tool-audit/audit-head*/audit-signing*/audit-checkpoint）；
+  SHA-256 清单原子写入、verify 逐文件复验、restore 先验后写、运行中新鲜锁拒绝、
+  恢复前 `.pre-restore-<ts>` 备拷、路径穿越守卫、label 白名单；
+  ② `tests/unit/test_backup_state.py` 6 项 + `tests/integration/test_recovery_faults.py`
+  3 项（状态存储中断保存不损坏已提交状态/重启加载最后提交态；安装器升级中断
+  半拷贝但指针不变、check 通过、--force 恢复完成）。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 834 / integration 252 / security 97 / e2e 12 全绿；内联 verifier +
+  security-reviewer PASS（Critical/High 0）。
+- 边界：备份目录默认位于安装根内，异地拷贝由部署策略决定；密钥句柄/私钥不随
+  备份（需按身份库/密钥手册处置）。
+- 回滚条件：备份/恢复任一测试失败、恢复路径可越出安装根、或门禁指纹变化未复核
+  时按 git 历史回退 `16c5f0e`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
