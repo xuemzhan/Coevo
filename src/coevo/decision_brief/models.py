@@ -446,6 +446,10 @@ def _build_content(
     receipt: MergeCommitReceipt,
     report: RiskReport,
     brief_type: BriefType,
+    *,
+    period_start: str | None = None,
+    period_end: str | None = None,
+    topic_risk_ids: tuple[str, ...] | None = None,
 ) -> BriefContent:
     result = SourceReference(BriefSourceKind.RESULT_PACKAGE, receipt.package_id)
     receipt_source = SourceReference(BriefSourceKind.MERGE_RECEIPT, receipt.receipt_id)
@@ -465,22 +469,109 @@ def _build_content(
                 receipt_source,
             )),
         ))
+    # AC-5 type-specific parameters: fail closed on malformed values and
+    # cross-type misuse. When omitted, the brief keeps the US-13-AC-1
+    # label-only shape (backward compatible).
+    if period_start is not None:
+        _parse_utc(period_start, field="period_start")
+    if period_end is not None:
+        _parse_utc(period_end, field="period_end")
+    if (
+        period_start is not None
+        and period_end is not None
+        and period_end < period_start
+    ):
+        raise DecisionBriefValidationError(
+            "period_end must be >= period_start"
+        )
+    topic_set: frozenset[str] | None = None
+    if topic_risk_ids is not None:
+        if (
+            type(topic_risk_ids) is not tuple
+            or not topic_risk_ids
+            or any(type(item) is not str or not item for item in topic_risk_ids)
+            or len(set(topic_risk_ids)) != len(topic_risk_ids)
+        ):
+            raise DecisionBriefValidationError(
+                "topic_risk_ids must be a non-empty tuple of unique strings"
+            )
+        known = frozenset(risk.risk_id for risk in report.risks)
+        unknown = sorted(set(topic_risk_ids) - known)
+        if unknown:
+            raise DecisionBriefValidationError(
+                f"topic_risk_ids reference unknown risks: {unknown}"
+            )
+        topic_set = frozenset(topic_risk_ids)
+    if brief_type is BriefType.PERIODIC:
+        if topic_risk_ids is not None:
+            raise DecisionBriefValidationError(
+                "PERIODIC briefs cannot use topic_risk_ids"
+            )
+        if (period_start is None) != (period_end is None):
+            raise DecisionBriefValidationError(
+                "PERIODIC briefs require both period_start and period_end"
+            )
+    elif brief_type is BriefType.RISK_TOPIC:
+        if period_start is not None or period_end is not None:
+            raise DecisionBriefValidationError(
+                "RISK_TOPIC briefs cannot use period bounds"
+            )
+        if topic_risk_ids is None:
+            raise DecisionBriefValidationError(
+                "RISK_TOPIC briefs require topic_risk_ids"
+            )
+    elif period_start is not None or period_end is not None or topic_risk_ids is not None:
+        raise DecisionBriefValidationError(
+            "STAGE briefs do not accept period or topic parameters"
+        )
     severe = tuple(risk for risk in report.risks if risk.severity >= HIGH_RISK_MIN_SEVERITY)
     label = {
         BriefType.STAGE: "Stage decision brief",
         BriefType.PERIODIC: "Periodic decision report",
         BriefType.RISK_TOPIC: "Risk topic brief",
     }[brief_type]
-    return BriefContent(
-        title=f"{label}: {receipt.snapshot.baseline.title}",
-        overall_progress=(BriefConclusion(
-            conclusion_id="progress.confirmed",
-            text=(
-                f"Project {receipt.project_id} is confirmed at {receipt.merged_revision}; "
-                f"latest task status is {receipt.report_status.value}."
+    title = f"{label}: {receipt.snapshot.baseline.title}"
+    if brief_type is BriefType.PERIODIC and period_start is not None:
+        title = f"{title} ({period_start} -> {period_end})"
+    if brief_type is BriefType.RISK_TOPIC and topic_set is not None:
+        title = f"{title} [{', '.join(sorted(topic_set))}]"
+    progress_text = (
+        f"Project {receipt.project_id} is confirmed at {receipt.merged_revision}; "
+        f"latest task status is {receipt.report_status.value}."
+    )
+    if brief_type is BriefType.PERIODIC and period_start is not None:
+        progress_text = (
+            f"Project {receipt.project_id} confirmed at {receipt.merged_revision} "
+            f"for report period {period_start} to {period_end}; "
+            f"latest task status is {receipt.report_status.value}."
+        )
+    progress = (BriefConclusion(
+        conclusion_id="progress.confirmed",
+        text=progress_text,
+        sources=_stable_sources((task, result, receipt_source)),
+    ),)
+    if brief_type is BriefType.RISK_TOPIC and topic_set is not None:
+        topic_risks = tuple(
+            risk for risk in report.risks if risk.risk_id in topic_set
+        )
+        topic_severe = tuple(
+            risk for risk in topic_risks
+            if risk.severity >= HIGH_RISK_MIN_SEVERITY
+        )
+        return BriefContent(
+            title=title,
+            overall_progress=progress,
+            important_changes=tuple(changes),
+            high_risk_items=tuple(
+                _risk_conclusion(risk, pending=False) for risk in topic_severe
             ),
-            sources=_stable_sources((task, result, receipt_source)),
-        ),),
+            pending_decisions=tuple(
+                _risk_conclusion(risk, pending=True) for risk in topic_risks
+            ),
+        )
+    return BriefContent(
+        title=title,
+        overall_progress=progress,
         important_changes=tuple(changes),
         high_risk_items=tuple(_risk_conclusion(item, pending=False) for item in severe),
         pending_decisions=tuple(_risk_conclusion(item, pending=True) for item in severe),

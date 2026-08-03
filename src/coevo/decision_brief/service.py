@@ -26,6 +26,9 @@ class DecisionBriefService:
         generated_at: str,
         actor_id: str,
         event_id: str,
+        period_start: str | None = None,
+        period_end: str | None = None,
+        topic_risk_ids: tuple[str, ...] | None = None,
     ) -> DecisionBrief:
         generated_time = _parse_utc(generated_at, field="generated_at")
         _safe_string(actor_id, field="actor_id", max_bytes=1024)
@@ -46,7 +49,14 @@ class DecisionBriefService:
             approval_id=template_approval_id, template_ref=template_ref
         )
         brief_id = _brief_id(receipt, brief_type)
-        content = _build_content(receipt, confirmation.report, brief_type)
+        content = _build_content(
+            receipt,
+            confirmation.report,
+            brief_type,
+            period_start=period_start,
+            period_end=period_end,
+            topic_risk_ids=topic_risk_ids,
+        )
         initial = _make_version(
             revision=1,
             created_at=generated_at,

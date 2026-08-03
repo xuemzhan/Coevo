@@ -122,6 +122,9 @@ class Harness:
         *,
         brief_type: BriefType = BriefType.STAGE,
         event_id: str = "brief.generate.1",
+        period_start: str | None = None,
+        period_end: str | None = None,
+        topic_risk_ids: tuple[str, ...] | None = None,
     ):
         return DecisionBriefService().generate(
             receipt_id=self.receipt.receipt_id,
@@ -136,6 +139,9 @@ class Harness:
             generated_at=GENERATED_AT,
             actor_id="CERT-OWNER",
             event_id=event_id,
+            period_start=period_start,
+            period_end=period_end,
+            topic_risk_ids=topic_risk_ids,
         )
 
 
@@ -144,7 +150,11 @@ class DecisionBriefGenerationTests(unittest.TestCase):
         for brief_type in BriefType:
             with self.subTest(brief_type=brief_type), tempfile.TemporaryDirectory() as tmp:
                 harness = Harness(Path(tmp))
-                brief = harness.generate(brief_type=brief_type)
+                kwargs = {}
+                if brief_type is BriefType.RISK_TOPIC:
+                    # AC-5: risk-topic briefs are focused on explicit topic risks.
+                    kwargs["topic_risk_ids"] = ("risk.high",)
+                brief = harness.generate(brief_type=brief_type, **kwargs)
                 content = brief.current.content
                 self.assertTrue(content.overall_progress)
                 self.assertTrue(content.important_changes)
@@ -325,6 +335,115 @@ class DecisionBriefGenerationTests(unittest.TestCase):
         self.assertFalse(repository._items)
         self.assertFalse(repository._events)
         self.assertFalse(authority.service.audit_trail)
+
+
+class BriefTypeContentTests(unittest.TestCase):
+    def test_periodic_brief_includes_period_window(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = Harness(Path(tmp))
+            brief = harness.generate(
+                brief_type=BriefType.PERIODIC,
+                period_start="2026-08-01T00:00:00Z",
+                period_end="2026-08-31T00:00:00Z",
+                event_id="brief.generate.periodic.1",
+            )
+            content = brief.current.content
+            self.assertIn(
+                "2026-08-01T00:00:00Z -> 2026-08-31T00:00:00Z", content.title
+            )
+            self.assertIn(
+                "for report period 2026-08-01T00:00:00Z to 2026-08-31T00:00:00Z",
+                content.overall_progress[0].text,
+            )
+
+    def test_risk_topic_brief_focuses_topic_risks(self):
+        risks = (
+            _risk("risk.high", 4),
+            _risk("risk.low", 3, kind=RiskKind.LONG_SILENCE),
+            _risk("risk.topic", 5),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = Harness(Path(tmp), risks=risks)
+            brief = harness.generate(
+                brief_type=BriefType.RISK_TOPIC,
+                topic_risk_ids=("risk.topic",),
+                event_id="brief.generate.topic.1",
+            )
+            content = brief.current.content
+            self.assertIn("[risk.topic]", content.title)
+            ids = tuple(
+                item.conclusion_id
+                for section in content.sections
+                for item in section
+            )
+            self.assertIn("decision.risk.topic", ids)
+            self.assertIn("risk.risk.topic", ids)
+            self.assertNotIn("risk.high", " ".join(ids))
+            self.assertNotIn("risk.low", " ".join(ids))
+            for section in content.sections:
+                for conclusion in section:
+                    self.assertNotIn("risk.low", conclusion.text)
+
+    def test_risk_topic_requires_existing_topic_ids(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = Harness(Path(tmp))
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.RISK_TOPIC,
+                    topic_risk_ids=("risk.ghost",),
+                    event_id="brief.generate.bad-topic.1",
+                )
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.RISK_TOPIC,
+                    topic_risk_ids=("risk.high", "risk.high"),
+                    event_id="brief.generate.dup-topic.1",
+                )
+
+    def test_periodic_requires_both_bounds_and_order(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = Harness(Path(tmp))
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.PERIODIC,
+                    period_start="2026-08-01T00:00:00Z",
+                    event_id="brief.generate.partial.1",
+                )
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.PERIODIC,
+                    period_start="2026-08-31T00:00:00Z",
+                    period_end="2026-08-01T00:00:00Z",
+                    event_id="brief.generate.inverted.1",
+                )
+
+    def test_cross_type_parameters_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = Harness(Path(tmp))
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.STAGE,
+                    topic_risk_ids=("risk.high",),
+                    event_id="brief.generate.stage-topic.1",
+                )
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.PERIODIC,
+                    topic_risk_ids=("risk.high",),
+                    event_id="brief.generate.periodic-topic.1",
+                )
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.RISK_TOPIC,
+                    period_start="2026-08-01T00:00:00Z",
+                    topic_risk_ids=("risk.high",),
+                    event_id="brief.generate.topic-period.1",
+                )
+            with self.assertRaises(DecisionBriefValidationError):
+                harness.generate(
+                    brief_type=BriefType.RISK_TOPIC,
+                    event_id="brief.generate.topic-missing.1",
+                )
 
 
 class ResourceLimitTests(unittest.TestCase):
