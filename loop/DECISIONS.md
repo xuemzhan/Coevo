@@ -3596,6 +3596,32 @@ security-reviewer 双签门禁。
   变化未复核时按 git 历史回退 `69fe4c2`（同时回退 audit-signing.json 字段）。
 - 提出者：loop-engineer（Codex）。决策者：用户（批准开源三方库方案）。
 
+## 2026-08-03 -- CI-1 CI 与制品托管方案实施 done（用户批准 CI/制品托管方案）
+
+- 用户决策：批准 CI/制品托管方案。实现：GitHub Actions 工作流 + 锁工具链制品
+  托管 + 恢复脚本 + 托管方案文档。
+- 实现（commit `53cad86`，5 文件，+383）：
+  ① `.github/workflows/quality.yml`——Windows runner，workflow_dispatch/push/PR
+  触发；restore 锁工具链制品后运行 fmt/lint/test/test-security/test-e2e 四个
+  验证侧目标并上传门禁证据（VERIFICATION/audit 链）；`--target quality` 的签名
+  封存保留维护机——审计签名私钥不可导出、不能上 runner，runner 仅用公钥复验
+  既有审计链（lint 内含 audit_log/audit_seal verify）；
+  ② `scripts/ci-restore-toolchain.ps1`——https 下载（或 -LocalPath 测试注入）、
+  SHA-256 锚定 fail-closed（不匹配不解压）、先临时解压校验 python/node/control
+  与仓库 toolchain-lock.json 可解析再复制进 .tools、失败清理不留半成品、
+  描述符 sha256=pending 时拒绝运行；
+  ③ `docs/dependencies/ci-artifact.json` 制品描述符 + 
+  `docs/operations/ci-artifact-hosting.md` 托管方案（构建命令/发布/回填哈希/
+  激活五步/升级/安全说明）。
+- 边界/激活前置：当前仓库规则禁 git push，工作流与制品发布需所有者操作
+  （激活步骤已写入文档）；CI 首跑需人工确认 runner 环境兼容性。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 806 / integration 242 / security 97 / e2e 12 全绿；恢复脚本 6 项测试；
+  内联 verifier + security-reviewer PASS（Critical/High 0）。
+- 回滚条件：恢复脚本任一测试失败、制品哈希锚定机制被绕过、或门禁指纹变化未
+  复核时按 git 历史回退 `53cad86`。
+- 提出者：loop-engineer（Codex）。决策者：用户（批准 CI/制品托管方案）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

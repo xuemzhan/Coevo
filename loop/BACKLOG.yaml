@@ -633,3 +633,12 @@ items:
     acceptance_tests: []
     security_review: true
     protocol_review: true
+  # ---------- CI 与制品托管（2026-08-03 用户批准 CI/制品托管方案） ----------
+  - id: CI-1
+    story: ENG-BASE
+    title: CI 与制品托管方案实施：.github/workflows/quality.yml（Windows runner，workflow_dispatch/push/PR 触发，restore 锁工具链制品后运行 fmt/lint/test/test-security/test-e2e 四个验证侧目标，上传门禁证据；--target quality 的签名封存保留维护机，runner 仅公钥复验审计链）；scripts/ci-restore-toolchain.ps1（https 下载或 LocalPath 测试注入，SHA-256 锚定 fail-closed，先临时解压校验 python/node/control 与 lock 可解析再复制进 .tools，清理不留半成品）；docs/dependencies/ci-artifact.json 制品描述符（pending 拒绝运行）；docs/operations/ci-artifact-hosting.md 托管方案（构建/发布/回填哈希/激活/升级/安全说明）；tests/unit/test_ci_restore.py 6 项（成功/哈希不匹配/缺条目/pending 拒绝/工作流四目标且不含 quality/描述符）
+    status: ready
+    dependencies: [CRYPTO-1]
+    acceptance_tests: []
+    security_review: true
+    protocol_review: false
