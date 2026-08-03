@@ -520,3 +520,13 @@ items:
       - tests/integration/test_talent_store_persistence.py
     security_review: true
     protocol_review: false
+  # ---------- phase 2 track B: decision brief types (2026-08-03) ----------
+  - id: US-13-AC-2
+    story: US-13
+    title: 简报类型内容差异化（AC-5）：PERIODIC 周期报告带周期窗口、RISK_TOPIC 风险专题按指定风险聚焦（标题/进展/高风险/待决内容随类型分化；跨类型参数与非法值 fail-closed；参数缺省保持 AC-1 兼容形态）
+    status: done
+    dependencies: [US-13-AC-1]
+    acceptance_tests:
+      - tests/unit/test_decision_brief.py
+    security_review: false
+    protocol_review: false

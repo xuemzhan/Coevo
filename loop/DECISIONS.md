@@ -3287,3 +3287,37 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- US-13-AC-2 简报类型内容差异化 done（Phase 2 Track B 第三项）
+
+- 用户确认按 C→A→B 推进，并在 B 轨内先 US-13-AC-2~7 后 US-2 剩余 AC。
+- DISCOVER 结论：US-13-AC-1（done）已覆盖 AC-1/2/3/4（WPS 请求与模板校验）/
+  6/7（CAS 版本链 BriefVersion.revise，含 fork/重放/篡改测试）；三种 BriefType
+  （STAGE/PERIODIC/RISK_TOPIC）已存在但内容仅标题不同（既有测试
+  test_all_three_types_generate_four_traceable_sections 可证）。真正缺口是
+  AC-5 的类型化内容，故 US-13-AC-2 定义为该差异化切片。
+- 实现：`_build_content` 新增可选参数 period_start/period_end/topic_risk_ids；
+  PERIODIC 标题与总体进展含周期窗口；RISK_TOPIC 高风险/待决仅聚焦指定风险且
+  标题带专题标记；跨类型参数与非法值（周期缺失/倒置、未知或重复 topic id、
+  非 tuple/空/非字符串、STAGE 带 topic、RISK_TOPIC 缺 topic）全部 fail-closed；
+  参数缺省保持 AC-1 标签形态（向后兼容，既有 CAS 版本链与测试不变）。
+  `DecisionBriefService.generate` 透传新参数。
+- 验证：tests/unit/test_decision_brief.py 25/25（新增 5 项；既有 20 项回归）；
+  `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`，audit fully-sealed。
+- 行尾：models.py/service.py 为 PROD-HARDEN-1 时期的 CRLF 混合 blob，本轮随
+  编辑统一为 LF（与仓库其余文件一致；既有模式）。
+- 安全审查（内联）：纯内容构建，无新信任边界、无 IO/文件/密钥/权限变更，
+  Critical/High 0。protocol 不涉及。
+- 记录：BACKLOG US-13-AC-2 新增 done；追溯矩阵新增行（commit 410c7e5）；
+  STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION 追加门禁
+  记录。
+- 提出者：loop-engineer（Codex）。决策者：用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
