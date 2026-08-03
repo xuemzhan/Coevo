@@ -104,3 +104,16 @@ python scripts\backup_state.py --action restore --label <label>
 - 健康检查不替代 `make quality`（后者含测试与审计封存）；
 - 自启任务不提升权限、不注册服务；需要 Windows 服务形态属后续决策点；
 - 备份不含密钥句柄与 CNG 私钥，恢复密钥需按身份库/密钥手册单独进行。
+
+## 7. 发布就绪（RELEASE-1）
+
+发布前运行单命令就绪检查（JSON + 退出码 0=就绪 / 1=警告 / 2=不发布）：
+
+```powershell
+python scripts\release_check.py --expect-version <版本>
+```
+
+检查项：git 工作区干净、版本语义化且匹配、审计 fully-sealed（未封尾=警告）、
+secret_scan 干净、追溯矩阵一致、loop/STATE done 且无阻塞、无 in-progress 工作项
+（ready 项=警告，视为显式推迟）。已知限制与外部条件见
+`known-limitations.md`，发布前必读。
