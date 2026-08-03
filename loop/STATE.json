@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "REVIEW-FIX-1",
+  "current_item": "INSTALL-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "50513a7eb6b6b7cf8c6cf7d576672bd90a6416a3",
+  "last_verified_commit": "9331d341b52f8a17a2b75feebca229f467c98b0b",
   "blocking_issue": "",
-  "updated_at": "2026-08-03T13:20:02.348577Z"
+  "updated_at": "2026-08-03T13:38:25.085637Z"
 }

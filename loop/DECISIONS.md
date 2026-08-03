@@ -3498,6 +3498,30 @@ security-reviewer 双签门禁。
   否决时按 git 历史回退 `50513a7` 并重新走独立双签。
 - 提出者：loop-engineer（Codex）。决策者：用户（选项 1 内联执行）。
 
+## 2026-08-03 -- INSTALL-1 离线安装/升级/回滚工具 done（P0-1 决策点）
+
+- 用户指令：先处理任一 P0 决策点，再下一工作项；本项选择 P0-1（打包/离线安装/
+  升级回滚）。沿用本会话已批准的内联执行方式（子代理派发失效，REVIEW-FIX-1
+  已留痕）。
+- 实现（commit `9331d34`，3 文件，+782）：`scripts/install_cockpit.py` 纯 stdlib
+  离线部署工具（install/upgrade/rollback/uninstall/check 五动作）：
+  版本化 `app/<version>` 安装目录、SHA-256 完整性清单（复制即哈希、写清单后复验、
+  current 指针原子切换）、releases.json 安装历史（previous 链）、升级保留上一版本、
+  回滚先复验清单再切指针、卸载仅移除当前版本（数据/日志保留）、check 忽略运行时
+  __pycache__、单实例锁（10 分钟陈旧接管）；fail-closed（版本号正则限安全路径段
+  禁时间戳、安装失败清理目标、install_root != source_root、破坏范围受限）；
+  `docs/operations/install-upgrade.md` 运维手册。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 768 / integration 236 / security 97 / e2e 12 全绿；集成测试 11 项；
+  冒烟（安装 0.2.0 → 已安装 run_cockpit --check ok → install check ok）；
+  内联 verifier PASS + 内联 security-reviewer PASS（Critical/High 0）。
+- 边界/未纳入：制品签名（清单数字签名）、pyproject/setuptools 打包元数据（构建
+  工具链属新依赖需离线审批）、Windows 服务/自启注册（P0-②）、Win7 分支安装验证
+  （P0-④）。均已写入 docs/operations/install-upgrade.md §6 已知限制。
+- 回滚条件：安装器任一集成测试失败、门禁指纹变化未复核，或发现安装器破坏数据/
+  日志目录时按 git 历史回退 `9331d34`。
+- 提出者：loop-engineer（Codex）。决策者：用户（先处理任一 P0 → 选定 P0-1）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
