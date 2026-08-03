@@ -562,3 +562,13 @@ items:
       - tests/unit/test_task_decomposition_agent.py
     security_review: true
     protocol_review: false
+  # ---------- phase 2 track B: local model service (2026-08-03) ----------
+  - id: US-2-AC-5
+    story: US-2
+    title: 本地模型服务接入（生产模型一版 = 本地 vLLM/llama.cpp，用户指令）：OpenAICompatibleProvider 统一支持本地/远程——回环 base_url 判定为本地模式（免密钥、免外发审批、数据不出机，§9.1）；远程必须 https + 密钥 + external_data_ok；端点自动归一 /v1/chat/completions；config 增加 local_openai 档案（默认 127.0.0.1:8000/v1）；DeepSeekProvider 收敛为其远程子类
+    status: done
+    dependencies: [US-2-AC-4]
+    acceptance_tests:
+      - tests/unit/test_model_provider.py
+    security_review: true
+    protocol_review: false

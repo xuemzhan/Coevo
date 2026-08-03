@@ -3433,3 +3433,47 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- 生产模型一版 = 本地模型服务（vLLM/llama.cpp）+ US-2-AC-5 done
+
+- 用户指令：真实环境模型一版为本地模型，使用 vLLM 或 llama.cpp 启动的本地
+  模型服务。
+- 合规定位：本地部署符合 mandatory-technical-constraints §9.1（本地终端 /
+  经批准集中服务；敏感数据不得发往未批准公网模型）——本地模式数据不出机，
+  无需外发审批。
+- 实现：`OpenAICompatibleProvider` 统一 OpenAI 兼容接口（vLLM 与 llama.cpp
+  均提供 /v1/chat/completions）：
+  * 回环 host（127.0.0.1/localhost/::1）= 本地模式：免 API 密钥、免
+    external_data_ok 门禁；
+  * 非回环 = 远程模式：必须 https + 密钥（api_key_env）+ external_data_ok
+    （fail-closed 外发门禁）；
+  * 端点自动归一 /v1/chat/completions（base_url 缺 /v1 自动补）。
+  `config/model-config.json` 新增 local_openai 档案（默认
+  http://127.0.0.1:8000/v1，vLLM 默认端口 8000；llama.cpp 默认 8080，改
+  base_url 即可）；`DeepSeekProvider` 收敛为远程子类（向后兼容）；
+  提示词仍按 name/model 变体解析（本地模型可加
+  local_openai/<model> 变体，无则 default 兜底）。
+- 验证：unit 29（model，含 LocalProviderTests 4 项）+ agent 6 回归全绿；
+  `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`，audit fully-sealed
+  （门禁离线）。
+- 安全审查（内联）：本地模式数据不出机；远程模式 https + 密钥环境引用 +
+  外发审批；密钥不进文件/日志/repr/请求体；Critical/High 0。
+  protocol 不涉及。
+- 启用方式（生产 v1）：启动 vLLM（如 `vllm serve qwen2.5-7b-instruct
+  --host 127.0.0.1 --port 8000`）或 llama.cpp server，然后把
+  config/model-config.json 的 provider 改为 "local_openai"（并按实际端口/
+  模型名调整）；提示词可在 config/model-prompts.json 增加
+  local_openai/<model> 变体。
+- 记录：BACKLOG US-2-AC-5 新增 done；追溯矩阵新增行（commit 317e080）；
+  STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION 追加门禁
+  记录。
+- 提出者：loop-engineer（Codex）。决策者：用户（生产模型一版 = 本地模型）。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
