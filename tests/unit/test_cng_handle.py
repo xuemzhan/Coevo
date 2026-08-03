@@ -132,12 +132,23 @@ class _FakeEngine:
     def verify(self, handle, data, signature) -> bool:
         return data == signature
 
+    def sign_wrapped(self, kek_name, wrapped, data, *, role, profile) -> bytes:
+        return b"sig:" + data
+
+    def open_wrapped(self, kek_name, wrapped, sealed, *, role, profile, associated_data) -> bytes:
+        return b"open:" + sealed[0]
+
 
 class ProtectedProviderTests(unittest.TestCase):
     def _provider(self):
         store = CngKekStore.__new__(CngKekStore)  # helper not needed for these tests
         handle = CngProtectedKeyHandle("h.1", "CERT-SENDER")
-        return GmsslProtectedProvider(_FakeEngine(), store, handle)
+        kek_ref = CngKekReference(
+            "CoevoSm2Kek-" + "a" * 32, "b" * 64, "2026-08-03T00:00:00Z"
+        )
+        return GmsslProtectedProvider(
+            _FakeEngine(), store, handle, b"wrapped", kek_ref, "crypto-test", "sender"
+        )
 
     def test_policy_surface(self):
         provider = self._provider()
@@ -156,18 +167,29 @@ class ProtectedProviderTests(unittest.TestCase):
         )
         self.assertTrue(provider.verify(None, b"d", b"d"))
 
-    def test_private_side_ops_fail_closed_with_handle2(self):
+    def test_private_side_ops_delegate_to_helper(self):
         provider = self._provider()
-        with self.assertRaises(Exception) as ctx:
-            provider.sign(None, b"data")
-        self.assertIn("HANDLE-2", str(ctx.exception))
-        with self.assertRaises(Exception) as ctx:
-            provider.open(None, object(), associated_data=b"aad")
-        self.assertIn("HANDLE-2", str(ctx.exception))
+        self.assertEqual(b"sig:data", provider.sign(None, b"data"))
+        self.assertEqual(b"open:plain", provider.open(None, (b"plain",), associated_data=b"aad"))
 
     def test_requires_real_kek_store_and_handle(self):
         with self.assertRaises(Exception):
             GmsslProtectedProvider(_FakeEngine(), object(), None)
+
+    def test_requires_wrapped_key_kek_ref_and_profile(self):
+        store = CngKekStore.__new__(CngKekStore)
+        handle = CngProtectedKeyHandle("h.1", "CERT-SENDER")
+        kek_ref = CngKekReference(
+            "CoevoSm2Kek-" + "a" * 32, "b" * 64, "2026-08-03T00:00:00Z"
+        )
+        with self.assertRaises(Exception):
+            GmsslProtectedProvider(_FakeEngine(), store, handle, b"", kek_ref, "p", "sender")
+        with self.assertRaises(Exception):
+            GmsslProtectedProvider(_FakeEngine(), store, handle, b"w", object(), "p", "sender")
+        with self.assertRaises(Exception):
+            GmsslProtectedProvider(_FakeEngine(), store, handle, b"w", kek_ref, "", "sender")
+        with self.assertRaises(Exception):
+            GmsslProtectedProvider(_FakeEngine(), store, handle, b"w", kek_ref, "p", "admin")
 
 
 if __name__ == "__main__":

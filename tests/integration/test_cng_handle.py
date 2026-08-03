@@ -1,14 +1,24 @@
 """HANDLE-1: real CNG non-exportable KEK integration tests."""
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 import uuid
 from pathlib import Path
 
-from src.coevo.crypto import CngKekStore, CngKekUnavailableError, CngWrappedKeyRegistry
+from src.coevo.crypto import (
+    CngKekStore,
+    CngKekUnavailableError,
+    CngProtectedKeyHandle,
+    CngWrappedKeyRegistry,
+    GmsslProtectedProvider,
+    GmsslPrototypeProvider,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,6 +81,90 @@ class RegistryPersistenceIntegrationTests(unittest.TestCase):
             reopened = CngWrappedKeyRegistry.open(path)
             self.assertEqual(1, len(reopened.snapshot()))
             self.assertEqual("h.1", reopened.snapshot()[0]["handle_id"])
+
+
+@unittest.skipUnless(os.name == "nt", "CNG protected SM2 round-trip requires Windows")
+class ProtectedSm2RoundTripTests(unittest.TestCase):
+    """HANDLE-2: sign/open via a CNG KEK-wrapped SM2 key (helper-side unwrap)."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.profile = "handle2-" + uuid.uuid4().hex[:16]
+        cls.output = ROOT / "loop" / "runtime" / "sm2-test-pki" / cls.profile
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+             str(ROOT / "scripts" / "generate-sm2-test-pki.ps1"),
+             "-ProfileName", cls.profile],
+            cwd=ROOT, capture_output=True, text=True, timeout=60,
+        )
+        if result.returncode != 0:
+            raise AssertionError(result.stderr)
+        cls.engine = GmsslPrototypeProvider(ROOT)
+        cls.store = CngKekStore()
+        cls.kek_ref = cls.store.create_kek("CoevoSm2Kek-" + uuid.uuid4().hex)
+        cls.sender_handle = cls.engine.sender_handle(cls.profile, "CERT-SENDER")
+        cls.recipient_handle = cls.engine.recipient_handle(cls.profile, "CERT-RECIPIENT")
+        cls.sender_wrapped = cls.engine.protect_key(
+            cls.kek_ref.kek_name, "sender", profile=cls.profile
+        )
+        cls.recipient_wrapped = cls.engine.protect_key(
+            cls.kek_ref.kek_name, "recipient", profile=cls.profile
+        )
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        try:
+            cls.store.destroy(cls.kek_ref)
+        except Exception:
+            pass
+        shutil.rmtree(cls.output, ignore_errors=True)
+
+    def _provider(
+        self, wrapped: bytes, handle: CngProtectedKeyHandle, role: str
+    ) -> GmsslProtectedProvider:
+        return GmsslProtectedProvider(
+            self.engine, self.store, handle, wrapped, self.kek_ref, self.profile, role
+        )
+
+    def test_protected_sign_verifies_with_public_cert(self):
+        provider = self._provider(
+            self.sender_wrapped, CngProtectedKeyHandle("h.s", "CERT-SENDER"), "sender"
+        )
+        signature = provider.sign(None, b"canonical manifest")
+        self.assertTrue(
+            self.engine.verify(self.sender_handle, b"canonical manifest", signature)
+        )
+        self.assertFalse(self.engine.verify(self.sender_handle, b"tampered", signature))
+
+    def test_protected_open_roundtrip_and_tamper(self):
+        sealed = self.engine.seal(
+            self.recipient_handle, b"secret payload", associated_data=b"envelope"
+        )
+        provider = self._provider(
+            self.recipient_wrapped,
+            CngProtectedKeyHandle("h.r", "CERT-RECIPIENT"),
+            "recipient",
+        )
+        self.assertEqual(
+            b"secret payload",
+            provider.open(None, sealed, associated_data=b"envelope"),
+        )
+        tampered = dataclasses.replace(
+            sealed, tag=bytes([sealed.tag[0] ^ 1]) + sealed.tag[1:]
+        )
+        with self.assertRaises(Exception):
+            provider.open(None, tampered, associated_data=b"envelope")
+
+    def test_wrong_kek_fails_closed(self):
+        other = self.store.create_kek("CoevoSm2Kek-" + uuid.uuid4().hex)
+        try:
+            with self.assertRaises(Exception):
+                self.engine.sign_wrapped(
+                    other.kek_name, self.sender_wrapped, b"x",
+                    role="sender", profile=self.profile,
+                )
+        finally:
+            self.store.destroy(other)
 
 
 if __name__ == "__main__":

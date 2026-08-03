@@ -10,14 +10,14 @@ The GmSSL 3.2.0 MVP prototype (``key_handle_backed=False``) therefore
 cannot satisfy ``ProviderRegistry.require_approved`` -- exactly the
 separation the business owner approved.
 
-HANDLE-1 (2026-08-03) adds the first key-handle-backed provider:
+HANDLE-1/2 (2026-08-03) adds the first key-handle-backed provider:
 ``coevo.crypto.GmsslProtectedProvider`` (``key_handle_backed=True``,
-scope ``APPROVED_PRODUCT``) whose SM2 private-key material is wrapped at
-rest under a non-exportable CNG RSA KEK (``coevo.crypto.CngKekStore`` /
-``coevo.crypto.CngWrappedKeyRegistry``). Unwrapping for SM2 sign/open
-happens inside the controlled crypto helper (HANDLE-2); until that
-helper action is wired, those operations fail closed with a precise
-error rather than falling back to the unprotected prototype path.
+scope ``APPROVED_PRODUCT``) whose SM2 key's PKCS#8 password is wrapped
+at rest under a non-exportable CNG RSA KEK (``coevo.crypto.CngKekStore``
+/ ``coevo.crypto.CngWrappedKeyRegistry``). SM2 sign/open unwrap the
+password and unlock the key inside the controlled crypto helper
+(HANDLE-2 actions 6/7); raw key bytes and the password never cross to
+Python.
 """
 from __future__ import annotations
 

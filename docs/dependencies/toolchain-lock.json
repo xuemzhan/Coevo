@@ -97,12 +97,8 @@
       "helper": {
         "protocol": "COEVOCRYPTO/1",
         "source": "scripts/gmssl-crypto-helper.cs",
-        "source_size": 17161,
-        "source_sha256": "71d32ecab3f91a78cd2d4666fba366a488bad80758c0a4d93f4e6ea8edb48b7a",
-    "launcher": {
-      "path": "scripts/invoke-gmssl-crypto.ps1",
-      "size": 6309,
-      "sha256": "7d6a99731490656c96a324d2be835271104e7bec8e24cda69530d9d42913d1bf"
+        "source_size": 20950, "source_sha256": "eb17d6e110c90c7b0bec234350d7f2c51b5885f2e4873c9806fa90743b514934",
+    "launcher": { "path": "scripts/invoke-gmssl-crypto.ps1", "size": 6339, "sha256": "2e24425cdd15cefaf1e066f39f6921cd68eab9609ae6bc5420102e566ad91390"
     },
         "compiler_lock": {
           "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
@@ -113,7 +109,8 @@
         },
         "framework_references": [
           {"name": "mscorlib.dll", "size": 5445432, "sha256": "a8cae3d326f7d973ca79cba849939d4837ad18d507ef6d5f6ebab802b7fb157a"},
-          {"name": "System.dll", "size": 3545264, "sha256": "2b3c17c6208a0b4b6beb94e1a066f99ba06cdb2ea919479e99d47e8c6d96dc71"}
+          {"name": "System.dll", "size": 3545264, "sha256": "2b3c17c6208a0b4b6beb94e1a066f99ba06cdb2ea919479e99d47e8c6d96dc71"},
+          {"name": "System.Core.dll", "size": 1551032, "sha256": "ec021797ef8aa7730fdeb3092a28532bcfa19ca179703327e6f004d3cfef7918"}
         ],
         "secret_transport": "No secrets in argv, environment, stdout, stderr, logs, or Python objects; encrypted key files and DPAPI password blobs are opened by the one-shot helper, and unwrapped SM4 keys remain helper-side.",
         "network_access": false

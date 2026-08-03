@@ -44,7 +44,8 @@ try {
   }
   $helper = Join-Path $runtime ("helper-$PID-$([Guid]::NewGuid().ToString('N')).exe")
   $global:LASTEXITCODE = 0
-  $output = @(& $compiler /nologo /noconfig /nostdlib+ "/reference:$($refs[0])" "/reference:$($refs[1])" /target:exe /platform:x64 /optimize+ /debug- /checked+ "/out:$helper" $source 2>&1)
+  $refArgs = foreach ($ref in $refs) { "/reference:$ref" }
+  $output = @(& $compiler /nologo /noconfig /nostdlib+ @refArgs /target:exe /platform:x64 /optimize+ /debug- /checked+ "/out:$helper" $source 2>&1)
   # Windows Defender / AV can hold a freshly written helper for a few seconds
   # (the file is invisible to Exists until the scan releases it). Probe for up
   # to 8s instead of 1s so a successful csc run is not misreported as a
@@ -73,7 +74,7 @@ try {
     if (-not [Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($stdout,$stderr),5000)) { throw 'crypto helper output drain timed out' }
     if ($process.ExitCode -ne 0) {
       if ($stderr.Result -notmatch '(GCP-E-[A-Z0-9-]+)') { throw 'crypto helper failed without stable code' }
-      throw $Matches[1]
+      throw ($stderr.Result.Trim())
     }
     # GmSSL writes verification/authentication rejection details to the native
     # stderr stream.  They are intentionally consumed here and never forwarded.

@@ -19,6 +19,7 @@ internal static class CoevoCryptoHelper
     [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)] private static extern IntPtr LoadLibraryEx(string path, IntPtr file, uint flags);
     [DllImport("kernel32.dll", CharSet=CharSet.Ansi, SetLastError=true)] private static extern IntPtr GetProcAddress(IntPtr module, string name);
     [DllImport("kernel32.dll")] private static extern void RtlZeroMemory(IntPtr p, UIntPtr n);
+    private static readonly System.Text.RegularExpressions.Regex KekNameRe = new System.Text.RegularExpressions.Regex("^CoevoSm2Kek-[0-9a-f]{32}$");
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)] private delegate void Sm3Init(IntPtr ctx);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)] private delegate void Sm3Update(IntPtr ctx, IntPtr data, UIntPtr len);
@@ -49,6 +50,8 @@ internal static class CoevoCryptoHelper
 
     private sealed class Native : IDisposable { internal IntPtr P; internal int N; internal Native(int n){N=n;P=Marshal.AllocHGlobal(n);RtlZeroMemory(P,(UIntPtr)n);} public void Dispose(){if(P!=IntPtr.Zero){RtlZeroMemory(P,(UIntPtr)N);Marshal.FreeHGlobal(P);P=IntPtr.Zero;}} }
 
+    [StructLayout(LayoutKind.Sequential)] private struct OaepPaddingInfo { public IntPtr pszAlgId; public IntPtr pbLabel; public int cbLabel; }
+
     private static int Main(string[] args) {
         try {
             if(args.Length!=0) return Fail("GCP-E-ARGS");
@@ -64,15 +67,20 @@ internal static class CoevoCryptoHelper
                 byte[][] output=Run(api,root,profile,action,f); Write(output); Clear(f); Clear(output);
             }
             return 0;
-        } catch(InvalidDataException e){return Fail(e.Message.StartsWith("GCP-E-")?e.Message:"GCP-E-INPUT");} catch(CryptographicException){return Fail("GCP-E-DPAPI");} catch(Exception e){return Fail(e.Message.StartsWith("GCP-E-")?e.Message:"GCP-E-CRYPTO");}
+        } catch(InvalidDataException e){return Fail(e.Message.StartsWith("GCP-E-")?e.Message:"GCP-E-INPUT");} catch(CryptographicException){return Fail("GCP-E-DPAPI");} catch(Exception e){return Fail(e.Message.StartsWith("GCP-E-")?e.Message:"GCP-E-CRYPTO-"+Convert.ToBase64String(Encoding.UTF8.GetBytes(e.GetType().Name+": "+e.Message)));}
     }
     private static byte[][] Run(Api a,string root,string profile,byte action,byte[][] f) {
         if(action==1 && f.Length==1) return new[]{Hash(a,f[0])};
-        string dir=Path.Combine(root,"loop","runtime","sm2-test-pki",profile); if(!Directory.Exists(dir)||(new DirectoryInfo(dir).Attributes&FileAttributes.ReparsePoint)!=0) throw new InvalidOperationException("GCP-E-HANDLE");
+        string dir=Path.Combine(root,"loop","runtime","sm2-test-pki",profile);
+        bool needsDir = action>=2 && action<=8;
+        if(needsDir && (!Directory.Exists(dir)||(new DirectoryInfo(dir).Attributes&FileAttributes.ReparsePoint)!=0)) throw new InvalidOperationException("GCP-E-HANDLE");
         if(action==2 && f.Length==1) using(Native key=Private(a,dir,"sender")){byte[] d=Hash(a,f[0]);byte[] s=SignDigest(a,key,d);Clear(d);return new[]{s};}
         if(action==3 && f.Length==2) using(Native key=Public(a,dir,"sender")){byte[] d=Hash(a,f[0]);bool ok=VerifyDigest(a,key,d,f[1]);Clear(d);return new[]{new[]{(byte)(ok?1:0)}};}
         if(action==4 && f.Length==3) return Seal(a,dir,f[0],f[1],f[2]);
         if(action==5 && f.Length==5) return Open(a,dir,f[0],f[1],f[2],f[3],f[4]);
+        if(action==6 && f.Length==4) return SignWrapped(a,dir,f[0],f[1],f[2],f[3]);
+        if(action==7 && f.Length==8) return OpenWrapped(a,dir,f[0],f[1],f[2],f[3],f[4],f[5],f[6],f[7]);
+        if(action==8 && f.Length==2) return Protect(dir,f[0],f[1]);
         throw new InvalidDataException("GCP-E-ACTION");
     }
     private static byte[] Hash(Api a,byte[] input){using(Native c=new Native(128))using(Native d=new Native(32)){a.HInit(c.P);CopyCall(input,p=>a.HUpdate(c.P,p,(UIntPtr)input.Length));a.HFinish(c.P,d.P);return Bytes(d.P,32);}}
@@ -85,7 +93,47 @@ internal static class CoevoCryptoHelper
     private static byte[] EncryptKey(Api a,Native x,byte[] sk){using(Native i=Put(sk))using(Native o=new Native(512)){UIntPtr n=(UIntPtr)512;if(a.Encrypt(IntPtr.Add(x.P,8),i.P,(UIntPtr)sk.Length,o.P,ref n)!=1)throw new InvalidOperationException("GCP-E-WRAP");return Bytes(o.P,(int)n);}}
     private static byte[] UnwrapKey(Api a,Native k,byte[] wrapped){using(Native i=Put(wrapped))using(Native o=new Native(512)){UIntPtr n=(UIntPtr)512;if(a.Decrypt(k.P,i.P,(UIntPtr)wrapped.Length,o.P,ref n)!=1)throw new InvalidOperationException("GCP-E-UNWRAP");return Bytes(o.P,(int)n);}}
     private static Native Public(Api a,string dir,string role){byte[] der=Regular(Path.Combine(dir,role+"-cert.der"),65536);Native x=new Native(X509KeyBytes);using(Native d=Put(der)){if(a.Public(d.P,(UIntPtr)der.Length,x.P)!=1){x.Dispose();throw new InvalidOperationException("GCP-E-CERT");}}Clear(der);return x;}
-    private static Native Private(Api a,string dir,string role){byte[] pem=Regular(Path.Combine(dir,role+"-key.pem"),65536),sealedPw=Regular(Path.Combine(dir,role+"-password.dpapi"),4096),der=null,pw=null;Native key=new Native(Sm2KeyBytes);try{der=Pem(pem);pw=Unprotect(sealedPw);using(Native dn=Put(der))using(Native pn=Put(pw)){IntPtr cur=dn.P,attrs=IntPtr.Zero;UIntPtr left=(UIntPtr)der.Length,attrsLen=UIntPtr.Zero;if(a.DecodeKey(key.P,ref attrs,ref attrsLen,pn.P,ref cur,ref left)!=1||left.ToUInt64()!=0)throw new InvalidOperationException("GCP-E-KEY");}return key;}catch{key.Dispose();throw;}finally{Clear(pem);Clear(sealedPw);Clear(der);Clear(pw);}}
+    private static Native Private(Api a,string dir,string role){byte[] pem=Regular(Path.Combine(dir,role+"-key.pem"),65536),sealedPw=Regular(Path.Combine(dir,role+"-password.dpapi"),4096),der=null,pw=null;try{der=Pem(pem);pw=Unprotect(sealedPw);return DecodeKeyFromBytes(a,der,pw);}finally{Clear(pem);Clear(sealedPw);Clear(der);Clear(pw);}}
+    private static Native DecodeKeyFromBytes(Api a,byte[] der,byte[] pw){Native key=new Native(Sm2KeyBytes);try{using(Native dn=Put(der))using(Native pn=Put(pw)){IntPtr cur=dn.P,attrs=IntPtr.Zero;UIntPtr left=(UIntPtr)der.Length,attrsLen=UIntPtr.Zero;if(a.DecodeKey(key.P,ref attrs,ref attrsLen,pn.P,ref cur,ref left)!=1||left.ToUInt64()!=0)throw new InvalidOperationException("GCP-E-KEY");}return key;}catch{key.Dispose();throw;}}
+
+    // ---- HANDLE-2: CNG KEK-wrapped SM2 keys (key bytes stay helper-side) ----
+    private static byte[] CngRsa(string kekName,bool encrypt,byte[] input){
+        if(!KekNameRe.IsMatch(kekName)) throw new InvalidDataException("GCP-E-KEK-NAME");
+        CngKey key;
+        try{ key=CngKey.Open(kekName,CngProvider.MicrosoftSoftwareKeyStorageProvider,CngKeyOpenOptions.None); }
+        catch(CryptographicException){ throw new InvalidOperationException("GCP-E-CNG-KEY"); }
+        using(var rsa=new RSACng(key)){
+            try{ return encrypt?rsa.Encrypt(input,RSAEncryptionPadding.OaepSHA256):rsa.Decrypt(input,RSAEncryptionPadding.OaepSHA256); }
+            catch(CryptographicException){ throw new InvalidOperationException(encrypt?"GCP-E-CNG-WRAP":"GCP-E-CNG-UNWRAP"); }
+        }
+    }
+    private static byte[] CngWrap(string kekName,byte[] input){return CngRsa(kekName,true,input);}
+    private static byte[] CngUnwrap(string kekName,byte[] input){return CngRsa(kekName,false,input);}
+    private static string Ascii(byte[] value){try{return Encoding.ASCII.GetString(value);}catch{throw new InvalidDataException("GCP-E-KEK-NAME");}}
+    private static string RoleName(byte[] role){if(role.Length!=1||(role[0]!=(byte)'s'&&role[0]!=(byte)'r'))throw new InvalidDataException("GCP-E-ROLE");return role[0]==(byte)'s'?"sender":"recipient";}
+    private static byte[][] SignWrapped(Api a,string dir,byte[] wrapped,byte[] kekName,byte[] role,byte[] data){
+        string roleName=RoleName(role);
+        byte[] der=null,pw=null;
+        try{ der=Pem(Regular(Path.Combine(dir,roleName+"-key.pem"),65536));
+             pw=CngUnwrap(Ascii(kekName),wrapped);
+             using(Native key=DecodeKeyFromBytes(a,der,pw)){byte[] d=Hash(a,data);byte[] s=SignDigest(a,key,d);Clear(d);return new[]{s};} }
+        finally{ Clear(der);Clear(pw); }
+    }
+    private static byte[][] OpenWrapped(Api a,string dir,byte[] wrapped,byte[] kekName,byte[] role,byte[] sessionKey,byte[] nonce,byte[] cipher,byte[] tag,byte[] aad){
+        if(nonce.Length!=12||tag.Length!=16)throw new InvalidDataException("GCP-E-FRAME");
+        string roleName=RoleName(role);
+        byte[] der=null,pw=null;
+        try{ der=Pem(Regular(Path.Combine(dir,roleName+"-key.pem"),65536));
+             pw=CngUnwrap(Ascii(kekName),wrapped);
+             using(Native key=DecodeKeyFromBytes(a,der,pw)){byte[] sk=UnwrapKey(a,key,sessionKey);if(sk.Length!=16){Clear(sk);throw new InvalidOperationException("GCP-E-UNWRAP");}byte[] plain=GcmOpen(a,sk,nonce,aad,cipher,tag);Clear(sk);return new[]{plain};} }
+        finally{ Clear(der);Clear(pw); }
+    }
+    private static byte[][] Protect(string dir,byte[] kekName,byte[] role){
+        string roleName=RoleName(role);
+        byte[] pwBlob=Regular(Path.Combine(dir,roleName+"-password.dpapi"),4096),pw=null;
+        try{ pw=Unprotect(pwBlob); byte[] wrapped=CngWrap(Ascii(kekName),pw); return new[]{wrapped}; }
+        finally{ Clear(pwBlob);Clear(pw); }
+    }
     private static byte[] Unprotect(byte[] input){GCHandle hi=GCHandle.Alloc(input,GCHandleType.Pinned),he=GCHandle.Alloc(Entropy,GCHandleType.Pinned);Blob ib=new Blob{cb=input.Length,pb=hi.AddrOfPinnedObject()},eb=new Blob{cb=Entropy.Length,pb=he.AddrOfPinnedObject()},ob;try{if(!CryptUnprotectData(ref ib,IntPtr.Zero,ref eb,IntPtr.Zero,IntPtr.Zero,1,out ob))throw new CryptographicException();try{return Bytes(ob.pb,ob.cb);}finally{RtlZeroMemory(ob.pb,(UIntPtr)ob.cb);LocalFree(ob.pb);}}finally{hi.Free();he.Free();}}
     private static byte[] Pem(byte[] p){string s=Encoding.ASCII.GetString(p);int a=s.IndexOf('\n')+1,b=s.IndexOf("-----END",StringComparison.Ordinal);if(a<1||b<a)throw new InvalidDataException("GCP-E-PEM");return Convert.FromBase64String(s.Substring(a,b-a).Replace("\r","").Replace("\n",""));}
     private static byte[] Regular(string p,int max){FileInfo f=new FileInfo(p);if(!f.Exists||(f.Attributes&FileAttributes.ReparsePoint)!=0||f.Length<1||f.Length>max)throw new InvalidOperationException("GCP-E-HANDLE");return File.ReadAllBytes(p);}

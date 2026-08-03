@@ -124,6 +124,65 @@ class GmsslPrototypeProvider:
             associated_data,
         )[0]
 
+    # ---- HANDLE-2: CNG KEK-wrapped SM2 key operations (key bytes stay helper-side) ----
+    def sign_wrapped(
+        self, kek_name: str, wrapped: bytes, data: bytes, *, role: str, profile: str
+    ) -> bytes:
+        """SM2 sign using a CNG-wrapped key password; the helper unwraps and signs in memory."""
+        if not isinstance(kek_name, str) or not kek_name:
+            raise GmsslPrototypeError("kek_name must be a non-empty string")
+        if not isinstance(wrapped, bytes) or not wrapped:
+            raise GmsslPrototypeError("wrapped key must be non-empty bytes")
+        if not isinstance(data, bytes) or not data:
+            raise GmsslPrototypeError("sign input must be non-empty bytes")
+        if role not in {"sender", "recipient"}:
+            raise GmsslPrototypeError("role must be sender or recipient")
+        return self._invoke(
+            6, profile, wrapped, kek_name.encode("ascii"), role[0].encode("ascii"), data
+        )[0]
+
+    def open_wrapped(
+        self,
+        kek_name: str,
+        wrapped: bytes,
+        sealed: SealedPayload,
+        *,
+        role: str,
+        profile: str,
+        associated_data: bytes,
+    ) -> bytes:
+        """SM4-GCM open using a CNG-wrapped SM2 key password (recipient private key)."""
+        if not isinstance(kek_name, str) or not kek_name:
+            raise GmsslPrototypeError("kek_name must be a non-empty string")
+        if not isinstance(wrapped, bytes) or not wrapped:
+            raise GmsslPrototypeError("wrapped key must be non-empty bytes")
+        if not isinstance(sealed, SealedPayload):
+            raise TypeError("sealed must be SealedPayload")
+        if role not in {"sender", "recipient"}:
+            raise GmsslPrototypeError("role must be sender or recipient")
+        return self._invoke(
+            7,
+            profile,
+            wrapped,
+            kek_name.encode("ascii"),
+            role[0].encode("ascii"),
+            sealed.wrapped_key,
+            sealed.nonce,
+            sealed.ciphertext,
+            sealed.tag,
+            associated_data,
+        )[0]
+
+    def protect_key(self, kek_name: str, role: str, *, profile: str) -> bytes:
+        """Wrap an SM2 key from a profile under a CNG KEK (helper-side only)."""
+        if not isinstance(kek_name, str) or not kek_name:
+            raise GmsslPrototypeError("kek_name must be a non-empty string")
+        if role not in {"sender", "recipient"}:
+            raise GmsslPrototypeError("role must be sender or recipient")
+        return self._invoke(
+            8, profile, kek_name.encode("ascii"), role[0].encode("ascii")
+        )[0]
+
     @staticmethod
     def _require(handle: GmsslPrototypeHandle, role: str) -> None:
         if not isinstance(handle, GmsslPrototypeHandle) or handle.role != role:
@@ -136,7 +195,7 @@ class GmsslPrototypeProvider:
         *frames: bytes,
         retries: int = 2,
     ) -> tuple[bytes, ...]:
-        if not _SAFE.fullmatch(profile) or not 1 <= len(frames) <= 5:
+        if not _SAFE.fullmatch(profile) or not 1 <= len(frames) <= 8:
             raise GmsslPrototypeError("invalid provider request")
         if not isinstance(retries, int) or not 0 <= retries <= 3:
             raise ValueError("retries must be an integer in 0..3")

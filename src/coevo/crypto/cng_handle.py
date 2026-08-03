@@ -2,10 +2,15 @@
 
 The approved-product path requires a *protected, non-exportable key
 handle*. Windows CNG does not natively host SM2 keys, so this layer
-implements the industry-standard key-wrapping pattern instead: an SM2
-private-key blob is wrapped at rest under a **non-exportable CNG RSA
-KEK** (``CngKekStore`` + ``scripts/cng-kek.ps1``), and only the wrapped
-blob plus metadata are persisted (``CngWrappedKeyRegistry``).
+implements the industry-standard key-wrapping pattern instead: the
+SM2 key's PKCS#8 encryption password is wrapped at rest under a
+**non-exportable CNG RSA KEK** (``CngKekStore`` +
+``scripts/cng-kek.ps1``); the key itself stays PKCS#8-encrypted in
+the profile, and only the wrapped password blob plus metadata are
+persisted (``CngWrappedKeyRegistry``). RSA-2048 OAEP-SHA256 cannot
+carry the full encrypted key + DPAPI blob, so the KEK protects the
+password that unlocks the key (HANDLE-2 unwraps it inside the
+controlled crypto helper).
 
 Key-security boundary (inherited from the repo-wide rule "Python never
 receives private-key bytes"):
@@ -17,9 +22,10 @@ receives private-key bytes"):
 * ``UnwrapDigest`` returns **only the SHA-256 digest** of the unwrapped
   material -- raw SM2 key bytes never cross the process boundary to
   Python;
-* the actual *use* of the unwrapped key (SM2 sign / open) must happen
-  inside the controlled crypto helper, which consumes the wrapped blob
-  and the KEK name directly (HANDLE-2 helper action, see
+* the actual *use* of the unlocked key (SM2 sign / open) happens
+  inside the controlled crypto helper (HANDLE-2 actions 6/7), which
+  consumes the wrapped password blob and the KEK name directly and
+  zeroizes the password and key in helper memory (see
   ``docs/dependencies/approved-crypto-provider-path.md``).
 """
 from __future__ import annotations

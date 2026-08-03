@@ -119,18 +119,25 @@ The protected-key-handle path is partially implemented:
 
 * **Done (HANDLE-1)**: `coevo.crypto.CngKekStore` creates / opens /
   destroys a **non-exportable CNG RSA-2048 KEK** (ExportPolicy=None) via
-  the controlled `scripts/cng-kek.ps1`; SM2 private-key material is
-  wrapped at rest under that KEK (RSA-OAEP-SHA256) and only ciphertext +
-  metadata are persisted in `CngWrappedKeyRegistry` (append-only SHA-256
-  hash chain, tamper-rejecting open, revoke/destroy lifecycle).
-  `GmsslProtectedProvider` (`key_handle_backed=True`, scope
-  `APPROVED_PRODUCT`) satisfies the policy surface; `sm3` / `seal` /
-  `verify` (public-key side) are functional today.
-* **Remaining (HANDLE-2)**: a crypto-helper action that consumes the
-  wrapped SM2 blob + KEK name **inside the helper**, unwraps with the
-  CNG handle, and performs SM2 sign / open without ever returning the
-  key to Python. Until wired, `sign` / `open` fail closed on
-  `GmsslProtectedProvider`.
+  the controlled `scripts/cng-kek.ps1`; the SM2 key's PKCS#8 encryption
+  password is wrapped at rest under that KEK (RSA-OAEP-SHA256) and only
+  the wrapped password blob + metadata are persisted in
+  `CngWrappedKeyRegistry` (append-only SHA-256 hash chain, tamper-
+  rejecting open, revoke/destroy lifecycle). `GmsslProtectedProvider`
+  (`key_handle_backed=True`, scope `APPROVED_PRODUCT`) satisfies the
+  policy surface; `sm3` / `seal` / `verify` (public-key side) are
+  functional.
+* **Done (HANDLE-2)**: the crypto helper (`gmssl-crypto-helper.cs`)
+  implements actions 6/7 — CNG-unwrap the wrapped password (via
+  RSACng + the non-exportable KEK, System.Core reference added to the
+  locked compile), decrypt the PKCS#8 key from the profile, and perform
+  SM2 sign / open, zeroizing password and key in helper memory. The
+  launcher forwards the full GCP-E diagnostic. `GmsslProtectedProvider`
+  `sign` / `open` are functional end-to-end (real CNG integration tests).
+* **Design note**: RSA-2048 OAEP-SHA256 cannot carry the full encrypted
+  key + DPAPI blob (~564 bytes > 190-byte limit), so the KEK protects
+  the key's encryption password rather than the key bytes themselves;
+  the key remains PKCS#8-encrypted at rest in the profile.
 * **External**: a nationally certified SM2/SM3/SM4 module (SKF /
   PKCS#11 / validated hardware) still requires vendor procurement; the
   adapter contract in §4 and acceptance gates in §6 apply unchanged.
