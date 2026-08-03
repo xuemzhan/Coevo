@@ -47,6 +47,9 @@ make quality
 
 - 质量门禁的唯一权威测试入口是 `make quality`（内部统一使用 `unittest` 发现并运行
   `tests/unit`、`tests/integration`、`tests/security`、`tests/e2e`）。
+- lint 目标包含 `scripts/secret_scan.py`：扫描已跟踪文本文件中的私钥块与高置信令牌
+  （AKIA/ghp_/sk-/xox/高熵 key 赋值），`tests/` 允许假 PEM 与假密钥赋值夹具；
+  命中即门禁失败。
 - 开发环境中存在的 `pytest` / `ruff`（当前版本见 `.venv` 或系统解释器）未进入
   `docs/dependencies/toolchain-lock.json`，不属于已批准的离线工具链，**不得**作为门禁
   判定依据；将其纳入门禁属于新的依赖审批工作项。
