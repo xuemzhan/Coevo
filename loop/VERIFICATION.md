@@ -9664,3 +9664,252 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-03T10:02:41.803474Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-03T10:02:49.642855Z — target=`lint` fingerprint=`f7b9a48cf4810492`
+- exit_code: `0`
+```text
+": [
+        "tests/e2e/test_return_chain.py",
+        "tests/e2e/test_demo_runner.py",
+        "tests/unit/test_production_support.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "tests/e2e/test_return_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/demo_support.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/pipeline.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_return_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_demo_runner.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_production_support.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "STABILITY-1",
+      "title": "�ȶ�������ά�ӹ̣�2026-08-03������ GmsslPrototypeProvider._invoke �н����ԣ�Ĭ�� 1 �ζ��Ⳣ�ԣ�0.25s��attempt �˱ܣ�����������������˲ʱʧ�ܣ�subprocess OSError/TimeoutExpired��helper �� GCP-E-* ��ʶ����ϵ� GCP-E-LAUNCH����helper ����ľ������뼶������ GCP-E-SIGN���������ԣ��������� bytearray �� try/finally ���㣻�� ���������� E2E `tests/e2e/test_cockpit_launcher.py`����ʵ�ӽ��̣�CREATE_NEW_PROCESS_GROUP������ run_cockpit �� /healthz 200 �� CTRL+BREAK �� �˳��� 0 �� cockpit-state.json �� cockpit-access.jsonl ���� �� ��ʵ�����ͷţ�AppConfig ���� COEVO_LOCK_PATH��Ĭ����·������Ӱ�죬����ʽ���òŸ��ǣ����� supervision 632 �в�� models(18)/service(8) + __init__ �ٵ������� __all__�������� API ���䣻�� �汾 0.1.0��0.2.0���������û���̱�����",
+      "code": [
+        "src/coevo/crypto/gmssl_provider.py",
+        "src/coevo/config.py",
+        "scripts/run_cockpit.py",
+        "tests/e2e/test_cockpit_launcher.py",
+        "src/coevo/supervision/__init__.py",
+        "src/coevo/supervision/models.py",
+        "src/coevo/supervision/service.py",
+        "src/coevo/version.py",
+        "docs/production-readiness.md"
+      ],
+      "tests": [
+        "tests/unit/test_gmssl_provider_retry.py",
+        "tests/e2e/test_cockpit_launcher.py",
+        "tests/unit/test_supervision_meeting.py",
+        "tests/unit/test_production_support.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/gmssl_provider.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/config.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/run_cockpit.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "tests/e2e/test_cockpit_launcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/version.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/production-readiness.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_gmssl_provider_retry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_cockpit_launcher.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_supervision_meeting.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_production_support.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-5",
+      "ac": "PACKAGE-DB-1",
+      "title": "�Ѵ������ǼǱ��־û���2026-08-03��Э�� ��17����`PackageStoreDb` SQLite �־û�����ʽ create/open���ܾ�����/��ʽ���⡢schema_version+schema_sha256+DDL ��ȷ�ȶ�������PRAGMA integrity_check��׷��ʽ SHA-256 ��ϣ�� prev_hash/record_hash ȫ�����顢meta.record_count һ���ԣ���UNIQUE Լ�� + BEGIN IMMEDIATE ����ʵ�� package_id/package_digest �ظ��ܾ�����17 ���� 1/2����������Ч�����ϸ���У�飨64 λСд hex ժҪ��ISO-8601 UTC 'Z' ʱ�䡢���ö�� committed/rolled_back���ֶδ�С���ޡ�sequence_no ��Χ����get/by_digest/by_scope/revision_for/iter_records/snapshot �Žӻ� in-memory ProcessedPackageStore������ facade ���ݣ��� stdlib��sqlite3/hashlib/json/uuid/pathlib/datetime������������������ US-5 wire ������Э��汾��",
+      "code": [
+        "src/coevo/protocol/package_store_db.py",
+        "src/coevo/protocol/__init__.py"
+      ],
+      "tests": [
+        "tests/unit/test_package_store_persistence.py",
+        "tests/integration/test_package_store_persistence.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/package_store_db.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_package_store_persistence.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_package_store_persistence.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-12",
+      "ac": "AC-2",
+      "title": "����������߰콨�飨AC-3��2026-08-03����`ReminderKind`(REMIND/URGE) + `ReminderSuggestion`��`REMINDER_WINDOW_SEC`=24h �����ѡ����� URGE����`SupervisionCoordinator.coordinate` �������ѣ�`SupervisionOutcome.reminders` У�飨Ψһ/����/������֪��� to_dict(reminder_count)/to_audit_record(reminder_kinds) Ͷ�䣻�������� IO������ wire/Э�顣�������̻����޸���`scripts/invoke-gmssl-crypto.ps1` ����̽�ⴰ�� 1s��8s + ����ɾ���ݴ���Windows Defender ���� helper exe ����Լ 3s �����󱨱���ʧ�� �� GCP-E-LAUNCH �������޸�ǰ̽�� 4/8 ʧ�ܡ��޸��� 0/8����`toolchain-lock.json` launcher ��ϣͬ����",
+      "code": [
+        "src/coevo/supervision/models.py",
+        "src/coevo/supervision/service.py",
+        "src/coevo/supervision/__init__.py",
+        "scripts/invoke-gmssl-crypto.ps1",
+        "docs/dependencies/toolchain-lock.json"
+      ],
+      "tests": [
+        "tests/unit/test_supervision_meeting.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/invoke-gmssl-crypto.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_supervision_meeting.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+audit seal: fully-sealed
+
+```
