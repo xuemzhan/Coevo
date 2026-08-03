@@ -3764,6 +3764,30 @@ security-reviewer 双签门禁。
   时按 git 历史回退 `cc9af66`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- SECSCAN-1 密钥/敏感信息扫描门禁 done
+
+- 用户指令：继续对项目进行生产落地优化。本项落地密钥/敏感信息扫描门禁
+  （标准生产安全控制）。
+- 实现（commit `6728edd`，7 文件，+248/-5）：
+  ① `scripts/secret_scan.py`——扫描已跟踪文本文件：PEM 私钥块、AKIA/ghp_/sk-/xox
+  令牌、高熵 key/secret/token/password 赋值；tests/ 允许假 PEM 与假密钥赋值
+  夹具（令牌格式仍全路径拦截）；扫描器自跳过；非 git 根回退递归扫描；逐文件
+  ≤1MiB；
+  ② `quality_gate.py` lint 目标新增 secret_scan 步骤（命中即失败）；
+  ③ 锁链同步（quality_gate.py 哈希/python-script-lock.tsv/toolchain-lock
+  script_inventory/make.cs ScriptInventorySha256 与源哈希）；
+  ④ docs/development-environment.md 门禁说明。
+- 指纹基线：lint 命令集新增步骤后，quality 指纹由 `34fc0b672c25a7b5` 更新为
+  `e3a61c2f23c3031b`（预期、记录在案）；旧指纹对应旧命令集的既有证据不变。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit fully-sealed；
+  unit 846 / integration 252 / security 97 / e2e 13 全绿；secret_scan 单元 6 项 +
+  锁链回归 20 项；仓库实际扫描 exit 0；内联 verifier + security-reviewer
+  PASS（Critical/High 0）。
+- 边界：扫描为高置信启发式，不替代人工审查；新增密钥格式需扩展模式清单。
+- 回滚条件：secret_scan 任一测试失败、真实密钥被漏检或白名单被滥用、门禁指纹
+  变化未复核时按 git 历史回退 `6728edd`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

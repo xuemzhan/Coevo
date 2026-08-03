@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "METRICS-1",
+  "current_item": "SECSCAN-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "cc9af66d45a5a5874434e0801437ad7c215f8c79",
+  "last_verified_commit": "6728eddf794edba3993b76c097d0361f790b57fe",
   "blocking_issue": "",
-  "updated_at": "2026-08-03T17:10:15.724454Z"
+  "updated_at": "2026-08-03T17:23:54.654839Z"
 }
