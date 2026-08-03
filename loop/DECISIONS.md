@@ -3727,6 +3727,27 @@ security-reviewer 双签门禁。
   时按 git 历史回退 `16c5f0e`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- AVAIL-1 可用性（fail-fast 启动预检 + 看门狗自动重启）done
+
+- 用户指令：继续对项目进行生产落地优化。本项落地可用性：启动即失败关闭、
+  崩溃自动拉起（补全计划任务自启后无人拉起的缺口）。
+- 实现（commit `b5b3088`，5 文件，+350）：
+  ① `scripts/run_cockpit.py --preflight`——配置 + 数据/日志目录可写 + 磁盘余量
+  （≥256MiB）+ 审计封存状态 + 模型配置可加载；退出码 0/1/2，critical 阻断启动；
+  ② `scripts/cockpit-watchdog.ps1`——轮询 /healthz，连续 MissThreshold 次失败
+  后隐藏窗口重启已安装驾驶舱，重启冷却（默认 60s）防崩溃循环；DryRun 单轮探测
+  打印动作不触系统；失败关闭；
+  ③ docs/operations/ops-runbook.md §2.1 预检与看门狗用法。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 840 / integration 252 / security 97 / e2e 13 全绿；预检/看门狗单元 6 项 +
+  e2e 预检退出 0 + 本地冒烟 exit 0；内联 verifier + security-reviewer
+  PASS（Critical/High 0）。
+- 边界：看门狗与自启任务依赖 PATH 上的 python（显式路径可由部署策略固定）；
+  重启不保留崩溃现场诊断（结合应用日志排障）。
+- 回滚条件：预检/看门狗任一测试失败、看门狗重启引入参数注入、或门禁指纹变化
+  未复核时按 git 历史回退 `b5b3088`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

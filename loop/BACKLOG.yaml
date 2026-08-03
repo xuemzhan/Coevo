@@ -687,3 +687,12 @@ items:
     acceptance_tests: []
     security_review: true
     protocol_review: false
+  # ---------- 可用性：fail-fast 启动预检 + 看门狗自动重启（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: AVAIL-1
+    story: ENG-BASE
+    title: 可用性落地——run_cockpit.py --preflight（fail-fast 启动预检：配置 + 数据/日志目录可写 + 磁盘余量 + 审计封存状态 + 模型配置可加载，critical 退出码 2 阻断启动，degraded 退出码 1）+ scripts/cockpit-watchdog.ps1（看门狗：轮询 /healthz，连续 MissThreshold 次失败后用受控命令隐藏窗口重启已安装驾驶舱，重启冷却防崩溃循环，DryRun 单轮探测并打印动作、不触系统、校验失败关闭）；docs/operations/ops-runbook.md 增看门狗节；tests/unit（预检逻辑/看门狗 DryRun 与失败关闭）+ e2e（健康仓库 --preflight 退出 0）
+    status: ready
+    dependencies: [BACKUP-1]
+    acceptance_tests: []
+    security_review: true
+    protocol_review: false
