@@ -1,0 +1,18 @@
+# Windows 推荐 core.autocrlf=true：提交自动转 LF，检出自动转 CRLF。
+# 以下路径被字节级钉扎（哈希/尺寸/审计链校验），必须保持 LF，不受 autocrlf 影响：
+Makefile                        text eol=lf
+docs/dependencies/python-script-lock.tsv  text eol=lf
+docs/dependencies/toolchain-lock.json     text eol=lf
+scripts/*.py                    text eol=lf
+scripts/**/*.py                 text eol=lf
+scripts/*.ps1                   text eol=lf
+scripts/**/*.ps1                text eol=lf
+scripts/*.cs                    text eol=lf
+scripts/**/*.cs                 text eol=lf
+loop/tool-audit.jsonl           text eol=lf
+loop/audit-head.json            text eol=lf
+# 既有混合行尾文本（gate 以 CRLF 追加）与二进制：不做转换，保持字节原样。
+loop/VERIFICATION.md            -text
+docs/traceability/requirements-test-matrix.md  -text
+*.p7s                           binary
+*.cer                           binary

@@ -3213,3 +3213,36 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- 仓库行尾策略：core.autocrlf=true（Windows 推荐）+ .gitattributes 钉扎字节敏感路径
+
+- 用户指令：按 Windows 推荐将 `core.autocrlf` 设为 true（提交自动转 LF /
+  检出自动转 CRLF）。
+- 冲突识别：本仓库含字节级钉扎文件（审计链 loop/tool-audit.jsonl 与
+  loop/audit-head.json、docs/dependencies/python-script-lock.tsv 与
+  toolchain-lock.json、scripts/*.py/.ps1/.cs、Makefile）。纯 autocrlf=true
+  会让这些文件在检出时变 CRLF，导致审计链 legacy prefix mismatch 与锁定
+  文件尺寸/哈希校验失败（本轮沙箱门禁已实测该现象）。
+- 决策：仓库本地 `git config core.autocrlf true`（系统级 Git for Windows
+  默认即 true，原仓库本地 false 覆盖）+ 新增 `.gitattributes`：
+  * 字节钉扎路径 `text eol=lf`：Makefile、docs/dependencies/ 两个 lock、
+    scripts/ 全部 .py/.ps1/.cs（含子目录）、loop/tool-audit.jsonl、
+    loop/audit-head.json；
+  * 既有混合行尾文本与二进制保持原样 `-text`/`binary`：
+    loop/VERIFICATION.md、docs/traceability/requirements-test-matrix.md、
+    *.p7s、*.cer。
+- 效果：常规文本按 Windows 默认检出 CRLF（提交仍为 LF）；审计链与锁定
+  工具链始终 LF，质量门禁与只读沙箱克隆稳定。
+- 验证：`git status` 干净；`git check-attr` 生效；克隆探针（系统
+  autocrlf=true）中钉扎文件为 LF、非钉扎 src/*.py 为 CRLF；audit_log /
+  audit_seal verify、traceability、compileall 通过。
+- 提出者：用户指令；落地：loop-engineer（Codex）。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
