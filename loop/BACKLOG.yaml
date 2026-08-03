@@ -614,3 +614,13 @@ items:
       - tests/integration/test_audit_key_health.py
     security_review: true
     protocol_review: false
+  # ---------- 文档与注释规范化（2026-08-03 用户指令：规范文档和代码注释，向生产落地靠近） ----------
+  - id: DOCS-COMMENT-1
+    story: ENG-BASE
+    title: 文档与代码注释规范化：新增 docs/operations/configuration-reference.md 权威 COEVO_* 环境变量登记表（分类/默认值/校验规则）；修正 4 个模块的过时注释（knowledge_base/cockpit/talent/task_decomposition 的 "deferred to US-x-AC-y"/"future slice" 引用已完成切片）；docs/README.md 索引补齐 process/operations/plans/生产文档并新增生产运维文档入口；README.md 增生产部署小节；docs/production-readiness.md 指向配置参考；docs/development-environment.md 增"代码注释与文档规范"；tests/unit/test_production_docs.py 新增 3 项文档⇄代码一致性门禁（config.py 变量全登记/登记变量均有使用/已完成模块无过时注释）
+    status: done
+    dependencies: [AUDIT-KEY-1]
+    acceptance_tests:
+      - tests/unit/test_production_docs.py
+    security_review: true
+    protocol_review: false

@@ -3546,6 +3546,32 @@ security-reviewer 双签门禁。
   私钥材料时按 git 历史回退 `e3ab4aa`。
 - 提出者：loop-engineer（Codex）。决策者：用户（再下一工作项 → 选定 P0-3 本地部分）。
 
+## 2026-08-03 -- DOCS-COMMENT-1 文档与代码注释规范化 done
+
+- 用户指令：规范文档和代码注释，往生产落地方向更靠近一些。沿用内联执行授权。
+- 实现（commit `d3297d4`，12 文件，+250/-26）：
+  ① 新增 `docs/operations/configuration-reference.md` 权威 `COEVO_*` 环境变量登记表
+  （运行时/模型/工具链/仅测试四类，含默认值与校验规则；模型外发开关澄清：
+  `select_provider` 标准路径以 model-config.json 的 external_data_ok 为准，
+  `COEVO_LLM_EXTERNAL_DATA_OK` 仅为直接构造时的兼容遗留开关）；
+  ② 修正 4 模块过时注释（knowledge_base "deferred to US-14-AC-2/AC-4"（AC-4 不存在）、
+  cockpit "deferred to US-7-AC-2/3/4"、talent/task_decomposition "future slice" ——
+  这些切片均已落地 → 边界改为落到 store.py/server.py/agent.py 实际实现模块）；
+  ③ docs/README.md 索引补齐 process/operations/plans/生产文档 + 生产运维文档入口；
+  ④ README.md 增生产部署小节（安装/升级/回滚/启动 + 文档导航）；
+  ⑤ docs/production-readiness.md 指向配置参考；
+  ⑥ docs/development-environment.md 增"代码注释与文档规范"六条纪律；
+  ⑦ tests/unit/test_production_docs.py 3 项文档⇄代码一致性门禁。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 793 / integration 240 / security 97 / e2e 12 全绿；相关模块回归 172/172；
+  内联 verifier PASS + 内联 security-reviewer PASS（Critical/High 0，纯注释/文档变更）。
+- 纪律（写入 development-environment.md）：注释必须与实现一致；已完成切片不得再以
+  "deferred/future slice" 描述；新增 COEVO_* 变量必须登记配置参考并由测试校验；
+  行为/文档变更必须同步 BACKLOG 与追溯矩阵。
+- 回滚条件：文档⇄代码一致性测试失败、门禁指纹变化未复核，或发现注释修订掩盖了
+  真实行为差异时按 git 历史回退 `d3297d4`。
+- 提出者：loop-engineer（Codex）。决策者：用户（规范文档与注释，向生产落地靠近）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
