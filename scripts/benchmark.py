@@ -18,7 +18,104 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.coevo.benchmarks import measure, report  # noqa: E402
+from src.coevo.benchmarks import BenchmarkResult, measure, report  # noqa: E402
+
+
+# LOAD-1: /healthz p95 latency SLA. The cockpit deliberately serves one
+# request per connection (see CockpitRequestHandler._handle), so every
+# probe request pays a fresh loopback TCP handshake; 1s keeps an order of
+# magnitude of headroom below the reference-architecture page SLA (3s)
+# while still being meaningful under 32-way concurrent load on Windows.
+COCKPIT_HTTP_P95_LIMIT_SEC = 1.0
+
+
+def _cockpit_http_probe() -> BenchmarkResult:
+    """Healthz latency under bounded concurrency (LOAD-1).
+
+    Starts a real loopback cockpit at the production concurrency cap
+    (max_concurrent_requests=16), fires 128 GET /healthz requests from
+    16 worker threads (8 requests each, one fresh connection per request,
+    matching the server's one-request-per-connection production behavior),
+    and reports the p95 per-request latency plus the error count.
+    SLA: p95 <= COCKPIT_HTTP_P95_LIMIT_SEC with zero errors.
+    """
+    import socket
+    import threading
+    import time
+    import urllib.request
+
+    from src.coevo.cockpit import CockpitHttpConfig, CockpitHttpServer
+
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    server = CockpitHttpServer(
+        CockpitHttpConfig(
+            bind_port=port,
+            request_timeout_sec=5,
+            lock_path=None,
+            # Probe exactly at the production concurrency bound (the
+            # CockpitHttpConfig default), so the load is representative of
+            # the server's designed capacity rather than a stress beyond it.
+            max_concurrent_requests=16,
+        ),
+        workspace_views=(),
+        role_views=(),
+    )
+    server.start()
+    latencies: list[float] = []
+    errors = 0
+    lock = threading.Lock()
+    workers = 16
+    per_worker = 8
+
+    def fire() -> None:
+        nonlocal errors
+        for _ in range(per_worker):
+            start = time.perf_counter()
+            try:
+                with urllib.request.urlopen(
+                    f"http://127.0.0.1:{port}/healthz", timeout=5
+                ) as response:
+                    if response.status != 200:
+                        with lock:
+                            errors += 1
+            except Exception:  # noqa: BLE001 - any failed probe request counts as an error
+                with lock:
+                    errors += 1
+            finally:
+                with lock:
+                    latencies.append(time.perf_counter() - start)
+
+    try:
+        threads = [threading.Thread(target=fire) for _ in range(workers)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(timeout=60)
+    finally:
+        server.stop()
+
+    latencies.sort()
+    total = len(latencies)
+    p95 = latencies[int(total * 0.95) - 1] if total else float("inf")
+    p50 = latencies[int(total * 0.5) - 1] if total else float("inf")
+    detail = (
+        f"p50={p50:.4f}s max={latencies[-1]:.4f}s errors={errors}"
+        if total
+        else "no samples"
+    )
+    return BenchmarkResult(
+        name="cockpit_http",
+        metric="healthz p95 latency (128 req / 16 workers, at concurrency cap)",
+        value=round(p95, 4),
+        unit="seconds",
+        limit=COCKPIT_HTTP_P95_LIMIT_SEC,
+        comparison="le",
+        ok=p95 <= COCKPIT_HTTP_P95_LIMIT_SEC and errors == 0,
+        samples=total,
+        detail=detail,
+    )
 
 
 def _sample_views():
@@ -228,6 +325,7 @@ def run(samples: int = 1) -> tuple:
             samples=max(100, 100 * samples),
         )
     )
+    results.append(_cockpit_http_probe())
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
