@@ -3477,3 +3477,31 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- 门禁策略：默认增量门禁（用户指令）
+
+- 用户指令：后续循环只做增量门禁；全量门禁仅在用户明确提示或 loop-engineer
+  认为有必要时执行。
+- 落地规则（默认流程）：
+  * 每个工作项必须跑：`python scripts/quality_gate.py --target fmt`
+    （compileall 语法门禁）+ `--target lint`（validate_opencode +
+    traceability + audit_log/audit_seal verify），以及**仅针对本轮改动**
+    的定向单元/集成测试（`python -m unittest` 指定文件或 `-p` 模式），
+    不再默认跑全量 `discover`。
+  * 全量 `--target quality` 仅在以下情况执行：用户明确要求；或改动触及
+    跨切面风险——审计链/封存、锁定工具链（toolchain-lock.json、
+    python-script-lock.tsv、scripts/*）、行尾/属性策略、安全敏感模块
+    （身份/密钥/协议/权限/审计）、或涉及多模块接口变更时。
+  * 每次增量门禁照常追加 VERIFICATION 指纹与 audit 记录，审计链持续闭合。
+- 影响：缩短常规轮次验证耗时；证据口径不变（门禁指纹、traceability、
+  audit fully-sealed 均以实际执行的命令为准）。
+- 提出者：用户指令；落地：loop-engineer（Codex）。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
