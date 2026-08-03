@@ -50,16 +50,21 @@ python scripts\health_check.py --install-root "%LOCALAPPDATA%\KaiwuAgent"
 
 ## 4. 备份与恢复
 
-需备份的最小集合（拷贝即可，全部离线）：
+推荐使用脚本化备份/恢复工具（离线、SHA-256 清单、运行中拒绝恢复）：
 
-```text
-%LOCALAPPDATA%\KaiwuAgent\
-├─ cockpit-state.json       驾驶舱视图状态
-├─ cockpit-access.jsonl     访问日志（可选）
-└─ loop\                    审计链（tool-audit.jsonl / audit-head.json / .p7s）
+```powershell
+# 备份（默认到 %LOCALAPPDATA%\KaiwuAgent\backups\<时间戳>\）
+python scripts\backup_state.py --action backup
+
+# 校验备份 / 列出备份 / 恢复（恢复前自动校验；运行中锁存在时拒绝）
+python scripts\backup_state.py --action verify --label <label>
+python scripts\backup_state.py --action list
+python scripts\backup_state.py --action restore --label <label>
 ```
 
-恢复：停止驾驶舱 → 按原路径回拷 → 启动；审计链恢复后运行
+备份内容：驾驶舱状态/访问日志、current 指针、安装历史、封装密钥注册表、
+审计链（tool-audit/audit-head/audit-signing*）与 manifests。恢复前会校验清单；
+恢复时把将被覆盖的文件先复制到 `.pre-restore-<ts>` 再回拷。审计链恢复后运行
 `python scripts/audit_seal.py verify` 确认封存状态。密钥材料（CNG KEK、私钥句柄）
 不随文件备份，需按 `audit-key-runbook.md` / 身份库方案另行处置。
 
