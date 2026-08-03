@@ -41,6 +41,22 @@ python scripts\health_check.py --install-root "%LOCALAPPDATA%\KaiwuAgent"
 失败关闭：安装根缺失、current 指针无效、`run_cockpit.py` 缺失或 Python 不可解析时
 中止且不修改系统。任务基于 Windows 计划任务（`onlogon`、`LIMITED`），无需管理员。
 
+## 2.1 启动预检与看门狗（AVAIL-1）
+
+```powershell
+# fail-fast 启动预检（0=ok / 1=degraded / 2=critical，critical 不启动）
+python scripts\run_cockpit.py --preflight
+
+# 看门狗：轮询 /healthz，连续 3 次失败后隐藏窗口重启已安装驾驶舱
+.\scripts\cockpit-watchdog.ps1 -InstallRoot "%LOCALAPPDATA%\KaiwuAgent"
+
+# 先探测一轮（不触系统）
+.\scripts\cockpit-watchdog.ps1 -DryRun
+```
+
+看门狗带重启冷却（默认 60 秒）防止崩溃循环；DryRun 只探测并打印将执行的动作。
+预检覆盖：配置、数据/日志目录可写、磁盘余量、审计封存状态、模型配置可加载。
+
 ## 3. 日志轮转
 
 - 应用运行日志：`coevo-app.log`（5MB×5，自动轮转）；

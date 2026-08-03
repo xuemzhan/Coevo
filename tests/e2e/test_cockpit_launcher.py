@@ -34,6 +34,20 @@ def _free_port() -> int:
 
 
 class CockpitLauncherE2ETest(unittest.TestCase):
+    def test_preflight_exits_zero_on_healthy_repo(self):
+        # AVAIL-1: fail-fast preflight must pass on the sealed gate context
+        # (audit fully-sealed, dirs writable, model config offline-loadable).
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "run_cockpit.py"), "--preflight"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
     def test_launcher_serves_healthz_and_stops_gracefully(self):
         if not hasattr(signal, "CTRL_BREAK_EVENT"):
             self.skipTest("graceful shutdown via CTRL+BREAK is Windows-only")

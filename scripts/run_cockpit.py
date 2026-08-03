@@ -3,6 +3,7 @@
 Usage:
     python scripts/run_cockpit.py                  # start with env/defaults
     python scripts/run_cockpit.py --check          # validate config and exit
+    python scripts/run_cockpit.py --preflight      # fail-fast startup checks and exit
     python scripts/run_cockpit.py --version        # print version and exit
     python scripts/run_cockpit.py --port 12710     # override bind port
 
@@ -10,11 +11,20 @@ Configuration comes from :class:`src.coevo.config.AppConfig`
 (environment-driven, fail-closed). On SIGINT/SIGTERM the server stops
 gracefully: pending state is flushed, the single-instance lock and log
 writer are released, and the process exits 0.
+
+``--preflight`` (AVAIL-1) runs the same fail-fast checks operators use
+before starting: config validity, data/log directory writability, free
+disk space, audit-seal state and model-config loadability. Exit codes:
+0 = ok, 1 = degraded (warnings), 2 = critical (do not start).
 """
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import signal
+import shutil
+import subprocess
 import sys
 import threading
 from pathlib import Path
@@ -54,6 +64,68 @@ def build_config(args: argparse.Namespace) -> AppConfig:
     return config
 
 
+def preflight(config: AppConfig, *, python: str | None = None) -> int:
+    """Run fail-fast startup checks (AVAIL-1). Returns 0/1/2."""
+    problems: list[str] = []
+    warnings: list[str] = []
+    data_dir = config.data_dir or (
+        Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "KaiwuAgent"
+    )
+    log_dir = config.log_dir or data_dir
+    for label, directory in (("data", data_dir), ("log", log_dir)):
+        try:
+            directory.mkdir(parents=True, exist_ok=True)
+            probe = directory / ".preflight-probe"
+            probe.write_text("probe", encoding="utf-8")
+            probe.unlink()
+        except OSError as exc:
+            problems.append(f"{label} dir not writable ({exc})")
+    try:
+        usage = shutil.disk_usage(data_dir)
+        if usage.free < 256 * 1024 * 1024:
+            problems.append(f"free disk space low: {usage.free} bytes")
+    except OSError as exc:
+        problems.append(f"cannot stat disk ({exc})")
+    try:
+        interpreter = python or sys.executable
+        result = subprocess.run(
+            [interpreter, str(ROOT / "scripts" / "audit_seal.py"), "verify"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=60,
+        )
+        status = ""
+        try:
+            status = json.loads(result.stdout or "{}").get("status", "")
+        except json.JSONDecodeError:
+            pass
+        if status == "fully-sealed":
+            pass
+        elif status == "valid-prefix-with-unsealed-tail":
+            warnings.append("audit has an unsealed tail (run make quality to re-seal)")
+        else:
+            problems.append(
+                "audit seal verify failed: "
+                + (result.stderr or result.stdout or "unknown").strip()[:200]
+            )
+    except subprocess.TimeoutExpired:
+        problems.append("audit seal verify timed out")
+    try:
+        from src.coevo.model.config import load_model_config
+        load_model_config()
+    except Exception as exc:  # noqa: BLE001 - model config is advisory for startup
+        warnings.append(f"model config unreadable ({exc}); offline default will be used")
+    print("preflight ok" if not problems else "preflight critical")
+    for problem in problems:
+        print(f"  critical: {problem}")
+    for warning in warnings:
+        print(f"  warning: {warning}")
+    return 2 if problems else (1 if warnings else 0)
+
+
 def run(args: argparse.Namespace) -> int:
     config = build_config(args)
     if args.check:
@@ -62,6 +134,8 @@ def run(args: argparse.Namespace) -> int:
             f"log_level={config.log_level}"
         )
         return 0
+    if args.preflight:
+        return preflight(config)
     logger = setup_logging(config)
     http_config_kwargs = dict(
         bind_host=config.cockpit_host,
@@ -113,6 +187,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Coevo local cockpit server")
     parser.add_argument("--port", type=int, default=None, help="bind port (loopback only)")
     parser.add_argument("--check", action="store_true", help="validate configuration and exit")
+    parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="run fail-fast startup checks and exit (0 ok / 1 degraded / 2 critical)",
+    )
     parser.add_argument("--version", action="store_true", help="print version and exit")
     args = parser.parse_args(argv)
     if args.version:
