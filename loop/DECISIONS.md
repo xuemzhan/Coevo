@@ -2633,6 +2633,14 @@ security-reviewer 双签门禁。
 - `README.md` 状态改为以 `loop/STATE.json` 为准（不再写死 iteration）。
 - `CODE_REVIEW.md` 移至 `docs/process/code-review-2026-07-30.md`（历史审查快照）。
 - `.omo/` 中 `split_packages.py` 已收编；其余 session 数据属本地未入库内容，保留待人工清理。
+
+## 2026-08-03 业务负责人授权推送至 GitHub
+
+- 授权人：xuemzhan（仓库 owner / 业务负责人），明确要求"提交到 github"。
+- 范围：将当前分支 `agent/initial-coevo-environment` 的本地提交（`4fc1b1d`、`474145a`）
+  推送至 `origin`（https://github.com/xuemzhan/Coevo.git）。
+- 说明：AGENTS.md §5 默认禁止 `git push`，本次按业务负责人显式授权执行，并在此留痕；
+  不合并分支、不打 tag、不发 release。
 ## 2026-08-03 -- 稳定性与运维加固（ENG-BASE STABILITY-1 done）
 
 ### 背景
