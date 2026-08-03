@@ -29,9 +29,11 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from src.coevo.model import (
+    ModelConfig,
     ModelProvider,
     ModelUnavailableError,
     ModelValidationError,
+    PromptRegistry,
     parse_json_object,
 )
 from src.coevo.task_flow import FlowUnderstanding
@@ -82,10 +84,7 @@ class ModelTaskSuggestion:
     candidate_edges: tuple[SuggestionEdge, ...]
 
 
-def _bounded_prompt(
-    understanding: FlowUnderstanding,
-    project_input: Mapping[str, Any],
-) -> str:
+def _flow_json(understanding: FlowUnderstanding) -> str:
     stages: list[dict[str, object]] = []
     node_count = 0
     for stage_id in understanding.graph.stage_ids_in_order:
@@ -110,20 +109,28 @@ def _bounded_prompt(
             )
         if entries:
             stages.append({"stage": stage_id, "nodes": entries})
-    payload = {
-        "project": {
-            "title": project_input.get("title"),
-            "objective": project_input.get("objective"),
-            "plan_start": project_input.get("plan_start"),
-            "plan_end": project_input.get("plan_end"),
-            "responsible_units": list(project_input.get("responsible_units", ())),
-        },
-        "flow_stages": stages,
-    }
-    prompt = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-    if len(prompt.encode("utf-8")) > _MAX_PROMPT_BYTES:
+    flow = json.dumps(
+        {"flow_stages": stages},
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    if len(flow.encode("utf-8")) > _MAX_PROMPT_BYTES:
         raise ModelValidationError("prompt exceeds the size limit")
-    return prompt
+    return flow
+
+
+def _project_json(project_input: Mapping[str, Any]) -> str:
+    payload = {
+        "title": project_input.get("title"),
+        "objective": project_input.get("objective"),
+        "plan_start": project_input.get("plan_start"),
+        "plan_end": project_input.get("plan_end"),
+        "responsible_units": list(project_input.get("responsible_units", ())),
+    }
+    project = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    if len(project.encode("utf-8")) > _MAX_PROMPT_BYTES:
+        raise ModelValidationError("prompt exceeds the size limit")
+    return project
 
 
 class TaskDecompositionAgent:
@@ -135,31 +142,36 @@ class TaskDecompositionAgent:
         understanding: FlowUnderstanding,
         project_input: Mapping[str, Any],
         provider: ModelProvider,
+        config: ModelConfig,
+        prompt_registry: PromptRegistry,
     ) -> ModelTaskSuggestion | None:
         """Ask the provider for candidate tasks/edges; ``None`` when offline."""
         if not isinstance(provider, ModelProvider):
             raise TaskDecompositionValidationError(
                 "provider must implement ModelProvider"
             )
-        user = _bounded_prompt(understanding, project_input)
-        system = (
-            "You are a task-decomposition assistant. Given a project and a "
-            "confirmed process-flow summary, propose ONLY additional tasks "
-            "and dependency edges as JSON with this exact shape: "
-            '{"tasks":[{"work_package_id":"...","task_id":"...","title":"...",'
-            '"responsible_role":"...","plan_start":"ISO-8601-Z",'
-            '"plan_end":"ISO-8601-Z","deliverable_title":"...",'
-            '"acceptance_criteria":["..."]}],"candidate_edges":'
-            '[{"predecessor_task_id":"...","successor_task_id":"..."}]}. '
-            "Use only work_package_ids present in the flow_stages. Do not "
-            "repeat existing node ids. Output ONLY the JSON object."
+        provider_key = (
+            f"{provider.name}/{config.model}"
+            if getattr(provider, "name", None) == "deepseek"
+            else None
+        )
+        template = prompt_registry.resolve(
+            "task_decomposition.suggest",
+            provider_key=provider_key,
+        )
+        user = template.expand(
+            values={
+                "project": _project_json(project_input),
+                "flow": _flow_json(understanding),
+            },
+            max_bytes=_MAX_PROMPT_BYTES,
         )
         try:
             content = provider.complete(
-                system=system,
+                system=template.system,
                 user=user,
-                max_tokens=2000,
-                timeout_seconds=30,
+                max_tokens=config.max_tokens,
+                timeout_seconds=config.timeout_seconds,
             )
         except ModelUnavailableError:
             return None

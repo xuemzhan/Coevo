@@ -1,12 +1,12 @@
 """Unified model-adapter layer (mandatory constraint 9.2).
 
 Business slices depend on :class:`ModelProvider`; vendors are selected
-by environment and never hard-coded into business logic. The default
-is offline (``NullModelProvider``), so gates never need a network.
+by a tracked config file (``config/model-config.json``) and prompts
+come from a versioned data file (``config/model-prompts.json``).
+The default is offline (``NullModelProvider``), so gates never need a
+network.
 """
 from __future__ import annotations
-
-import os
 
 from .contract import (
     ModelError,
@@ -17,25 +17,44 @@ from .contract import (
     parse_json_object,
 )
 from .deepseek import DeepSeekProvider
+from .config import ModelConfig, load_model_config
+from .prompts import (
+    PromptRegistry,
+    PromptTemplate,
+    load_prompt_registry,
+)
 
 
-def select_provider() -> ModelProvider:
-    """Select a provider from ``COEVO_LLM_PROVIDER`` (default offline)."""
-    provider = os.environ.get("COEVO_LLM_PROVIDER", "").strip().lower()
-    if provider in ("", "none", "offline"):
+def select_provider(config: ModelConfig | None = None) -> ModelProvider:
+    """Select a provider from the model config (default offline)."""
+    cfg = config or load_model_config()
+    if cfg.provider == "offline":
         return NullModelProvider()
-    if provider == "deepseek":
-        return DeepSeekProvider()
-    raise ModelError(f"unsupported model provider {provider!r}")
+    if cfg.provider == "deepseek":
+        assert cfg.api_key_env is not None
+        assert cfg.base_url is not None
+        assert cfg.model is not None
+        return DeepSeekProvider(
+            api_key_env=cfg.api_key_env,
+            base_url=cfg.base_url,
+            model=cfg.model,
+            external_data_ok=cfg.external_data_ok,
+        )
+    raise ModelError(f"unsupported model provider {cfg.provider!r}")
 
 
 __all__ = [
     "DeepSeekProvider",
+    "ModelConfig",
     "ModelError",
     "ModelProvider",
     "ModelUnavailableError",
     "ModelValidationError",
     "NullModelProvider",
+    "PromptRegistry",
+    "PromptTemplate",
+    "load_model_config",
+    "load_prompt_registry",
     "parse_json_object",
     "select_provider",
 ]

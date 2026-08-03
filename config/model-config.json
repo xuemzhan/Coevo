@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "provider": "offline",
+  "prompts_file": "config/model-prompts.json",
+  "providers": {
+    "deepseek": {
+      "base_url": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "api_key_env": "COEVO_LLM_API_KEY",
+      "timeout_seconds": 30,
+      "max_tokens": 2000,
+      "external_data_ok": false
+    }
+  }
+}

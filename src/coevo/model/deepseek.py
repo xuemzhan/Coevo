@@ -52,7 +52,7 @@ class DeepSeekProvider:
     def __init__(
         self,
         *,
-        api_key: str | None = None,
+        api_key_env: str = "COEVO_LLM_API_KEY",
         base_url: str = "https://api.deepseek.com",
         model: str = "deepseek-chat",
         external_data_ok: bool | None = None,
@@ -60,7 +60,7 @@ class DeepSeekProvider:
     ) -> None:
         if not base_url.startswith("https://"):
             raise ModelError("base_url must use https")
-        self._api_key = api_key or os.environ.get("COEVO_LLM_API_KEY", "")
+        self._api_key_env = api_key_env
         self._base_url = base_url.rstrip("/")
         self._model = model
         allowed = external_data_ok
@@ -73,7 +73,7 @@ class DeepSeekProvider:
         # Never expose the key or the base URL's credentials.
         return (
             f"DeepSeekProvider(model={self._model!r}, "
-            f"configured={bool(self._api_key)}, "
+            f"configured={bool(os.environ.get(self._api_key_env))}, "
             f"external_data_ok={self._external_data_ok})"
         )
 
@@ -85,9 +85,10 @@ class DeepSeekProvider:
         max_tokens: int,
         timeout_seconds: float,
     ) -> str:
-        if not self._api_key:
+        api_key = os.environ.get(self._api_key_env, "")
+        if not api_key:
             raise ModelUnavailableError(
-                "DeepSeek API key is not configured (COEVO_LLM_API_KEY)"
+                f"DeepSeek API key is not configured ({self._api_key_env})"
             )
         if not self._external_data_ok:
             raise ModelUnavailableError(
@@ -118,7 +119,7 @@ class DeepSeekProvider:
         )
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self._api_key}",
+            "Authorization": f"Bearer {api_key}",
         }
         url = f"{self._base_url}/chat/completions"
         status, raw = self._http_post(url, body, headers, timeout_seconds)

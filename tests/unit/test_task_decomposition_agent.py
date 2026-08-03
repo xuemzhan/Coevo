@@ -7,6 +7,8 @@ import unittest
 from src.coevo.model import (
     ModelUnavailableError,
     ModelValidationError,
+    load_model_config,
+    load_prompt_registry,
 )
 from src.coevo.task_decomposition import (
     ModelTaskSuggestion,
@@ -68,6 +70,12 @@ def _project_input() -> dict[str, object]:
     }
 
 
+def _config_and_registry():
+    config = load_model_config()
+    registry = load_prompt_registry(config.prompts_file)
+    return config, registry
+
+
 class SuggestTests(unittest.TestCase):
     def test_suggest_parses_valid_suggestion(self):
         understanding = _understanding()
@@ -75,6 +83,8 @@ class SuggestTests(unittest.TestCase):
             understanding=understanding,
             project_input=_project_input(),
             provider=FakeProvider(content=_valid_suggestion_json()),
+            config=_config_and_registry()[0],
+            prompt_registry=_config_and_registry()[1],
         )
         self.assertIsNotNone(suggestion)
         assert suggestion is not None
@@ -91,26 +101,34 @@ class SuggestTests(unittest.TestCase):
             understanding=_understanding(),
             project_input=_project_input(),
             provider=FakeProvider(error=ModelUnavailableError("offline")),
+            config=_config_and_registry()[0],
+            prompt_registry=_config_and_registry()[1],
         )
         self.assertIsNone(suggestion)
 
     def test_suggest_rejects_malformed_and_oversized_output(self):
         agent = TaskDecompositionAgent()
+        config, registry = _config_and_registry()
         with self.assertRaises(ModelValidationError):
             agent.suggest(
                 understanding=_understanding(),
                 project_input=_project_input(),
                 provider=FakeProvider(content="not json"),
+                config=config,
+                prompt_registry=registry,
             )
         with self.assertRaises(ModelValidationError):
             agent.suggest(
                 understanding=_understanding(),
                 project_input=_project_input(),
                 provider=FakeProvider(content='{"tasks": ' + "[" * 1000 + "]}"),
+                config=config,
+                prompt_registry=registry,
             )
 
     def test_suggest_rejects_unknown_package_and_unknown_edge(self):
         agent = TaskDecompositionAgent()
+        config, registry = _config_and_registry()
         bad_package = json.dumps(
             {
                 "tasks": [
@@ -133,6 +151,8 @@ class SuggestTests(unittest.TestCase):
                 understanding=_understanding(),
                 project_input=_project_input(),
                 provider=FakeProvider(content=bad_package),
+                config=config,
+                prompt_registry=registry,
             )
         bad_edge = json.dumps(
             {
@@ -150,6 +170,8 @@ class SuggestTests(unittest.TestCase):
                 understanding=_understanding(),
                 project_input=_project_input(),
                 provider=FakeProvider(content=bad_edge),
+                config=config,
+                prompt_registry=registry,
             )
 
 
