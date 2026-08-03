@@ -628,35 +628,53 @@ items:
   - id: CRYPTO-1
     story: ENG-BASE
     title: 正式密码方案落地为"简单功能可用版本"：纯 Python SM3（GB/T 32905，src/coevo/crypto/sm3.py，官方向量 + 与 GmSSL 3.2.0 引擎交叉验证）替换 compute_sm3_digest 的 SHA-256 替身；用户批准开源 GmSSL 3.2.0（Apache-2.0）作为功能密码引擎（SM2 签名/密钥封装、SM4-GCM 已由 GmsslPrototypeProvider 真实实现并经 E2E 验证）；更新 crypto/contract.py scope 治理说明、docs/dependencies/approved-crypto-provider-path.md、README 交付边界、loop/audit-signing.json formal_replacement；受保护密钥句柄仍为 approved-product scope 的硬性前置
-    status: ready
+    status: done
     dependencies: [DOCS-COMMENT-1]
-    acceptance_tests: []
+    acceptance_tests:
+      - tests/unit/test_crypto_sm3.py
+      - tests/integration/test_crypto_sm3.py
+      - tests/integration/test_gmssl_prototype_provider.py
+      - tests/e2e/test_return_chain.py
     security_review: true
     protocol_review: true
   # ---------- CI 与制品托管（2026-08-03 用户批准 CI/制品托管方案） ----------
   - id: CI-1
     story: ENG-BASE
     title: CI 与制品托管方案实施：.github/workflows/quality.yml（Windows runner，workflow_dispatch/push/PR 触发，restore 锁工具链制品后运行 fmt/lint/test/test-security/test-e2e 四个验证侧目标，上传门禁证据；--target quality 的签名封存保留维护机，runner 仅公钥复验审计链）；scripts/ci-restore-toolchain.ps1（https 下载或 LocalPath 测试注入，SHA-256 锚定 fail-closed，先临时解压校验 python/node/control 与 lock 可解析再复制进 .tools，清理不留半成品）；docs/dependencies/ci-artifact.json 制品描述符（pending 拒绝运行）；docs/operations/ci-artifact-hosting.md 托管方案（构建/发布/回填哈希/激活/升级/安全说明）；tests/unit/test_ci_restore.py 6 项（成功/哈希不匹配/缺条目/pending 拒绝/工作流四目标且不含 quality/描述符）
-    status: ready
+    status: done
     dependencies: [CRYPTO-1]
-    acceptance_tests: []
+    acceptance_tests:
+      - tests/unit/test_ci_restore.py
     security_review: true
     protocol_review: false
   # ---------- 受保护密钥句柄（2026-08-03 用户指令：继续 国密认证模块 + 受保护密钥句柄） ----------
   - id: HANDLE-1
     story: ENG-BASE
     title: 受保护密钥句柄（CNG 非导出 KEK 封装 SM2 私钥）：scripts/cng-kek.ps1 受控 CNG 助手（创建/状态/封装/解封摘要/销毁，RSA-2048 ExportPolicy=None，OAEP-SHA256，缓冲归零，输出仅密文与摘要）；src/coevo/crypto/cng_handle.py（CngKekReference/CngKekStore/CngProtectedKeyHandle/CngWrappedKeyRegistry：JSON+SHA-256 哈希链、显式 create/open、篡改拒开、注册/撤销/销毁生命周期、明文永不落盘、helper 哈希钉扎）；src/coevo/crypto/protected_provider.py（GmsslProtectedProvider：key_handle_backed=True、scope=APPROVED_PRODUCT，sm3/seal/verify 公钥侧功能可用，sign/open 指向 HANDLE-2 fail-closed 不回落原型路径）；文档同步；单元 12 + 真实 CNG 集成 4
-    status: ready
+    status: done
     dependencies: [CI-1]
-    acceptance_tests: []
+    acceptance_tests:
+      - tests/unit/test_cng_handle.py
+      - tests/integration/test_cng_handle.py
     security_review: true
     protocol_review: false
   # ---------- HANDLE-2：helper 内 CNG 解封 + SM2 签名/解包（2026-08-03 用户指令） ----------
   - id: HANDLE-2
     story: ENG-BASE
     title: crypto-helper 内新增 CNG 解封 + SM2 签名/解包动作（HANDLE-1 接线）：gmssl-crypto-helper.cs 动作 6/7/8——动作 8 用 RSACng+非导出 KEK 封装 SM2 密钥的 PKCS#8 口令（RSA-2048 OAEP 上限 190B，封装整包 564B 不可行，故封装口令、密钥保持口令加密于 profile）；动作 6 解封口令→解密 PKCS#8→SM2 签名，动作 7 解封口令→解包 SM4-GCM；口令/密钥在 helper 内存使用后归零，Python 全程不可见；helper 增 System.Core 引用（RSACng）并透传完整 GCP-E 诊断；GmsslProtectedProvider.sign/open 功能化；集成测试 3 项（受保护签名+公钥验签/受保护解包+篡改拒绝/错误 KEK fail-closed）
-    status: ready
+    status: done
     dependencies: [HANDLE-1]
+    acceptance_tests:
+      - tests/unit/test_cng_handle.py
+      - tests/integration/test_cng_handle.py
+    security_review: true
+    protocol_review: false
+  # ---------- 生产运维与可观测性落地（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: OPS-1
+    story: ENG-BASE
+    title: 生产运维与可观测性落地：scripts/health_check.py（stdlib，JSON 输出+退出码：数据/日志目录可写、磁盘余量、驾驶舱 /healthz、审计封存状态、安装版本一致性、单实例锁陈旧检查）；scripts/register-autostart.ps1（Windows 计划任务登录自启已安装驾驶舱，Register/Unregister/Status，DryRun 不触系统、校验失败关闭）；驾驶舱访问日志按大小轮转（_CockpitLogWriter 默认 5MB×5，轮转失败不影响请求）；docs/operations/ops-runbook.md 统一运维手册（健康检查/自启/轮转/备份恢复指引/排障）
+    status: ready
+    dependencies: [HANDLE-2]
     acceptance_tests: []
     security_review: true
     protocol_review: false

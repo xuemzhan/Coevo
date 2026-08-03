@@ -9161,6 +9161,33 @@ fully-sealed（unit 643+28 / integration 209+7 / security 96 / e2e 12 全绿）�
 
 结论：双放行；进入 RECORD。
 
+## 2026-08-04 -- 独立复核：OPS-1（内联执行；沿用用户批准的内联授权）
+
+### verifier 结论：PASS
+
+| 检查项 | 证据 | 结果 |
+|---|---|---|
+| 健康检查各检查项（dirs/disk/version/lock）与聚合 | tests/unit/test_ops_tooling.py::HealthCheckTests（6 项） | 通过 |
+| 自启助手（Status 未注册 / DryRun 打印 / 缺安装根失败关闭） | AutostartHelperTests（3 项） | 通过 |
+| 访问日志按大小轮转 + 备份移位 + 轮转失败写隔离 | AccessLogRotationTests（2 项） | 通过 |
+| cockpit 回归（HTTP 配置/服务/E2E launcher） | tests/unit/test_cockpit_http.py + tests/integration/test_cockpit_http_server.py + tests/e2e/test_cockpit_launcher.py（50 项） | 通过 |
+| 真实健康检查冒烟 | 临时安装根：dirs/disk/version ok、驾驶舱不可达 → degraded → exit 1 | 通过 |
+| 全量门禁 | `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；unit 828 / integration 249 / security 97 / e2e 12 全绿 | 通过 |
+
+结论：允许进入下一工作项。
+
+### security-reviewer 结论：PASS（Critical 0 / High 0）
+- 只读性：健康检查全部检查只读、不修改状态；审计检查仅公钥验签 ✔
+- 自启边界：DryRun 不触系统；Register 以普通权限（LIMITED）创建登录任务，命令
+  仅含显式 Python 与 runner 路径，无密钥/口令；失败关闭（安装根/指针/runner/
+  Python 缺失即中止）✔
+- 日志轮转：按大小轮转、备份移位；轮转失败计入 errors 且重开流继续写，不丢
+  活跃请求日志 ✔
+- 观察项（Low）：轮转备份为明文访问日志（与原文同密级）；health_check 依赖
+  loopback 探测（默认 127.0.0.1）；自启任务非 Windows 服务（后续决策点）
+
+结论：双放行；进入 RECORD。
+
 ## 2026-08-03 -- 独立复核：HANDLE-2（内联执行；沿用用户批准的内联授权）
 
 ### verifier 结论：PASS
@@ -13736,6 +13763,366 @@ rofile������ �ĵ�ͬ����cng_handle/key_handle/approved-cr
         {
           "kind": "test",
           "path": "tests/unit/test_crypto_sm3.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "REVIEW-FIX-1",
+      "title": "�޸� 2026-08-03 ȫ����鷢�ֵĴ��뼶���⣨2026-08-03���û�ָ����� `import_service` ɾ��ռλ pass��fixed-header ����������ʵ��һ����У�� fail-closed������ʽ base/current revision ʱ�ܾ����루����Ĭ�� R0001 α�����汾��Э�� ��16������ `merge._reject` ���� import record �� MergeError�����پ�Ĭα�� decision_maker���� `report._one_year_after` ��Чʱ����� ReportBuilderError���� `workspace/paths` `..` ��ԽУ��ͬʱ���� POSIX �� Windows ��б�ܷ��ԣ�PurePosixPath+PureWindowsPath������ `identity._cleanup_failed_create` ����ʧ�ܼ� warning �Ҿ����ڸ�ԭʼ create ���󣻢� `package_builder` ����������ͳһԤ�� FixedHeader ���ȣ��ڴ治������ to_bytes һ�£���`build_signed_payload` ���� `assert_sign_blocked` ������ fail-closed ���壻�� cockpit ״̬���ڿ��գ�Ĭ�� 300s��`COEVO_COCKPIT_CHECKPOINT_SEC` ���䣬stop ʱ join+�������̣����������״̬���� OpenAI ���� provider ��Ӧ��Ӳ���� 4MiB + �� max_tokens �����ޡ�������˲ʱʧ���н����� 1 �Σ�HTTP ����/���޲����ԣ����� cockpit �����н磨Ĭ�� 16������ 503������ stdlib������������������ wire/Э��汾/���뷽����",
+      "code": [
+        "src/coevo/protocol/import_service.py",
+        "src/coevo/protocol/package_builder.py",
+        "src/coevo/protocol/__init__.py",
+        "src/coevo/merge/engine.py",
+        "src/coevo/report/builder.py",
+        "src/coevo/workspace/paths.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/cockpit/server.py",
+        "src/coevo/model/openai_compatible.py",
+        "src/coevo/config.py",
+        "scripts/run_cockpit.py",
+        "docs/production-readiness.md"
+      ],
+      "tests": [
+        "tests/unit/test_model_provider.py",
+        "tests/unit/test_report_builder.py",
+        "tests/unit/test_workspace_init.py",
+        "tests/unit/test_merge_engine_v3.py",
+        "tests/unit/test_cockpit_http.py",
+        "tests/unit/test_production_support.py",
+        "tests/unit/test_protocol_sign_blocked.py",
+        "tests/integration/test_agent_package_atomic_import.py",
+        "tests/integration/test_cockpit_http_server.py",
+        "tests/integration/test_cockpit_state_persistence.py",
+        "tests/security/test_identity_store_security.py",
+        "tests/e2e/test_return_chain.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/import_service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/package_builder.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/merge/engine.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/report/builder.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/workspace/paths.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/server.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/model/openai_compatible.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/config.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/run_cockpit.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/production-readiness.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_model_provider.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_report_builder.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_workspace_init.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_merge_engine_v3.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_cockpit_http.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_production_support.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_protocol_sign_blocked.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_agent_package_atomic_import.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cockpit_http_server.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cockpit_state_persistence.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_identity_store_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_return_chain.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+audit seal: fully-sealed
+
+```
+
+## 2026-08-03T16:26:01.048218Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `1`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\Workspace\Coevo\.tools\control\control.pyz\__main__.py", line 18, in <module>
+    runpy.run_module(name, run_name="__main__", alter_sys=True)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 226, in run_module
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\Workspace\Coevo\.tools\control\control.pyz\traceability_check.py", line 40, in <module>
+    if __name__=="__main__": raise SystemExit(main())
+                                              ~~~~^^
+  File "E:\Workspace\Coevo\.tools\control\control.pyz\traceability_check.py", line 39, in main
+    summary=check(args.story,not args.all_statuses); print(json.dumps(summary,ensure_ascii=False,indent=2)); return 0 if summary["checked"] and not summary["missing"] else 10
+                                                     ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2194' in position 107754: illegal multibyte sequence
+
+```
+
+## 2026-08-03T16:35:01.758873Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+ecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
+test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
+test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
+test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 97 tests in 50.600s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 135.611s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-08-03T16:35:38.935512Z — target=`lint` fingerprint=`f7b9a48cf4810492`
+- exit_code: `0`
+```text
+�/��־Ŀ¼�����ҿ�д���������� �� `--min-free-bytes`��Ĭ�� 512MiB������ʻ�� `/healthz`��Ĭ�� 127.0.0.1:12701�����ɴ�=degraded������Ʒ��״̬��`audit_seal.py verify`��fully-sealed ok / δ��β degraded / ʧ�� critical������װ�汾һ���ԣ�current ָ���밲װ�� version.py һ�£�����ʵ�����¾ɣ�<10 ���ӣ���ȫ��ֻ������ `scripts/register-autostart.ps1` Windows �ƻ������¼�����Ѱ�װ��ʻ�գ�Register/Unregister/Status��`-DryRun` ����ϵͳ��schtasks EAP=Continue ���� PS5.1��ʧ�ܹرգ���װ��/ָ��/runner/Python ȱʧ����ֹ������ `src/coevo/cockpit/server.py` `_CockpitLogWriter` ������־����С��ת��Ĭ�� 5MB��5��������λ����תʧ�ܼ��� errors �Ҳ�Ӱ�������������� `docs/operations/ops-runbook.md` ͳһ��ά�ֲᣨ�������/����/��ת/���ݻָ���С����/�����ٲ�/�߽磩���� `docs/README.md` operations �������¡�",
+      "code": [
+        "scripts/health_check.py",
+        "scripts/register-autostart.ps1",
+        "src/coevo/cockpit/server.py",
+        "docs/operations/ops-runbook.md",
+        "docs/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_ops_tooling.py",
+        "tests/unit/test_cockpit_http.py",
+        "tests/integration/test_cockpit_http_server.py",
+        "tests/e2e/test_cockpit_launcher.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/health_check.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/register-autostart.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/server.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_cockpit_http.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cockpit_http_server.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_cockpit_launcher.py",
           "exists": true
         }
       ],

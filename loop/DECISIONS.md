@@ -3680,6 +3680,31 @@ security-reviewer 双签门禁。
   或门禁指纹变化未复核时按 git 历史回退 `e1fb9af`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续 HANDLE-2 接线）。
 
+## 2026-08-04 -- OPS-1 生产运维与可观测性落地 done + BACKLOG 状态补正
+
+- 用户指令：继续对项目进行生产落地优化。本项落地运维与可观测性缺口
+  （此前审查 P2：健康详情、自启守护、日志轮转、统一运维手册）。
+- 实现（commit `2d1fb28`，6 文件，+647/-27）：
+  ① `scripts/health_check.py` 离线健康检查（JSON + 退出码 0/1/2）：目录可写、
+  磁盘余量、驾驶舱 /healthz、审计封存、安装版本一致性、单实例锁陈旧；只读；
+  ② `scripts/register-autostart.ps1` Windows 计划任务登录自启已安装驾驶舱
+  （Register/Unregister/Status，DryRun 不触系统，schtasks EAP=Continue 兼容
+  PS5.1，失败关闭）；
+  ③ `src/coevo/cockpit/server.py` 访问日志按大小轮转（默认 5MB×5，轮转失败
+  不影响请求）；
+  ④ `docs/operations/ops-runbook.md` 统一运维手册；docs/README.md 索引更新。
+- 记录补正：CRYPTO-1/CI-1/HANDLE-1/HANDLE-2 的 BACKLOG 状态此前仍为 ready
+  （STATE/矩阵/DECISIONS 均为 done），本轮补正为 done 并回填验收测试。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 828 / integration 249 / security 97 / e2e 12 全绿；ops 工具 10 项 +
+  cockpit 回归 50 项；冒烟（健康检查 degraded→exit 1）；内联 verifier +
+  security-reviewer PASS（Critical/High 0）。
+- 边界：自启为计划任务而非 Windows 服务（服务形态属后续决策点）；健康检查不
+  替代 make quality；备份不含密钥句柄。
+- 回滚条件：ops 工具任一测试失败、自启注册引入权限/密钥泄露、或门禁指纹变化
+  未复核时按 git 历史回退 `2d1fb28`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
