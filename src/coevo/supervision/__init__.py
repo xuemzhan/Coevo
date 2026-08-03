@@ -27,9 +27,9 @@ from dataclasses import dataclass
 from typing import Iterable
 from src.coevo.risk import Risk, RiskKind, RiskReport, RiskValidationError, SourceKind
 
-from .models import (COORDINATION_RECOMMENDED_KINDS, EscalationLevel, EscalationSuggestion, MEETING_DOMAIN, MEETING_SCHEMA, MeetingAgendaItem, MeetingConclusionKind, MeetingConclusionProjection, MeetingProposal, SUPERVISABLE_RISK_KINDS, SUPERVISION_DOMAIN, SUPERVISION_SCHEMA, SupervisionError, SupervisionItem, SupervisionOutcome, SupervisionValidationError, _non_empty, _parse_utc)
+from .models import (COORDINATION_RECOMMENDED_KINDS, EscalationLevel, EscalationSuggestion, MEETING_DOMAIN, MEETING_SCHEMA, MeetingAgendaItem, MeetingConclusionKind, MeetingConclusionProjection, MeetingProposal, REMINDER_WINDOW_SEC, ReminderKind, ReminderSuggestion, SUPERVISABLE_RISK_KINDS, SUPERVISION_DOMAIN, SUPERVISION_SCHEMA, SupervisionError, SupervisionItem, SupervisionOutcome, SupervisionValidationError, _non_empty, _parse_utc)
 
-from .service import (SupervisionCoordinator, _agenda_title_for, _closing_condition_for, _conclusions_for, _escalation_level_for, _escalation_reason_for, _meeting_proposal_for, _supervision_item_id)
+from .service import (SupervisionCoordinator, _agenda_title_for, _closing_condition_for, _conclusions_for, _escalation_level_for, _escalation_reason_for, _meeting_proposal_for, _reminder_for, _supervision_item_id)
 
 __all__ = [
     "COORDINATION_RECOMMENDED_KINDS",
@@ -41,6 +41,9 @@ __all__ = [
     "MeetingConclusionKind",
     "MeetingConclusionProjection",
     "MeetingProposal",
+    "REMINDER_WINDOW_SEC",
+    "ReminderKind",
+    "ReminderSuggestion",
     "SUPERVISABLE_RISK_KINDS",
     "SUPERVISION_DOMAIN",
     "SUPERVISION_SCHEMA",

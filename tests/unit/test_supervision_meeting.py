@@ -20,6 +20,8 @@ from src.coevo.supervision import (
     MeetingConclusionKind,
     MeetingConclusionProjection,
     MeetingProposal,
+    ReminderKind,
+    ReminderSuggestion,
     SUPERVISABLE_RISK_KINDS,
     SUPERVISION_DOMAIN,
     SUPERVISION_SCHEMA,
@@ -173,6 +175,82 @@ class SupervisionModelTests(unittest.TestCase):
                 created_at="2026-08-21T00:00:00Z",
             )
 
+    def test_reminder_suggestion_validates_shape(self):
+        suggestion = ReminderSuggestion(
+            item_id="sup.PRJ001.risk.1.00",
+            kind=ReminderKind.REMIND,
+            reason="due soon",
+            suggested_at="2026-08-21T00:00:00Z",
+        )
+        self.assertEqual("remind", suggestion.kind.value)
+        self.assertEqual(
+            {
+                "item_id": "sup.PRJ001.risk.1.00",
+                "kind": "remind",
+                "reason": "due soon",
+                "suggested_at": "2026-08-21T00:00:00Z",
+            },
+            suggestion.to_dict(),
+        )
+        for bad_factory in (
+            lambda: ReminderSuggestion(
+                item_id="", kind=ReminderKind.REMIND, reason="r",
+                suggested_at="2026-08-21T00:00:00Z",
+            ),
+            lambda: ReminderSuggestion(
+                item_id="sup.PRJ001.risk.1.00", kind="remind", reason="r",
+                suggested_at="2026-08-21T00:00:00Z",
+            ),
+            lambda: ReminderSuggestion(
+                item_id="sup.PRJ001.risk.1.00", kind=ReminderKind.URGE,
+                reason="", suggested_at="2026-08-21T00:00:00Z",
+            ),
+            lambda: ReminderSuggestion(
+                item_id="sup.PRJ001.risk.1.00", kind=ReminderKind.URGE,
+                reason="r", suggested_at="2026-08-21T00:00:00+00:00",
+            ),
+        ):
+            with self.subTest(bad_factory=bad_factory):
+                with self.assertRaises(SupervisionValidationError):
+                    bad_factory()
+
+    def test_outcome_rejects_unknown_or_duplicate_reminders(self):
+        item = SupervisionItem(
+            item_id="sup.PRJ001.risk.1.00", project_id="PRJ001",
+            risk_id="risk.1", risk_kind=RiskKind.LONG_SILENCE,
+            responsible_subject="x", due_at="2026-08-22T00:00:00Z",
+            closing_condition="c", affected_tasks=("TASK-001",),
+            created_at="2026-08-21T00:00:00Z",
+        )
+        reminder = ReminderSuggestion(
+            item_id=item.item_id, kind=ReminderKind.REMIND,
+            reason="r", suggested_at="2026-08-21T00:00:00Z",
+        )
+        ok = SupervisionOutcome(
+            project_id="PRJ001", items=(item,), escalations=(),
+            meeting_proposal=None, conclusions=(),
+            created_at="2026-08-21T00:00:00Z",
+            reminders=(reminder,),
+        )
+        self.assertEqual(1, ok.to_dict()["reminder_count"])
+        with self.assertRaises(SupervisionValidationError):
+            SupervisionOutcome(
+                project_id="PRJ001", items=(item,), escalations=(),
+                meeting_proposal=None, conclusions=(),
+                created_at="2026-08-21T00:00:00Z",
+                reminders=(ReminderSuggestion(
+                    item_id="ghost", kind=ReminderKind.URGE, reason="r",
+                    suggested_at="2026-08-21T00:00:00Z",
+                ),),
+            )
+        with self.assertRaises(SupervisionValidationError):
+            SupervisionOutcome(
+                project_id="PRJ001", items=(item,), escalations=(),
+                meeting_proposal=None, conclusions=(),
+                created_at="2026-08-21T00:00:00Z",
+                reminders=(reminder, reminder),
+            )
+
 
 class SupervisionCoordinatorTests(unittest.TestCase):
     def test_constructs_one_supervision_item_per_risk_with_stable_id(self):
@@ -303,6 +381,47 @@ class SupervisionCoordinatorTests(unittest.TestCase):
     def test_to_audit_record_rejects_non_outcome(self):
         with self.assertRaises(SupervisionError):
             SupervisionCoordinator().to_audit_record(_report())
+
+    def test_reminders_cover_remind_urge_and_none(self):
+        risks = (
+            _risk(risk_id="risk.far", kind=RiskKind.LONG_SILENCE,
+                  due="2026-08-30T00:00:00Z"),
+            _risk(risk_id="risk.overdue", kind=RiskKind.LONG_SILENCE,
+                  due="2026-08-20T00:00:00Z"),
+            _risk(risk_id="risk.soon", kind=RiskKind.LONG_SILENCE,
+                  due="2026-08-21T12:00:00Z"),
+        )
+        report = _report(risks=risks)
+        outcome = SupervisionCoordinator().coordinate(
+            risk_report=report,
+            project_recipient_cert_id="CERT-OWNER",
+            now="2026-08-21T00:00:00Z",
+        )
+        by_id = {r.item_id: r.kind for r in outcome.reminders}
+        self.assertEqual(
+            ReminderKind.URGE, by_id["sup.PRJ001.risk.overdue.01"]
+        )
+        self.assertEqual(
+            ReminderKind.REMIND, by_id["sup.PRJ001.risk.soon.02"]
+        )
+        self.assertNotIn("sup.PRJ001.risk.far.00", by_id)
+        self.assertEqual(2, len(outcome.reminders))
+
+    def test_audit_record_includes_reminder_kinds(self):
+        outcome = SupervisionCoordinator().coordinate(
+            risk_report=_report(
+                risks=(
+                    _risk(risk_id="risk.overdue", kind=RiskKind.LONG_SILENCE,
+                          due="2026-08-20T00:00:00Z"),
+                    _risk(risk_id="risk.soon", kind=RiskKind.LONG_SILENCE,
+                          due="2026-08-21T12:00:00Z"),
+                ),
+            ),
+            project_recipient_cert_id="CERT-OWNER",
+            now="2026-08-21T00:00:00Z",
+        )
+        record = SupervisionCoordinator().to_audit_record(outcome)
+        self.assertEqual(["remind", "urge"], record["reminder_kinds"])
 
 
 class SupervisionDomainConstantsTests(unittest.TestCase):

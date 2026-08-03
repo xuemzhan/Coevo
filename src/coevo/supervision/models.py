@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import enum
 from dataclasses import dataclass
+from typing import Final
 from src.coevo.risk import RiskKind
 
 SUPERVISION_DOMAIN = "coevo.supervision"
@@ -43,6 +44,14 @@ class EscalationLevel(enum.Enum):
     WATCH = "watch"
     ESCALATE_TO_OWNER = "escalate_to_owner"
     EMERGENCY = "emergency"
+
+class ReminderKind(enum.Enum):
+    """AC-3 reminder/urge granularity for the responsible subject."""
+    NONE = "none"
+    REMIND = "remind"
+    URGE = "urge"
+
+REMINDER_WINDOW_SEC: Final[int] = 86_400  # 24h before due_at
 
 class MeetingConclusionKind(enum.Enum):
     """AC-8 conclusion projection: where the meeting outcome lands."""
@@ -124,6 +133,34 @@ class EscalationSuggestion:
         return {
             "item_id": self.item_id,
             "level": self.level.value,
+            "reason": self.reason,
+            "suggested_at": self.suggested_at,
+        }
+
+@dataclass(frozen=True)
+class ReminderSuggestion:
+    """AC-3: a reminder/urge suggestion bound to one supervision item.
+
+    ``REMIND`` fires when ``due_at`` is inside :data:`REMINDER_WINDOW_SEC`;
+    ``URGE`` fires once ``due_at`` has passed. The suggestion is advisory
+    only -- the responsible subject decides whether to act.
+    """
+    item_id: str
+    kind: ReminderKind
+    reason: str
+    suggested_at: str
+
+    def __post_init__(self) -> None:
+        _non_empty(self.item_id, field="item_id")
+        if not isinstance(self.kind, ReminderKind):
+            raise SupervisionValidationError("kind must be ReminderKind")
+        _non_empty(self.reason, field="reason")
+        _parse_utc(self.suggested_at, field="suggested_at")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "item_id": self.item_id,
+            "kind": self.kind.value,
             "reason": self.reason,
             "suggested_at": self.suggested_at,
         }
@@ -247,6 +284,7 @@ class SupervisionOutcome:
     created_at: str
     requires_owner_confirmation: bool = True
     formally_released: bool = False
+    reminders: tuple[ReminderSuggestion, ...] = ()
 
     def __post_init__(self) -> None:
         _non_empty(self.project_id, field="project_id")
@@ -268,6 +306,25 @@ class SupervisionOutcome:
             raise SupervisionValidationError("escalations must use stable item_id order")
         if set(esc_item_ids) - set(item_ids):
             raise SupervisionValidationError("escalations reference unknown supervision items")
+        if not isinstance(self.reminders, tuple):
+            raise SupervisionValidationError(
+                "reminders must be a tuple of ReminderSuggestion"
+            )
+        if any(not isinstance(r, ReminderSuggestion) for r in self.reminders):
+            raise SupervisionValidationError(
+                "reminders must be exact ReminderSuggestion"
+            )
+        reminder_item_ids = tuple(r.item_id for r in self.reminders)
+        if len(set(reminder_item_ids)) != len(reminder_item_ids):
+            raise SupervisionValidationError("reminder item_id must be unique")
+        if reminder_item_ids != tuple(sorted(reminder_item_ids)):
+            raise SupervisionValidationError(
+                "reminders must use stable item_id order"
+            )
+        if set(reminder_item_ids) - set(item_ids):
+            raise SupervisionValidationError(
+                "reminders reference unknown supervision items"
+            )
         if self.meeting_proposal is not None and not isinstance(
             self.meeting_proposal, MeetingProposal,
         ):
@@ -295,6 +352,7 @@ class SupervisionOutcome:
             "project_id": self.project_id,
             "item_count": len(self.items),
             "escalation_count": len(self.escalations),
+            "reminder_count": len(self.reminders),
             "meeting_proposal": (
                 self.meeting_proposal.to_dict() if self.meeting_proposal is not None else None
             ),

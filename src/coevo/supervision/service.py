@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime as dt
 from src.coevo.risk import Risk, RiskKind, RiskReport
 
-from .models import COORDINATION_RECOMMENDED_KINDS, EscalationLevel, EscalationSuggestion, MeetingAgendaItem, MeetingConclusionKind, MeetingConclusionProjection, MeetingProposal, SUPERVISABLE_RISK_KINDS, SupervisionError, SupervisionItem, SupervisionOutcome, SupervisionValidationError, _parse_utc
+from .models import COORDINATION_RECOMMENDED_KINDS, EscalationLevel, EscalationSuggestion, MeetingAgendaItem, MeetingConclusionKind, MeetingConclusionProjection, MeetingProposal, REMINDER_WINDOW_SEC, ReminderKind, ReminderSuggestion, SUPERVISABLE_RISK_KINDS, SupervisionError, SupervisionItem, SupervisionOutcome, SupervisionValidationError, _parse_utc
 
 class SupervisionCoordinator:
     """Pure facade; consumes one verified RiskReport per cycle."""
@@ -77,6 +77,11 @@ class SupervisionCoordinator:
                 reason=_escalation_reason_for(item, level),
                 suggested_at=now,
             ))
+        reminders: list[ReminderSuggestion] = []
+        for item in items:
+            reminder = _reminder_for(item, reference_time, now)
+            if reminder is not None:
+                reminders.append(reminder)
         meeting = _meeting_proposal_for(
             risk_report=risk_report,
             project_recipient_cert_id=project_recipient_cert_id,
@@ -90,6 +95,7 @@ class SupervisionCoordinator:
             project_id=risk_report.project_id,
             items=tuple(items),
             escalations=tuple(escalations),
+            reminders=tuple(reminders),
             meeting_proposal=meeting,
             conclusions=tuple(conclusions),
             created_at=now,
@@ -105,6 +111,7 @@ class SupervisionCoordinator:
             "item_ids": [item.item_id for item in outcome.items],
             "risk_ids": sorted({item.risk_id for item in outcome.items}),
             "escalation_levels": sorted({e.level.value for e in outcome.escalations}),
+            "reminder_kinds": sorted({r.kind.value for r in outcome.reminders}),
             "meeting_proposal_id": (
                 outcome.meeting_proposal.proposal_id
                 if outcome.meeting_proposal is not None else None
@@ -170,6 +177,42 @@ def _escalation_reason_for(
             f"affected tasks={list(item.affected_tasks)}"
         )
     return "no escalation needed"
+
+def _reminder_for(
+    item: SupervisionItem,
+    reference_time: dt.datetime,
+    now: str,
+) -> ReminderSuggestion | None:
+    """AC-3: emit a REMIND/URGE suggestion for one supervision item.
+
+    ``URGE`` fires once ``due_at`` has passed; ``REMIND`` fires when
+    ``due_at`` is inside :data:`REMINDER_WINDOW_SEC`. Items whose due
+    date is further out produce no reminder (``None``).
+    """
+    due = _parse_utc(item.due_at, field="due_at")
+    delta = (due - reference_time).total_seconds()
+    if delta < 0:
+        return ReminderSuggestion(
+            item_id=item.item_id,
+            kind=ReminderKind.URGE,
+            reason=(
+                f"due_at {item.due_at} overdue for {item.risk_kind.value} "
+                f"(US-12 AC-3 urge); affected tasks={list(item.affected_tasks)}"
+            ),
+            suggested_at=now,
+        )
+    if delta <= REMINDER_WINDOW_SEC:
+        return ReminderSuggestion(
+            item_id=item.item_id,
+            kind=ReminderKind.REMIND,
+            reason=(
+                f"due_at {item.due_at} within {REMINDER_WINDOW_SEC // 3600}h "
+                f"for {item.risk_kind.value} (US-12 AC-3 remind); "
+                f"affected tasks={list(item.affected_tasks)}"
+            ),
+            suggested_at=now,
+        )
+    return None
 
 def _meeting_proposal_for(
     *,
