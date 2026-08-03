@@ -72,3 +72,20 @@ make quality
 每次业务提交都会生成新的不可导出 CNG 标记私钥和 `CurrentUser/My` 标记证书。旧代际严格先按签名绑定的 key ID 与公钥摘要销毁私钥并验证无法重新打开，再移除证书；正式 head 与外部退休记录保留签名 tombstone。崩溃恢复与安全测试覆盖旧快照回放、标记/tombstone/pending 篡改以及 key-first 删除各阶段。
 
 开发期 RSA-3072/SHA-256、本机自签代际标记和固定审计签名者仅用于本机篡改与回滚发现；正式环境仍必须替换为批准的 SM2 产品、组织证书链、受保护的硬件密钥和独立审计节点。
+
+## 代码注释与文档规范
+
+- **注释必须与当前实现一致**：切片落地后必须清除 `deferred to US-x-AC-y` /
+  `future slice` 式过时描述（已完成的 AC 不再"待办"）；不得引用不存在的 AC。
+- **模块 docstring 自述真实边界**：说明本模块做什么、不做什么，IO/LLM/持久化
+  等边界落到具体实现模块（如 `store.py`、`server.py`、`agent.py`），而非抽象地
+  说"未来切片"。
+- **注释解释 why/constraint，不重复代码**：安全/合规约束用文档编号引用
+  （如"约束 §5.1"、"协议 §16.2"）；普通代码逻辑不逐行复述。
+- **语言一致性**：同一文件内保持同一种注释语言；公共 API 以英文 docstring 为主，
+  业务术语允许中文，但全仓统一（驾驶舱=cockpit、任务包=.agent package、运行中枢=orchestrator）。
+- **配置登记纪律**：新增/删除/修改任一 `COEVO_*` 环境变量必须同步
+  `docs/operations/configuration-reference.md`（`tests/unit/test_production_docs.py`
+  做双向一致性校验）；修改运行行为须同步 `docs/production-readiness.md`。
+- **追溯纪律**：行为或文档基线变更须同步 `loop/BACKLOG.yaml` 与
+  `docs/traceability/requirements-test-matrix.md`（lint 门禁校验无悬空条目）。

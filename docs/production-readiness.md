@@ -8,7 +8,9 @@ Python 标准库（零第三方运行时依赖），不产生任何公网请求�
 ## 配置（环境变量驱动、失败关闭）
 
 所有运行参数集中由 `src/coevo/config.py::AppConfig.from_env()` 读取，非法值一律
-抛 `ConfigError` 而非静默回退：
+抛 `ConfigError` 而非静默回退。完整变量表、默认值与分类（运行时/模型/工具链/仅测试）
+以 `docs/operations/configuration-reference.md` 为权威，代码 ⇄ 文档一致性由
+`tests/unit/test_production_docs.py` 校验：
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|

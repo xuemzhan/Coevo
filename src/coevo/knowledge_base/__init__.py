@@ -5,8 +5,10 @@ Scope
 Pure half of US-14: the *governance* layer that aggregates project
 knowledge into a draft :class:`KnowledgeBundle`, applies reviewer
 decisions (AC-6), and runs the classification check (AC-5). No
-actual disk persistence (deferred to US-14-AC-2); no LLM-assisted
-template extraction (deferred to US-14-AC-4).
+IO in the facade itself: disk persistence is provided by
+:class:`KnowledgeStore` (US-14-AC-2, ``store.py``) and wired by the
+composition layer. LLM-assisted template extraction is not
+implemented (out of scope).
 
 * No IO, no DB, no LLM, no scheduler.
 * All dataclasses are frozen + exact-type + ISO-8601 UTC `Z` time strings.

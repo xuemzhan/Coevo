@@ -30,7 +30,8 @@ What this is NOT
 * No I/O. The pool is supplied as a Python object. Persistence +
   redaction-on-import live in ``store.py`` (US-3-AC-2).
 * No LLM call. Recommendations are produced by a deterministic
-  scoring function; the production 团队推荐 agent is a future slice.
+  scoring function; extracting candidate requirements from a US-2
+  baseline is wired in the composition layer, not in this service.
 * No PII leak. The redaction layer is irreversible within the slice.
 """
 from .models import (

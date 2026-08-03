@@ -7,13 +7,15 @@ plus a list of task-slot requirements and returns ranked
 The service does NOT call any model. Scoring is the deterministic
 algorithm in :mod:`.recommender`. The "智能体" that produces
 candidate requirements from a US-2 :class:`ProjectBaseline` is a
-future slice; this AC ships only the deterministic plumbing.
+wired in the composition layer; this slice ships only the
+deterministic plumbing.
 
 Non-goals (out of scope for US-3-AC-1)
 --------------------------------------
 * No I/O. The pool is supplied as a Python object.
 * No LLM call. Recommendations are produced by deterministic scoring.
-* No persistence. Importing the pool from a DB is a future slice.
+* No persistence in the service. Pool persistence + redaction-on-import
+  are provided by :class:`TalentStore` (US-3-AC-2, ``store.py``).
 """
 from __future__ import annotations
 

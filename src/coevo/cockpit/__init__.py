@@ -4,9 +4,11 @@ Scope
 -----
 Pure half of US-7: the *governance* layer that decides which cockpit
 request is allowed and what the response body should be. The slice
-stops at the dispatch boundary -- actual HTTP server bring-up (which
-uses ``http.server`` from the Python standard library) and actual HTML
-rendering are deferred to US-7-AC-2.
+stops at the dispatch boundary. HTTP server bring-up (``server.py``),
+static rendering (``static.py``), state persistence
+(``state_store.py``) and the WPS launcher (``wps.py``) implement
+US-7-AC-2/AC-3/AC-4 + WPS-AC-4 + COCKPIT-OPS-1 and are wired by the
+composition layer.
 
 * No new dependency (Python stdlib only).
 * All dataclasses are frozen + exact-type + ISO-8601 UTC `Z` time strings.
@@ -36,10 +38,10 @@ AC mapping
 
 Non-goals
 ---------
-* No actual HTTP socket bind (deferred to US-7-AC-2).
-* No HTML / CSS / JS rendering (deferred to US-7-AC-2).
-* No disk persistence of workspace_views (deferred to US-7-AC-3).
-* No actual WPS subprocess call (deferred to US-7-AC-4)."""
+* The facade performs no IO: HTTP serving lives in ``server.py``,
+  static rendering in ``static.py``, state persistence in
+  ``state_store.py`` and WPS launch in ``wps.py`` (implemented
+  slices US-7-AC-2/AC-3/AC-4, WPS-AC-4, COCKPIT-OPS-1)."""
 
 from __future__ import annotations
 

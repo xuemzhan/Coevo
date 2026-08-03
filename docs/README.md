@@ -12,7 +12,23 @@
 | `protocol/` | `.agent` 任务包协议规范 | `agent-package-protocol.md` |
 | `traceability/` | 需求—代码—测试追踪矩阵 | `requirements-test-matrix.md` |
 | `dependencies/` | 经批准工具的精确版本、来源、哈希与许可证 | `toolchain-lock.json` |
+| `process/` | 独立双签、只读沙箱、记录归档等治理流程 | `independent-review-governance.md` |
+| `operations/` | 生产运维手册（配置参考、安装/升级/回滚、审计密钥恢复） | `configuration-reference.md`、`install-upgrade.md`、`audit-key-runbook.md` |
+| `plans/` | 各工作项的切片规划（历史） | `*.md` |
 | `development-environment.md` | 本地开发环境入口、使用方法和离线边界 | `development-environment.md` |
+| `production-readiness.md` | MVP 生产可用性说明（配置/停机/日志/版本/性能） | `production-readiness.md` |
+| `audit-signing.md` | 审计签名原型与正式密码方案边界 | `audit-signing.md` |
+
+## 生产运维文档
+
+面向部署与运维的权威入口：
+
+| 文档 | 用途 |
+|---|---|
+| `operations/configuration-reference.md` | 全部 `COEVO_*` 环境变量登记表（代码 ⇄ 文档一致性由测试校验） |
+| `operations/install-upgrade.md` | 离线安装 / 升级 / 回滚 / 卸载 |
+| `operations/audit-key-runbook.md` | 审计签名密钥健康诊断与恢复 |
+| `production-readiness.md` | 生产可用性基线（配置/优雅停机/日志/版本/性能） |
 
 ## 冲突优先级
 

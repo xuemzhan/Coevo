@@ -31,6 +31,23 @@ python scripts\run_cockpit.py --check
 python scripts\run_cockpit.py
 ```
 
+## 生产部署
+
+```powershell
+# 1) 离线安装/升级/回滚/卸载（版本化目录 + SHA-256 完整性清单）
+python scripts\install_cockpit.py --action install        # 安装（版本取 src/coevo/version.py）
+python scripts\install_cockpit.py --action upgrade --version <新版本>
+python scripts\install_cockpit.py --action rollback       # 回滚上一版本（先验清单）
+python scripts\install_cockpit.py --action check          # 校验当前安装完整性
+
+# 2) 从已安装目录启动驾驶舱
+python "%LOCALAPPDATA%\KaiwuAgent\app\<version>\scripts\run_cockpit.py"
+```
+
+全部环境变量、默认值与校验规则见 `docs/operations/configuration-reference.md`；
+安装/升级/回滚手册见 `docs/operations/install-upgrade.md`；审计签名密钥健康诊断与
+恢复见 `docs/operations/audit-key-runbook.md`。
+
 ## 文档
 
 | 主题 | 位置 |
@@ -40,6 +57,7 @@ python scripts\run_cockpit.py
 | `.agent` 任务包协议 | `docs/protocol/agent-package-protocol.md` |
 | 生产可用性说明 | `docs/production-readiness.md` |
 | 开发环境与离线规则 | `docs/development-environment.md` |
+| 生产运维手册（配置参考/安装升级/审计密钥） | `docs/operations/` |
 | 需求—代码—测试追踪 | `docs/traceability/requirements-test-matrix.md` |
 | 工程循环状态 | `loop/`（GOAL/STATE/BACKLOG/DECISIONS/VERIFICATION） |
 

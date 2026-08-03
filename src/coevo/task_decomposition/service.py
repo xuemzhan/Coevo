@@ -25,11 +25,15 @@ What this layer adds on top of US-2's data model
 
 Non-goals (out of scope for US-2-AC-1)
 --------------------------------------
-* No LLM call. The production 任务分解 agent is a separate slice.
+* No LLM call in this service. Optional model-assisted decomposition
+  lives in ``agent.py`` (US-2-AC-3/AC-4/AC-5); the deterministic
+  service remains the offline default.
 * No I/O. The service is a pure function over its inputs.
 * No automatic edge proposal. Stage-order edges are seeded
   deterministically (every task in stage i precedes every task in
-  stage i+1); explicit LLM-suggested edges are a future slice.
+  stage i+1); LLM-suggested candidate edges are proposed by
+  :class:`TaskDecompositionAgent` (US-2-AC-3) and never applied
+  automatically.
 """
 from __future__ import annotations
 

@@ -24,8 +24,10 @@ AC test matrix (each TestCase class locks one AC):
 
 What this is NOT
 ----------------
-* No LLM call. ``service.decompose_from_flow`` is a deterministic
-  state machine; the production 任务分解 agent is a future slice.
+* No LLM call in this service. ``service.decompose_from_flow`` is a
+  deterministic state machine; optional model-assisted decomposition
+  is implemented in ``agent.py`` (US-2-AC-3/AC-4/AC-5) and always
+  produces human-confirmed drafts.
 * No I/O. Inputs and outputs are Python objects only.
 * No re-derivation of stage mappings — we consume the StageGraph that
   US-1-AC-2 already produced.
