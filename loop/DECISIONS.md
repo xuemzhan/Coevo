@@ -3788,6 +3788,28 @@ security-reviewer 双签门禁。
   变化未复核时按 git 历史回退 `6728edd`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- RELEASE-1 发布就绪检查 + 已知限制清单 done
+
+- 用户指令：继续对项目进行生产落地优化。本项落地发布前就绪检查与已知限制清单
+  （MVP 交付物 #18 收口）。
+- 实现（commit `2c1cb50`，4 文件，+402）：
+  ① `scripts/release_check.py`（stdlib）——git 工作区干净、版本语义化且与
+  `--expect-version` 一致、审计 fully-sealed（未封尾 warning）、secret_scan 干净、
+  追溯矩阵一致、STATE done 且无阻塞、无 in-progress（ready=warning）；JSON + 退出码
+  0/1/2；
+  ② `docs/operations/known-limitations.md`——外部条件（国密认证模块/Win7 实机/
+  CI 激活/审计密钥托管/Windows 服务形态）与实现边界清单 + 维护注意（门禁指纹随
+  命令集变化、锁链全链同步、COEVO_* 登记）；
+  ③ ops-runbook §7 发布就绪节。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit fully-sealed；
+  unit 851 / integration 252 / security 97 / e2e 13 全绿；release_check 单元 5 项；
+  内联 verifier + security-reviewer PASS（Critical/High 0）。
+- 边界：发布就绪检查为人工执行前置工具，不替代审批流程；建议发布记录引用实际
+  门禁指纹。
+- 回滚条件：release_check 任一测试失败、发布检查可被绕过（如漏项）、或门禁指纹
+  变化未复核时按 git 历史回退 `2c1cb50`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

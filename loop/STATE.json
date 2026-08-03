@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "SECSCAN-1",
+  "current_item": "RELEASE-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "6728eddf794edba3993b76c097d0361f790b57fe",
+  "last_verified_commit": "2c1cb5045a03e5e85f196cb2a520cee2b51b6218",
   "blocking_issue": "",
-  "updated_at": "2026-08-03T17:23:54.654839Z"
+  "updated_at": "2026-08-03T23:31:46.069858Z"
 }
