@@ -603,3 +603,14 @@ items:
       - tests/integration/test_installer.py
     security_review: true
     protocol_review: false
+  # ---------- P0-3 本地部分：审计签名密钥健康诊断与恢复（2026-08-03 用户指令：再下一工作项） ----------
+  - id: AUDIT-KEY-1
+    story: ENG-BASE
+    title: 审计签名密钥健康诊断与恢复手册：scripts/audit_key_health.py（纯 stdlib）——config.structure/public_certificate/head_signer/certificate.inspect 四类检查（委托 audit_signature.ps1 -Action Inspect），结构化 JSON + 处置建议，退出码 0/1，不读取不打印私钥材料；docs/operations/audit-key-runbook.md 按故障类型恢复/轮换流程 + 归档纪律；单元 20 项 + 集成 4 项（真实仓库健康/损坏配置/缺失配置 fail-closed）
+    status: done
+    dependencies: [INSTALL-1]
+    acceptance_tests:
+      - tests/unit/test_audit_key_health.py
+      - tests/integration/test_audit_key_health.py
+    security_review: true
+    protocol_review: false

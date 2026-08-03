@@ -3522,6 +3522,30 @@ security-reviewer 双签门禁。
   日志目录时按 git 历史回退 `9331d34`。
 - 提出者：loop-engineer（Codex）。决策者：用户（先处理任一 P0 → 选定 P0-1）。
 
+## 2026-08-03 -- AUDIT-KEY-1 审计签名密钥健康诊断与恢复手册 done（P0-3 本地部分）
+
+- 用户指令：先处理任一 P0 决策点，再下一工作项；P0-1（INSTALL-1）done 后继续，
+  选定 P0-3（审计签名密钥托管化 + 丢失告警/自动恢复）的本地可落地部分
+  （独立审计节点/批准密码产品属外部决策，未纳入）。沿用内联执行授权。
+- 实现（commit `e3ab4aa`，4 文件，+684）：`scripts/audit_key_health.py` 纯 stdlib
+  健康诊断——config.structure（字段/thumbprint/哈希/算法/store）、
+  config.public_certificate（公钥文件存在+哈希匹配+不越出仓库根）、
+  config.head_signer（链头签名者=配置或历史归档存在且匹配）、
+  certificate.inspect（委托 audit_signature.ps1 -Action Inspect：恰好 1 个/有私钥/
+  非导出/有效期内）；结构化 JSON + remediations 处置建议；退出码 0/1；
+  全程不读取不打印私钥材料；`docs/operations/audit-key-runbook.md` 按故障类型
+  （证书丢失/配置损坏/可导出私钥/历史归档缺失）恢复与轮换流程 + 归档纪律 +
+  升级路径（正式 SM2 密码产品/独立审计节点为外部决策点）。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 790 / integration 240 / security 97 / e2e 12 全绿；单元 20 + 集成 4；
+  内联 verifier PASS + 内联 security-reviewer PASS（Critical/High 0）。
+- 过程修正：INSTALL-1 记录轮将追溯矩阵 ENG-BASE 行增至 13 但未同步
+  test_traceability_check 硬编码计数（12），本轮门禁首跑暴露（12≠13）；已随
+  AUDIT-KEY-1 矩阵行将计数同步为 14。教训：新增 ENG-BASE 行必须同步该测试计数。
+- 回滚条件：健康脚本任一测试失败、门禁指纹变化未复核，或发现诊断工具读取/输出
+  私钥材料时按 git 历史回退 `e3ab4aa`。
+- 提出者：loop-engineer（Codex）。决策者：用户（再下一工作项 → 选定 P0-3 本地部分）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
