@@ -3246,3 +3246,44 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- US-3-AC-2 人才库持久化入库 done（Phase 2 Track B 第二项）+ .gitattributes 钉扎策略修正
+
+- 用户确认按 C→A→B 推进；本项为 B 轨 US-3-AC-2（人才库持久化 + 导入脱敏，
+  由 US-3-AC-1 的 __init__ 文档预留）。
+- 实现：`TalentStore`（SQLite 持久化；显式 create/open/from_pool、拒绝覆盖
+  与隐式建库；schema_version+schema_sha256+DDL 精确比对锁定；
+  PRAGMA integrity_check；追加式 SHA-256 哈希链 prev_hash/record_hash 全链
+  复验；talent_code UNIQUE + BEGIN IMMEDIATE 事务；严格行校验：safe-id、
+  skill_tags/credentials 封闭格式、load 计数范围、ISO-8601 UTC 'Z' 可用窗口、
+  identity_hash 64-hex、display_hint ≤16、identity.pool_code 必须匹配库；
+  snapshot 经 TalentPool 构造器复验，唯一/非空/pool 匹配，fail-closed）；
+  `talent_from_import`（原始 PII 经 redact_identity 脱敏后才进入 Talent，
+  原始 PII 绝不落盘）。仅 stdlib（sqlite3/hashlib/json/uuid/datetime/pathlib），
+  无新依赖，不改 wire/协议版本。
+- 验证：unit 24/24 + integration 6/6（跨重启持久化、重复码跨重启拒绝、
+  快照驱动推荐闭环、篡改拒开、重开续写、from_pool 回环）；
+  `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`，audit fully-sealed。
+- .gitattributes 钉扎策略修正（工程基线）：此前把字节钉扎路径标为
+  `text eol=lf`，实测对 mixed-EOL blob（如 scripts/quality_gate.py、
+  scripts/validate_opencode.py）会触发 git 规范化比对导致永久 dirty（本轮
+  门禁后 validate_opencode.py 出现 1 行 EOL 差异，且无法通过恢复 blob 字节
+  消除）。改为 `-text`（不做任何行尾转换，工作区与 blob 字节一致），克隆
+  探针确认钉扎文件检出字节不变；mixed-EOL blob 保持原样，无需改锁哈希。
+  已提交 63f408e。
+- 安全审查（内联）：TalentStore 只持久化脱敏字段；篡改拒开（schema 锁定 +
+  哈希链 + integrity_check）；snapshot fail-closed；无原始 PII 泄露路径；
+  Critical/High 0。protocol-reviewer 不涉及（未触碰 .agent wire）。
+- 记录：BACKLOG US-3-AC-2 ready→done；追溯矩阵新增行（commit 71e72ac）；
+  STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION 追加门禁
+  记录；tool-audit 由受控脚本自动追加。
+- 提出者：loop-engineer（Codex）。决策者：用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.

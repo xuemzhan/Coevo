@@ -509,3 +509,14 @@ items:
       - tests/unit/test_supervision_meeting.py
     security_review: false
     protocol_review: false
+  # ---------- phase 2 track B: team formation persistence (2026-08-03) ----------
+  - id: US-3-AC-2
+    story: US-3
+    title: 人才库持久化入库（AC-2）：TalentStore SQLite 持久化（显式 create/open、schema 锁定、篡改拒开哈希链、talent_code 唯一、fail-closed）+ 导入脱敏（redact_identity → Talent）与 snapshot 桥接回 TalentPool；仅 stdlib
+    status: done
+    dependencies: [US-3-AC-1]
+    acceptance_tests:
+      - tests/unit/test_talent_store.py
+      - tests/integration/test_talent_store_persistence.py
+    security_review: true
+    protocol_review: false
