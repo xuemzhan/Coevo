@@ -26,7 +26,11 @@ envelope). Sub-modules:
   transaction state machine (pure-function; no IO).
 * ``processed_package_store`` — US-5-AC-3 (§ 17): in-memory
   processed-package registry with atomic register / scope / digest
-  queries. Pure-function; DB persistence is a future slice.
+  queries. Pure-function.
+* ``package_store_db`` — PACKAGE-DB-1 (§ 17): SQLite-persistent
+  processed-package registry with explicit create/open, locked
+  schema, tamper-rejecting hash chain and cross-restart duplicate
+  detection; ``snapshot()`` bridges back to the in-memory store.
 * ``import_service`` — US-5-AC-3 facade tying the importer +
   store + replay detector + base_revision check together.
 """
@@ -136,6 +140,11 @@ from .processed_package_store import (
     ProcessedPackageRecord,
     ProcessedPackageStore,
 )
+from .package_store_db import (
+    PackageStoreDb,
+    PackageStoreDbError,
+    PackageStoreDbIntegrityError,
+)
 from .import_service import (
     DEFAULT_EMPTY_STORE,
     ImportOutcome,
@@ -188,6 +197,9 @@ __all__ = [
     "PROTOCOL_MAJOR",
     "PROTOCOL_MINOR",
     "PackageImportService",
+    "PackageStoreDb",
+    "PackageStoreDbError",
+    "PackageStoreDbIntegrityError",
     "ParsedPackageHeader",
     "PayloadBlock",
     "ProcessedPackage",

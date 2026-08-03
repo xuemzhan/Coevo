@@ -488,3 +488,14 @@ items:
       - tests/unit/test_production_support.py
     security_review: true
     protocol_review: false
+  # ---------- phase 2 track C: protocol & crypto formalization (2026-08-03) ----------
+  - id: PACKAGE-DB-1
+    story: US-5
+    title: 已处理包登记表持久化：协议 §17 registry 由 in-memory 改为 SQLite 持久化（显式 create/open、篡改拒开、重放/重复包跨重启识别、fail-closed）
+    status: ready
+    dependencies: [US-5-AC-3]
+    acceptance_tests:
+      - tests/unit/test_package_store_persistence.py
+      - tests/integration/test_package_store_persistence.py
+    security_review: true
+    protocol_review: true
