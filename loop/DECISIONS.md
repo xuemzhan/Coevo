@@ -3650,6 +3650,36 @@ security-reviewer 双签门禁。
   未复核时按 git 历史回退 `cb902b2`/`b733259`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续 国密认证模块 + 受保护密钥句柄）。
 
+## 2026-08-03 -- HANDLE-2 crypto-helper 内 CNG 解封 + SM2 签名/解包 done
+
+- 用户指令：在 crypto-helper 内新增"CNG 解封 + SM2 签名/解包"动作——wrapped blob +
+  KEK 名直接进 helper，SM2 私钥在 helper 内存中即时使用并归零，Python 全程不可见；
+  接线后 GmsslProtectedProvider 的 sign/open 功能化。
+- 实现（commit `e1fb9af`，10 文件，+322/-65）：
+  ① `scripts/gmssl-crypto-helper.cs` 动作 6/7/8：动作 8 用 RSACng+非导出 KEK 封装
+  SM2 密钥的 PKCS#8 口令；动作 6 解封口令→sm2_private_key_info_decrypt_from_der
+  解密→SM2 签名；动作 7 解封口令→SM4-GCM 解包；口令/密钥 helper 内存归零；增
+  System.Core 引用（RSACng）；GCP-E 兜底输出 Base64 异常诊断；
+  ② `scripts/invoke-gmssl-crypto.ps1` 编译引用遍历全部 framework_references、
+  失败透传完整 stderr 诊断；
+  ③ `src/coevo/crypto/gmssl_provider.py` 增 sign_wrapped/open_wrapped/protect_key
+  （动作 6/7/8、role 帧、帧上限 8）；`GmsslProtectedProvider.sign/open` 功能化
+  （构造增 role/wrapped/kek_ref/profile）；
+  ④ 锁更新：helper 源哈希、System.Core.dll（1551032/ec0217...）、launcher 哈希；
+  ⑤ 文档同步（cng_handle/key_handle/approved-crypto-provider-path §8）。
+- 设计说明（关键约束）：RSA-2048 OAEP-SHA256 上限 190B，而"加密 DER(266B)+DPAPI
+  口令(294B)"整包 564B 无法一次封装；实测 raw NCryptEncrypt/Decrypt 对该类 CNG 键
+  返回 NTE_BAD_FLAGS（RSACng 可正常使用）。因此采用**口令封装**：KEK 保护 SM2 密钥
+  的口令，密钥保持 PKCS#8 口令加密于 profile——受保护句柄的间接封装语义（§8 已记）。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 818 / integration 249 / security 97 / e2e 12 全绿；受保护签名/解包真实
+  CNG 集成 3 项；内联 verifier + security-reviewer PASS（Critical/High 0）。
+- 剩余：国密认证模块（SKF/PKCS#11/硬件令牌）需外部采购；软件 KSP 为受保护句柄的
+  软件实现；DPAPI 口令文件仍存在于 profile（可由部署策略移除）。
+- 回滚条件：受保护签名/解包任一集成测试失败、密钥/口令越界（进入 Python）被证实、
+  或门禁指纹变化未复核时按 git 历史回退 `e1fb9af`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续 HANDLE-2 接线）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

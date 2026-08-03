@@ -651,3 +651,12 @@ items:
     acceptance_tests: []
     security_review: true
     protocol_review: false
+  # ---------- HANDLE-2：helper 内 CNG 解封 + SM2 签名/解包（2026-08-03 用户指令） ----------
+  - id: HANDLE-2
+    story: ENG-BASE
+    title: crypto-helper 内新增 CNG 解封 + SM2 签名/解包动作（HANDLE-1 接线）：gmssl-crypto-helper.cs 动作 6/7/8——动作 8 用 RSACng+非导出 KEK 封装 SM2 密钥的 PKCS#8 口令（RSA-2048 OAEP 上限 190B，封装整包 564B 不可行，故封装口令、密钥保持口令加密于 profile）；动作 6 解封口令→解密 PKCS#8→SM2 签名，动作 7 解封口令→解包 SM4-GCM；口令/密钥在 helper 内存使用后归零，Python 全程不可见；helper 增 System.Core 引用（RSACng）并透传完整 GCP-E 诊断；GmsslProtectedProvider.sign/open 功能化；集成测试 3 项（受保护签名+公钥验签/受保护解包+篡改拒绝/错误 KEK fail-closed）
+    status: ready
+    dependencies: [HANDLE-1]
+    acceptance_tests: []
+    security_review: true
+    protocol_review: false
