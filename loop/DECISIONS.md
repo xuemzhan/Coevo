@@ -3748,6 +3748,22 @@ security-reviewer 双签门禁。
   未复核时按 git 历史回退 `b5b3088`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- METRICS-1 驾驶舱进程内健康/状态端点 done
+
+- 用户指令：继续对项目进行生产落地优化。本项落地进程内可观测性端点，与外部
+  `health_check.py` 互补（运行实例即时视图）。
+- 实现（commit `cc9af66`，3 文件，+85/-21）：`GET /api/health`（认证只读）返回
+  service/version/started_at/uptime_sec/session_count/request_count/audit_records/
+  log_errors；请求计数线程安全（lock 保护）；未认证 401；无敏感数据；
+  ops-runbook §1 增进程内端点说明。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 840 / integration 254 / security 97 / e2e 13 全绿；集成测试 2 项新增 +
+  cockpit HTTP 17 项回归；内联 verifier + security-reviewer PASS（Critical/High 0）。
+- 边界：request_count 仅统计认证请求（未认证探测不计入，已文档化）。
+- 回滚条件：/api/health 任一测试失败、端点泄露敏感数据、或门禁指纹变化未复核
+  时按 git 历史回退 `cc9af66`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

@@ -696,3 +696,12 @@ items:
     acceptance_tests: []
     security_review: true
     protocol_review: false
+  # ---------- 进程内健康/状态端点（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: METRICS-1
+    story: ENG-BASE
+    title: 驾驶舱进程内健康/状态端点 /api/health（认证只读）：返回 service/version/started_at/uptime_sec/session_count/request_count/audit_records/log_errors；请求计数线程安全；未认证 401、无敏感数据；docs/operations/ops-runbook.md 增进程内端点；集成测试（带令牌 200 与字段断言、无令牌 401）
+    status: ready
+    dependencies: [AVAIL-1]
+    acceptance_tests: []
+    security_review: true
+    protocol_review: false
