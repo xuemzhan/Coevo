@@ -617,12 +617,32 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
 
 
 class _CockpitLogWriter:
-    """Append-only JSONL access log with fail-isolated writes."""
+    """Size-rotating JSONL access log with fail-isolated writes (OPS-1).
 
-    def __init__(self, path: Path) -> None:
+    Rotates by size (default 5 MiB per file, 5 backups) so a long-running
+    cockpit never grows an unbounded access log. Rotation failures are
+    counted and never break request handling.
+    """
+
+    DEFAULT_MAX_BYTES: Final[int] = 5 * 1024 * 1024
+    DEFAULT_BACKUP_COUNT: Final[int] = 5
+
+    def __init__(
+        self,
+        path: Path,
+        *,
+        max_bytes: int = DEFAULT_MAX_BYTES,
+        backup_count: int = DEFAULT_BACKUP_COUNT,
+    ) -> None:
+        if not isinstance(max_bytes, int) or max_bytes <= 0:
+            raise CockpitValidationError("access log max_bytes must be positive")
+        if not isinstance(backup_count, int) or backup_count < 1:
+            raise CockpitValidationError("access log backup_count must be positive")
         self._path = path
         self._lock = threading.Lock()
         self.errors = 0
+        self._max_bytes = max_bytes
+        self._backup_count = backup_count
         path.parent.mkdir(parents=True, exist_ok=True)
         self._stream = path.open("a", encoding="utf-8")
 
@@ -632,10 +652,33 @@ class _CockpitLogWriter:
                 record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
             ) + "\n"
             with self._lock:
+                self._maybe_rotate(len(line.encode("utf-8")))
                 self._stream.write(line)
                 self._stream.flush()
         except OSError:
             self.errors += 1
+
+    def _maybe_rotate(self, incoming_bytes: int) -> None:
+        try:
+            if self._path.stat().st_size + incoming_bytes <= self._max_bytes:
+                return
+            self._stream.close()
+            for index in range(self._backup_count - 1, 0, -1):
+                source = self._path.with_suffix(f".{index}")
+                target = self._path.with_suffix(f".{index + 1}")
+                if source.exists():
+                    os.replace(source, target)
+            os.replace(self._path, self._path.with_suffix(".1"))
+            self._stream = self._path.open("a", encoding="utf-8")
+        except OSError:
+            # Rotation must never take request handling down; the next
+            # write retries the rotation.
+            self.errors += 1
+            if self._stream.closed:
+                try:
+                    self._stream = self._path.open("a", encoding="utf-8")
+                except OSError:
+                    pass
 
     def close(self) -> None:
         try:

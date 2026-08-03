@@ -13,7 +13,7 @@
 | `traceability/` | 需求—代码—测试追踪矩阵 | `requirements-test-matrix.md` |
 | `dependencies/` | 经批准工具的精确版本、来源、哈希与许可证 | `toolchain-lock.json` |
 | `process/` | 独立双签、只读沙箱、记录归档等治理流程 | `independent-review-governance.md` |
-| `operations/` | 生产运维手册（配置参考、安装/升级/回滚、审计密钥恢复） | `configuration-reference.md`、`install-upgrade.md`、`audit-key-runbook.md` |
+| `operations/` | 生产运维手册（配置参考、安装/升级/回滚、审计密钥恢复、健康检查/自启/排障） | `configuration-reference.md`、`install-upgrade.md`、`audit-key-runbook.md`、`ops-runbook.md` |
 | `plans/` | 各工作项的切片规划（历史） | `*.md` |
 | `development-environment.md` | 本地开发环境入口、使用方法和离线边界 | `development-environment.md` |
 | `production-readiness.md` | MVP 生产可用性说明（配置/停机/日志/版本/性能） | `production-readiness.md` |
