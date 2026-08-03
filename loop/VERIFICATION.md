@@ -9365,3 +9365,302 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-03T09:23:04.621560Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `1`
+```text
+_step4_available_before_crypto_failure) ... ok
+test_sqlite_reopen_preserves_replay_and_conflict (test_orchestrator_real_facade_chain.GuardedChainTests.test_sqlite_reopen_preserves_replay_and_conflict) ... ok
+test_sqlite_reopen_replays_confirmed_snapshot (test_orchestrator_real_facade_chain.GuardedChainTests.test_sqlite_reopen_replays_confirmed_snapshot) ... ok
+test_append_after_reopen_extends_persisted_registry (test_package_store_persistence.CrossRestartPersistenceTests.test_append_after_reopen_extends_persisted_registry) ... ok
+test_duplicate_digest_detected_across_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_duplicate_digest_detected_across_restart) ... ok
+test_duplicate_package_id_detected_across_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_duplicate_package_id_detected_across_restart) ... ok
+test_registered_records_survive_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_registered_records_survive_restart) ... ok
+test_scope_and_revision_queries_after_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_scope_and_revision_queries_after_restart) ... ok
+test_snapshot_after_restart_supports_inmemory_facades (test_package_store_persistence.CrossRestartPersistenceTests.test_snapshot_after_restart_supports_inmemory_facades) ... ok
+test_tampered_file_is_refused_on_reopen (test_package_store_persistence.CrossRestartPersistenceTests.test_tampered_file_is_refused_on_reopen) ... ok
+test_watcher_background_mode_collects_modified_events (test_progress_watcher.ProgressWatcherIntegrationTests.test_watcher_background_mode_collects_modified_events) ... ok
+test_watcher_events_feed_progress_capture (test_progress_watcher.ProgressWatcherIntegrationTests.test_watcher_events_feed_progress_capture) ... ok
+test_committed_profile_rejects_minimal_receipt_and_missing_or_tampered_artifact (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_profile_rejects_minimal_receipt_and_missing_or_tampered_artifact) ... ok
+test_committed_receipt_hardlink_is_rejected (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_receipt_hardlink_is_rejected) ... ok
+test_committed_receipt_reparse_is_rejected_when_supported (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_receipt_reparse_is_rejected_when_supported) ... skipped "file symlink privilege unavailable: [WinError 1314] �ͻ���û���������Ȩ��: 'E:\\\\Workspace\\\\Coevo\\\\loop\\\\runtime\\\\sm2-test-pki\\\\receipt-target-5767665fb2df434eb614af30c8323a06.json' -> 'E:\\\\Workspace\\\\Coevo\\\\loop\\\\runtime\\\\sm2-test-pki\\\\test-fb237856a7fe40749b98\\\\receipt.json'"
+test_concurrent_same_profile_has_one_atomic_winner (test_sm2_test_pki_generation.Sm2TestPkiTests.test_concurrent_same_profile_has_one_atomic_winner) ... ok
+test_directory_lock_non_sharing_error_is_not_retried (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_non_sharing_error_is_not_retried) ... ok
+test_directory_lock_retries_sharing_violation_then_succeeds (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_retries_sharing_violation_then_succeeds) ... ok
+test_directory_lock_roles_and_share_flags_are_fixed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_roles_and_share_flags_are_fixed) ... ok
+test_directory_lock_sharing_violation_retry_exhaustion_fails_closed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_sharing_violation_retry_exhaustion_fails_closed) ... ok
+test_dpapi_and_encrypted_pkcs8_round_trip_without_command_line_secret (test_sm2_test_pki_generation.Sm2TestPkiTests.test_dpapi_and_encrypted_pkcs8_round_trip_without_command_line_secret) ... ok
+test_existing_profile_acl_must_remain_protected_owner_only (test_sm2_test_pki_generation.Sm2TestPkiTests.test_existing_profile_acl_must_remain_protected_owner_only) ... ok
+test_generation_is_isolated_encrypted_verified_and_non_overwriting (test_sm2_test_pki_generation.Sm2TestPkiTests.test_generation_is_isolated_encrypted_verified_and_non_overwriting) ... ok
+test_helper_command_line_and_input_channel_are_fail_closed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_command_line_and_input_channel_are_fail_closed) ... ok
+test_helper_is_static_no_child_and_launcher_has_no_job_or_native_directory_layer (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_is_static_no_child_and_launcher_has_no_job_or_native_directory_layer) ... ok
+test_helper_launch_surface_has_no_cli_or_subprocess_secret_path (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_launch_surface_has_no_cli_or_subprocess_secret_path) ... ok
+test_helper_owns_handle_identity_reparse_rename_and_strict_recovery (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_owns_handle_identity_reparse_rename_and_strict_recovery) ... ok
+test_helper_response_is_fixed_public_frame_and_response_loss_recovers (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_response_is_fixed_public_frame_and_response_loss_recovers) ... ok
+test_hung_helper_is_tree_killed_and_drains_are_bounded (test_sm2_test_pki_generation.Sm2TestPkiTests.test_hung_helper_is_tree_killed_and_drains_are_bounded) ... ok
+test_kill_points_are_recovered_with_same_nonce (test_sm2_test_pki_generation.Sm2TestPkiTests.test_kill_points_are_recovered_with_same_nonce) ... ok
+test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper) ... ok
+test_lock_matches_offline_artifact_and_records_unsigned_risk (test_sm2_test_pki_generation.Sm2TestPkiTests.test_lock_matches_offline_artifact_and_records_unsigned_risk) ... ok
+test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper) ... ok
+test_prepositioned_profile_file_is_preserved_and_no_staging_remains (test_sm2_test_pki_generation.Sm2TestPkiTests.test_prepositioned_profile_file_is_preserved_and_no_staging_remains) ... ok
+test_recover_unknown_staged_object_fails_closed_without_deleting_it (test_sm2_test_pki_generation.Sm2TestPkiTests.test_recover_unknown_staged_object_fails_closed_without_deleting_it) ... ok
+test_runtime_output_is_gitignored (test_sm2_test_pki_generation.Sm2TestPkiTests.test_runtime_output_is_gitignored) ... ok
+test_wide_runtime_acl_is_corrected_before_staging_creation (test_sm2_test_pki_generation.Sm2TestPkiTests.test_wide_runtime_acl_is_corrected_before_staging_creation) ... ok
+test_custom_tools_reference_existing_controlled_scripts (test_tool_contracts.ToolContractIntegrationTests.test_custom_tools_reference_existing_controlled_scripts) ... ok
+
+======================================================================
+ERROR: test_sm2_sm4_gcm_roundtrip_and_all_authentication_fields (test_gmssl_prototype_provider.GmsslPrototypeProviderTests.test_sm2_sm4_gcm_roundtrip_and_all_authentication_fields)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\test_gmssl_prototype_provider.py", line 88, in test_sm2_sm4_gcm_roundtrip_and_all_authentication_fields
+    self.assertEqual(b"secret payload", self.provider.open(self.recipient, sealed, associated_data=b"envelope"))
+                                        ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\crypto\gmssl_provider.py", line 117, in open
+    return self._invoke(
+           ~~~~~~~~~~~~^
+        5,
+        ^^
+    ...<5 lines>...
+        associated_data,
+        ^^^^^^^^^^^^^^^^
+    )[0]
+    ^
+  File "E:\Workspace\Coevo\src\coevo\crypto\gmssl_provider.py", line 200, in _invoke
+    raise GmsslPrototypeError(diagnostic)
+src.coevo.crypto.gmssl_provider.GmsslPrototypeError: GCP-E-LAUNCH
+
+----------------------------------------------------------------------
+Ran 216 tests in 257.369s
+
+FAILED (errors=1, skipped=1)
+
+```
+
+## 2026-08-03T09:33:23.885376Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `1`
+```text
+s_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 96 tests in 68.591s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... FAIL
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+======================================================================
+FAIL: test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\e2e\test_demo_runner.py", line 110, in test_cli_smoke_run_exits_zero
+    self.assertEqual(0, completed.returncode, completed.stderr[-2000:])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : Traceback (most recent call last):
+  File "E:\Workspace\Coevo\scripts\run_demo.py", line 75, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "E:\Workspace\Coevo\scripts\run_demo.py", line 41, in main
+    result = run_demo_pipeline(
+        Path(args.runtime_dir),
+        with_cockpit=not args.no_server and not args.smoke,
+        cockpit_port=args.port,
+    )
+  File "E:\Workspace\Coevo\src\coevo\app\pipeline.py", line 176, in run_demo_pipeline
+    raise RuntimeError(
+        f"demo chain did not complete: {completed.orch_report.outcome}"
+    )
+RuntimeError: demo chain did not complete: OrchestrationOutcome.ESCALATED
+
+
+----------------------------------------------------------------------
+Ran 12 tests in 214.431s
+
+FAILED (failures=1)
+
+```
+
+## 2026-08-03T09:48:54.821331Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+ecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
+test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
+test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
+test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 96 tests in 47.988s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 131.896s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-08-03T09:58:08.776632Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+ecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
+test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
+test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
+test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 96 tests in 49.745s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 134.847s
+
+OK
+audit seal: fully-sealed
+
+```

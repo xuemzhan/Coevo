@@ -3172,3 +3172,44 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- US-12-AC-2 督办提醒与催办建议 done（Phase 2 Track B 首项）+ GmSSL launcher 抖动修复
+
+- 用户指令：确认按 C→A→B 顺序推进 Phase 2。C 轨 PACKAGE-DB-1 已 done；
+  C 轨剩余 CRYPTO-P2-1（需业务负责人批准正式密码产品）与 A 轨各项
+  （独立复核 runner / 真实浏览器 E2E / 发布交付）均需外部环境或明确指令，
+  故按建议先推进 B 轨 US-12-AC-2。
+- 实现（AC-3 提醒与催办建议）：`ReminderKind`(REMIND/URGE) +
+  `ReminderSuggestion` + `REMINDER_WINDOW_SEC`(24h)；`SupervisionCoordinator`
+  按 due_at 生成提醒（逾期 URGE / 24h 内 REMIND / 远期无）；`SupervisionOutcome`
+  新增 `reminders` 字段（默认 ()，校验唯一/有序/引用已知项）；to_dict 增加
+  reminder_count；to_audit_record 增加 reminder_kinds；`__init__` 再导出。
+  纯函数、无 IO、不改 wire、无新依赖；security/protocol 审查不涉及（与
+  US-12-AC-1 同类纯 facade）。
+- 验证：tests/unit/test_supervision_meeting.py 14/14（新增 4 项）；
+  `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`，audit fully-sealed。
+- 门禁过程中发现并修复环境级缺陷（工程基线，非 US-12 范围）：GmSSL helper
+  按需编译后，Windows Defender 对新 exe 暂锁约 3 秒才可见，而 launcher 探测
+  窗口仅 1 秒（100×10ms），把成功编译误报为"locked crypto helper compilation
+  failed"→ 瞬时 GCP-E-LAUNCH（修复前探针 8 次中 4 次失败；修复后 0/8）。
+  修复：`scripts/invoke-gmssl-crypto.ps1` 探测窗口 100→800 次（1s→8s）+
+  finally 删除加容错重试；`docs/dependencies/toolchain-lock.json` launcher
+  哈希同步（size 5753→6309，sha256 2104af…→7d6a99…）；清理 74 个历史遗留
+  helper-*.exe（gitignored 运行时垃圾）。该修复与 STABILITY-1 的 GCP-E-LAUNCH
+  有界重试互补（根因修复），已留痕。
+- 行尾说明：本轮新增/修改的 supervision 4 文件统一为 LF（STABILITY-1 拆分时
+  遗留的 CRLF 混合已归一）；requirements-test-matrix.md 与 VERIFICATION.md 的
+  既有混合行尾（gate 以 CRLF 追加所致）保持不变，不属本轮。
+- 记录：BACKLOG US-12-AC-2 ready→done；追溯矩阵新增行（commit d0caac9 +
+  1203527）；STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION
+  追加门禁记录；tool-audit 由受控脚本自动追加。
+- 提出者：loop-engineer（Codex）。决策者：用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.

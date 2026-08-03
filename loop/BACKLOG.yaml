@@ -499,3 +499,13 @@ items:
       - tests/integration/test_package_store_persistence.py
     security_review: true
     protocol_review: true
+  # ---------- phase 2 track B: supervision closure (2026-08-03) ----------
+  - id: US-12-AC-2
+    story: US-12
+    title: 督办提醒与催办建议（AC-3）：ReminderKind(REMIND/URGE) + ReminderSuggestion 生成、接入 SupervisionOutcome 校验与审计投射（to_audit_record 增加 reminder_kinds；纯函数无 IO）
+    status: done
+    dependencies: [US-12-AC-1]
+    acceptance_tests:
+      - tests/unit/test_supervision_meeting.py
+    security_review: false
+    protocol_review: false
