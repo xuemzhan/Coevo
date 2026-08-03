@@ -14,6 +14,7 @@ from src.coevo.model import (
     ModelUnavailableError,
     ModelValidationError,
     NullModelProvider,
+    OpenAICompatibleProvider,
     PromptRegistry,
     load_model_config,
     load_prompt_registry,
@@ -99,6 +100,35 @@ class ConfigLoaderTests(unittest.TestCase):
             self.assertEqual("deepseek", config.provider)
             self.assertEqual("deepseek-chat", config.model)
             self.assertEqual(KEY_ENV, config.api_key_env)
+
+    def test_local_openai_config_loads(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = self._base(provider="local_openai")
+            payload["providers"]["local_openai"] = {
+                "base_url": "http://127.0.0.1:8000/v1",
+                "model": "qwen2.5-7b-instruct",
+                "api_key_env": KEY_ENV,
+                "timeout_seconds": 60,
+                "max_tokens": 2000,
+                "external_data_ok": True,
+            }
+            config = load_model_config(self._write_config(tmp, payload))
+            self.assertEqual("local_openai", config.provider)
+            self.assertEqual("qwen2.5-7b-instruct", config.model)
+
+    def test_loopback_http_is_allowed_in_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = self._base(provider="local_openai")
+            payload["providers"]["local_openai"] = {
+                "base_url": "http://localhost:8080/v1",
+                "model": "m",
+                "api_key_env": KEY_ENV,
+                "timeout_seconds": 60,
+                "max_tokens": 2000,
+                "external_data_ok": True,
+            }
+            config = load_model_config(self._write_config(tmp, payload))
+            self.assertEqual("http://localhost:8080/v1", config.base_url)
 
     def test_malformed_configs_are_fail_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -257,7 +287,9 @@ class DeepSeekProviderTests(unittest.TestCase):
         )
         self.assertEqual('{"ok": true}', content)
         url, body, headers, timeout = captured[0]
-        self.assertTrue(url.startswith("https://api.deepseek.com/chat/completions"))
+        self.assertTrue(
+            url.startswith("https://api.deepseek.com/v1/chat/completions")
+        )
         self.assertEqual(7, timeout)
         self.assertTrue(headers["Authorization"].startswith("Bearer "))
         parsed = json.loads(body.decode("utf-8"))
@@ -310,6 +342,91 @@ class DeepSeekProviderTests(unittest.TestCase):
             )
 
 
+class LocalProviderTests(unittest.TestCase):
+    def _capturing_post(self, responses, captured):
+        def post(url, body, headers, timeout_seconds):
+            captured.append((url, body, headers, timeout_seconds))
+            return responses.pop(0)
+
+        return post
+
+    def test_local_provider_works_without_key_or_egress_approval(self):
+        captured = []
+        provider = OpenAICompatibleProvider(
+            name="local_openai",
+            base_url="http://127.0.0.1:8000/v1",
+            model="qwen2.5-7b-instruct",
+            external_data_ok=False,
+            http_post=self._capturing_post(
+                [
+                    (
+                        200,
+                        json.dumps(
+                            {"choices": [{"message": {"content": "ok"}}]}
+                        ).encode("utf-8"),
+                    )
+                ],
+                captured,
+            ),
+        )
+        self.assertTrue(provider.name == "local_openai")
+        content = provider.complete(
+            system="s", user="u", max_tokens=100, timeout_seconds=5
+        )
+        self.assertEqual("ok", content)
+        url, body, headers, _ = captured[0]
+        self.assertEqual(
+            "http://127.0.0.1:8000/v1/chat/completions", url
+        )
+        self.assertNotIn("Authorization", headers)
+
+    def test_endpoint_normalization_adds_v1_when_missing(self):
+        captured = []
+        provider = OpenAICompatibleProvider(
+            name="local_openai",
+            base_url="http://127.0.0.1:8080",
+            model="m",
+            external_data_ok=True,
+            http_post=self._capturing_post(
+                [
+                    (
+                        200,
+                        json.dumps(
+                            {"choices": [{"message": {"content": "ok"}}]}
+                        ).encode("utf-8"),
+                    )
+                ],
+                captured,
+            ),
+        )
+        provider.complete(
+            system="s", user="u", max_tokens=100, timeout_seconds=5
+        )
+        self.assertEqual(
+            "http://127.0.0.1:8080/v1/chat/completions", captured[0][0]
+        )
+
+    def test_remote_http_url_is_rejected(self):
+        with self.assertRaises(ModelError):
+            OpenAICompatibleProvider(
+                name="local_openai",
+                base_url="http://api.deepseek.com",
+                model="m",
+            )
+
+    def test_remote_provider_still_requires_key_and_egress(self):
+        provider = OpenAICompatibleProvider(
+            name="remote",
+            base_url="https://api.example.com/v1",
+            model="m",
+            external_data_ok=False,
+        )
+        with self.assertRaises(ModelUnavailableError):
+            provider.complete(
+                system="s", user="u", max_tokens=100, timeout_seconds=5
+            )
+
+
 class ProviderSelectionTests(unittest.TestCase):
     def test_default_selection_is_offline(self):
         provider = select_provider()
@@ -338,6 +455,21 @@ class ProviderSelectionTests(unittest.TestCase):
         )
         with self.assertRaises(ModelError):
             select_provider(config)
+
+    def test_local_openai_selection(self):
+        config = ModelConfig(
+            provider="local_openai",
+            prompts_file=Path("config/model-prompts.json"),
+            base_url="http://127.0.0.1:8000/v1",
+            model="qwen2.5-7b-instruct",
+            api_key_env=KEY_ENV,
+            timeout_seconds=60,
+            max_tokens=2000,
+            external_data_ok=True,
+        )
+        provider = select_provider(config)
+        self.assertIsInstance(provider, OpenAICompatibleProvider)
+        self.assertEqual("local_openai", provider.name)
 
 
 if __name__ == "__main__":

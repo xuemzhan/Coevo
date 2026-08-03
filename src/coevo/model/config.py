@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .contract import ModelError
+from .openai_compatible import is_loopback
 
 
 _SCHEMA_VERSION = "1.0"
@@ -61,14 +62,21 @@ def _validate_provider_entry(name: str, raw: object) -> dict[str, object]:
     timeout = raw.get("timeout_seconds", 30.0)
     max_tokens = raw.get("max_tokens", 2000)
     egress = raw.get("external_data_ok", False)
-    if not isinstance(base_url, str) or not base_url.startswith("https://"):
-        raise ModelError(f"provider {name!r} base_url must be https")
+    if not isinstance(base_url, str) or not (
+        base_url.startswith("https://")
+        or (base_url.startswith("http://") and is_loopback(base_url))
+    ):
+        raise ModelError(
+            f"provider {name!r} base_url must be https or loopback http"
+        )
     if (
         not isinstance(model, str)
         or not model.strip()
         or len(model.encode("utf-8")) > 128
     ):
         raise ModelError(f"provider {name!r} model is invalid")
+    if api_key_env is None:
+        api_key_env = "COEVO_LLM_API_KEY"
     if not isinstance(api_key_env, str) or not _ENV_NAME.fullmatch(api_key_env):
         raise ModelError(f"provider {name!r} api_key_env is invalid")
     if (
@@ -123,8 +131,10 @@ def load_model_config(path: Path | str | None = None) -> ModelConfig:
     if raw.get("schema_version") != _SCHEMA_VERSION:
         raise ModelError("model config schema_version mismatch")
     provider = raw.get("provider")
-    if provider not in {"offline", "deepseek"}:
-        raise ModelError("model config provider must be 'offline' or 'deepseek'")
+    if provider not in {"offline", "deepseek", "local_openai"}:
+        raise ModelError(
+            "model config provider must be 'offline', 'deepseek' or 'local_openai'"
+        )
     prompts_file = raw.get("prompts_file")
     if (
         not isinstance(prompts_file, str)
@@ -136,18 +146,19 @@ def load_model_config(path: Path | str | None = None) -> ModelConfig:
     providers_raw = raw.get("providers", {})
     if not isinstance(providers_raw, dict):
         raise ModelError("model config providers must be an object")
-    extra = set(providers_raw) - {"deepseek"}
+    extra = set(providers_raw) - {"deepseek", "local_openai"}
     if extra:
         raise ModelError(
             f"model config has unsupported providers: {sorted(extra)}"
         )
     entry = None
-    if "deepseek" in providers_raw:
-        entry = _validate_provider_entry("deepseek", providers_raw["deepseek"])
-    elif provider == "deepseek":
-        raise ModelError(
-            "model config provider is 'deepseek' but the provider entry is missing"
-        )
+    provider_entry = providers_raw.get(provider, {}) if provider != "offline" else {}
+    if provider in {"deepseek", "local_openai"}:
+        if provider not in providers_raw:
+            raise ModelError(
+                f"model config provider is {provider!r} but its entry is missing"
+            )
+        entry = _validate_provider_entry(provider, provider_entry)
     repo_root = config_path.parent.parent
     return ModelConfig(
         provider=provider,

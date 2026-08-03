@@ -10,6 +10,14 @@
       "timeout_seconds": 30,
       "max_tokens": 2000,
       "external_data_ok": false
+    },
+    "local_openai": {
+      "base_url": "http://127.0.0.1:8000/v1",
+      "model": "qwen2.5-7b-instruct",
+      "api_key_env": "COEVO_LLM_API_KEY",
+      "timeout_seconds": 60,
+      "max_tokens": 2000,
+      "external_data_ok": true
     }
   }
 }
