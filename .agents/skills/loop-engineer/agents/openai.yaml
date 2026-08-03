@@ -1,0 +1,7 @@
+interface:
+  display_name: "Loop 工程循环编排器"
+  short_description: "按七阶段推进 Coevo MVP 循环，独立双签放行"
+  default_prompt: "使用 $loop-engineer 执行下一轮 MVP 工程循环。"
+
+policy:
+  allow_implicit_invocation: true

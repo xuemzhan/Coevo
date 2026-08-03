@@ -1,0 +1,7 @@
+interface:
+  display_name: "MVP 实现"
+  short_description: "按已批准的最小切片实现工作项并同步提交配套测试，不扩大范围"
+  default_prompt: "使用 $mvp-builder 实现当前工作项。"
+
+policy:
+  allow_implicit_invocation: true

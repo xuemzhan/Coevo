@@ -1,0 +1,7 @@
+interface:
+  display_name: "验收测试方法学"
+  short_description: "把用户故事 AC 落到可重复、可独立运行的测试用例，覆盖异常输入"
+  default_prompt: "使用 $acceptance-testing 设计验收测试。"
+
+policy:
+  allow_implicit_invocation: true

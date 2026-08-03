@@ -1,0 +1,7 @@
+interface:
+  display_name: "独立安全审查"
+  short_description: "STRIDE 式安全审查，命中阻断项返回 security-blocked，不修改代码"
+  default_prompt: "使用 $security-reviewer 执行独立安全审查。"
+
+policy:
+  allow_implicit_invocation: true

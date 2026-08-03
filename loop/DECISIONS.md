@@ -2578,6 +2578,26 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 引入 Codex 原生执行面（skills + hooks 护栏），与 opencode 体系并行
+
+### 背景
+- 用户要求将 Loop Engineering 工程化能力平移至 Codex 环境：仓库级 skills 与护栏配置，保留 opencode 体系不变。
+- 不修改任何既有权威文档（AGENTS.md、docs/*、loop/STATE.json 等）与既有安全测试。
+
+### 决策
+- 仓库级 skills 置于 `.agents/skills/`（Codex 从 cwd 向上扫描该目录）：loop-engineer + mvp-planner/mvp-builder/mvp-verifier/protocol-reviewer/security-reviewer + mvp-requirements/agent-package/acceptance-testing，共 9 个，frontmatter 仅 name+description，通过 skill-creator quick_validate。
+- 护栏配置置于 `.codex/hooks.json` + `.codex/hooks/loop-guard.mjs`，复用 `.opencode/plugins/path-policy.mjs`；拦截清单与 opencode loop-guard 一致，并补充 Invoke-RestMethod、pnpm/yarn install。
+- 派生子代理消息内嵌角色核心约束；审查类子代理禁止修改代码、禁止派生子代理（对齐 independent-review-governance.md）。
+
+### 验证结果（2026-08-03 新会话端到端实测）
+- `codex exec` 全新会话中 `$loop-engineer` 被自动发现并触发：按状态分支只读输出 STATE/BACKLOG/VERIFICATION/DECISIONS/git 状态，结论与 STATE.json 一致。
+- SessionStart 探针证明 `.codex/hooks.json` 被加载；PreToolUse 拦截 `curl --version`（deny 信息 LoopGuard blocked prohibited shell command）。
+- hooks 需要一次性信任授权；未授权时被静默跳过（桌面应用首次会话需确认信任）。
+
+### 影响与边界
+- 本改动不涉及产品代码与测试；质量门禁结果见 `loop/VERIFICATION.md` 本次追加段。
+- 遗留维护项：opencode skills 与 Codex skills 内容存在双份漂移风险；hook 命令硬编码 `E:\Workspace\Coevo`，仓库迁移需同步更新 `.codex/hooks.json`。
 ## 2026-08-03 -- 稳定性与运维加固（ENG-BASE STABILITY-1 done）
 
 ### 背景
