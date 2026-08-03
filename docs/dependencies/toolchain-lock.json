@@ -99,11 +99,11 @@
         "source": "scripts/gmssl-crypto-helper.cs",
         "source_size": 17161,
         "source_sha256": "71d32ecab3f91a78cd2d4666fba366a488bad80758c0a4d93f4e6ea8edb48b7a",
-        "launcher": {
-          "path": "scripts/invoke-gmssl-crypto.ps1",
-          "size": 5753,
-          "sha256": "2104af797795f79584f52c9a279fefd811046adeaff0c59848d4effa5c101cc1"
-        },
+    "launcher": {
+      "path": "scripts/invoke-gmssl-crypto.ps1",
+      "size": 6309,
+      "sha256": "7d6a99731490656c96a324d2be835271104e7bec8e24cda69530d9d42913d1bf"
+    },
         "compiler_lock": {
           "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
           "size": 2569832,

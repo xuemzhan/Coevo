@@ -45,7 +45,11 @@ try {
   $helper = Join-Path $runtime ("helper-$PID-$([Guid]::NewGuid().ToString('N')).exe")
   $global:LASTEXITCODE = 0
   $output = @(& $compiler /nologo /noconfig /nostdlib+ "/reference:$($refs[0])" "/reference:$($refs[1])" /target:exe /platform:x64 /optimize+ /debug- /checked+ "/out:$helper" $source 2>&1)
-  for ($probe = 0; $probe -lt 100 -and -not [IO.File]::Exists($helper); $probe++) { [Threading.Thread]::Sleep(10) }
+  # Windows Defender / AV can hold a freshly written helper for a few seconds
+  # (the file is invisible to Exists until the scan releases it). Probe for up
+  # to 8s instead of 1s so a successful csc run is not misreported as a
+  # compile failure (observed as transient GCP-E-LAUNCH).
+  for ($probe = 0; $probe -lt 800 -and -not [IO.File]::Exists($helper); $probe++) { [Threading.Thread]::Sleep(10) }
   if ($LASTEXITCODE -ne 0 -or -not [IO.File]::Exists($helper)) { throw 'locked crypto helper compilation failed' }
   $item = Get-Item -LiteralPath $helper -Force
   $null = $handles.Add((Open-CoevoLockedFile $helper ([int64]$item.Length) (Hash $helper)))
@@ -77,5 +81,11 @@ try {
   } finally { $response.Dispose(); $process.Dispose(); $request.Dispose() }
 } finally {
   Close-CoevoDirectoryHandles $handles
-  if ($null -ne $helper -and [IO.File]::Exists($helper)) { [IO.File]::Delete($helper) }
+  if ($null -ne $helper -and [IO.File]::Exists($helper)) {
+    # The freshly compiled helper may still be held by the AV scanner; a
+    # failed cleanup must not turn an already-successful call into a failure.
+    for ($retry = 0; $retry -lt 20; $retry++) {
+      try { [IO.File]::Delete($helper); break } catch { [Threading.Thread]::Sleep(100) }
+    }
+  }
 }
