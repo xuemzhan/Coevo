@@ -540,3 +540,14 @@ items:
       - tests/unit/test_task_decomposition_editing.py
     security_review: false
     protocol_review: false
+  # ---------- phase 2 track B: model-assisted decomposition (2026-08-03) ----------
+  - id: US-2-AC-3
+    story: US-2
+    title: 任务分解智能体增强（AC-3，业务负责人批准方案 B 使用 DeepSeek）：统一模型适配层（§9.2 可替换 provider：NullModelProvider 离线默认 + DeepSeekProvider 仅 stdlib urllib、密钥仅环境变量、外发需 COEVO_LLM_EXTERNAL_DATA_OK 审批开关）+ TaskDecompositionAgent（有界 prompt/响应、严格 schema 校验、未知包/未知边/越界 fail-closed；离线返回 None 回退确定性分解；apply 仅产出版本+1 草稿并标记 model.suggestion override，人工确认边界不变；候选边仅建议不自动应用）
+    status: done
+    dependencies: [US-2-AC-2]
+    acceptance_tests:
+      - tests/unit/test_model_provider.py
+      - tests/unit/test_task_decomposition_agent.py
+    security_review: true
+    protocol_review: false

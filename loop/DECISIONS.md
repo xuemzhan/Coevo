@@ -3343,12 +3343,51 @@ security-reviewer 双签门禁。
   A. 维持确定性 decompose_from_flow（当前实现，零依赖、离线、可验证），
      AC-3 视为已满足；
   B. 引入 LLM 辅助分解（候选 edge 提议 / 更细任务拆分），需先定模型来源、
-     离线审批依赖、fail-closed 与人工确认边界，且不得把模型输出直接写成
-     正式状态（AGENTS.md §3）。未获指令前不擅自实现 B。
+    离线审批依赖、fail-closed 与人工确认边界，且不得把模型输出直接写成
+    正式状态（AGENTS.md §3）。未获指令前不擅自实现 B。
 - 记录：BACKLOG US-2-AC-2 新增 done；追溯矩阵新增行（commit c05823e）；
   STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION 追加门禁
   记录。
 - 提出者：loop-engineer（Codex）。决策者：用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- 业务负责人决策：方案 B（DeepSeek 模型）+ US-2-AC-3 done
+
+- 用户决策：US-2-AC-3 采用方案 B，模型供应商为 DeepSeek（在 DECISIONS
+  2026-08-03 US-2-AC-2 条目中的决策点 A/B 中选择 B）。
+- 约束核对（mandatory-technical-constraints）：
+  * §9.2 模型可替换：业务层只依赖统一 `ModelProvider` 适配层，供应商/模型
+    是配置而非代码；DeepSeek 只是其中一个 provider。
+  * §9.1 数据密级：默认仅允许 demo/合成数据外发（`COEVO_LLM_EXTERNAL_DATA_OK=1`
+    显式开关）；真实涉密数据发往公网模型须按 §9.1 另行审批（Medium 观察项）。
+  * §7 模型输出边界：模型输出仅作待确认草稿；`apply` 只产出版本+1 草稿并写
+    `model.suggestion:` Override，人工确认（confirm_baseline）边界不变。
+  * 离线门禁：默认 `NullModelProvider`（offline），门禁/测试从不发起真实网络
+    请求（provider 仅以注入 http_post / FakeProvider 的 mock 测试）。
+  * 依赖与密钥：仅 stdlib（urllib），无新增依赖、无运行时下载；API 密钥仅
+    读 `COEVO_LLM_API_KEY` 环境变量，绝不进入日志/repr/请求体。
+- 实现：`src/coevo/model/`（contract/deepseek/选择器）+ `task_decomposition/agent.py`
+  （TaskDecompositionAgent：有界 prompt/响应、严格 schema、离线降级、apply 草稿）。
+- 验证：unit 14（model）+ 6（agent）+ 8（editing 回归）全绿；
+  `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`，audit fully-sealed。
+- 安全审查（内联）：密钥不泄露、外发开关 fail-closed、有界输入输出、无自动
+  状态写入；Critical/High 0。protocol 不涉及（不改 .agent wire）。
+- 使用说明（后续接线）：设置 `COEVO_LLM_PROVIDER=deepseek` +
+  `COEVO_LLM_API_KEY=<key>` + `COEVO_LLM_EXTERNAL_DATA_OK=1`（demo 数据）后，
+  通过 `TaskDecompositionAgent.suggest/apply` 接入编排/驾驶舱；未配置时行为
+  与确定性分解完全一致。
+- 记录：BACKLOG US-2-AC-3 新增 done；追溯矩阵新增行（commit 0d7a899）；
+  STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION 追加门禁
+  记录。
+- 提出者：loop-engineer（Codex）。决策者：用户（方案 B + DeepSeek）。
 
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
