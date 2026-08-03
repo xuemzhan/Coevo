@@ -642,3 +642,12 @@ items:
     acceptance_tests: []
     security_review: true
     protocol_review: false
+  # ---------- 受保护密钥句柄（2026-08-03 用户指令：继续 国密认证模块 + 受保护密钥句柄） ----------
+  - id: HANDLE-1
+    story: ENG-BASE
+    title: 受保护密钥句柄（CNG 非导出 KEK 封装 SM2 私钥）：scripts/cng-kek.ps1 受控 CNG 助手（创建/状态/封装/解封摘要/销毁，RSA-2048 ExportPolicy=None，OAEP-SHA256，缓冲归零，输出仅密文与摘要）；src/coevo/crypto/cng_handle.py（CngKekReference/CngKekStore/CngProtectedKeyHandle/CngWrappedKeyRegistry：JSON+SHA-256 哈希链、显式 create/open、篡改拒开、注册/撤销/销毁生命周期、明文永不落盘、helper 哈希钉扎）；src/coevo/crypto/protected_provider.py（GmsslProtectedProvider：key_handle_backed=True、scope=APPROVED_PRODUCT，sm3/seal/verify 公钥侧功能可用，sign/open 指向 HANDLE-2 fail-closed 不回落原型路径）；文档同步；单元 12 + 真实 CNG 集成 4
+    status: ready
+    dependencies: [CI-1]
+    acceptance_tests: []
+    security_review: true
+    protocol_review: false

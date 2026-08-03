@@ -3622,6 +3622,34 @@ security-reviewer 双签门禁。
   复核时按 git 历史回退 `53cad86`。
 - 提出者：loop-engineer（Codex）。决策者：用户（批准 CI/制品托管方案）。
 
+## 2026-08-03 -- HANDLE-1 受保护密钥句柄（CNG 非导出 KEK 封装 SM2 私钥）done
+
+- 用户指令：继续 国密认证模块 + 受保护密钥句柄。本项落地受保护句柄的可实现部分
+  （国密认证模块需外部采购，另记）。
+- 实现（commit `cb902b2`，8 文件，+984；修复提交 `b733259`）：
+  ① `scripts/cng-kek.ps1` 受控 CNG 助手——创建/状态/封装/解封摘要/销毁非导出
+  RSA-2048 KEK（ExportPolicy=None、OAEP-SHA256、输入归零、输出仅密文与摘要、
+  KEK 名 `CoevoSm2Kek-<32hex>`）；
+  ② `src/coevo/crypto/cng_handle.py`——CngKekReference（仅元数据）、CngKekStore
+  （helper 哈希钉扎）、CngProtectedKeyHandle（ProtectedKeyHandle 协议，SM2 OID
+  1.2.156.10197.1.301）、CngWrappedKeyRegistry（JSON+SHA-256 哈希链、显式
+  create/open、篡改拒开、注册/撤销/销毁、明文永不落盘）；
+  ③ `src/coevo/crypto/protected_provider.py`——GmsslProtectedProvider
+  （key_handle_backed=True、scope=APPROVED_PRODUCT；sm3/seal/verify 公钥侧功能
+  可用；sign/open 指向 HANDLE-2 fail-closed）；
+  ④ 工具链一致性修复（`b733259`）：python-script-lock.tsv / make.cs /
+  toolchain-lock.json 钉扎对齐实际文件（CRLF 时代遗留），F6 历史链头
+  （json 内容不变）以当前钉扎 F6DE 证书重签（与 F713 事件先例一致）。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 818 / integration 246 / security 97 / e2e 12 全绿；真实 CNG 集成 4 项；
+  内联 verifier + security-reviewer PASS（Critical/High 0）。
+- 剩余/边界：HANDLE-2 = crypto-helper 内解封（CNG 句柄）+ SM2 签名/解包动作
+  （SM2 私钥仍在 helper 内使用，Python 不可见）；国密认证模块（SKF/PKCS#11/
+  硬件令牌）需外部采购；软件 KSP 为受保护句柄的软件实现。
+- 回滚条件：CNG 集成任一测试失败、封装注册表篡改检测被绕过、或门禁指纹变化
+  未复核时按 git 历史回退 `cb902b2`/`b733259`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续 国密认证模块 + 受保护密钥句柄）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
