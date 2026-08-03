@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
   "iteration": 30,
-  "current_story": "US-2",
-  "current_item": "US-2-AC-5",
+  "current_story": "ENG-BASE",
+  "current_item": "REVIEW-FIX-1",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "317e0802b01fba4085a96c12e921019747b47202",
+  "last_verified_commit": "50513a7eb6b6b7cf8c6cf7d576672bd90a6416a3",
   "blocking_issue": "",
-  "updated_at": "2026-08-03T12:03:12.422162Z"
+  "updated_at": "2026-08-03T13:20:02.348577Z"
 }

@@ -3469,6 +3469,35 @@ security-reviewer 双签门禁。
   记录。
 - 提出者：loop-engineer（Codex）。决策者：用户（生产模型一版 = 本地模型）。
 
+## 2026-08-03 -- REVIEW-FIX-1 全面审查修复 done（用户批准内联执行）
+
+- 用户指令：修复 2026-08-03 全面审查发现的代码级问题（选项 1：批准内联执行）。
+- 执行方式偏差（留痕）：本会话协作子代理派发连续 4 次未收到任务载荷（回声探针
+  实证：即使"只输出 PLANNER_ECHO_OK"的最小任务也只返回通用回复），命中
+  loop-engineer "同一错误连续出现 3 次"停止条件；经用户决策批准，由 loop-engineer
+  直接完成 实现→测试→全量门禁→安全复核。验证与安全审查的"独立性"降级为分步自查
+  + 门禁实证（照 PACKAGE-DB-1 内联执行先例留痕）。
+- 实现（commit `50513a7`，23 文件，+719/-105）：① import_service 删除占位 pass，
+  fixed-header 三长度一致性 fail-closed，无显式 base/current revision 拒绝导入
+  （不再默认 R0001 伪造主版本）；② merge._reject 畸形 import record 抛 MergeError；
+  ③ report._one_year_after 无效时间戳抛 ReportBuilderError；④ workspace/paths
+  `..` 穿越校验双方言（PurePosixPath+PureWindowsPath）；⑤ identity 清理失败记
+  warning 且绝不掩盖原始错误；⑥ package_builder 两个构建器统一预填 FixedHeader
+  长度，build_signed_payload 更名 assert_sign_blocked；⑦ cockpit 状态周期快照
+  （默认 300s，COEVO_COCKPIT_CHECKPOINT_SEC 可配，stop join+最终落盘）；⑧ 模型
+  响应体 4MiB 硬上限 + 按 max_tokens 软上限、连接类瞬时失败有界重试 1 次；⑨
+  cockpit 并发信号量（默认 16，饱和 503）。仅 stdlib，零新增依赖，不改 wire/
+  协议版本/密码方案；未删降既有安全测试。
+- 验证：`make quality` exit=0 fingerprint=`34fc0b672c25a7b5`；audit fully-sealed；
+  unit 768（skipped 2）/ integration 225（skipped 1）/ security 97 / e2e 12 全绿；
+  内联 verifier PASS + 内联 security-reviewer PASS（Critical/High 0）。
+- 待业务负责人决策（本轮未实施，属 P0/外部条件）：① 打包元数据/离线安装器/
+  升级回滚；② CI/门禁流水线（禁 push 前提下无法激活）；③ 审计签名密钥托管与
+  独立审计节点（调整密码方案需另行审批）；④ Win7 实机验证（需存量环境）。
+- 回滚条件：任一安全测试失败、门禁指纹变化后未复核，或内联执行被业务负责人
+  否决时按 git 历史回退 `50513a7` 并重新走独立双签。
+- 提出者：loop-engineer（Codex）。决策者：用户（选项 1 内联执行）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

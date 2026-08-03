@@ -572,3 +572,24 @@ items:
       - tests/unit/test_model_provider.py
     security_review: true
     protocol_review: false
+  # ---------- 2026-08-03 全面审查修复（用户指令：修复发现的所有问题） ----------
+  - id: REVIEW-FIX-1
+    story: ENG-BASE
+    title: 修复 2026-08-03 全面审查发现的代码级问题：占位 pass 校验与默认版本占位 fail-open（import_service）、过宽 except 静默吞错（merge._reject / report._one_year_after / identity._cleanup_failed_create）、Windows 反斜杠路径穿越绕过（workspace/paths）、build_signed_payload 哑占位语义澄清、驾驶舱状态仅停机落盘（周期快照）、模型调用无响应上限/无重试、本地 HTTP 并发无界；仅 stdlib，不改 wire/协议版本/密码方案
+    status: done
+    dependencies: [PACKAGE-DB-1]
+    acceptance_tests:
+      - tests/unit/test_model_provider.py
+      - tests/unit/test_report_builder.py
+      - tests/unit/test_workspace_init.py
+      - tests/unit/test_merge_engine_v3.py
+      - tests/unit/test_cockpit_http.py
+      - tests/unit/test_production_support.py
+      - tests/unit/test_protocol_sign_blocked.py
+      - tests/integration/test_agent_package_atomic_import.py
+      - tests/integration/test_cockpit_http_server.py
+      - tests/integration/test_cockpit_state_persistence.py
+      - tests/security/test_identity_store_security.py
+      - tests/e2e/test_return_chain.py
+    security_review: true
+    protocol_review: false
