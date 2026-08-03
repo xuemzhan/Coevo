@@ -64,6 +64,8 @@ def _build_committed_outcome(
     project_id: str = "PRJ001",
     package_id: str = "00000000-0000-0000-0000-000000000001",
     role_id_hint: str | None = None,
+    base_revision: str | None = None,
+    current_revision: str | None = None,
 ) -> ImportOutcome:
     """Build a synthetic ImportOutcome that has reached COMMITTED.
 
@@ -119,6 +121,8 @@ def _build_committed_outcome(
         package=pkg,
         replay_decision=replay,
         store=DEFAULT_EMPTY_STORE,
+        base_revision=base_revision or f"{project_id}-R0001",
+        current_revision=current_revision or f"{project_id}-R0001",
     )
 
 
@@ -137,6 +141,12 @@ class TestQuarantinePath(unittest.TestCase):
     def test_quarantine_path_rejects_traversal(self):
         with self.assertRaises(WorkspacePathError):
             QuarantinePath(quarantine_root="../etc", package_id="p.1")
+
+    def test_quarantine_path_rejects_backslash_traversal(self):
+        with self.assertRaises(WorkspacePathError):
+            QuarantinePath(quarantine_root="q\\..\\etc", package_id="p.1")
+        with self.assertRaises(WorkspacePathError):
+            QuarantinePath(quarantine_root="q/..\\etc", package_id="p.1")
 
     def test_quarantine_path_rejects_invalid_id(self):
         with self.assertRaises(WorkspacePathError):
@@ -164,6 +174,12 @@ class TestWorkspacePath(unittest.TestCase):
     def test_workspace_path_rejects_traversal(self):
         with self.assertRaises(WorkspacePathError):
             WorkspacePath(workspace_root="ws/../escaped", project_id="PRJ001", role_id="a.pm")
+
+    def test_workspace_path_rejects_backslash_traversal(self):
+        with self.assertRaises(WorkspacePathError):
+            WorkspacePath(workspace_root="ws\\..\\escaped", project_id="PRJ001", role_id="a.pm")
+        with self.assertRaises(WorkspacePathError):
+            WorkspacePath(workspace_root="ws/..\\escaped", project_id="PRJ001", role_id="a.pm")
 
     def test_workspace_path_rejects_invalid_project_id(self):
         with self.assertRaises(WorkspacePathError):
@@ -381,6 +397,23 @@ class TestBuildPaths(unittest.TestCase):
         self.assertEqual("q/p.1.agent", paths.quarantine.as_posix())
         self.assertEqual("s/p.1", paths.staging_root)
         self.assertEqual("w/PRJ/a.pm", paths.workspace.as_posix())
+
+    def test_build_paths_rejects_backslash_traversal_in_roots(self):
+        with self.assertRaises(WorkspacePathError):
+            build_paths(
+                project_id="PRJ", role_id="a.pm", package_id="p.1",
+                quarantine_root="q\\..\\x",
+            )
+        with self.assertRaises(WorkspacePathError):
+            build_paths(
+                project_id="PRJ", role_id="a.pm", package_id="p.1",
+                workspace_root="w\\..\\x",
+            )
+        with self.assertRaises(WorkspacePathError):
+            build_paths(
+                project_id="PRJ", role_id="a.pm", package_id="p.1",
+                staging_root="s\\..\\x",
+            )
 
 
 if __name__ == "__main__":

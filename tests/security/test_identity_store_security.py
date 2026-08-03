@@ -47,6 +47,33 @@ class IdentityStoreSecurityTests(unittest.TestCase):
         self.assertEqual(self.repo.connection.execute("SELECT COUNT(*) FROM identity_audit_events").fetchone()[0], 2)
         self.assertTrue(self.repo.verify_audit_chain())
 
+    def test_failed_create_cleanup_failure_is_logged_not_masked(self) -> None:
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            anchor = mock.Mock()
+            anchor.pending_head = base / "pending-head"
+            anchor.pending_signature = base / "pending-sig"
+            anchor.pending_new_signature = base / "pending-new-sig"
+            for path in (
+                anchor.pending_head,
+                anchor.pending_signature,
+                anchor.pending_new_signature,
+            ):
+                path.write_bytes(b"x")
+            anchor.abort_pending = mock.Mock(side_effect=OSError("boom"))
+            anchor.artifacts.return_value = []
+            repo = IdentityRepository.__new__(IdentityRepository)
+            repo.anchor = anchor
+            repo.database = base / "identity.sqlite3"
+            with self.assertLogs(
+                IdentityRepository.__module__, level="WARNING"
+            ) as logs:
+                repo._cleanup_failed_create()
+            self.assertTrue(
+                any("abort_pending" in message for message in logs.output)
+            )
+
     def test_signed_anchor_detects_audit_tail_and_all_event_deletion(self) -> None:
         self.service.register_identity_bundle(self.writer, "request-1", identity_payload()); self.service.register_identity_bundle(self.writer, "request-1", identity_payload())
         self.repo.connection.execute("DELETE FROM identity_audit_events WHERE sequence_no=(SELECT MAX(sequence_no) FROM identity_audit_events)")

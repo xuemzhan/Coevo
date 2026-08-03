@@ -46,6 +46,7 @@ def build_config(args: argparse.Namespace) -> AppConfig:
             cockpit_host=config.cockpit_host,
             cockpit_port=args.port,
             session_timeout_sec=config.session_timeout_sec,
+            cockpit_checkpoint_interval_sec=config.cockpit_checkpoint_interval_sec,
             log_level=config.log_level,
             cockpit_state_path=config.cockpit_state_path,
             cockpit_log_path=config.cockpit_log_path,
@@ -66,6 +67,7 @@ def run(args: argparse.Namespace) -> int:
         bind_host=config.cockpit_host,
         bind_port=config.cockpit_port,
         session_timeout_sec=config.session_timeout_sec,
+        state_snapshot_interval_sec=config.cockpit_checkpoint_interval_sec,
         state_path=config.cockpit_state_path or config.default_state_path(),
         log_path=config.cockpit_log_path or config.default_log_path(),
     )

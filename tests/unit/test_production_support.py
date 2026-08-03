@@ -54,12 +54,14 @@ class AppConfigTests(unittest.TestCase):
                 "COEVO_COCKPIT_PORT": "12742",
                 "COEVO_LOG_LEVEL": "debug",
                 "COEVO_SESSION_TIMEOUT_SEC": "60",
+                "COEVO_COCKPIT_CHECKPOINT_SEC": "12.5",
                 "COEVO_DATA_DIR": str(ROOT / ".omo"),
             }
         )
         self.assertEqual(12742, config.cockpit_port)
         self.assertEqual("DEBUG", config.log_level)
         self.assertEqual(60, config.session_timeout_sec)
+        self.assertEqual(12.5, config.cockpit_checkpoint_interval_sec)
         self.assertEqual(ROOT / ".omo", config.data_dir)
 
     def test_from_env_fails_closed_on_bad_values(self):
@@ -67,6 +69,17 @@ class AppConfigTests(unittest.TestCase):
             AppConfig.from_env({"COEVO_COCKPIT_PORT": "not-a-number"})
         with self.assertRaises(ConfigError):
             AppConfig.from_env({"COEVO_COCKPIT_HOST": "0.0.0.0"})
+        with self.assertRaises(ConfigError):
+            AppConfig.from_env({"COEVO_COCKPIT_CHECKPOINT_SEC": "not-a-number"})
+        with self.assertRaises(ConfigError):
+            AppConfig.from_env({"COEVO_COCKPIT_CHECKPOINT_SEC": "0"})
+
+    def test_checkpoint_interval_default_and_validation(self):
+        self.assertEqual(300.0, AppConfig().cockpit_checkpoint_interval_sec)
+        with self.assertRaises(ConfigError):
+            AppConfig(cockpit_checkpoint_interval_sec=-1)
+        with self.assertRaises(ConfigError):
+            AppConfig(cockpit_checkpoint_interval_sec=True)
 
     def test_default_paths_stay_under_app_data(self):
         config = AppConfig()

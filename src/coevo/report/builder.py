@@ -303,11 +303,19 @@ def _master_revision(project_id: str, version_number: int) -> str:
 
 
 def _one_year_after(iso_z: str) -> str:
-    """Return ``iso_z + 1 year`` (or fall back to ``iso_z`` if parsing fails)."""
+    """Return ``iso_z + 1 year``; invalid timestamps raise (fail-closed).
+
+    The previous implementation silently fell back to the input
+    string when parsing failed, which could persist a corrupt
+    expiry value. An unparseable timestamp is an invariant
+    violation, so it now raises :class:`ReportBuilderError`.
+    """
+    from datetime import datetime, timedelta, timezone
     try:
-        from datetime import datetime, timedelta, timezone
         base = datetime.fromisoformat(iso_z.replace("Z", "+00:00"))
-        future = base + timedelta(days=365)
-        return future.isoformat().replace("+00:00", "Z")
-    except Exception:
-        return iso_z
+    except (TypeError, ValueError) as exc:
+        raise ReportBuilderError(
+            f"cannot compute one-year expiry from invalid timestamp {iso_z!r}"
+        ) from exc
+    future = base + timedelta(days=365)
+    return future.isoformat().replace("+00:00", "Z")

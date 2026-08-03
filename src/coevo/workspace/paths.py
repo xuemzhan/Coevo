@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from pathlib import PurePosixPath, PureWindowsPath
 from typing import Final
 
 class WorkspacePathError(Exception):
@@ -46,6 +47,21 @@ _SAFE_ID: Final[re.Pattern[str]] = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,6
 PROJECT_ID_MAX: Final[int] = 64
 ROLE_ID_MAX: Final[int] = 64
 _PACKAGE_ID_MAX: Final[int] = 64
+
+
+def _has_parent_traversal(value: str) -> bool:
+    """True when ``value`` contains a ``..`` segment under either path dialect.
+
+    The path strings are pure and later consumed on Windows, so a
+    ``..`` that is only visible when backslashes are treated as
+    separators (e.g. ``a\\..\\b``) must be rejected as well as the
+    POSIX form. Both dialects are checked so the result is
+    host-independent.
+    """
+    for parts in (PurePosixPath(value).parts, PureWindowsPath(value).parts):
+        if ".." in parts:
+            return True
+    return False
 
 
 def sanitize_id(value: str, *, name: str, maximum: int = 64) -> str:
@@ -85,7 +101,7 @@ class QuarantinePath:
         sanitize_id(self.package_id, name="package_id", maximum=_PACKAGE_ID_MAX)
         if not self.quarantine_root:
             raise WorkspacePathError("quarantine_root must be a non-empty string")
-        if ".." in self.quarantine_root.split("/"):
+        if _has_parent_traversal(self.quarantine_root):
             raise WorkspacePathError(
                 f"quarantine_root must not contain '..': {self.quarantine_root!r}"
             )
@@ -119,11 +135,10 @@ class WorkspacePath:
         sanitize_id(self.role_id, name="role_id", maximum=ROLE_ID_MAX)
         if not self.workspace_root:
             raise WorkspacePathError("workspace_root must be a non-empty string")
-        for segment in self.workspace_root.split("/"):
-            if segment == "..":
-                raise WorkspacePathError(
-                    f"workspace_root must not contain '..': {self.workspace_root!r}"
-                )
+        if _has_parent_traversal(self.workspace_root):
+            raise WorkspacePathError(
+                f"workspace_root must not contain '..': {self.workspace_root!r}"
+            )
 
     def as_posix(self) -> str:
         root = self.workspace_root.rstrip("/")
@@ -146,11 +161,10 @@ class WorkspacePaths:
     def __post_init__(self) -> None:
         if not self.staging_root:
             raise WorkspacePathError("staging_root must be a non-empty string")
-        for segment in self.staging_root.split("/"):
-            if segment == "..":
-                raise WorkspacePathError(
-                    f"staging_root must not contain '..': {self.staging_root!r}"
-                )
+        if _has_parent_traversal(self.staging_root):
+            raise WorkspacePathError(
+                f"staging_root must not contain '..': {self.staging_root!r}"
+            )
 
 
 def default_workspace_root() -> str:

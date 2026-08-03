@@ -178,12 +178,20 @@ def build_unsigned_package(
         manifest,
         signer_cert_id=envelope.sender_cert_id,
     )
+    env_bytes = encode_envelope(envelope)
+    key_bytes = encode_key_transport_bytes(key_block)
+    payload_bytes = (
+        payload_block.header
+        + payload_block.nonce
+        + payload_block.ciphertext
+        + payload_block.tag
+    )
     fixed = FixedHeader(
         major=PROTOCOL_MAJOR,
         minor=PROTOCOL_MINOR,
-        header_length=0,    # filled by to_bytes()
-        key_block_length=0, # filled by to_bytes()
-        payload_length=0,   # filled by to_bytes()
+        header_length=len(env_bytes),
+        key_block_length=len(key_bytes),
+        payload_length=len(payload_bytes),
         flags=AgentPackageFlags.KEY_BLOCK_PRESENT | AgentPackageFlags.PAYLOAD_PRESENT,
     )
     return BuiltPackage(
@@ -290,19 +298,20 @@ def parse_package_bytes(data: bytes) -> BuiltPackage:
     )
 
 
-def build_signed_payload(
+def assert_sign_blocked(
     manifest: dict,
     *,
     signer_cert_id: str,
     signed_at: str | None = None,
 ) -> SignatureRecord:
-    """Sign a manifest — fail-closed (P1 path).
+    """Signal that manifest signing is blocked pending an approved SM2 product.
 
     The wire format is final (Algorithm = "SM2-SM3", signed_object =
     "manifest.json", manifest_sm3 = 64-hex digest, signature field
     reserved for the future SM2 product). Calling this function
-    raises :class:`AgentPackageCryptoUnavailableError` so callers
-    never receive a half-signed record.
+    ALWAYS raises :class:`AgentPackageCryptoUnavailableError`
+    (fail-closed) so callers never receive a half-signed record;
+    the name is deliberately explicit that signing is blocked.
     """
     from .sm2_sign import AgentPackageCryptoUnavailableError
     raise AgentPackageCryptoUnavailableError(
@@ -354,8 +363,21 @@ def build_encrypted_package(
         header=encode_payload_header(),
         nonce=sealed.nonce, ciphertext=sealed.ciphertext, tag=sealed.tag,
     )
+    env_bytes = encode_envelope(envelope)
+    key_bytes = encode_key_transport_bytes(key_block)
+    payload_bytes = (
+        payload.header
+        + payload.nonce
+        + payload.ciphertext
+        + payload.tag
+    )
     return BuiltPackage(
-        FixedHeader(PROTOCOL_MAJOR, PROTOCOL_MINOR, 0, 0, 0,
+        FixedHeader(
+            PROTOCOL_MAJOR,
+            PROTOCOL_MINOR,
+            len(env_bytes),
+            len(key_bytes),
+            len(payload_bytes),
                     AgentPackageFlags.KEY_BLOCK_PRESENT | AgentPackageFlags.PAYLOAD_PRESENT),
         envelope, key_block, payload, signature,
     )

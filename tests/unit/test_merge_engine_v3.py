@@ -300,3 +300,40 @@ class TestConflictThreeWayDiff(unittest.TestCase):
         # decision_maker is sourced from import_outcome even on conflict
         self.assertEqual(report.recipient_cert_id, proposal.record.decision_maker)
         self.assertNotEqual("", proposal.record.decision_maker)
+
+
+class TestRejectMalformedRecordFailClosed(unittest.TestCase):
+    """REVIEW-FIX-1: _reject must not silently fabricate decision_maker."""
+
+    def setUp(self) -> None:
+        self.engine = MergeEngine()
+        self.baseline = _baseline()
+        self.store = ProcessedPackageStore.empty()
+
+    def test_reject_with_malformed_record_raises(self):
+        report = _report()
+
+        class _FakeOutcome:
+            record = object()
+
+        with self.assertRaises(MergeError):
+            self.engine._reject(
+                self.baseline,
+                self.store,
+                report,
+                "2026-08-20T01:00:00Z",
+                reason="simulated",
+                import_outcome=_FakeOutcome(),
+            )
+
+    def test_reject_without_import_outcome_keeps_empty_decision_maker(self):
+        report = _report()
+        proposal = self.engine._reject(
+            self.baseline,
+            self.store,
+            report,
+            "2026-08-20T01:00:00Z",
+            reason="simulated",
+        )
+        self.assertEqual("", proposal.record.decision_maker)
+        self.assertFalse(proposal.accepted)

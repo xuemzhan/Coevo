@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import logging
 from dataclasses import dataclass, replace
 from src.coevo.protocol.import_service import ImportOutcome
 from src.coevo.protocol.import_transaction import ImportStep
@@ -13,6 +14,8 @@ from .receipt import BASELINE_DIGEST_ALGORITHM, BASELINE_SCHEMA, MergeCommitRece
 from .repository import MergeReceiptRepository
 
 from .models import FieldMerge, MERGEABLE_PACKAGE_TYPES, MISSING, MergeCommitOutcome, MergeDecision, MergeError, MergeProposal, MergeRecord, MergeValidationError, _master_revision
+
+logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class MergeEngine:
@@ -668,10 +671,17 @@ class MergeEngine:
             import_outcome is not None
             and getattr(import_outcome, "record", None) is not None
         ):
-            try:
-                dm = import_outcome.record.package.recipient_cert_id
-            except Exception:
-                dm = ""
+            record = import_outcome.record
+            if not isinstance(record, ProcessedPackageRecord):
+                logger.error(
+                    "reject path received a malformed import record (%s); "
+                    "refusing to fabricate decision_maker",
+                    type(record).__name__,
+                )
+                raise MergeError(
+                    "import_outcome.record must be ProcessedPackageRecord"
+                )
+            dm = record.package.recipient_cert_id
         record = MergeRecord(
             project_id=baseline.project_id,
             reporter_package_id=report.package_id,

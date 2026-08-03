@@ -64,6 +64,7 @@ class AppConfig:
     cockpit_host: str = LOOPBACK_HOST
     cockpit_port: int = DEFAULT_PORT
     session_timeout_sec: int = 8 * 3600
+    cockpit_checkpoint_interval_sec: float = 300.0
     log_level: str = "INFO"
     cockpit_state_path: Path | None = None
     cockpit_log_path: Path | None = None
@@ -83,6 +84,15 @@ class AppConfig:
             )
         if not isinstance(self.session_timeout_sec, int) or self.session_timeout_sec <= 0:
             raise ConfigError("session_timeout_sec must be a positive integer")
+        interval = self.cockpit_checkpoint_interval_sec
+        if (
+            not isinstance(interval, (int, float))
+            or isinstance(interval, bool)
+            or interval <= 0
+        ):
+            raise ConfigError(
+                "cockpit_checkpoint_interval_sec must be a positive number"
+            )
         if self.log_level not in VALID_LOG_LEVELS:
             raise ConfigError(
                 f"log_level must be one of {sorted(VALID_LOG_LEVELS)!r}; "
@@ -107,6 +117,8 @@ class AppConfig:
         * ``COEVO_COCKPIT_HOST`` / ``COEVO_COCKPIT_PORT`` -- bind target
           (host must stay loopback);
         * ``COEVO_SESSION_TIMEOUT_SEC`` -- cockpit session lifetime;
+        * ``COEVO_COCKPIT_CHECKPOINT_SEC`` -- periodic cockpit state
+          snapshot interval in seconds;
         * ``COEVO_LOG_LEVEL`` -- one of the standard logging levels;
         * ``COEVO_STATE_PATH`` / ``COEVO_LOG_PATH`` -- explicit file
           overrides for the cockpit state / access log;
@@ -124,6 +136,15 @@ class AppConfig:
             except ValueError as exc:
                 raise ConfigError(f"{name} must be an integer; got {raw!r}") from exc
 
+        def _float(name: str, default: float) -> float:
+            raw = source.get(name)
+            if raw is None or not raw:
+                return default
+            try:
+                return float(raw)
+            except ValueError as exc:
+                raise ConfigError(f"{name} must be a number; got {raw!r}") from exc
+
         return cls(
             repo_root=_require_path(source.get("COEVO_REPO_ROOT"), "COEVO_REPO_ROOT"),
             data_dir=_require_path(source.get("COEVO_DATA_DIR"), "COEVO_DATA_DIR"),
@@ -131,6 +152,9 @@ class AppConfig:
             cockpit_host=source.get("COEVO_COCKPIT_HOST", LOOPBACK_HOST),
             cockpit_port=_int("COEVO_COCKPIT_PORT", DEFAULT_PORT),
             session_timeout_sec=_int("COEVO_SESSION_TIMEOUT_SEC", 8 * 3600),
+            cockpit_checkpoint_interval_sec=_float(
+                "COEVO_COCKPIT_CHECKPOINT_SEC", 300.0
+            ),
             log_level=source.get("COEVO_LOG_LEVEL", "INFO").upper(),
             cockpit_state_path=_require_path(
                 source.get("COEVO_STATE_PATH"), "COEVO_STATE_PATH"

@@ -69,6 +69,21 @@ class CockpitHttpConfigTests(unittest.TestCase):
         self.assertIsNotNone(config.lock_path)
         self.assertTrue(str(config.lock_path).endswith("cockpit.lock"))
 
+    def test_invalid_concurrency_limit_is_rejected(self):
+        for value in (0, -1, True, 1.5, "16"):
+            with self.assertRaises(CockpitValidationError):
+                CockpitHttpConfig(max_concurrent_requests=value)
+
+    def test_invalid_snapshot_interval_is_rejected(self):
+        for value in (0, -1, True, "5"):
+            with self.assertRaises(CockpitValidationError):
+                CockpitHttpConfig(state_snapshot_interval_sec=value)
+
+    def test_hardening_defaults(self):
+        config = CockpitHttpConfig()
+        self.assertEqual(16, config.max_concurrent_requests)
+        self.assertEqual(300.0, config.state_snapshot_interval_sec)
+
 
 class CockpitSessionManagerTests(unittest.TestCase):
     def test_create_and_validate(self):

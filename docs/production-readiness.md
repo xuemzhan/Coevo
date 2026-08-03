@@ -17,6 +17,7 @@ Python 标准库（零第三方运行时依赖），不产生任何公网请求�
 | `COEVO_DATA_DIR` | `%LOCALAPPDATA%\KaiwuAgent` | 状态与数据根目录 |
 | `COEVO_LOG_DIR` | `%LOCALAPPDATA%\KaiwuAgent` | 应用日志根目录 |
 | `COEVO_SESSION_TIMEOUT_SEC` | `28800` | 驾驶舱会话不活动超时 |
+| `COEVO_COCKPIT_CHECKPOINT_SEC` | `300` | 驾驶舱状态周期快照间隔（秒），崩溃不丢视图状态；停机仍做最终落盘 |
 | `COEVO_LOG_LEVEL` | `INFO` | CRITICAL/ERROR/WARNING/INFO/DEBUG |
 | `COEVO_STATE_PATH` / `COEVO_LOG_PATH` | 由 data/log 目录派生 | 显式覆盖文件路径 |
 
@@ -29,7 +30,9 @@ python scripts/run_cockpit.py --port 12710
 
 `SIGINT`（Ctrl+C）、`SIGTERM` 与 Windows `CTRL+BREAK` 均触发优雅停机：停止接收新连接、
 落盘驾驶舱状态快照、关闭访问日志与单实例锁后以退出码 0 结束。单实例锁残留超过 10 分钟
-自动接管，进程被硬杀后的残留锁不会阻塞后续启动超过该窗口。
+自动接管，进程被硬杀后的残留锁不会阻塞后续启动超过该窗口。运行期间视图状态按
+`COEVO_COCKPIT_CHECKPOINT_SEC` 周期落盘，硬杀/断电最多丢失一个周期内的视图变化；
+本地 HTTP 服务并发处理有界（默认 16，饱和返回 503），避免无界线程消耗。
 
 ## 日志边界
 

@@ -297,6 +297,25 @@ class TestReportBuilder(unittest.TestCase):
         # AC-4: sequence_no matches
         self.assertEqual(1, result.package.envelope.sequence_no)
 
+    def test_build_rejects_invalid_submitted_at(self):
+        # REVIEW-FIX-1: an unparseable submitted_at must raise instead
+        # of silently persisting a corrupt expiry value.
+        bad_manifest = self.manifest.with_overrides(
+            overrides=(ReportOverride(
+                target_path="progress_summary",
+                original_value=self.manifest.progress_summary,
+                edited_value="75% complete",
+                reason="PM follow-up",
+            ),),
+            new_submitted_at="not-a-timestamp",
+        )
+        with self.assertRaises(ReportBuilderError):
+            self.builder.build(
+                manifest=bad_manifest,
+                baseline=self.baseline,
+                sequence=self.sequence,
+            )
+
     def test_build_wire_bytes_are_deterministic(self):
         a = self.builder.build(
             manifest=self.manifest, baseline=self.baseline, sequence=self.sequence,

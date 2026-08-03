@@ -346,5 +346,43 @@ class CockpitSingleInstanceTests(unittest.TestCase):
             self.assertFalse(lock_path.exists())
 
 
+class CockpitConcurrencyLimitTests(unittest.TestCase):
+    """REVIEW-FIX-1: overflow requests get 503 instead of unbounded threads."""
+
+    def test_busy_server_rejects_overflow_with_503(self):
+        server = CockpitHttpServer(
+            CockpitHttpConfig(
+                bind_port=_free_port(),
+                request_timeout_sec=3,
+                lock_path=None,
+                max_concurrent_requests=2,
+            ),
+            workspace_views=(_workspace_view(),),
+            role_views=(),
+        )
+        server._concurrency.acquire()
+        server._concurrency.acquire()
+        try:
+            seen: dict[str, object] = {}
+
+            class _FakeRequest:
+                def sendall(self, data: bytes) -> None:
+                    seen["data"] = data
+
+                def shutdown(self, how: int) -> None:
+                    seen["shutdown"] = how
+
+                def close(self) -> None:
+                    seen["closed"] = True
+
+            server.process_request(_FakeRequest(), ("127.0.0.1", 1234))
+            self.assertIn(b"503", seen["data"])
+            self.assertTrue(seen["closed"])
+        finally:
+            server._concurrency.release()
+            server._concurrency.release()
+            server.server_close()
+
+
 if __name__ == "__main__":
     unittest.main()

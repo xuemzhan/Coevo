@@ -10,6 +10,7 @@ from __future__ import annotations
 
 
 import json
+import logging
 
 import mimetypes
 
@@ -34,6 +35,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from typing import Any, Final
+
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -141,6 +145,8 @@ class CockpitHttpConfig:
     lock_path: Path | None = field(default_factory=_default_lock_path)
     state_path: Path | None = None
     log_path: Path | None = None
+    max_concurrent_requests: int = 16
+    state_snapshot_interval_sec: float | None = 300.0
 
     def __post_init__(self) -> None:
         if not isinstance(self.bind_host, str) or self.bind_host != LOOPBACK_HOST:
@@ -189,6 +195,23 @@ class CockpitHttpConfig:
             raise CockpitValidationError("state_path must be a Path or None")
         if self.log_path is not None and not isinstance(self.log_path, Path):
             raise CockpitValidationError("log_path must be a Path or None")
+        if (
+            not isinstance(self.max_concurrent_requests, int)
+            or isinstance(self.max_concurrent_requests, bool)
+            or self.max_concurrent_requests <= 0
+        ):
+            raise CockpitValidationError(
+                "max_concurrent_requests must be a positive integer"
+            )
+        interval = self.state_snapshot_interval_sec
+        if interval is not None and (
+            not isinstance(interval, (int, float))
+            or isinstance(interval, bool)
+            or interval <= 0
+        ):
+            raise CockpitValidationError(
+                "state_snapshot_interval_sec must be positive or None"
+            )
 
 
 
@@ -682,6 +705,11 @@ class CockpitHttpServer(ThreadingHTTPServer):
             else None
         )
         self._started_monotonic = time.monotonic()
+        self._concurrency = threading.BoundedSemaphore(
+            config.max_concurrent_requests
+        )
+        self._snapshot_stop = threading.Event()
+        self._snapshot_thread: threading.Thread | None = None
         try:
             super().__init__(
                 (config.bind_host, config.bind_port),
@@ -714,6 +742,58 @@ class CockpitHttpServer(ThreadingHTTPServer):
     def recent_audit(self) -> tuple[dict[str, Any], ...]:
         return tuple(self._audit_log)
 
+    def process_request(self, request: Any, client_address: Any) -> None:
+        """Bound concurrent handler threads; reject overflow with 503."""
+        if not self._concurrency.acquire(blocking=False):
+            self._reject_busy(request, client_address)
+            return
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self._concurrency.release()
+            raise
+
+    def process_request_thread(self, request: Any, client_address: Any) -> None:
+        """Run one request handler, releasing the concurrency permit on exit."""
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self._concurrency.release()
+
+    def _reject_busy(self, request: Any, client_address: Any) -> None:
+        """Reply 503 and close the socket when the concurrency limit is reached."""
+        try:
+            request.sendall(
+                b"HTTP/1.1 503 Service Unavailable\r\n"
+                b"Content-Length: 0\r\n"
+                b"Connection: close\r\n\r\n"
+            )
+        except OSError:
+            pass
+        finally:
+            try:
+                request.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            request.close()
+
+    def _snapshot_once(self) -> None:
+        """Persist the current views (fail-isolated: log, never crash the server)."""
+        if self._state_store is None:
+            return
+        try:
+            self._state_store.save(
+                self.state.workspace_views,
+                self.state.role_views,
+            )
+        except Exception:  # noqa: BLE001 - snapshot must never take the server down
+            logger.exception("cockpit periodic state snapshot failed")
+
+    def _snapshot_loop(self) -> None:
+        interval = self.config.state_snapshot_interval_sec
+        while not self._snapshot_stop.wait(interval):
+            self._snapshot_once()
+
     def start(self) -> None:
         thread = threading.Thread(
             target=self.serve_forever,
@@ -721,8 +801,25 @@ class CockpitHttpServer(ThreadingHTTPServer):
             daemon=True,
         )
         thread.start()
+        if (
+            self._state_store is not None
+            and self.config.state_snapshot_interval_sec is not None
+        ):
+            self._snapshot_stop.clear()
+            self._snapshot_thread = threading.Thread(
+                target=self._snapshot_loop,
+                name="cockpit-state-snapshot",
+                daemon=True,
+            )
+            self._snapshot_thread.start()
 
     def stop(self) -> None:
+        if self._snapshot_thread is not None:
+            self._snapshot_stop.set()
+            self._snapshot_thread.join(
+                timeout=(self.config.state_snapshot_interval_sec or 0) + 5
+            )
+            self._snapshot_thread = None
         self.shutdown()
         self.server_close()
         if self._state_store is not None:

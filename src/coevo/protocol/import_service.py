@@ -42,6 +42,7 @@ from .agent_package import (
     AgentPackageError,
     AgentPackageFlags,
     EnvelopeHeader,
+    encode_envelope,
 )
 from .import_transaction import (
     AgentPackageImportError,
@@ -60,6 +61,7 @@ from .replay_detector import (
     ReplayDecision,
 )
 from .sm2_sign import compute_sm3_digest
+from .sm2_keywrap import encode_key_transport_bytes
 
 
 @dataclasses.dataclass(frozen=True)
@@ -150,18 +152,23 @@ class PackageImportService:
 
         try:
             tx = self.importer.advance(tx, to_step=ImportStep.DECRYPT_AND_INSPECT)
-            # Caller-side validation: fixed-header consistency
-            if package.fixed_header.header_length != len(_payload_blob(package)):
-                # placeholder — actual length is computed by to_bytes()
-                pass
+            # Caller-side validation: fixed-header consistency (fail-closed).
+            _check_fixed_header_consistency(package)
             tx = self.importer.advance(tx, to_step=ImportStep.PREPARE_WORKSPACE)
             tx = self.importer.advance(tx, to_step=ImportStep.WRITE_FILES)
             tx = self.importer.advance(tx, to_step=ImportStep.PREPARE_DATABASE)
             self.importer.check_replay(tx, replay_decision=replay_decision)
             self.importer.check_base_revision(tx)
+            if base_revision is None and current_revision is None:
+                raise AgentPackageImportError(
+                    "refusing to import without an explicit revision: neither "
+                    "base_revision nor current_revision was supplied (protocol "
+                    "16.2/16.3); the receiver must not fabricate a project "
+                    "master revision"
+                )
             tx = self.importer.advance(tx, to_step=ImportStep.COMMIT)
             timestamp = processed_at or _now_utc_iso_z()
-            revision = current_revision or base_revision or _revision_placeholder(env)
+            revision = current_revision or base_revision
             record = _record(timestamp, "committed", revision)
             new_store = store.register(record)
             tx = self.importer.advance(tx, to_step=ImportStep.PROMOTE)
@@ -181,17 +188,33 @@ def _now_utc_iso_z() -> str:
     return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
-def _revision_placeholder(envelope: EnvelopeHeader) -> str:
-    """Derive a default master revision when neither base_revision nor current_revision is supplied.
+def _check_fixed_header_consistency(package: BuiltPackage) -> None:
+    """Fail-closed caller-side fixed-header length validation.
 
-    The protocol § 16.1 format is ``<project_id>-R<revision_number>``;
-    when the receiver has no prior state we emit ``R0001`` to
-    signal "first import". Callers should override this in
-    production with the real project-master revision.
+    The fixed header (protocol § 7.1) declares three lengths; each
+    must match the actual encoded block it describes. A mismatch
+    means the object was assembled inconsistently or tampered
+    with, so the import is rejected instead of silently
+    continuing (the previous placeholder silently accepted any
+    mismatch).
     """
-    return f"{envelope.project_id}-R0001"
-
-
-def _payload_blob(package: BuiltPackage) -> bytes:
-    """Render the package bytes for length comparison."""
-    return package.to_bytes()
+    env_bytes = encode_envelope(package.envelope)
+    key_bytes = encode_key_transport_bytes(package.key_block)
+    payload_bytes = (
+        package.payload_block.header
+        + package.payload_block.nonce
+        + package.payload_block.ciphertext
+        + package.payload_block.tag
+    )
+    fixed = package.fixed_header
+    if (
+        fixed.header_length != len(env_bytes)
+        or fixed.key_block_length != len(key_bytes)
+        or fixed.payload_length != len(payload_bytes)
+    ):
+        raise AgentPackageError(
+            "fixed header length fields do not match package blocks: "
+            f"header_length={fixed.header_length} vs {len(env_bytes)}, "
+            f"key_block_length={fixed.key_block_length} vs {len(key_bytes)}, "
+            f"payload_length={fixed.payload_length} vs {len(payload_bytes)}"
+        )

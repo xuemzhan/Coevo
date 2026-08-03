@@ -12,6 +12,7 @@ register into the processed-package store.
 """
 from __future__ import annotations
 
+import dataclasses
 import unittest
 from pathlib import Path
 import sys
@@ -352,7 +353,7 @@ class TestPackageImportService(unittest.TestCase):
         self.assertEqual(ImportStep.ROLLED_BACK, outcome.transaction.step)
         self.assertEqual(0, len(outcome.store))
 
-    def test_first_import_no_revision(self):
+    def test_import_without_revision_is_fail_closed(self):
         pkg = _build_package()
         replay = check_replay(candidate=ProcessedPackage(
             package_id=pkg.envelope.package_id,
@@ -369,8 +370,44 @@ class TestPackageImportService(unittest.TestCase):
             store=DEFAULT_EMPTY_STORE,
             # no base_revision / current_revision
         )
-        self.assertEqual(ImportStep.COMMITTED, outcome.transaction.step)
-        self.assertEqual(1, len(outcome.store))
+        self.assertEqual(ImportStep.ROLLED_BACK, outcome.transaction.step)
+        self.assertEqual(0, len(outcome.store))
+        self.assertIsNone(outcome.record)
+        self.assertIn(
+            "revision", outcome.transaction.failure_reason.lower()
+        )
+
+    def test_fixed_header_length_mismatch_is_fail_closed(self):
+        pkg = _build_package()
+        tampered = dataclasses.replace(
+            pkg,
+            fixed_header=dataclasses.replace(
+                pkg.fixed_header,
+                header_length=pkg.fixed_header.header_length + 1,
+            ),
+        )
+        replay = check_replay(candidate=ProcessedPackage(
+            package_id=tampered.envelope.package_id,
+            package_digest=f"{tampered.envelope.package_id}|{tampered.envelope.sequence_no}|{tampered.expected_total_length()}",
+            sender_cert_id=tampered.envelope.sender_cert_id,
+            recipient_cert_id=tampered.envelope.recipient_cert_id,
+            project_id=tampered.envelope.project_id,
+            sequence_no=tampered.envelope.sequence_no,
+        ))
+        service = PackageImportService()
+        outcome = service.import_package(
+            package=tampered,
+            replay_decision=replay,
+            store=DEFAULT_EMPTY_STORE,
+            base_revision="PRJ001-R0001",
+            current_revision="PRJ001-R0001",
+        )
+        self.assertEqual(ImportStep.ROLLED_BACK, outcome.transaction.step)
+        self.assertEqual(0, len(outcome.store))
+        self.assertIsNone(outcome.record)
+        self.assertIn(
+            "fixed header", outcome.transaction.failure_reason.lower()
+        )
 
     def test_duplicate_package_id_rolls_back(self):
         pkg = _build_package()
@@ -388,6 +425,8 @@ class TestPackageImportService(unittest.TestCase):
             package=pkg,
             replay_decision=replay,
             store=store,
+            base_revision="PRJ001-R0001",
+            current_revision="PRJ001-R0001",
         )
         self.assertEqual(ImportStep.ROLLED_BACK, outcome.transaction.step)
         self.assertEqual(1, len(outcome.store))  # unchanged

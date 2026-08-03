@@ -5,6 +5,7 @@ import json
 import os
 import tempfile
 import unittest
+import urllib.error
 from pathlib import Path
 
 from src.coevo.model import (
@@ -304,6 +305,87 @@ class DeepSeekProviderTests(unittest.TestCase):
             external_data_ok=True,
         )
         with self.assertRaises(ModelError):
+            provider.complete(
+                system="s", user="u", max_tokens=100, timeout_seconds=5
+            )
+
+    def test_transient_connection_failure_is_retried_once(self):
+        calls = []
+
+        def post(url, body, headers, timeout_seconds):
+            calls.append(1)
+            if len(calls) == 1:
+                raise urllib.error.URLError("temporary outage")
+            return 200, json.dumps(
+                {"choices": [{"message": {"content": "ok"}}]}
+            ).encode("utf-8")
+
+        _set_key("super-secret-key")
+        self.addCleanup(_clear_key)
+        provider = DeepSeekProvider(
+            api_key_env=KEY_ENV,
+            external_data_ok=True,
+            http_post=post,
+        )
+        self.assertEqual(
+            "ok",
+            provider.complete(
+                system="s", user="u", max_tokens=100, timeout_seconds=5
+            ),
+        )
+        self.assertEqual(2, len(calls))
+
+    def test_connection_failure_is_fail_closed_after_retries(self):
+        calls = []
+
+        def post(url, body, headers, timeout_seconds):
+            calls.append(1)
+            raise urllib.error.URLError("still down")
+
+        _set_key("super-secret-key")
+        self.addCleanup(_clear_key)
+        provider = DeepSeekProvider(
+            api_key_env=KEY_ENV,
+            external_data_ok=True,
+            http_post=post,
+        )
+        with self.assertRaises(ModelUnavailableError):
+            provider.complete(
+                system="s", user="u", max_tokens=100, timeout_seconds=5
+            )
+        self.assertEqual(2, len(calls))
+
+    def test_http_error_status_is_not_retried(self):
+        calls = []
+
+        def post(url, body, headers, timeout_seconds):
+            calls.append(1)
+            return 500, b"boom"
+
+        _set_key("super-secret-key")
+        self.addCleanup(_clear_key)
+        provider = DeepSeekProvider(
+            api_key_env=KEY_ENV,
+            external_data_ok=True,
+            http_post=post,
+        )
+        with self.assertRaises(ModelError):
+            provider.complete(
+                system="s", user="u", max_tokens=100, timeout_seconds=5
+            )
+        self.assertEqual(1, len(calls))
+
+    def test_oversized_response_is_fail_closed(self):
+        payload = json.dumps(
+            {"choices": [{"message": {"content": "x" * 100}}]}
+        ).encode("utf-8")
+        oversized = payload + b" " * (40 * 1024)
+        provider = self._provider(
+            responses=[(200, oversized)],
+            captured=[],
+            external_data_ok=True,
+        )
+        with self.assertRaises(ModelValidationError):
             provider.complete(
                 system="s", user="u", max_tokens=100, timeout_seconds=5
             )

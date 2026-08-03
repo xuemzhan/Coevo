@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import sqlite3
 import uuid
 from datetime import UTC, datetime
@@ -12,6 +13,9 @@ from typing import Any
 
 from .audit_anchor import AuditAnchorError, FreshnessAuthority, SignedAuditAnchor, Signer, WindowsCertificateSigner, WindowsFreshnessAuthority
 from .models import IdentityBundle, RegistrationResult
+
+
+logger = logging.getLogger(__name__)
 
 
 class ConflictError(RuntimeError):
@@ -71,14 +75,28 @@ class IdentityRepository:
             raise
 
     def _cleanup_failed_create(self) -> None:
+        """Best-effort removal of a half-created store (never masks the original error)."""
         try:
             if self.anchor.pending_head.exists() and self.anchor.pending_signature.exists() and self.anchor.pending_new_signature.exists():
                 self.anchor.abort_pending()
-        except Exception:
-            pass
+        except Exception as exc:  # noqa: BLE001 - best-effort cleanup must never mask the original error
+            logger.warning(
+                "identity failed-create: abort_pending failed: %s", exc
+            )
         for path in self.anchor.artifacts():
-            path.unlink(missing_ok=True)
-        self.database.unlink(missing_ok=True)
+            try:
+                path.unlink(missing_ok=True)
+            except OSError as exc:
+                logger.warning(
+                    "identity failed-create: cannot remove %s: %s", path, exc
+                )
+        try:
+            self.database.unlink(missing_ok=True)
+        except OSError as exc:
+            logger.warning(
+                "identity failed-create: cannot remove database %s: %s",
+                self.database, exc,
+            )
 
     def _validate_schema(self) -> None:
         tables = {row[0] for row in self.connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}

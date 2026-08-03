@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import socket
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -136,6 +137,32 @@ class CockpitStatePersistenceTests(unittest.TestCase):
                 self.assertEqual((other,), second.state.workspace_views)
             finally:
                 second.stop()
+
+    def test_state_snapshotted_periodically_without_stop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state_path = Path(tmp) / "cockpit-state.json"
+            server = CockpitHttpServer(
+                CockpitHttpConfig(
+                    bind_port=_free_port(),
+                    request_timeout_sec=3,
+                    state_path=state_path,
+                    lock_path=None,
+                    state_snapshot_interval_sec=0.05,
+                ),
+                workspace_views=(_workspace_view(),),
+                role_views=(_role_view(),),
+            )
+            server.start()
+            try:
+                deadline = time.monotonic() + 5.0
+                while time.monotonic() < deadline and not state_path.exists():
+                    time.sleep(0.05)
+                self.assertTrue(
+                    state_path.exists(),
+                    "periodic snapshot never persisted state before stop",
+                )
+            finally:
+                server.stop()
 
     def test_corrupt_state_file_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:

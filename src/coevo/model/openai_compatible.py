@@ -19,7 +19,7 @@ import json
 import os
 import urllib.error
 import urllib.request
-from typing import Callable
+from typing import Callable, Final
 from urllib.parse import urlparse
 
 from .contract import ModelError, ModelUnavailableError, ModelValidationError
@@ -27,6 +27,9 @@ from .contract import ModelError, ModelUnavailableError, ModelValidationError
 
 HttpPost = Callable[[str, bytes, dict[str, str], float], tuple[int, bytes]]
 _LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+MAX_RESPONSE_BYTES: Final[int] = 4 * 1024 * 1024
+RESPONSE_OVERHEAD_BYTES: Final[int] = 32 * 1024
+MAX_POST_ATTEMPTS: Final[int] = 2
 
 
 def is_loopback(url: str) -> bool:
@@ -48,9 +51,19 @@ def _default_post(
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-            return response.status, response.read()
+            raw = response.read(MAX_RESPONSE_BYTES + 1)
+            if len(raw) > MAX_RESPONSE_BYTES:
+                raise ModelValidationError(
+                    "model response exceeds the hard size limit"
+                )
+            return response.status, raw
     except urllib.error.HTTPError as exc:
-        return exc.code, exc.read()
+        raw = exc.read(MAX_RESPONSE_BYTES + 1)
+        if len(raw) > MAX_RESPONSE_BYTES:
+            raise ModelValidationError(
+                "model error response exceeds the hard size limit"
+            )
+        return exc.code, raw
 
 
 class OpenAICompatibleProvider:
@@ -143,7 +156,28 @@ class OpenAICompatibleProvider:
         headers = {"Content-Type": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
-        status, raw = self._http_post(self._endpoint, body, headers, timeout_seconds)
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                status, raw = self._http_post(
+                    self._endpoint, body, headers, timeout_seconds
+                )
+                break
+            except (urllib.error.URLError, OSError, TimeoutError) as exc:
+                if attempt >= MAX_POST_ATTEMPTS:
+                    raise ModelUnavailableError(
+                        f"model API unreachable after {attempt} attempts ({exc})"
+                    ) from exc
+                # Connection-class transient failure: retry once. HTTP
+                # error statuses (non-200) and validation failures are
+                # never retried (fail-closed).
+        max_response_bytes = RESPONSE_OVERHEAD_BYTES + max_tokens * 8
+        if len(raw) > max_response_bytes:
+            raise ModelValidationError(
+                "model response exceeds the size limit for "
+                f"max_tokens={max_tokens} ({len(raw)} bytes)"
+            )
         if status != 200:
             raise ModelError(
                 f"model API returned HTTP {status} "
