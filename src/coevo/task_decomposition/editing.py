@@ -59,11 +59,15 @@ def _task_location(baseline: ProjectBaseline, task_id: str) -> tuple[int, int]:
 def _rebuild(
     baseline: ProjectBaseline,
     work_packages: tuple[WorkPackage, ...],
-    override: Override,
+    overrides: tuple[Override, ...],
     *,
     now: str,
 ) -> ProjectBaseline:
-    """Re-validate and rebuild a baseline at version+1 with one override."""
+    """Re-validate and rebuild a baseline at version+1 with overrides."""
+    if not overrides:
+        raise TaskDecompositionValidationError(
+            "rebuild requires at least one override"
+        )
     draft = build_baseline(
         BaselineInput(
             project_id=baseline.project_id,
@@ -81,7 +85,7 @@ def _rebuild(
         draft,
         version=baseline.version + 1,
         created_at=now,
-        overrides=baseline.overrides + (override,),
+        overrides=baseline.overrides + overrides,
     )
 
 
@@ -116,12 +120,12 @@ def add_task(
     return _rebuild(
         baseline,
         tuple(packages),
-        Override(
+        (Override(
             target_path=f"work_packages[{wp_index}].tasks",
             original_value=None,
             edited_value=task.task_id,
             reason=reason,
-        ),
+        ),),
         now=now,
     )
 
@@ -148,12 +152,12 @@ def remove_task(
     return _rebuild(
         baseline,
         tuple(packages),
-        Override(
+        (Override(
             target_path=f"work_packages[{wp_index}].tasks",
             original_value=removed.task_id,
             edited_value=None,
             reason=reason,
-        ),
+        ),),
         now=now,
     )
 
@@ -197,7 +201,7 @@ def update_task(
     return _rebuild(
         baseline,
         tuple(packages),
-        Override(
+        (Override(
             target_path=f"work_packages[{wp_index}].tasks[{task_index}].{task_id}",
             original_value={
                 key: dataclasses.asdict(getattr(task, key))
@@ -212,7 +216,7 @@ def update_task(
                 for key in updates
             },
             reason=reason,
-        ),
+        ),),
         now=now,
     )
 
@@ -242,12 +246,12 @@ def reorder_tasks(
     return _rebuild(
         baseline,
         tuple(packages),
-        Override(
+        (Override(
             target_path=f"work_packages[{wp_index}].tasks",
             original_value=list(current_ids),
             edited_value=list(ordered),
             reason=reason,
-        ),
+        ),),
         now=now,
     )
 

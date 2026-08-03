@@ -57,15 +57,25 @@ from .editing import (
     reorder_tasks,
     update_task,
 )
+from .agent import (
+    ModelTaskSuggestion,
+    SuggestionEdge,
+    SuggestionTask,
+    TaskDecompositionAgent,
+)
 
 __all__ = [
     "BaselineInput",
     "DependencyEdge",
     "DependencyGraph",
     "Deliverable",
+    "ModelTaskSuggestion",
     "Milestone",
     "ProjectBaseline",
+    "SuggestionEdge",
+    "SuggestionTask",
     "Task",
+    "TaskDecompositionAgent",
     "TaskDecompositionError",
     "TaskDecompositionService",
     "TaskDecompositionValidationError",
