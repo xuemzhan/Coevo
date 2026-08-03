@@ -10,6 +10,15 @@ Loop 工程循环的状态机目录。**不要手改** `STATE.json` 与 `tool-au
 | `VERIFICATION.md` | 最近一次门禁结果 | `quality_gate` Tool | `mvp-verifier`、`security-reviewer` |
 | `DECISIONS.md` | 决策留痕 | 人工或 `loop-engineer`（重大变更） | 所有 Agent / 审计 |
 | `tool-audit.jsonl` | 所有 Tool 调用指纹 | 各 Tool | 审计 / `security-reviewer` |
+| `archive/YYYYMMDD/` | 按容量/期限归档的旧记录（VERIFICATION/DECISIONS/tool-audit） | `python scripts/archive_records.py --apply` | 审计 / 历史追溯 |
+
+## 归档约定
+
+- `VERIFICATION.md` 保留最近 60 个门禁条目（或 ≤1MB）；`DECISIONS.md` 保留最近
+  20 个章节（或 ≤500KB）；`tool-audit.jsonl` 保留最近 2000 行（或 ≤5MB）。
+- 超限的旧记录由 `scripts/archive_records.py` 移入 `loop/archive/YYYYMMDD/`
+  （保留期 2 年），不触碰审计签名链与 `STATE.json`。
+- Agent 读取记录时只读最新一段即可；历史证据以 `loop/archive/` 为准。
 
 ## 状态字段（`STATE.json`）
 

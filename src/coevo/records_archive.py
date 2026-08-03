@@ -102,9 +102,19 @@ def archive_plan(
             archive.append(content)
         else:
             keep.append(content)
+    size_bytes = len(text.encode("utf-8"))
+    if size_bytes > size_threshold_bytes:
+        # Enforce the size cap (policy: "保留 N 条（或 ≤ 容量）"): drop the
+        # oldest kept sections until the remaining tail fits, never emptying
+        # the record. This makes the documented size trigger actually bite.
+        moved = 0
+        while len(keep) > 1 and len("\n".join(keep).encode("utf-8")) > size_threshold_bytes:
+            archive.insert(0, keep.pop(0))
+            moved += 1
+        reason = f"size {size_bytes} > {size_threshold_bytes} bytes"
+        if moved:
+            reason += f"; size-trimmed {moved} kept section(s)"
     kept_text = "\n".join(keep)
-    if len(text.encode("utf-8")) > size_threshold_bytes:
-        reason = f"size {len(text)} > {size_threshold_bytes} bytes"
     if archive:
         reason = f"archived {len(archive)} old section(s); " + reason
     return {

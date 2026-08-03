@@ -134,7 +134,7 @@ class GmsslPrototypeProvider:
         action: int,
         profile: str,
         *frames: bytes,
-        retries: int = 1,
+        retries: int = 2,
     ) -> tuple[bytes, ...]:
         if not _SAFE.fullmatch(profile) or not 1 <= len(frames) <= 5:
             raise GmsslPrototypeError("invalid provider request")
@@ -177,7 +177,7 @@ class GmsslPrototypeProvider:
                     )
                 except (OSError, subprocess.TimeoutExpired) as exc:
                     if attempt <= retries:
-                        time.sleep(0.25 * attempt)
+                        time.sleep(0.5 * attempt)
                         continue
                     raise GmsslPrototypeError("GCP-E-LAUNCH") from exc
                 if completed.returncode == 0:
@@ -195,7 +195,7 @@ class GmsslPrototypeProvider:
                     # and are NEVER retried.
                     diagnostic = "GCP-E-LAUNCH"
                     if attempt <= retries:
-                        time.sleep(0.25 * attempt)
+                        time.sleep(0.5 * attempt)
                         continue
                 raise GmsslPrototypeError(diagnostic)
         finally:

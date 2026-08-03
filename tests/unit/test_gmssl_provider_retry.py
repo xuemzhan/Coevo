@@ -51,6 +51,18 @@ class GmsslLaunchRetryTests(unittest.TestCase):
         self.assertEqual("GCP-E-LAUNCH", str(ctx.exception))
         self.assertEqual(2, run.call_count, "retries must be bounded")
 
+    def test_default_retries_absorb_two_transient_launch_failures(self):
+        provider = _provider()
+        results = [
+            subprocess.CompletedProcess([], 1, stdout=b"", stderr=b""),
+            subprocess.CompletedProcess([], 1, stdout=b"", stderr=b""),
+            subprocess.CompletedProcess([], 0, stdout=_reply(b"ok"), stderr=b""),
+        ]
+        with mock.patch.object(subprocess, "run", side_effect=results) as run:
+            frames = provider._invoke(1, "demo", b"request")
+        self.assertEqual((b"ok",), frames)
+        self.assertEqual(3, run.call_count, "default retries must cover two retries")
+
     def test_helper_reported_crypto_error_is_never_retried(self):
         provider = _provider()
         error = subprocess.CompletedProcess(

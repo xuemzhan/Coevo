@@ -6,7 +6,7 @@
 
 ## 当前状态（2026-08）
 
-- 工程循环：iteration 28（`loop/STATE.json`），BACKLOG 46 个工作项全部 `done`。
+- 工程循环：迭代与状态以 `loop/STATE.json` 为准（本快照：iteration 30，BACKLOG 全部 `done`）。
 - 能力面：US-0..US-15 全部落地（身份与密钥、流程理解、分解、团队推荐、任务包、
   工作区、驾驶舱、进展采集、成果回传、状态合并、风险、督办会议、简报、知识沉淀、审计）。
 - 两条固定编排链均已 E2E 验证：任务下发链（`tests/e2e/test_demo_runner.py`）与

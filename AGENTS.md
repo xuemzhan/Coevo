@@ -15,6 +15,9 @@
 - `loop/STATE.json`（最近一次循环结果）
 - `loop/VERIFICATION.md`（最近一次门禁记录）
 
+历史门禁/决策/审计记录按容量与期限自动归档至 `loop/archive/YYYYMMDD/`；
+`VERIFICATION.md` 只保留最近条目，Agent 只需读取其最新一段，历史证据以归档区为准。
+
 文档冲突时优先级：
 
 1. 强制性技术约束

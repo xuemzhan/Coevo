@@ -2598,6 +2598,41 @@ security-reviewer 双签门禁。
 ### 影响与边界
 - 本改动不涉及产品代码与测试；质量门禁结果见 `loop/VERIFICATION.md` 本次追加段。
 - 遗留维护项：opencode skills 与 Codex skills 内容存在双份漂移风险；hook 命令硬编码 `E:\Workspace\Coevo`，仓库迁移需同步更新 `.codex/hooks.json`。
+
+## 2026-08-03 架构治理七项优化（根目录文档去重 / 记录归档 / 门禁稳定性 / 技能单一源 / __init__ 拆分 / 测试入口 / 文档整理）
+
+### 1. 根目录重复文档去重
+- 删除根目录 5 个与 `docs/` 重复的中文文档：`系统原始需求.md`、`MVP用户故事.md`、`强制技术约束.md`、`MVP参考选型.md`、`agent任务包协议规范.md`。
+- 前 4 个与 `docs/` 逐字节一致；`agent任务包协议规范.md` 停留在初始提交 `d60d37e`，已落后于 `docs/protocol/agent-package-protocol.md`（`1427193` 加固）。
+- 恢复方式：git 历史（初始提交 `d60d37e`）可完整找回；`docs/README.md` 已声明 `docs/` 为唯一基线。
+
+### 2. 记录归档容量触发修复
+- 发现 `docs/process/records-archiving-policy.md` 的"或 ≤容量"阈值只写入 reason、从未真正触发；修复 `src/coevo/records_archive.py`：超容量时从保留区最旧段裁剪至容量内（永不置空），补 2 个单元测试。
+- 执行 `archive_records.py --apply`：`VERIFICATION.md` 2MB → 978KB，168 个旧条目入 `loop/archive/20260803/`；DECISIONS/tool-audit 未超阈值。
+- `loop/README.md` 增补归档约定；`AGENTS.md` 明确历史记录以 `loop/archive/` 为准、只读最新一段。
+
+### 3. 门禁稳定性（GmSSL 启动竞争）
+- `gmssl_provider._invoke` 默认 retries 1→2、退避 0.25→0.5s（0..3 上限不变），补默认值测试；当日实测两次瞬时失败后第三次成功。
+- 追加门禁级有界重试：e2e 输出含 `GCP-E-LAUNCH`（工具链启动竞争的瞬态标记）时，`quality_gate.py` 对 e2e 命令重试一次并在 VERIFICATION 记录两次输出；权威密码学错误（GCP-E-SIGN 等）绝不重试。
+- 根因线索：PID 7520（2026-08-02 23:03 启动的编码命令自动化会话）疑似持有 `.tools` 句柄；未擅自终止，待业务负责人确认后可关闭/重启该会话释放锁。
+- `%TEMP%\coevo-sandbox-verify` 残留仍被 `.tools` 快照文件锁定（`b204af5c…`），维持 2026-08-02 已记录的人工清理待办。
+
+### 4. 领域技能单一权威源
+- 权威源固定为 `.agents/skills/{mvp-requirements,agent-package,acceptance-testing}/SKILL.md`；`.opencode/skills` 同名文件改为薄指针（frontmatter 不变，正文指向权威源）。
+- 新增 `tests/unit/test_skills_consistency.py` 防漂移（权威源存在且含必需章节；opencode 侧必须是指针）。
+
+### 5. `__init__.py` 实现拆分
+- 收编 `.omo/split_packages.py` → `scripts/split_packages.py`（登记 `python-script-lock.tsv`），新增 risk/benchmarks 拆分配置并执行：`risk` → `models.py` + `analyzer.py`；`benchmarks` → `models.py` + `harness.py`；`__init__.py` 均变为纯导出门面。
+- 相关测试 52/52 通过（含 decision_brief/supervision/merge_risk_receipt_chain）。
+
+### 6. 测试与静态检查入口
+- 唯一权威入口保持 `make quality`（unittest）；`pytest`/`ruff` 未锁版本、未审批，不得作为门禁依据，纳入需走离线审批（评估：ruff 当前基线 1055 错误，属后续工作项）。
+- `docs/development-environment.md` 增补入口说明。
+
+### 7. 文档与本地杂项
+- `README.md` 状态改为以 `loop/STATE.json` 为准（不再写死 iteration）。
+- `CODE_REVIEW.md` 移至 `docs/process/code-review-2026-07-30.md`（历史审查快照）。
+- `.omo/` 中 `split_packages.py` 已收编；其余 session 数据属本地未入库内容，保留待人工清理。
 ## 2026-08-03 -- 稳定性与运维加固（ENG-BASE STABILITY-1 done）
 
 ### 背景

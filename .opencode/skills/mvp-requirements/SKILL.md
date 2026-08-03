@@ -7,17 +7,9 @@ metadata:
   scope: mvp
 ---
 
-## 权威文件
+## 权威内容（单一权威源）
 
-- `docs/requirements/system-requirements.md`
-- `docs/requirements/mvp-user-stories.md`
-- `docs/constraints/mandatory-technical-constraints.md`
-- `docs/traceability/requirements-test-matrix.md`
-
-## 使用规则
-
-1. 先用工作项 ID 定位用户故事与 AC；不得跨故事合并范围。
-2. 把每条 AC 转换为可执行测试（含失败/异常输入）。
-3. 需求不清时输出 `blocked`，不允许自行假定；必须写到 `loop/DECISIONS.md`。
-4. 每轮必须输出 AC ↔ 代码 ↔ 测试映射关系，供 verifier 与 security-reviewer 使用。
-5. 当 AC 同时涉及协议字段时，提示 `loop-engineer` 同步加载 `agent-package` skill。
+本技能内容与 Codex 侧 `.agents/skills/mvp-requirements/SKILL.md` 同源。
+执行相关任务前**先读取**该文件——权威文件清单、使用规则、AC ↔ 代码 ↔ 测试映射
+约定均以 `.agents/skills/mvp-requirements/SKILL.md` 为准；若该文件缺失或不可读，
+停轮上报，不得凭记忆执行。

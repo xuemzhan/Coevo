@@ -26,8 +26,19 @@ def run(target):
         output.append("preflight audit seal failed: "+str(exc)+"\n")
     for argv in argvs:
         if rc: break
-        process=subprocess.run(argv,cwd=ROOT,capture_output=True,text=True,encoding="utf-8",errors="replace"); output.append("$ "+" ".join(argv)+"\n"+process.stdout+process.stderr)
-        if process.returncode: rc=process.returncode; break
+        process=subprocess.run(argv,cwd=ROOT,capture_output=True,text=True,encoding="utf-8",errors="replace")
+        combined=process.stdout+process.stderr
+        output.append("$ "+" ".join(argv)+"\n"+combined)
+        if process.returncode:
+            # Bounded, documented retry: e2e crypto tests may hit transient
+            # GmSSL helper launch contention (GCP-E-LAUNCH; see
+            # src/coevo/crypto/gmssl_provider.py). Retry once and record it.
+            if any("tests/e2e" in str(part) for part in argv) and "GCP-E-LAUNCH" in combined:
+                retried=subprocess.run(argv,cwd=ROOT,capture_output=True,text=True,encoding="utf-8",errors="replace")
+                output.append("\n[gate] e2e failed with transient GCP-E-LAUNCH; retried once (bounded)\n$ "+" ".join(argv)+"\n"+retried.stdout+retried.stderr)
+                process=retried
+            rc=process.returncode
+            if rc: break
     ts=dt.datetime.now(dt.UTC).isoformat().replace("+00:00","Z"); append_record({"ts":ts,"actor":"quality_gate","tool":"quality_gate","target":target,"fingerprint":fp,"exit_code":rc})
     if rc==0:
         try:

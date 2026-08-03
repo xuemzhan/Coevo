@@ -61,6 +61,37 @@ class ArchivePlanTests(unittest.TestCase):
             archive_plan("x", kind="bogus", now="2026-08-02T00:00:00Z",
                          keep_recent=1, min_age_days=1, size_threshold_bytes=1)
 
+    def test_size_threshold_trims_oldest_kept_sections(self):
+        text = (
+            "## 2026-07-01 -- a\n" + "x" * 300 + "\n"
+            "## 2026-07-02 -- b\n" + "y" * 300 + "\n"
+            "## 2026-07-03 -- c\n" + "z" * 300 + "\n"
+        )
+        plan = archive_plan(
+            text,
+            kind="decisions",
+            now="2026-08-02T00:00:00Z",
+            keep_recent=3,
+            min_age_days=1,
+            size_threshold_bytes=400,
+        )
+        self.assertGreaterEqual(plan["archived_sections"], 1)
+        self.assertNotIn("2026-07-01", plan["keep"])
+        self.assertIn("2026-07-03", plan["keep"])
+        self.assertIn("size-trimmed", plan["reason"])
+
+    def test_size_threshold_never_empties_keep(self):
+        text = "## 2026-08-01 -- only\n" + "x" * 5000 + "\n"
+        plan = archive_plan(
+            text,
+            kind="decisions",
+            now="2026-08-02T00:00:00Z",
+            keep_recent=1,
+            min_age_days=1,
+            size_threshold_bytes=100,
+        )
+        self.assertEqual(1, len(split_decisions_sections(plan["keep"])))
+
 
 if __name__ == "__main__":
     unittest.main()
