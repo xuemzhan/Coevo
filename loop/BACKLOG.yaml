@@ -551,3 +551,14 @@ items:
       - tests/unit/test_task_decomposition_agent.py
     security_review: true
     protocol_review: false
+  # ---------- phase 2 track B: config file + versioned prompts (2026-08-03) ----------
+  - id: US-2-AC-4
+    story: US-2
+    title: 模型访问配置文件化 + 提示词版本化（用户指令）：config/model-config.json 承载非敏感模型配置（provider/base_url/model/api_key_env 环境变量名引用/timeout/max_tokens/外发开关）；config/model-prompts.json 版本化提示词库（id/version/provider_key/system/user_template + SHA-256 digest 防篡改，按 provider/model 变体解析、default 兜底、占位符有界展开）；agent 改由配置与提示词库驱动，方便按模型调优
+    status: done
+    dependencies: [US-2-AC-3]
+    acceptance_tests:
+      - tests/unit/test_model_provider.py
+      - tests/unit/test_task_decomposition_agent.py
+    security_review: true
+    protocol_review: false

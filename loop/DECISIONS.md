@@ -3397,3 +3397,39 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- US-2-AC-4 模型访问配置文件化 + 提示词版本化 done
+
+- 用户指令：模型访问配置使用配置文件；个性化提示词使用数据库或数据文件进行
+  版本控制；后续方便按不同模型调整。
+- 设计：
+  * `config/model-config.json`（git 跟踪）：provider/prompts_file/
+    providers.deepseek{base_url, model, api_key_env（仅环境变量名引用，
+    密钥绝不入文件）, timeout_seconds, max_tokens, external_data_ok}；
+    `load_model_config` 严格校验 fail-closed（未知字段/非法 provider/路径
+    逃逸/越界数值/非 https 全部拒绝）。
+  * `config/model-prompts.json`（git 跟踪 = 数据文件版本控制）：每个提示词
+    条目含 id/version/provider_key/system/user_template + SHA-256 digest，
+    加载时复验 digest 防篡改；按 (prompt_id, provider_key) 精确解析、
+    "default" 兜底；占位符 {project}/{flow} 有界展开、未知占位符拒绝。
+    支持 provider/model 变体（如 deepseek/deepseek-chat 独立 system 提示词），
+    便于按模型调优；改提示词 = 改数据文件（git 历史留痕 + version/digest）。
+  * `DeepSeekProvider` 改为 api_key_env 引用（密钥仅运行时从环境变量读取）。
+  * `TaskDecompositionAgent.suggest` 改由 config + prompt_registry 驱动。
+- 验证：unit 22（model）+ 6（agent 回归）全绿；`make quality` exit=0
+  fingerprint=`34fc0b672c25a7b5`，audit fully-sealed（门禁离线）。
+- 安全审查（内联）：密钥不进配置文件/日志/repr/请求体；提示词库 digest
+  防篡改、有界展开；Critical/High 0。protocol 不涉及。
+- 记录：BACKLOG US-2-AC-4 新增 done；追溯矩阵新增行（commit c12c8d3）；
+  STATE 经 `scripts/loop_state.py --stdin` 受控更新；VERIFICATION 追加门禁
+  记录。
+- 提出者：loop-engineer（Codex）。决策者：用户。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
