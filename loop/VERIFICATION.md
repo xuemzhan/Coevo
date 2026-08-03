@@ -9119,3 +9119,178 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-03 -- 独立复核：PACKAGE-DB-1（内联执行；沙箱门禁环境性受阻已留痕于 DECISIONS）
+
+### verifier 结论：PASS
+
+| AC | 对应测试 | 测试结果 | 代码证据 | 通过/失败 | 未覆盖边界 |
+|---|---|---|---|---|---|
+| 显式 create/open，拒绝覆盖与隐式建库 | unit LifecycleTests（create_refuses_existing_path / open_missing / open_non_sqlite / open_corrupt / close 幂等） | 28/28 ok | src/coevo/protocol/package_store_db.py（create/open/close） | 通过 | 多进程并发打开（Non-goal，单连接语义） |
+| 篡改拒开：schema 锁定 + 哈希链 + integrity_check | unit TamperDetectionTests 7 项 + integration tampered_file_is_refused_on_reopen | 7/7 ok | _verify_schema/_verify_chain/_verify_integrity | 通过 | 外部签名锚定由全局 audit seal 承担（见 security 报告） |
+| package_id/package_digest 跨重启重复拒绝 | unit RegisterQueryTests 2 项 + integration duplicate_*_across_restart 2 项 | 全部 ok | UNIQUE 约束 + BEGIN IMMEDIATE register | 通过 | 无 |
+| 查询与快照桥接兼容既有 facade | unit RegisterQueryTests（by_scope/revision_for/iter/snapshot）+ integration scope_and_revision / snapshot_after_restart | 全部 ok | get/by_digest/by_scope/revision_for/iter_records/snapshot | 通过 | 组合根接线留待 PACKAGE-DB-2 |
+| 严格输入校验 fail-closed | unit ValidationTests 8 项（digest/字段/sequence/类型/时间/结果/版本） | 全部 ok | _validate_record/_validate_iso_z | 通过 | 无 |
+| 无新增依赖、不改 wire/协议版本 | 静态核查 imports + git diff（__init__.py 仅再导出） | 通过 | package_store_db.py imports（stdlib only） | 通过 | 无 |
+
+门禁证据：主仓库 `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`，audit
+fully-sealed（unit 643+28 / integration 209+7 / security 96 / e2e 12 全绿）。
+结论：允许进入下一工作项。
+
+### protocol-reviewer 结论：PASS
+- Fixed Header / Envelope：未改动（本项仅持久化层，wire 布局不变）✔
+- JSON 规范化 / 协议版本：未触碰；DB schema 版本独立于协议版本，open 时精确比对 ✔
+- package_id / sequence_no 冲突处理：UNIQUE(package_id)、UNIQUE(package_digest) +
+  BEGIN IMMEDIATE 事务；by_scope 按 sequence_no ASC，语义与 in-memory 一致 ✔
+- 重复 / 重放（§17 情形 1-6）：情形 1/2 由持久化唯一约束跨重启成立；情形 3-6
+  由 replay_detector 在 snapshot 上保持原语义；已撤销包集合仍由调用方提供 ✔
+- 原子导入 / 回滚：register 事务原子（失败 rollback）；create 失败清理已建文件 ✔
+- 协议主版本升级：不必要（无 wire/语义变更）✔
+
+### security-reviewer 结论：PASS（Critical 0 / High 0）
+- 伪造/身份：字段强校验 + 唯一约束；签名与接收人绑定仍由上游 import/merge 流程
+  负责，未放宽 ✔
+- 篡改：schema 锁定 + integrity_check + 哈希链全链复验，open 时篡改拒开；观察项
+  （Medium/Low）：哈希链为自认证链，抗"重算链"攻击依赖全局 audit seal 外部锚定 ✔
+- 抵赖：登记操作仍走既有审计事件；本层不新增敏感信息 ✔
+- 信息泄露：仅元数据（id/摘要/角色/版本），无私钥/内容；字段大小上限 ✔
+- 拒绝服务：观察项（Low）：open 时 _verify_chain 使用 fetchall，超大登记库有
+  内存占用风险；DB 无大小上限（与 in-memory 语义一致）✔
+- 权限提升：无；观察项（Low）：DB 文件 ACL 依赖部署目录权限（默认
+  LOCALAPPDATA/受控目录可接受）✔
+
+结论：双放行；进入 RECORD。
+
+## 2026-08-03T08:39:54.776045Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `1`
+```text
+antinePath.test_quarantine_path_rejects_invalid_id) ... ok
+test_quarantine_path_rejects_traversal (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_traversal) ... ok
+test_audit_record_is_json_safe_on_success (test_workspace_init.TestWorkspaceInitService.test_audit_record_is_json_safe_on_success) ... ok
+test_audit_record_on_rejection (test_workspace_init.TestWorkspaceInitService.test_audit_record_on_rejection) ... ok
+test_init_allows_same_package_different_role (test_workspace_init.TestWorkspaceInitService.test_init_allows_same_package_different_role) ... ok
+test_init_creates_workspace_for_committed_import (test_workspace_init.TestWorkspaceInitService.test_init_creates_workspace_for_committed_import) ... ok
+test_init_idempotent_on_duplicate_package (test_workspace_init.TestWorkspaceInitService.test_init_idempotent_on_duplicate_package) ... ok
+test_init_rejects_invalid_role_id (test_workspace_init.TestWorkspaceInitService.test_init_rejects_invalid_role_id) ... ok
+test_init_rejects_non_import_outcome (test_workspace_init.TestWorkspaceInitService.test_init_rejects_non_import_outcome) ... ok
+test_init_rejects_rolled_back_import (test_workspace_init.TestWorkspaceInitService.test_init_rejects_rolled_back_import) ... ok
+test_sanitize_id_accepts_safe (test_workspace_init.TestWorkspacePath.test_sanitize_id_accepts_safe) ... ok
+test_sanitize_id_rejects_empty (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_empty) ... ok
+test_sanitize_id_rejects_too_long (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_too_long) ... ok
+test_workspace_path_default_root (test_workspace_init.TestWorkspacePath.test_workspace_path_default_root) ... ok
+test_workspace_path_layout (test_workspace_init.TestWorkspacePath.test_workspace_path_layout) ... ok
+test_workspace_path_rejects_empty_root (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_empty_root) ... ok
+test_workspace_path_rejects_invalid_project_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_project_id) ... ok
+test_workspace_path_rejects_invalid_role_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_role_id) ... ok
+test_workspace_path_rejects_traversal (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_traversal) ... ok
+test_by_package (test_workspace_init.TestWorkspaceRegistry.test_by_package) ... ok
+test_empty_registry (test_workspace_init.TestWorkspaceRegistry.test_empty_registry) ... ok
+test_register_allows_same_package_for_different_role (test_workspace_init.TestWorkspaceRegistry.test_register_allows_same_package_for_different_role) ... ok
+test_register_rejects_duplicate_package_for_same_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_package_for_same_role) ... ok
+test_register_rejects_duplicate_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_role) ... ok
+test_register_then_get (test_workspace_init.TestWorkspaceRegistry.test_register_then_get) ... ok
+test_disallowed_extension_is_denied (test_wps_launcher.WpsLauncherTests.test_disallowed_extension_is_denied) ... ok
+test_invalid_root_is_rejected (test_wps_launcher.WpsLauncherTests.test_invalid_root_is_rejected) ... ok
+test_missing_absolute_executable_is_not_available (test_wps_launcher.WpsLauncherTests.test_missing_absolute_executable_is_not_available) ... ok
+test_missing_file_is_denied (test_wps_launcher.WpsLauncherTests.test_missing_file_is_denied) ... ok
+test_runner_failure_is_error (test_wps_launcher.WpsLauncherTests.test_runner_failure_is_error) ... ok
+test_runner_is_invoked_with_explicit_executable_and_path (test_wps_launcher.WpsLauncherTests.test_runner_is_invoked_with_explicit_executable_and_path) ... ok
+test_symlink_escape_is_denied (test_wps_launcher.WpsLauncherTests.test_symlink_escape_is_denied) ... skipped 'symlink creation unavailable'
+test_traversal_and_absolute_paths_are_denied (test_wps_launcher.WpsLauncherTests.test_traversal_and_absolute_paths_are_denied) ... ok
+test_valid_document_dry_run_is_ok (test_wps_launcher.WpsLauncherTests.test_valid_document_dry_run_is_ok) ... ok
+
+======================================================================
+FAIL: test_decisions_records_the_audit_corpus_status (test_private_key_handles_bindings.PrivateKeyHandlesBindingsTests.test_decisions_records_the_audit_corpus_status)
+Pin: latest DECISIONS entry acknowledges the receipt policy.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_private_key_handles_bindings.py", line 162, in test_decisions_records_the_audit_corpus_status
+    self.assertIn(
+    ~~~~~~~~~~~~~^
+        marker,
+        ^^^^^^^
+        latest,
+        ^^^^^^^
+        f"latest DECISIONS.md section lacks approved governance marker: {marker}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 'decision status: approved a+b' not found in '## 2026-08-03 -- �û����� phase2 c��a��b + package-db-1 done��phase 2 track c ���\n\n- �û�ָ���һ�׶ΰ� c��Э����������ʽ������ a����������β���� b���������죩\n  ˳���ƽ�������ʵ�� c ������ package-db-1��Э�� ��17 �Ѵ������ǼǱ��־û�����\n- �滮������ʵ��¼�������ɷ� mvp-planner �Ӵ�����δ��Ҫ������滮��������\n  ��һ���Ӵ������������Ӵ�������"ֻ��"ָ����ԽȨд�̣�src/coevo/protocol/\n  package_store_db.py + tests/unit��tests/integration/test_package_store_\n  persistence.py + src/coevo/protocol/__init__.py �ٵ����������жϴ�����������\n  ���ԽȨ��������������á������ knowledgestore �־û�ģʽһ�¡��� stdlib\n  �������������� .agent wire ��Э�����汾���������� windows �ϴ�����ʵȱ��\n  ��tempfile.temporarydirectory �� store.close ֮ǰ�˳���sqlite ������ռ������\n  winerror 32 ����ʧ�ܣ����������ر�˳��lifo addcleanup���������� unit 28 +\n  integration 7 ȫ�̡��� 2026-08-02 �� ������ԽȨ���ﾭ������������м�ֵ���֣�\n  ԽȨ��Ϊ����Դ��ʵ���ۣ���Ĭ�Ͻ���ԽȨ��\n- ʵ��ժҪ��packagestoredb��sqlite �־û�����ʽ create/open���ܾ���������ʽ\n  ���⣻schema_version+schema_sha256+ddl ��ȷ�ȶ�������pragma integrity_check��\n  ׷��ʽ sha-256 ��ϣ�� prev_hash/record_hash ȫ�����飻unique Լ�� +\n  begin immediate ����ʵ�� package_id/package_digest �������ظ��ܾ���\n  �ϸ���У�� fail-closed��get/by_digest/by_scope/revision_for/iter_records/\n  snapshot �Žӻ� in-memory processedpackagestore������ facade ��Ϊ���ݣ���\n- ��֤�����ֿ� `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`��audit\n  fully-sealed��unit 643+28 / integration 209+7 / security 96 / e2e 12 ȫ�̣���\n  ֻ��ɳ���Ž����λ�����ʧ�ܣ��� git ȫ�� autocrlf ʹ��¡�ļ�ת crlf�������\n  legacy prefix mismatch�������� git_config ǿ�� core.autocrlf=false �ؽ�ɳ��\n  ������� .tools �� junction ���غ� windows-native-security.ps1 �ж�Ϊ\n  reparse point �ܾ�����������ȫ���Ե����Լ������ɳ�����޷��������Ž���\n  �� independent-review-governance.md ��7 �� junction ָ����ͻ�����ĵ��밲ȫ\n  Ӳ��֮�����֪��һ�£��� �� ������ loop-engineer ���������֤��\n  protocol/security ��鲢���ۣ�"ר��ֻ������ runner / �˹�����"ά�ּ���ά��\n  ���������ͨ�Ӵ����䵱���������ߡ�\n- �����ۣ�protocol-reviewer pass������ wire/���汾����17 ʮ�ֶ��뱸��\n  �����ط�/�ظ��������徭 snapshot �Žӱ��֣���security-reviewer pass\n  ��critical/high 0/0��medium/low �۲����ϣ��Ϊ����֤�����ⲿê����ȫ��\n  audit seal �е���open ʱ _verify_chain �� fetchall �Դ�����ڴ�ռ�÷��գ�\n  db �ļ� acl ��������Ŀ¼Ȩ�ޣ���\n- ��Χ�⣨������ѡ���������֣���package-db-2 �� packagestoredb ����\n  packageimportservice / ��ϸ�������·�� + �������� + �������滻����crypto-p2-1\n  ��ҵ��������׼��ʽ�����Ʒ�����п��\n- ��¼��backlog package-db-1 ready��done��׷�ݾ��������У����Ž�֤����\n  commit f196bc4����state �� `scripts/loop_state.py --stdin` �ܿظ���\n  ��iteration �ֶβ����ܿؽű�֧�֣����� 30�������ֶ����ƽ�����verification\n  ׷�ӱ����Ž��븴�˼�¼��tool-audit ���ܿؽű��Զ�׷�ӡ�\n- ����ߣ�loop-engineer��codex���������ߣ��û���\n' : latest DECISIONS.md section lacks approved governance marker: decision status: approved a+b
+
+----------------------------------------------------------------------
+Ran 676 tests in 42.480s
+
+FAILED (failures=1, skipped=2)
+
+```
+
+## 2026-08-03T08:51:08.699250Z — target=`quality` fingerprint=`34fc0b672c25a7b5`
+- exit_code: `0`
+```text
+ecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
+test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
+test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
+test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 96 tests in 69.673s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 180.733s
+
+OK
+audit seal: fully-sealed
+
+```

@@ -492,7 +492,7 @@ items:
   - id: PACKAGE-DB-1
     story: US-5
     title: 已处理包登记表持久化：协议 §17 registry 由 in-memory 改为 SQLite 持久化（显式 create/open、篡改拒开、重放/重复包跨重启识别、fail-closed）
-    status: ready
+    status: done
     dependencies: [US-5-AC-3]
     acceptance_tests:
       - tests/unit/test_package_store_persistence.py

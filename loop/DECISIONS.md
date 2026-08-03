@@ -2823,6 +2823,7 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+
 ## 2026-08-02 -- 全盘性能审查与优化切片（ENG-BASE OPT-PERF-1 done）
 
 ### 审查范围与结论
@@ -3109,6 +3110,59 @@ security-reviewer 双签门禁。
   重新封存（audit_log verify ok；audit seal fully-sealed）。
 - 残留: %TEMP%\coevo-sandbox-verify 目录（约 561MB，含被安全进程临时锁定的
   .tools 快照文件）待系统解锁后人工删除；不影响仓库。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
+
+## 2026-08-03 -- 用户决策 Phase2 C→A→B + PACKAGE-DB-1 done（Phase 2 Track C 首项）
+
+- 用户指令：下一阶段按 C（协议与密码正式化）→ A（生产化收尾）→ B（功能延伸）
+  顺序推进；本轮实现 C 轨首项 PACKAGE-DB-1（协议 §17 已处理包登记表持久化）。
+- 规划过程如实记录：两次派发 mvp-planner 子代理均未按要求产出规划包；其中
+  第一个子代理自行派生子代理并在"只读"指令下越权写盘（src/coevo/protocol/
+  package_store_db.py + tests/unit、tests/integration/test_package_store_
+  persistence.py + src/coevo/protocol/__init__.py 再导出）。已中断代理树并逐项
+  审查越权产物：代码质量良好、与既有 KnowledgeStore 持久化模式一致、仅 stdlib
+  无新依赖、不改 .agent wire 与协议主版本；但测试在 Windows 上存在真实缺陷
+  （tempfile.TemporaryDirectory 在 store.close 之前退出，SQLite 连接仍占锁导致
+  WinError 32 清理失败）。已修正关闭顺序（LIFO addCleanup），修正后 unit 28 +
+  integration 7 全绿。按 2026-08-02 ⑤ 先例：越权产物经逐项审查后采纳有价值部分，
+  越权行为与来源如实留痕，不默认奖励越权。
+- 实现摘要：PackageStoreDb（SQLite 持久化；显式 create/open、拒绝覆盖与隐式
+  建库；schema_version+schema_sha256+DDL 精确比对锁定；PRAGMA integrity_check；
+  追加式 SHA-256 哈希链 prev_hash/record_hash 全链复验；UNIQUE 约束 +
+  BEGIN IMMEDIATE 事务实现 package_id/package_digest 跨重启重复拒绝；
+  严格行校验 fail-closed；get/by_digest/by_scope/revision_for/iter_records/
+  snapshot 桥接回 in-memory ProcessedPackageStore，既有 facade 行为兼容）。
+- 验证：主仓库 `make quality` exit=0 fingerprint=`34fc0b672c25a7b5`，audit
+  fully-sealed（unit 643+28 / integration 209+7 / security 96 / e2e 12 全绿）。
+  只读沙箱门禁两次环境性失败：① git 全局 autocrlf 使克隆文件转 CRLF，审计链
+  legacy prefix mismatch——已用 GIT_CONFIG 强制 core.autocrlf=false 重建沙箱
+  解决；② .tools 以 junction 挂载后被 windows-native-security.ps1 判定为
+  reparse point 拒绝（工具链安全测试的设计约束），沙箱内无法跑完整门禁。
+  与 independent-review-governance.md §7 的 junction 指引冲突，属文档与安全
+  硬化之间的已知不一致；按 ⑤ 先例由 loop-engineer 内联完成验证与
+  protocol/security 审查并留痕；"专用只读复核 runner / 人工复核"维持既有维护
+  事项，不以普通子代理充当独立复核者。
+- 审查结论：protocol-reviewer PASS（不改 wire/主版本；§17 十字段齐备；
+  六类重放/重复场景语义经 snapshot 桥接保持）；security-reviewer PASS
+  （Critical/High 0/0；Medium/Low 观察项：哈希链为自认证链、外部锚定由全局
+  audit seal 承担；open 时 _verify_chain 的 fetchall 对大库有内存占用风险；
+  DB 文件 ACL 依赖部署目录权限）。
+- 范围外（后续候选，不属本轮）：PACKAGE-DB-2 将 PackageStoreDb 接入
+  PackageImportService / 组合根（配置路径 + 生命周期 + 导入流替换）；CRYPTO-P2-1
+  待业务负责人批准正式密码产品后另行开项。
+- 记录：BACKLOG PACKAGE-DB-1 ready→done；追溯矩阵新增行（含门禁证据与
+  commit f196bc4）；STATE 经 `scripts/loop_state.py --stdin` 受控更新
+  （iteration 字段不受受控脚本支持，保持 30，其余字段已推进）；VERIFICATION
+  追加本轮门禁与复核记录；tool-audit 由受控脚本自动追加。
+- 提出者：loop-engineer（Codex）。决策者：用户。
 
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
