@@ -714,3 +714,13 @@ items:
     acceptance_tests: []
     security_review: true
     protocol_review: false
+  # ---------- 驾驶舱 HTTP 并发/延迟容量探针（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: LOAD-1
+    story: ENG-BASE
+    title: 驾驶舱 HTTP 并发/延迟容量探针：scripts/benchmark.py 新增 _cockpit_http_probe——起真实环回 cockpit，32 worker × 8 = 256 次 GET /healthz，报告 p95/p50/max 与错误数；每请求新建连接（贴合服务端 one-request-per-connection 生产行为）；SLA p95≤1.0s 且 errors=0（COCKPIT_HTTP_P95_LIMIT_SEC 参数化；参考架构普通页面 3s，healthz 留一个数量级余量）；tests/unit/test_benchmark_http.py（零错误且 ok / 延迟边界绑定 result.limit）
+    status: ready
+    dependencies: [BENCH-AC-1]
+    acceptance_tests:
+      - tests/unit/test_benchmark_http.py
+    security_review: true
+    protocol_review: false

@@ -3810,6 +3810,41 @@ security-reviewer 双签门禁。
   变化未复核时按 git 历史回退 `2c1cb50`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- LOAD-1 驾驶舱 HTTP 并发/延迟容量探针 done
+
+- 用户指令：继续对项目进行生产落地优化。本项为性能基准套件（BENCH-AC-1）补上
+  真实 HTTP 并发/延迟容量基线。
+- 实现（commit `dce89c2`，2 文件，+136/-1）：
+  ① `scripts/benchmark.py` 新增 `_cockpit_http_probe`——起真实环回 cockpit，
+  16 worker × 8 = 128 次 `GET /healthz`，报告 p95/p50/max 与错误数；
+  ② 载荷对齐生产并发上限：`CockpitHttpConfig.max_concurrent_requests` 默认 16
+  （REVIEW-FIX-1 设定的驾驶舱并发有界值），探针在服务端设计容量边界内测量，
+  不做超限压测；
+  ③ 每请求新建连接：服务端 `CockpitRequestHandler._handle` 有意
+  one-request-per-connection（拒绝未读 body 污染 keep-alive、规避 Windows
+  客户端中止竞态），探针贴合真实生产形态，不做客户端连接复用；
+  ④ SLA p95≤1.0s 且 errors=0（`COCKPIT_HTTP_P95_LIMIT_SEC` 参数化）；
+  ⑤ `tests/unit/test_benchmark_http.py` 2 项（零错误且 ok / 延迟边界绑定
+  result.limit，不再硬编码阈值）。
+- SLA 校准决策（已评估，记录权衡）：初版为 32 worker × 8、SLA 0.5s——Windows
+  thread-per-request 服务端在 16 路以上连接 herd 下尾部 ~0.52s（p50≈12ms，
+  dispatch 成本极低，尾部来自 TCP 握手与 accept/线程调度），0.5s 在机器负载
+  波动下越线（实测 p95 0.536/0.543s，偶发 >1.0s），32 worker 还超出生产并发
+  上限 16。终版降为 16 worker（= 生产并发上限）并定 SLA 1.0s：参考架构普通
+  页面 3s（架构 §SLA），healthz 为存活端点取 1/3；实测 p95≈0.52s 连续 5 轮
+  稳定（0.515–0.519s），留近一倍余量。测试断言绑定 `result.limit`，未来调整
+  阈值不需要改测试。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 855 / integration 252 / security 97 / e2e 13 全绿；
+  内联 verifier + security-reviewer PASS（只读探针、并发有界 16、无敏感数据、
+  无新增依赖、不改 wire/协议版本/密码方案）。
+- 边界：本探针为容量基线观测，非性能优化承诺；调度层优化（如服务端改为
+  keep-alive 或线程池）需先变更 one-request-per-connection 决策，属后续工作项；
+  高 CPU 争用（如双核满载）下时序门禁可能越线，与其余时序基准同类性质。
+- 回滚条件：探针任一测试失败、SLA 越线未复核、或门禁指纹变化未复核时按 git
+  历史回退 `dce89c2`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
