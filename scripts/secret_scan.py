@@ -3,13 +3,16 @@
 The scanner looks for obvious secret forms that should never be committed:
 
 * PEM private-key blocks (``-----BEGIN ... PRIVATE KEY-----``, including
-  RSA / EC / DSA / OpenSSH / encrypted / SM2 variants);
+  RSA / EC / DSA / OpenSSH / encrypted / SM2 variants, plus PGP
+  ``-----BEGIN PGP PRIVATE KEY BLOCK-----``);
 * AWS access key ids (``AKIA...``);
 * GitHub token family (``ghp_``/``gho_``/``ghu_``/``ghs_``/``ghr_`` and
   fine-grained ``github_pat_...``);
 * OpenAI-style keys (``sk-...``);
 * Slack tokens (``xox[a|b|p|r|s]-...``);
-* Google API keys (``AIza...``) and npm access tokens (``npm_...``);
+* Google API keys (``AIza...``), npm access tokens (``npm_...``),
+  Stripe live/test secret + restricted keys (``sk_live_``/``sk_test_``/
+  ``rk_live_``) and SendGrid API keys (``SG.<id>.<key>``);
 * high-entropy assignments to key-ish names
   (``api_key``/``secret``/``token``/``password = "<20+ chars>"``).
 
@@ -43,6 +46,7 @@ _TEXT_SUFFIXES: Final[frozenset[str]] = frozenset({
 _MAX_FILE_BYTES: Final[int] = 1 * 1024 * 1024
 _TESTS_ALLOWED_PATTERNS: Final[frozenset[str]] = frozenset({
     "pem_private_key",
+    "pgp_private_key",
     "key_assignment",
 })
 _SELF_SKIP: Final[frozenset[str]] = frozenset({"scripts/secret_scan.py"})
@@ -50,6 +54,10 @@ _SELF_SKIP: Final[frozenset[str]] = frozenset({"scripts/secret_scan.py"})
 _PATTERNS: Final[dict[str, re.Pattern[str]]] = {
     "pem_private_key": re.compile(
         r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |SM2 )?PRIVATE KEY-----",
+        re.IGNORECASE,
+    ),
+    "pgp_private_key": re.compile(
+        r"-----BEGIN PGP PRIVATE KEY BLOCK-----",
         re.IGNORECASE,
     ),
     "aws_access_key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
@@ -60,6 +68,12 @@ _PATTERNS: Final[dict[str, re.Pattern[str]]] = {
     "slack_token": re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,}\b"),
     "google_api_key": re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"),
     "npm_token": re.compile(r"\bnpm_[A-Za-z0-9]{36}\b"),
+    "stripe_key": re.compile(
+        r"\b(?:sk_live_|sk_test_|rk_live_)[0-9A-Za-z]{16,}\b"
+    ),
+    "sendgrid_key": re.compile(
+        r"\bSG\.[A-Za-z0-9_-]{22,}\.[A-Za-z0-9_-]{20,}\b"
+    ),
     "key_assignment": re.compile(
         r"(?:api[_-]?key|secret|token|password)\s*[:=]\s*"
         r"[\"'][A-Za-z0-9+/=_-]{20,}[\"']",

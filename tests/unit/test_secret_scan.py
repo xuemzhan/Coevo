@@ -135,6 +135,61 @@ class SecretScanTests(unittest.TestCase):
                 findings,
             )
 
+    def test_stripe_key_detected(self):
+        for prefix in ("sk_live_", "sk_test_", "rk_live_"):
+            with self.subTest(prefix=prefix):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    (root / "conf.py").write_text(
+                        "key = '" + prefix + "A" * 24 + "'\n",
+                        encoding="utf-8",
+                    )
+                    findings = secret_scan.scan(root)
+                    self.assertTrue(
+                        any(item["pattern"] == "stripe_key" for item in findings),
+                        (prefix, findings),
+                    )
+
+    def test_sendgrid_key_detected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "conf.py").write_text(
+                "key = 'SG." + "A" * 22 + "." + "B" * 20 + "'\n",
+                encoding="utf-8",
+            )
+            findings = secret_scan.scan(root)
+            self.assertTrue(
+                any(item["pattern"] == "sendgrid_key" for item in findings),
+                findings,
+            )
+
+    def test_pgp_private_key_outside_tests_detected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "src" / "bad.txt").write_text(
+                "-----BEGIN PGP PRIVATE KEY BLOCK-----\n"
+                + "C" * 64
+                + "\n-----END PGP PRIVATE KEY BLOCK-----\n",
+                encoding="utf-8",
+            )
+            findings = secret_scan.scan(root)
+            self.assertEqual(1, len(findings))
+            self.assertEqual("pgp_private_key", findings[0]["pattern"])
+
+    def test_pgp_private_key_in_tests_allowed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "tests").mkdir()
+            (root / "tests" / "fixture.txt").write_text(
+                "-----BEGIN PGP PRIVATE KEY BLOCK-----\n"
+                + "D" * 64
+                + "\n-----END PGP PRIVATE KEY BLOCK-----\n",
+                encoding="utf-8",
+            )
+            findings = secret_scan.scan(root)
+            self.assertEqual([], findings)
+
     def test_key_assignment_detected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
