@@ -849,3 +849,13 @@ items:
       - tests/unit/test_preflight_watchdog.py
     security_review: true
     protocol_review: false
+  # ---------- 工具链制品构建与哈希回填（2026-08-04 用户指令：push 到 github 后继续） ----------
+  - id: CI-2
+    story: ENG-BASE
+    title: 工具链制品构建与哈希回填：新增 scripts/ci-build-toolchain.py（可复现构建 .tools 子集 zip，输出大小与 SHA-256，fail-closed）；ci-artifact.json 回填 version=1.0.0/url/sha256=81dd3e7d…；真实制品恢复 + fmt/lint 冒烟通过；ci-artifact-hosting/known-limitations 更新；测试 +3（构建夹具布局/缺条目拒绝/输出已存在拒绝）；剩余：所有者创建 toolchain-1.0.0 Release 上传制品
+    status: ready
+    dependencies: [CI-1]
+    acceptance_tests:
+      - tests/unit/test_ci_restore.py
+    security_review: true
+    protocol_review: false

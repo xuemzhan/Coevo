@@ -4183,6 +4183,50 @@ security-reviewer 双签门禁。
   变化未复核时按 git 历史回退 `9c32b82`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- 推送授权（用户明确指令，覆盖仓库默认"不 git push"约束）
+
+- 用户指令：`push 到github，然后继续`（2026-08-04）。
+- 决策：业务负责人（仓库所有者）明确授权将本地 `main` 推送到
+  `origin`（https://github.com/xuemzhan/Coevo.git）。此授权覆盖 AGENTS.md 与
+  loop-engineer 技能中的默认"不执行 git push"约束，仅针对推送动作本身；
+  不授权 merge/tag/release。
+- 落地：`git push origin main` 推送 43 个提交（447856a..8ac036b），
+  `origin/main` 与本地 HEAD 一致；后续 CI-2 记录提交在授权范围内随 main
+  一并推送。
+- 提出者：用户。决策者：用户。记录：loop-engineer（Codex）。
+
+## 2026-08-04 -- CI-2 工具链制品构建与哈希回填 done
+
+- 用户指令：push 到 github 后继续生产落地优化。推送解锁了 CI-1 登记的
+  "CI 激活"外部前置中的可本地完成部分：制品构建 + 哈希回填。
+- 实现（commit `d198002`，5 文件，+174/-14）：
+  ① 新增 `scripts/ci-build-toolchain.py`——纯 stdlib 可复现构建
+  （python 完整运行时 + `3.14.3-files.lock`、node、gmssl、control，
+  根为 `.tools/`，排除 __pycache__），输出大小与 SHA-256；fail-closed
+  （必需条目缺失 / 输出已存在拒绝）；
+  ② `docs/dependencies/ci-artifact.json` 回填 version=1.0.0、
+  url=Release 模式、sha256=81dd3e7d5e…（制品 80.08 MB、4934 文件）；
+  ③ 验证：真实制品经 `ci-restore-toolchain.ps1 -LocalPath` 恢复成功
+  （exit 0），恢复出的 python 跑 `quality_gate --target fmt` 与
+  `--target lint` 均 exit 0（指纹 e225df6115/4e9985cf——CI 场景
+  sys.executable 不同，指纹与维护机基线不同属预期，工作流注释已说明）；
+  ④ 文档：ci-artifact-hosting.md 状态更新（构建命令改为
+  `ci-build-toolchain.py`）、known-limitations CI 行更新；
+  ⑤ 测试：构建小夹具 3 项 + pending 描述符测试改临时夹具 + 描述符
+  "已回填"断言（64-hex/语义化版本/https）。
+- 安全边界：制品为锁定运行时子集（内容寻址 sha256 锚定，恢复 fail-closed）；
+  不提交制品本身（仅哈希）；零新增依赖。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 907 / integration 259 / security 97 / e2e 14 全绿；
+  内联 verifier + security-reviewer PASS（Critical/High 0）；protocol 不涉及。
+- 剩余（所有者动作）：创建 `toolchain-1.0.0` GitHub Release 并上传
+  `coevo-toolchain-win64-1.0.0.zip`（维护机本地副本
+  `%TEMP%\coevo-toolchain-win64-1.0.0.zip`，可随时用
+  `scripts/ci-build-toolchain.py --version 1.0.0` 重建）后，CI 即激活。
+- 回滚条件：任一新增测试失败、制品恢复失败（哈希/条目）、或门禁指纹变化未
+  复核时按 git 历史回退 `d198002`。
+- 提出者：loop-engineer（Codex）。决策者：用户（push 授权 + 继续）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
