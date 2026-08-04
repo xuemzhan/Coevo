@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import subprocess
 import tempfile
 import unittest
@@ -67,6 +68,21 @@ class ReleaseCheckTests(unittest.TestCase):
             check = release_check.check_backlog(root)
             self.assertTrue(check["ok"])
             self.assertEqual("warning", check["level"])
+
+    def test_real_backlog_matches_state(self):
+        """RECORDS-2: every non-done BACKLOG item must be the current item."""
+        backlog = (ROOT / "loop" / "BACKLOG.yaml").read_text(encoding="utf-8")
+        state = json.loads((ROOT / "loop" / "STATE.json").read_text(encoding="utf-8"))
+        current = state.get("current_item")
+        non_done = []
+        for match in re.finditer(
+            r"  - id: (\S+)\n(.*?)(?=\n  - id: |\Z)", backlog, re.S
+        ):
+            ident = match.group(1)
+            if "status: done" not in match.group(2):
+                non_done.append(ident)
+        self.assertEqual([], [i for i in non_done if i != current], non_done)
+        self.assertTrue(current, "STATE must have a current_item")
 
     def test_subprocess_checks_and_report(self):
         with tempfile.TemporaryDirectory() as tmp:
