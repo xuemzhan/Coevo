@@ -86,10 +86,30 @@ def check_disk(install_root: Path, min_free_bytes: int) -> dict[str, Any]:
 
 
 def check_cockpit(cockpit_url: str) -> dict[str, Any]:
+    """Probe /healthz and verify the responder is really the cockpit.
+
+    A 200 from a *different* service occupying the port must not count as
+    healthy (AVAIL-2): the body must identify ``service=coevo-cockpit`` and
+    ``status=ok``. Any unhealthy responder is degraded (availability
+    warning), matching the documented semantics.
+    """
     try:
         with urllib.request.urlopen(cockpit_url + "/healthz", timeout=3) as response:
-            ok = response.status == 200
-            return _check("cockpit", ok, f"healthz HTTP {response.status}")
+            raw = response.read(4096).decode("utf-8", errors="replace")
+            try:
+                payload = json.loads(raw)
+            except json.JSONDecodeError:
+                payload = {}
+            ok = (
+                response.status == 200
+                and payload.get("service") == "coevo-cockpit"
+                and payload.get("status") == "ok"
+            )
+            detail = (
+                f"healthz HTTP {response.status} "
+                f"service={payload.get('service', '?')!r}"
+            )
+            return _check("cockpit", ok, detail, level="degraded")
     except Exception as exc:  # noqa: BLE001 - network/connection failures are degraded
         return _check("cockpit", False, f"unreachable ({exc})", level="degraded")
 

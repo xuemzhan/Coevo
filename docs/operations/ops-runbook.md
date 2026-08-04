@@ -21,7 +21,7 @@ python scripts\health_check.py --backup-root "D:\CoevoBackups" --max-backup-age-
 | disk | 磁盘余量 ≥ `--min-free-bytes`（默认 512MiB） | critical |
 | version | current 指针与安装包 `version.py` 一致 | critical |
 | lock | 单实例锁未陈旧（<10 分钟） | critical |
-| cockpit | `/healthz` 返回 200 | degraded（未运行） |
+| cockpit | `/healthz` 返回 200 且响应体身份为 `service=coevo-cockpit`、`status=ok`（AVAIL-2，防止端口被其他服务占用时误判） | degraded（未运行/异常服务） |
 | audit | `audit_seal.py verify`：fully-sealed ok；未封尾=degraded；失败=critical | 分级 |
 | backup | 最新备份 manifest 存在且 ≤ `--max-backup-age-days`（默认 7 天；OPS-3） | degraded（缺失/过期，恢复姿态告警，不阻断服务） |
 | pin | `<install-root>\python-path.txt` 存在、绝对路径且指向存在的解释器（OPS-5） | degraded（缺失/无效，看门狗将回退 PATH） |
@@ -85,6 +85,8 @@ python scripts\run_cockpit.py --preflight
 预检覆盖：配置、数据/日志目录可写、磁盘余量、审计封存状态、模型配置可加载。
 解释器解析顺序：显式 `-PythonPath` → `<install_root>\python-path.txt`（OPS-2
 sidecar）→ PATH；sidecar 内容必须是绝对路径且指向存在的可执行文件，否则失败关闭。
+健康判定（AVAIL-2）：`/healthz` 除 HTTP 200 外还校验响应体
+`service=coevo-cockpit` 与 `status=ok`——端口被其他服务占用时不会误判为健康。
 
 模型外发姿态（OPS-4）：当激活 provider 为非回环（https）且
 `config/model-config.json` 的 `external_data_ok=true`，或遗留开关

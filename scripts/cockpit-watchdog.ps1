@@ -86,7 +86,14 @@ $startCommand = @($python, $runner)
 function Test-CockpitHealth {
     try {
         $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 3
-        return ($response.StatusCode -eq 200)
+        if ($response.StatusCode -ne 200) { return $false }
+        # AVAIL-2: a 200 from a different service on the port must not be
+        # treated as healthy; the body must identify the cockpit.
+        $body = [string]$response.Content
+        return (
+            ($body -match '"service"\s*:\s*"coevo-cockpit"') -and
+            ($body -match '"status"\s*:\s*"ok"')
+        )
     } catch {
         return $false
     }

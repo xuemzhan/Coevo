@@ -9,6 +9,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,6 +73,50 @@ class HealthCheckTests(unittest.TestCase):
             import os
             os.utime(lock, (old, old))
             self.assertFalse(health.check_lock(root)["ok"])
+
+    class _FakeHealthzResponse:
+        def __init__(self, status: int, body: str):
+            self.status = status
+            self._body = body
+
+        def read(self, n: int = -1) -> bytes:
+            return self._body.encode("utf-8")
+
+        def __enter__(self) -> "_FakeHealthzResponse":
+            return self
+
+        def __exit__(self, *exc: object) -> bool:
+            return False
+
+    def _cockpit_check(self, status: int, body: str):
+        with mock.patch.object(
+            health.urllib.request,
+            "urlopen",
+            return_value=self._FakeHealthzResponse(status, body),
+        ):
+            return health.check_cockpit("http://127.0.0.1:9")
+
+    def test_cockpit_ok_with_identity(self):
+        result = self._cockpit_check(
+            200, '{"status":"ok","service":"coevo-cockpit","uptime_sec":1.0}'
+        )
+        self.assertTrue(result["ok"])
+
+    def test_cockpit_wrong_service_is_degraded(self):
+        result = self._cockpit_check(200, '{"status":"ok","service":"other"}')
+        self.assertFalse(result["ok"])
+        self.assertEqual("degraded", result["level"])
+        self.assertIn("other", result["detail"])
+
+    def test_cockpit_non_200_is_degraded(self):
+        result = self._cockpit_check(500, '{"status":"error"}')
+        self.assertFalse(result["ok"])
+        self.assertEqual("degraded", result["level"])
+
+    def test_cockpit_malformed_body_is_degraded(self):
+        result = self._cockpit_check(200, "not-json")
+        self.assertFalse(result["ok"])
+        self.assertEqual("degraded", result["level"])
 
     def _seed_backup(self, backup_root: Path, label: str, days_ago: float) -> None:
         from datetime import UTC, datetime, timedelta

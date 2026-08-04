@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import importlib.util
+import http.server
 import json
 import os
+import socket
 import subprocess
 import sys
 import tempfile
+import threading
 import types
 import unittest
 from pathlib import Path
@@ -206,6 +209,65 @@ class WatchdogTests(unittest.TestCase):
             self.assertIn("DRY-RUN", result.stdout)
             self.assertIn("would restart", result.stdout)
             self.assertNotIn("Started", result.stdout)
+
+    def test_dry_run_healthy_against_real_cockpit(self):
+        from src.coevo.cockpit import CockpitHttpConfig, CockpitHttpServer
+
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = probe.getsockname()[1]
+        server = CockpitHttpServer(
+            CockpitHttpConfig(
+                bind_port=port,
+                request_timeout_sec=3,
+                lock_path=None,
+            ),
+            workspace_views=(),
+            role_views=(),
+        )
+        server.start()
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                result = self._run(
+                    "-InstallRoot", self._fake_install(tmp),
+                    "-Port", str(port),
+                    "-DryRun",
+                )
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertIn("healthy", result.stdout)
+        finally:
+            server.stop()
+
+    def test_dry_run_wrong_service_on_port_is_down(self):
+        class _ImpostorHandler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self) -> None:
+                body = b'{"status":"ok","service":"other"}'
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args: object) -> None:
+                pass
+
+        imposter = http.server.ThreadingHTTPServer(
+            ("127.0.0.1", 0), _ImpostorHandler
+        )
+        thread = threading.Thread(target=imposter.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                result = self._run(
+                    "-InstallRoot", self._fake_install(tmp),
+                    "-Port", str(imposter.server_address[1]),
+                    "-DryRun",
+                )
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertIn("would restart", result.stdout)
+                self.assertNotIn("healthy", result.stdout)
+        finally:
+            imposter.shutdown()
+            thread.join(timeout=10)
 
     def test_sidecar_pin_is_used_for_restart(self):
         with tempfile.TemporaryDirectory() as tmp:
