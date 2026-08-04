@@ -2,11 +2,14 @@
 
 The scanner looks for obvious secret forms that should never be committed:
 
-* PEM private-key blocks (``-----BEGIN ... PRIVATE KEY-----``);
+* PEM private-key blocks (``-----BEGIN ... PRIVATE KEY-----``, including
+  RSA / EC / DSA / OpenSSH / encrypted / SM2 variants);
 * AWS access key ids (``AKIA...``);
-* GitHub personal access tokens (``ghp_...``);
+* GitHub token family (``ghp_``/``gho_``/``ghu_``/``ghs_``/``ghr_`` and
+  fine-grained ``github_pat_...``);
 * OpenAI-style keys (``sk-...``);
 * Slack tokens (``xox[a|b|p|r|s]-...``);
+* Google API keys (``AIza...``) and npm access tokens (``npm_...``);
 * high-entropy assignments to key-ish names
   (``api_key``/``secret``/``token``/``password = "<20+ chars>"``).
 
@@ -46,13 +49,17 @@ _SELF_SKIP: Final[frozenset[str]] = frozenset({"scripts/secret_scan.py"})
 
 _PATTERNS: Final[dict[str, re.Pattern[str]]] = {
     "pem_private_key": re.compile(
-        r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-----",
+        r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |SM2 )?PRIVATE KEY-----",
         re.IGNORECASE,
     ),
     "aws_access_key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
-    "github_pat": re.compile(r"\bghp_[A-Za-z0-9]{36}\b"),
+    "github_pat": re.compile(
+        r"\b(?:ghp_|gho_|ghu_|ghs_|ghr_|github_pat_)[A-Za-z0-9_]{22,}\b"
+    ),
     "openai_key": re.compile(r"\bsk-[A-Za-z0-9]{20,}\b"),
     "slack_token": re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,}\b"),
+    "google_api_key": re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"),
+    "npm_token": re.compile(r"\bnpm_[A-Za-z0-9]{36}\b"),
     "key_assignment": re.compile(
         r"(?:api[_-]?key|secret|token|password)\s*[:=]\s*"
         r"[\"'][A-Za-z0-9+/=_-]{20,}[\"']",

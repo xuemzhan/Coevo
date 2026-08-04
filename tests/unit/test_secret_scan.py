@@ -28,6 +28,14 @@ def _fake_pem() -> str:
     )
 
 
+def _fake_sm2_pem() -> str:
+    return (
+        "-----BEGIN SM2 PRIVATE KEY-----\n"
+        + "B" * 64
+        + "\n-----END SM2 PRIVATE KEY-----\n"
+    )
+
+
 class SecretScanTests(unittest.TestCase):
     def test_repo_is_clean(self):
         # The tracked repository must contain no high-confidence secrets.
@@ -43,11 +51,30 @@ class SecretScanTests(unittest.TestCase):
             self.assertEqual(1, len(findings))
             self.assertEqual("pem_private_key", findings[0]["pattern"])
 
+    def test_finds_sm2_private_key_outside_tests(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "src" / "bad.py").write_text(_fake_sm2_pem(), encoding="utf-8")
+            findings = secret_scan.scan(root)
+            self.assertEqual(1, len(findings))
+            self.assertEqual("pem_private_key", findings[0]["pattern"])
+
     def test_tests_pem_is_allowed(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "tests").mkdir()
             (root / "tests" / "fixture.py").write_text(_fake_pem(), encoding="utf-8")
+            findings = secret_scan.scan(root)
+            self.assertEqual([], findings)
+
+    def test_tests_sm2_pem_is_allowed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "tests").mkdir()
+            (root / "tests" / "fixture.py").write_text(
+                _fake_sm2_pem(), encoding="utf-8"
+            )
             findings = secret_scan.scan(root)
             self.assertEqual([], findings)
 
@@ -61,6 +88,50 @@ class SecretScanTests(unittest.TestCase):
             findings = secret_scan.scan(root)
             self.assertTrue(
                 any(item["pattern"] == "github_pat" for item in findings),
+                findings,
+            )
+
+    def test_github_token_family_detected(self):
+        prefixes = ("ghp_", "gho_", "ghu_", "ghs_", "ghr_", "github_pat_")
+        for prefix in prefixes:
+            with self.subTest(prefix=prefix):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    suffix = "A" * 36 if prefix != "github_pat_" else (
+                        "A" * 22 + "_" + "B" * 59
+                    )
+                    (root / "conf.py").write_text(
+                        "token = " + repr(prefix + suffix) + "\n",
+                        encoding="utf-8",
+                    )
+                    findings = secret_scan.scan(root)
+                    self.assertTrue(
+                        any(item["pattern"] == "github_pat" for item in findings),
+                        (prefix, findings),
+                    )
+
+    def test_google_api_key_detected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "conf.py").write_text(
+                "key = 'AIza" + "A" * 35 + "'\n", encoding="utf-8"
+            )
+            findings = secret_scan.scan(root)
+            self.assertTrue(
+                any(item["pattern"] == "google_api_key" for item in findings),
+                findings,
+            )
+
+    def test_npm_token_detected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "npmrc.txt").write_text(
+                "//registry.npmjs.org/:_authToken=npm_" + "A" * 36 + "\n",
+                encoding="utf-8",
+            )
+            findings = secret_scan.scan(root)
+            self.assertTrue(
+                any(item["pattern"] == "npm_token" for item in findings),
                 findings,
             )
 
