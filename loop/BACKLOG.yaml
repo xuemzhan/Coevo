@@ -736,3 +736,13 @@ items:
       - tests/integration/test_installer.py
     security_review: true
     protocol_review: false
+  # ---------- 备份异卷保证（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: BACKUP-2
+    story: ENG-BASE
+    title: 备份异卷保证：backup_state.py 新增 --require-external——备份根在安装根内或与安装根同卷（st_dev 比较）时失败关闭，防磁盘故障同时毁掉数据与备份；manifest 增加 same_volume 字段；备份根非目录/不可写时干净报错；--require-external 仅作用于 backup；ops-runbook §4 + known-limitations 更新；测试：外部根工作且标记同卷/安装根内拒绝/同卷拒绝（断言消息）/文件作根干净失败
+    status: ready
+    dependencies: [BACKUP-1]
+    acceptance_tests:
+      - tests/unit/test_backup_state.py
+    security_review: true
+    protocol_review: false

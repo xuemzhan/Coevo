@@ -3874,6 +3874,36 @@ security-reviewer 双签门禁。
   门禁指纹变化未复核时按 git 历史回退 `46b2df1`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- BACKUP-2 备份异卷保证 done
+
+- 用户指令：继续对项目进行生产落地优化。本项收口备份/恢复的"异地"性质：
+  BACKUP-1 默认备份根 `<install_root>\backups` 与数据同卷，磁盘故障会同时
+  毁掉数据与备份。
+- 实现（commit `2b140a2`，4 文件，+142/-4）：
+  ① `scripts/backup_state.py` 新增 `--require-external`——备份根位于安装根内
+  （`_inside` resolve 校验）或与安装根同卷（`_volume_key` = 最近存在祖先的
+  `st_dev` 比较，覆盖尚未创建的备份根）时失败关闭；
+  ② manifest 增加 `same_volume` 布尔字段（机器可读，供自动化核查 3-2-1
+  性质）；默认同卷行为不变但可被识别；
+  ③ 备份根非目录、目标不可创建、写入探测失败时干净抛
+  `BackupValidationError`（此前 `target.mkdir` 对"备份根是文件"会裸 traceback）；
+  ④ `--require-external` 仅作用于 `backup` 动作，`verify`/`restore` 不受限
+  （恢复只看备份自身完整性，策略由备份时点决定）；
+  ⑤ 文档：ops-runbook §4 异地备份示例（`--backup-root D:\... --require-external`）
+  + known-limitations 备份条目更新。
+- 安全边界：`_volume_key`/`_inside` 仅 stat/resolve，无权限变化；`.write-test`
+  探测文件无敏感内容、写后即删；manifest 新字段无敏感数据；零新增依赖、无网络。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 867 / integration 254 / security 97 / e2e 13 全绿；
+  新增测试 4 项；内联 verifier + security-reviewer PASS（Critical/High 0）；
+  protocol 不涉及。
+- 边界：同卷检测基于 Windows `st_dev`（卷序列号），同一物理磁盘的多个分区
+  视为不同卷（符合"异卷"语义）；网络共享卷号取决于挂载方式，部署方需自行
+  复核；异地的最终责任在部署策略，工具只做失败关闭的强制项。
+- 回滚条件：任一新增测试失败、`--require-external` 可被绕过（如同卷仍成功）、
+  或门禁指纹变化未复核时按 git 历史回退 `2b140a2`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
