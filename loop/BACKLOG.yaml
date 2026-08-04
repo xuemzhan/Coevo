@@ -797,3 +797,14 @@ items:
       - tests/integration/test_cockpit_http_server.py
     security_review: true
     protocol_review: false
+  # ---------- 生产就绪复审修复（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: REVIEW-FIX-2
+    story: ENG-BASE
+    title: 生产就绪复审修复：① run_cockpit.py 新增 --print-token——启动后签发一次会话令牌打印到 stdout（flush 即时、不进日志框架、不落盘，服务端仅存 SHA-256 摘要），闭环生产环境认证接口无令牌签发路径缺口；ops-runbook §2.2 + app.js 提示指向 --print-token（无 URL 字面量保持离线资产不变量）；② cockpit server 并发饱和 503 可观测——rejected_count 暴露于 /api/health，_reject_busy 写有界 busy_rejected 访问日志行（仅 client_host/reason）；测试：e2e +1（签发→鉴权 200→令牌不入日志→优雅退出）、integration +1（busy_rejected 日志行）+ rejected_count 断言
+    status: ready
+    dependencies: [METRICS-2]
+    acceptance_tests:
+      - tests/e2e/test_cockpit_launcher.py
+      - tests/integration/test_cockpit_http_server.py
+    security_review: true
+    protocol_review: false

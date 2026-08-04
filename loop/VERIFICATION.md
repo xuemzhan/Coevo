@@ -19092,3 +19092,337 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-04T01:58:01.124432Z — target=`quality` fingerprint=`e3a61c2f23c3031b`
+- exit_code: `1`
+```text
+not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+======================================================================
+FAIL: test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\e2e\test_cockpit_offline_frontend.py", line 108, in test_local_assets_load_and_have_no_external_urls
+    self.assertNotIn("http://", text)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: 'http://' unexpectedly found in '(function () {\r\n  "use strict";\r\n\r\n  var token = new URLSearchParams(location.search).get("token")\r\n    || sessionStorage.getItem("cockpit_token")\r\n    || "";\r\n  if (token) {\r\n    sessionStorage.setItem("cockpit_token", token);\r\n    if (location.search) {\r\n      history.replaceState(null, "", location.pathname);\r\n    }\r\n  }\r\n\r\n  function api(path, options) {\r\n    var headers = { "X-Cockpit-Token": token };\r\n    var init = { headers: headers };\r\n    if (options && options.body) {\r\n      init.method = "POST";\r\n      init.headers["Content-Type"] = "application/json";\r\n      init.headers["X-Requested-With"] = "coevo-cockpit";\r\n      init.body = JSON.stringify(options.body);\r\n    }\r\n    return fetch(path, init).then(function (response) {\r\n      return response.json().then(function (data) {\r\n        return { code: response.status, data: data };\r\n      });\r\n    });\r\n  }\r\n\r\n  function setStatus(text, isError) {\r\n    var status = document.getElementById("status");\r\n    status.textContent = text;\r\n    status.classList.toggle("error", !!isError);\r\n  }\r\n\r\n  function el(tag, text) {\r\n    var node = document.createElement(tag);\r\n    if (text !== undefined && text !== null) {\r\n      node.textContent = String(text);\r\n    }\r\n    return node;\r\n  }\r\n\r\n  function showDetail(title) {\r\n    document.getElementById("detail-title").textContent = title;\r\n    document.getElementById("detail").hidden = false;\r\n  }\r\n\r\n  function renderRoles(roleView) {\r\n    var container = document.getElementById("roles");\r\n    container.textContent = "";\r\n    container.appendChild(el("h3", "Roles"));\r\n    var list = el("ul");\r\n    var role = el("li", roleView.data.payload.display_name + " (" + roleView.data.payload.role_id + ")");\r\n    role.appendChild(el("span", " - " + roleView.data.payload.task_count + " tasks"));\r\n    list.appendChild(role);\r\n    container.appendChild(list);\r\n  }\r\n\r\n  function renderTasks(roleView) {\r\n    var list = document.getElementById("tasks");\r\n    list.textContent = "";\r\n    (roleView.data.payload.tasks || []).forEach(function (task) {\r\n      var item = el("li", task.title + " [" + task.status + "] due " + task.due_at);\r\n      list.appendChild(item);\r\n    });\r\n  }\r\n\r\n  function renderMilestones(roleView) {\r\n    var list = document.getElementById("milestones");\r\n    list.textContent = "";\r\n    (roleView.data.payload.milestones || []).forEach(function (milestone) {\r\n      var item = el("li", milestone.title + (milestone.completed ? " (done)" : " (open)"));\r\n      list.appendChild(item);\r\n    });\r\n  }\r\n\r\n  function renderArtifacts(roleView) {\r\n    var list = document.getElementById("artifacts");\r\n    list.textContent = "";\r\n    (roleView.data.payload.artifacts || []).forEach(function (artifact) {\r\n      var item = el("li", artifact.path);\r\n      var button = el("button", "Open in WPS");\r\n      button.addEventListener("click", function () {\r\n        api("/api/wps_open", {\r\n          body: { project_id: roleView.data.payload.project_id, artifact_path: artifact.path, confirm: true },\r\n        }).then(function (result) {\r\n          setStatus(result.data.task || "WPS request accepted", result.code !== 200);\r\n        });\r\n      });\r\n      item.appendChild(button);\r\n      list.appendChild(item);\r\n    });\r\n  }\r\n\r\n  function loadRole(projectId, roleId) {\r\n    return api("/api/role_view?project_id=" + encodeURIComponent(projectId)\r\n      + "&role_id=" + encodeURIComponent(roleId)).then(function (result) {\r\n      if (result.code !== 200) {\r\n        throw new Error(result.data.error || "role view failed");\r\n      }\r\n      return result;\r\n    });\r\n  }\r\n\r\n  function openProject(projectId, displayName) {\r\n    showDetail(displayName + " (" + projectId + ")");\r\n    document.getElementById("roles").textContent = "Loading roles?";\r\n    return api("/api/list_roles?project_id=" + encodeURIComponent(projectId)).then(function (result) {\r\n      if (result.code !== 200) {\r\n        throw new Error(result.data.error || "roles failed");\r\n      }\r\n      var roles = result.data.payload.roles || [];\r\n      if (roles.length === 0) {\r\n        document.getElementById("roles").textContent = "No roles.";\r\n        return;\r\n      }\r\n      var first = roles[0];\r\n      return loadRole(projectId, first).then(function (roleView) {\r\n        renderRoles(roleView);\r\n        renderTasks(roleView);\r\n        renderMilestones(roleView);\r\n        renderArtifacts(roleView);\r\n      });\r\n    }).catch(function (err) {\r\n      setStatus(err.message, true);\r\n    });\r\n  }\r\n\r\n  function loadProjects() {\r\n    var list = document.getElementById("project-list");\r\n    list.textContent = "";\r\n    setStatus("Loading projects?");\r\n    return api("/api/list_projects").then(function (result) {\r\n      if (result.code !== 200) {\r\n        throw new Error(result.data.error || "list failed");\r\n      }\r\n      setStatus("Connected.");\r\n      var projects = result.data.payload.projects || [];\r\n      if (projects.length === 0) {\r\n        list.appendChild(el("li", "(no projects)"));\r\n        return;\r\n      }\r\n      projects.forEach(function (projectId) {\r\n        var item = el("li", projectId);\r\n        item.classList.add("project");\r\n        item.addEventListener("click", function () {\r\n          openProject(projectId, projectId);\r\n        });\r\n        list.appendChild(item);\r\n      });\r\n    }).catch(function (err) {\r\n      setStatus(err.message, true);\r\n    });\r\n  }\r\n\r\n  if (!token) {\n    setStatus(\n      "No session token. Start the cockpit with --print-token and open " +\n      "the printed URL (http://127.0.0.1:12701/?token=...).",\n      true\n    );\n    return;\n  }\n  loadProjects();\r\n})();\r\n'
+
+----------------------------------------------------------------------
+Ran 14 tests in 141.430s
+
+FAILED (failures=1)
+
+```
+
+## 2026-08-04T02:07:51.147788Z — target=`quality` fingerprint=`e3a61c2f23c3031b`
+- exit_code: `0`
+```text
+ejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
+test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
+test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
+test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 97 tests in 67.617s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Workspace\Coevo\.tools\python\3.14.3\Lib\unittest\case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='cp936'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_preflight_exits_zero_on_healthy_repo (test_cockpit_launcher.CockpitLauncherE2ETest.test_preflight_exits_zero_on_healthy_repo) ... ok
+test_print_token_issues_usable_session (test_cockpit_launcher.CockpitLauncherE2ETest.test_print_token_issues_usable_session) ... ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... E:\Workspace\Coevo\.tools\python\3.14.3\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 147.767s
+
+OK
+audit seal: fully-sealed
+
+```
+
+## 2026-08-04T02:08:44.224831Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+s": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/secret_scan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_secret_scan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "OPS-3",
+      "title": "����������ӱ������ʶȼ�أ�2026-08-04���û�ָ�������������Ż�����`scripts/health_check.py` ���� `backup` ��顪��ɨ�� `--backup-root`��Ĭ�� `<install-root>\\backups`����ȫ������ manifest��ȡ���� `created_at`������ �� `--max-backup-age-days`��Ĭ�� 7 �죩Ϊ ok�����ݸ�ȱʧ/����Ч manifest/����/δ��ʱ�����>1 �죩��Ϊ degraded���ָ���̬�澯������Ϸ��񣬲��� critical����CLI ���� `--backup-root` �� `--max-backup-age-days`��<1 �ܾ�����ֻ������ stdlib��docs/operations/ops-runbook.md ��1 ���� + ��ر��ݼ��ʾ����",
+      "code": [
+        "scripts/health_check.py",
+        "docs/operations/ops-runbook.md"
+      ],
+      "tests": [
+        "tests/unit/test_ops_tooling.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/health_check.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "OPS-4",
+      "title": "ģ���ⷢ�����ɹ۲��ԣ�2026-08-04���û�ָ�������������Ż�����`scripts/run_cockpit.py` ���� `model_egress_warnings()`�������� provider �ǻػ���https���� `external_data_ok=true`����������뿪���������������� `COEVO_LLM_EXTERNAL_DATA_OK=1` ������ʱ����澯��`--preflight` ���ɣ��ⷢ����/�������� �� degraded exit 1���ػ� provider �� offline ��Ĭ�����ݲ��������󱨣���ÿ�������� `setup_logging` д `model egress posture` �澯��־���������Ʊ��� fail-closed ���䣻�ĵ���configuration-reference ������ + ops-runbook ��2.1 �ⷢ��̬�ڡ�",
+      "code": [
+        "scripts/run_cockpit.py",
+        "docs/operations/configuration-reference.md",
+        "docs/operations/ops-runbook.md"
+      ],
+      "tests": [
+        "tests/unit/test_preflight_watchdog.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/run_cockpit.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/configuration-reference.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_preflight_watchdog.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "OPS-5",
+      "title": "������ pin �����Լ�飨2026-08-04���û�ָ�������������Ż�����`scripts/install_cockpit.py --action check` ���� pin У�顪��`python-path.txt` ȱʧ/��/�Ǿ���·��/Ŀ�겻���ھ� check ʧ�ܣ�exit 1�������� `register-autostart.ps1 -Action PinPython` ָ�����ջ� OPS-2 �ɰ�װȱ�ڣ������Ź���Ĭ���� PATH����`scripts/health_check.py` ���� `pin` ��顪��ȱʧ/��Ч �� degraded����ز�ɼ��ԣ������� `build_report`���ĵ���ops-runbook ��1 ���� pin �� + install check ǿ��˵����known-limitations OPS-2 ��Ŀ���¡�",
+      "code": [
+        "scripts/install_cockpit.py",
+        "scripts/health_check.py",
+        "docs/operations/ops-runbook.md",
+        "docs/operations/known-limitations.md"
+      ],
+      "tests": [
+        "tests/integration/test_installer.py",
+        "tests/unit/test_ops_tooling.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/install_cockpit.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/health_check.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/known-limitations.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_installer.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "METRICS-2",
+      "title": "/healthz ̽�������2026-08-04���û�ָ�������������Ż�����`src/coevo/cockpit/server.py` ���� `_probe_count`������ `_request_lock` �̰߳�ȫ������`/healthz` ���̽���������������֤ `request_count` ����������METRICS-1 ���岻�䣩��`/api/health` ��Ӧ���� `probe_count` �ֶΣ���ά�����ֿ��Ź�/�������/��׼̽����������ʵʹ�ã��ĵ���ops-runbook ��1 �����ڶ˵�˵�� + known-limitations request_count ��Ŀ���¡�",
+      "code": [
+        "src/coevo/cockpit/server.py",
+        "docs/operations/ops-runbook.md",
+        "docs/operations/known-limitations.md"
+      ],
+      "tests": [
+        "tests/integration/test_cockpit_http_server.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/server.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/known-limitations.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cockpit_http_server.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "REVIEW-FIX-2",
+      "title": "�������������޸���2026-08-04���û�ָ�������������Ż������� `scripts/run_cockpit.py` ���� `--print-token`���������� `session_manager.create()` ǩ��һ�λỰ���ƴ�ӡ�� stdout��flush ��ʱ�ɼ���������־��ܡ������̣�����˽��� SHA-256 ժҪ�����ջ���������\"��֤�ӿ�������ǩ��·��\"��ȱ�ڣ�ops-runbook ��2.2 ����ʽ����˵����`static/app.js` ��������ʾָ�� `--print-token`���� URL �����������������ʲ������������������� `src/coevo/cockpit/server.py` �������� 503 �ɹ۲⡪������ `rejected_count`���̰߳�ȫ����¶�� `/api/health`��`_reject_busy` д�н� `busy_rejected` ������־�У��� client_host/reason�������������ݣ���",
+      "code": [
+        "scripts/run_cockpit.py",
+        "src/coevo/cockpit/server.py",
+        "src/coevo/cockpit/static/app.js",
+        "docs/operations/ops-runbook.md"
+      ],
+      "tests": [
+        "tests/e2e/test_cockpit_launcher.py",
+        "tests/integration/test_cockpit_http_server.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/run_cockpit.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/server.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/static/app.js",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_cockpit_launcher.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cockpit_http_server.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```

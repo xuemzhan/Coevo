@@ -4045,6 +4045,40 @@ security-reviewer 双签门禁。
   变化未复核时按 git 历史回退 `74ffa11`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- REVIEW-FIX-2 生产就绪复审修复 done
+
+- 用户指令：继续对项目进行生产落地优化。本项为聚焦复审修复：以审查视角
+  复核运行时/运维面，确认审计记录内容干净（无令牌、路径哈希化）、静态路径
+  与会话实现稳健后，落地两项有据可查的缺口修复。
+- 实现（commit `07cbc9d`，6 文件，+174/-2）：
+  ① **会话令牌生产签发路径**——`run_cockpit.py` 新增 `--print-token`：
+  启动后经 `session_manager.create()` 签发一次令牌打印到 stdout
+  （`flush=True` 即时可见），不经过日志框架、不落盘；服务端仅存 SHA-256
+  摘要，超时自动失效。此前的生产路径没有任何签发机制（`create()` 仅测试
+  调用），认证接口实际不可达；ops-runbook §2.2 交互式访问说明；
+  `static/app.js` 无令牌提示改为指向 `--print-token`（不含 URL 字面量，
+  保持离线资产"无外链"不变量——e2e 首轮即拦截了带 URL 的文案，已修正）；
+  ② **并发饱和 503 可观测**——`rejected_count`（线程安全）暴露于
+  `/api/health`；`_reject_busy` 写有界 `busy_rejected` 访问日志行
+  （仅 ts/event/client_host/reason，不读任何请求内容），此前饱和事件完全
+  不可见。
+- 安全边界：令牌只在 stdout 显示一次，不在日志/磁盘/请求体中；拒绝日志不
+  含请求内容；`--print-token` 为交互式 opt-in，headless 自启场景不打印
+  （进程内会话无法跨进程签发，headless UI 分发方案需另行决策，已文档化）；
+  零新增依赖、不改 wire/协议/会话语义/认证模型。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 886 / integration 259 / security 97 / e2e 14 全绿；
+  新增测试 2 项（e2e 令牌签发→鉴权 200→令牌不入访问日志→优雅退出；
+  integration busy_rejected 日志行断言）+ rejected_count 断言与 /api/health
+  字段；内联 verifier + security-reviewer PASS（Critical/High 0）；
+  protocol 不涉及。
+- 边界：--print-token 的令牌对同一机器上的其他本地进程不构成安全边界（本机
+  进程本就可读用户数据），其作用是交互式访问的认证握手；headless UI 访问的
+  受控令牌分发（如文件握手）留待业务决策。
+- 回滚条件：任一新增测试失败、令牌进入日志/磁盘、busy_rejected 含请求内容、
+  或门禁指纹变化未复核时按 git 历史回退 `07cbc9d`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
