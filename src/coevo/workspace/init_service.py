@@ -37,10 +37,16 @@ AC mapping
   which returns ``created=False`` (and the unchanged registry)
   when the same ``package_id`` is re-imported.
 """
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 工作区初始化服务（US-6 AC-1）：WorkspaceInitService.init_from_import() 把
+# US-5 原子导入结果转成工作区初始化结果——非 COMMITTED 拒绝（AC-4）、
+# 重复 (project, role) 拒绝（AC-7）、同包幂等（AC-8）、成功返回
+# 项目/角色目录路径（AC-5/AC-6）。本层纯函数，路径策略在 paths.py。
+
 from __future__ import annotations
 
 import dataclasses
-from typing import Mapping
 
 from src.coevo.protocol import ImportOutcome
 

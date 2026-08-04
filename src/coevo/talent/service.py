@@ -17,6 +17,13 @@ Non-goals (out of scope for US-3-AC-1)
 * No persistence in the service. Pool persistence + redaction-on-import
   are provided by :class:`TalentStore` (US-3-AC-2, ``store.py``).
 """
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 人才推荐服务层（US-3 AC-1）：TalentRecommenderService.recommend_for_requirements()
+# 对每个任务槽位按确定性评分（技能/资质/窗口/负荷）排序，附 LoadAlert
+# （满负荷/时间冲突）；to_audit_record() 只记池代号/数量/告警统计。
+# 人才池只含脱敏身份（redaction 层保证），本层不接触 PII。
+
 from __future__ import annotations
 
 import dataclasses

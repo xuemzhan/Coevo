@@ -1,4 +1,21 @@
 """risk.analyzer - deterministic RiskAnalyzer facade, merge+analyze hook and their private helpers (US-11)."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 风险预警引擎（US-11）：
+#   analyze_after_merge()：只分析“最新权威回执”对应的合并后状态，
+#     回执链不连续或非最新即拒绝（防止用旧状态算风险）。
+#   识别四类基础风险（AC-2）：
+#     DEADLINE_OVERRUN（事实型：任务/项目截止已过，严重度 4 → 建议会议）；
+#     INSUFFICIENT_EVIDENCE（事实型：权威回执中的完成标记不足）；
+#     LONG_SILENCE（事实型：超过阈值无合并反馈）；
+#     PREDECESSOR_UNFINISHED（规则型：前置任务无完成标记，影响后继）。
+#   另支持 AT_RISK/BLOCKED 传染（推断型）与严重协调建议
+#     SEVERE_COORDINATION_NEEDED（规则型）。
+#   merge_and_analyze()：合并 + 回执 + 风险分析一站式钩子，供回传链
+#     调用；合并未接受则不产生风险报告。
+#   关键不变量：风险报告仅“候选”，正式发布前必须负责人确认
+#     （requires_owner_confirmation=True 强制）。
 
 from __future__ import annotations
 

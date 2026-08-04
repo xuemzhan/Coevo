@@ -1,5 +1,12 @@
 """orchestrator.service - deterministic Orchestrator facade (US-4 AC-3..AC-7)."""
 
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 运行中枢门面（US-4 AC-3..AC-7）：Orchestrator 提供 dispatch_event /
+# confirm_human（含权限校验）/ dispatch_event_with_real_facades /
+# confirm_real_chain / resume_real_chain 等受控编排入口；每一步产生
+# 审计轨迹，高影响步骤要求人工确认。
+
 from __future__ import annotations
 
 from src.coevo.workspace.models import WorkspaceEntry

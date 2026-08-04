@@ -3,6 +3,11 @@
 The Python process never receives private-key bytes, private-key passwords, or
 an unwrapped SM4 session key. Those values exist only in the one-shot helper.
 """
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# GmSSL 3.2.0 锁定原型 provider：一次性助手进程完成 SM2/SM3/SM4 运算，
+# Python 进程不接触私钥字节；启动级瞬时失败有界重试，密码级错误绝不重试。
+
 from __future__ import annotations
 
 import os

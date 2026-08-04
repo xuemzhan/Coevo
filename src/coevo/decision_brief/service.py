@@ -1,4 +1,17 @@
 """decision_brief.service - DecisionBriefService facade and its private helpers."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 决策简报服务（US-13）：
+#   generate()：只消费“最新 verified 合并回执”与“负责人密钥签名的风险
+#     确认”，二者缺一即拒绝；支持 STAGE/PERIODIC/RISK_TOPIC 三种类型，
+#     内容逐结论绑定 task/result/risk/receipt 来源，保证可追溯。
+#   revise()：修订走 CAS（revision + head_digest），旧事件重放拒绝，
+#     修订历史以内容哈希链保存（AC-7）。
+#   模板治理：ApprovedTemplateRegistry 每次实际复验受控 DOCX；生成的
+#     WPS 请求只创建新版本副本并强制人工确认，不自动执行宏。
+#   关键不变量：风险确认必须由项目负责人证书身份签署且与回执绑定；
+#     未经确认的风险不得进入简报。
 
 from __future__ import annotations
 

@@ -5,6 +5,12 @@ and path policy live in :mod:`.static`. This module keeps the request
 handler, server lifecycle and single-instance lock.
 """
 
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 驾驶舱环回 HTTP 服务（US-7 AC-2）：单实例锁 + 会话令牌 + Host/Origin/
+# CSRF 校验 + 请求体上限 + 状态快照落盘与重启恢复 + 结构化访问日志；
+# 只绑定 127.0.0.1，前端资源全部本地化。
+
 from __future__ import annotations
 
 

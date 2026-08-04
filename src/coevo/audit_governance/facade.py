@@ -1,4 +1,16 @@
 """US-15 security audit governance facade (split from the package init)."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 安全审计门面（US-15）：
+#   evaluate_interception()：把异常包的五类拦截原因集中判定为一次决策
+#     （CORRUPTED/TAMPERED/EXPIRED/DUPLICATE/RECIPIENT_MISMATCH，按序
+#     优先级短路），供导入前拦截层使用。
+#   query_events()：按主体/动作/结果/项目/任务/时间过滤审计事件，带
+#     limit 硬上限（10000）与 record_hash 游标分页；纯函数无 IO。
+#   export_events()：导出 JSON/JSONL，内容摘要 SHA-256 稳定可复验。
+#   关键不变量：AuditEvent 六字段（ts/actor/action/result/project/task）
+#     强制非空，审计投影排除敏感文本只保留哈希/计数。
 from __future__ import annotations
 
 import hashlib

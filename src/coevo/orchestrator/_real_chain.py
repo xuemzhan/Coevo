@@ -1,4 +1,22 @@
 """US-4-AC-2 guarded two-phase orchestration over the real US-1/2/3/5 facades."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 本模块实现“固定下发链”的真实门面两阶段编排（US-4 AC-2）：
+#   阶段一（dispatch_real_chain）：
+#     ① 校验固定链形状（5 步：流程理解→分解→推荐→人工确认→生成包）；
+#     ② begin_dispatch 原子占位；步骤 0-2 依次调用真实门面
+#        （understand / build_baseline / recommend），任何失败按
+#        FailurePolicy 处理（本链禁用 SKIP，失败即升级人工）；
+#     ③ 停在第 3 步（HELD_AT_CONFIRM），把中间产物与摘要存入
+#        RealChainStore——未经人工确认绝不生成任务包。
+#   阶段二（confirm_real_chain → resume_real_chain）：
+#     ① confirm：校验 stored hold 与 package_preview 绑定、负责人
+#        orchestrator:confirm-package:<project> 权限，生成确认摘要；
+#     ② resume：校验确认摘要、注册表状态与事件摘要一致性后，才调用
+#        US-5 构建加密包并回读校验，成功写 TERMINAL，失败写 ESCALATED。
+#   关键安全不变量：包只能由已确认且摘要可验证的会话生成；事件/确认/
+#   包摘要三者绑定存储，防止跳过确认或篡改中间结果。
 from __future__ import annotations
 
 import dataclasses

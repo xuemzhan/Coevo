@@ -26,6 +26,12 @@ Re-exports are in ``coevo.protocol``; ``AgentPackageError`` and its
 subclasses are the protocol boundary's only failure surface.
 """
 
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# `.agent` 协议固定头 + 规范信封编码（US-5 AC-1）：36 字节固定头 +
+# EnvelopeHeader 严格编解码，拒绝非规范 JSON/未知枚举/长度矛盾/非法
+# nonce/尾随数据；build_envelope_template 生成默认一年有效期信封。
+
 from __future__ import annotations
 
 import base64

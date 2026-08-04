@@ -32,6 +32,19 @@ Non-goals
 * No IO, no LLM, no model.
 * No mutation of US-5-AC-1 fixed header / envelope wire layout.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 本模块是 `.agent` 任务包的“线格式”组合层（US-5 AC-2 / 协议 §7+§13）：
+#   * build_unsigned_package：组装 Fixed Header + Envelope + KeyTransport +
+#     Payload，产出字节精确的 BuiltPackage（SM2 封钥/SM4-GCM 载荷）；
+#   * build_encrypted_package：在未签名包之上附加发送方签名，形成完整包；
+#   * parse_package_bytes：严格解析线字节，拒绝长度矛盾/非法 nonce/尾随数据；
+#   * open_encrypted_package：解密 → 严格解析内层 JSON（拒绝重复键）→
+#     验签 → 回读 content。句柄证书必须与信封 sender/recipient 一致，
+#     否则抛 AgentPackageError（错误接收人包被真实拒绝）。
+#   关键安全不变量：Python 进程不接触私钥字节，所有密码运算经
+#   GmsslPrototypeProvider 一次性助手完成；解封失败一律 fail-closed。
 from __future__ import annotations
 
 import dataclasses

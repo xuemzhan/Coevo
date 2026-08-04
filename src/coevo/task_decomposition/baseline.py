@@ -20,7 +20,7 @@ from __future__ import annotations
 import datetime as dt
 import re
 from dataclasses import dataclass
-from typing import Iterable, Mapping, Sequence
+from typing import Iterable, Sequence
 
 from .models import (
     Deliverable,

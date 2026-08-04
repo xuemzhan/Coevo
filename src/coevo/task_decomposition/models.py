@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field, replace
-from typing import Mapping
 
 
 class TaskDecompositionError(Exception):

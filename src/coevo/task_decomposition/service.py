@@ -35,6 +35,13 @@ Non-goals (out of scope for US-2-AC-1)
   :class:`TaskDecompositionAgent` (US-2-AC-3) and never applied
   automatically.
 """
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 任务分解服务层（US-2 AC-1）：TaskDecompositionService.propose() 消费 US-1
+# FlowUnderstanding，按标准阶段分组生成工作包/任务/交付物草案；build_baseline
+# 全量校验（ID 唯一/时间窗口/依赖环/里程碑）产出 v1 基线。本层纯函数，
+# 无 IO/无 LLM；编辑能力在 editing.py（add/remove/update/reorder，均升版本）。
+
 from __future__ import annotations
 
 import dataclasses

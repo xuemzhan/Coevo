@@ -43,7 +43,6 @@ from dataclasses import dataclass
 from typing import Any, Final, Mapping
 
 from .agent_package import AgentPackageError
-from .sm2_extension import AgentPackageAlgorithmUnsupportedError
 
 
 SM3_DIGEST_SIZE: Final[int] = 32

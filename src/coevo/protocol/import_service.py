@@ -33,10 +33,15 @@ Non-goals
 * No LLM, no model, no network.
 * No mutation of US-5-AC-1 / US-5-AC-2 wire layout.
 """
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 任务包原子导入门面（US-5 AC-3 / 协议 §15+§17）：import_package 以
+# 重放决策 + 7 步事务状态机完成导入，失败回滚不留半态；成功返回
+# ImportOutcome（COMMITTED + 已处理包登记）。
+
 from __future__ import annotations
 
 import dataclasses
-from typing import Mapping
 
 from .agent_package import (
     AgentPackageError,

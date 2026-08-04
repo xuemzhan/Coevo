@@ -1,5 +1,11 @@
 """knowledge_base.facade - KnowledgeBaseFacade aggregation and template/retrospective extraction helpers."""
 
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 知识沉淀门面（US-14）：aggregate 汇总基线/合并/风险/会议结论/简报/进展/
+# 模型总结 → 知识包 + 复盘草稿 + 可复用模板；review 审批入库，模型总结
+# 必须显式审批（AC-7）；密级取全部条目最高值。纯函数无 IO。
+
 from __future__ import annotations
 
 import hashlib

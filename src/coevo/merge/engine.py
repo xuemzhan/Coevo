@@ -1,4 +1,17 @@
 """merge.engine - deterministic MergeEngine facade (US-10-AC-1 P1 + Round-2)."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 成果合并引擎（US-10 AC-1 + Round-2 加固）：
+#   merge()：消费已验证的 ImportOutcome + ReportManifest + 当前基线，
+#     按序执行 P1 导入绑定校验、P2 重复/摘要去重、AC-3 项目与基线版本
+#     匹配（不匹配 → HOLD 三方冲突，绝不自动覆盖）、P4 决策者白名单
+#     （授权接收人集合），再逐字段合并（ACCEPT/REJECT/HOLD，HOLD 使
+#     提案整体拒绝）。AC-7：禁止仅凭时间戳覆盖。
+#   merge_and_commit()：合并成功后原子生成“冻结基线快照 + 签名回执”，
+#     回执链要求版本连续（跳号即拒绝）；失败走 rollback，不留半态。
+#   关键安全不变量：合并只能由已验证导入的接收人身份（recipient_cert_id）
+#     作为决策者，且必须在项目授权白名单内；版本更新必须人工确认。
 
 from __future__ import annotations
 

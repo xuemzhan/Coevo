@@ -58,6 +58,14 @@ Non-goals (deliberately not in US-1-AC-2)
   is *structure-only*; actual append is the audit module's job in a
   future slice (out of scope for AC-2).
 """
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 任务流程理解服务层（US-1 AC-2）：在数据模型/解析器/映射层之上提供单一门面
+# FlowUnderstandingService——understand() 一次产出 流程模型 + 标准阶段映射 +
+# 阶段图（供 US-2 依赖）+ 评审视图（字段来源/置信度）；confirm() 以 Override
+# 升版本（版本单调递增）；to_audit_record() 只记结构事实不泄内容。
+# 本层纯函数无 IO/无 LLM；解析失败一律 fail-closed。
+
 from __future__ import annotations
 
 import dataclasses

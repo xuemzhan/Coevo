@@ -1,5 +1,12 @@
 """supervision.service - SupervisionCoordinator facade and its private helpers."""
 
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 督办与会议协同（US-12）：SupervisionCoordinator.coordinate 把已确认风险
+# 转为督办项（责任主体/截止/关闭条件）+ 分级升级建议 + 提醒/催办建议 +
+# 会议候选提案（议题/背景/待决策）+ 结论三类投影（新任务/风险处置/新督办）。
+# 不实际召集会议，只产出建议；to_audit_record 排除敏感文本。
+
 from __future__ import annotations
 
 import datetime as dt

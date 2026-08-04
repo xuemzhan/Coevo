@@ -1,4 +1,35 @@
-"""app.pipeline - offline demo pipeline composition root (dispatch chain E2E) and its result value object."""
+"""app.pipeline —— 离线演示组合根（下发链 E2E）与结果值对象。
+
+职责
+----
+把 `src/coevo` 各领域模块按“固定编排链”装配成一个可离线复现的端到端
+演示闭环，是 `scripts/run_demo.py` 与 `tests/e2e/test_demo_runner.py` 的
+官方入口。本模块只做**装配与调度**，不包含领域逻辑；所有业务能力来自
+被组合的各领域门面。
+
+七阶段流水线（`run_demo_pipeline`）
+----------------------------------
+1. 加密与 PKI：`ensure_demo_profile` 引导 SM2 测试 PKI；创建
+   `GmsslPrototypeProvider`（Python 进程不接触私钥字节）。
+2. 真实链环境：`RealChainStore`（编排记录 + 审计链）、脱敏人才池、
+   `RealChainExecutor`（流程理解/分解/推荐三服务 + 人才库）、
+   `AgentRegistry`（四个子智能体登记）。
+3. 固定链执行：`dispatch_event_with_real_facades` 前三步原子执行并停在第 4 步
+   人工确认 → `confirm_real_chain`（负责人授权）→ `resume_real_chain`
+   （第 5 步生成加密包并回读校验）。
+4. 加密包导出：`build_encrypted_package` → `parse_package_bytes` →
+   `open_encrypted_package` 三方回环校验后落盘 outbox。
+5. 驾驶舱：`WorkspaceView`/`RoleView` 快照；可选启动环回
+   `CockpitHttpServer`。
+6. 知识包：`KnowledgeBaseFacade.aggregate` → `KnowledgeStore` 持久化。
+7. 审计流：`AuditStreamHub` 订阅者收到链完成/包导出/知识入库事件。
+
+安全与约束
+----------
+* 全流程离线：无网络请求、无运行时下载；密钥不落明文。
+* 演示性替身集中在 `demo_support.py`（HMAC 签名/内存新鲜度权威），
+  生产路径见受保护密钥句柄与国密认证模块。
+"""
 
 from __future__ import annotations
 

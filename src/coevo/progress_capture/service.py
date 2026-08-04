@@ -1,5 +1,12 @@
 """progress_capture.service - ProgressCaptureService facade and its private helpers."""
 
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 进展采集服务（US-8）：extract_progress 把证据输入转成 PROPOSED 进展；
+# revise/reject/accept 提供人工处置三动作；to_report_draft 仅接受
+# formally_accepted 的采集并分四段输出。AC-7：拒绝仅凭文件时间（模型中
+# 无 FILE_MTIME_ONLY）；正式任务状态必须用户确认。纯函数无 IO。
+
 from __future__ import annotations
 
 from typing import Iterable

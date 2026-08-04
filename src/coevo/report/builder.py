@@ -29,12 +29,16 @@ Non-goals
   bytes are byte-identical to a dispatch package with the same
   envelope.
 """
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 成果回传包构建（US-9 AC-1）：ReportBuilder.build 复用 US-5 wire 布局
+# （AC-5：与下发包一致的加密/签名机制）；ReportSubmissionSequence 单调
+# 序号（AC-4）；manifest 必须与基线项目/版本一致（AC-3 fail-closed）。
+
 from __future__ import annotations
 
 import base64
-import datetime as dt
 from dataclasses import dataclass
-from typing import Iterable
 
 from src.coevo.protocol import (
     BuiltPackage,

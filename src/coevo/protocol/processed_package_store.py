@@ -33,7 +33,6 @@ Non-goals
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, Mapping
 
 from .agent_package import AgentPackageError
 from .replay_detector import ProcessedPackage

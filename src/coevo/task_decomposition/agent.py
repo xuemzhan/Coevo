@@ -38,7 +38,6 @@ from src.coevo.model import (
 )
 from src.coevo.task_flow import FlowUnderstanding
 
-from .baseline import BaselineInput
 from .editing import _rebuild
 from .models import (
     Deliverable,

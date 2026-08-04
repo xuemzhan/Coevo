@@ -1,4 +1,16 @@
 """cockpit.facade - CockpitFacade route dispatch and audit projection."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 驾驶舱纯函数门面（US-7 AC-5..AC-9）：
+#   start_server()：只允许绑定环回地址（fail-closed），装配工作区与
+#     角色视图快照。
+#   dispatch()：按路由分发 项目/角色/任务/里程碑/WPS 打开 等请求；
+#     未绑定环回的服务直接返回 NOT_BOUND。
+#   _wps_open()：WPS 打开必须通过允许列表（WPSAllowList 扩展名闭集）
+#     且路径为工作区内相对路径，越权/非法扩展名一律 DENIED。
+#   to_audit_record()：每次请求投影一条审计记录，供访问日志与审计链消费。
+#   关键不变量：视图数据是快照投影，不直接改动项目正式状态。
 
 from __future__ import annotations
 
