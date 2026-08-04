@@ -776,3 +776,14 @@ items:
       - tests/unit/test_preflight_watchdog.py
     security_review: true
     protocol_review: false
+  # ---------- 解释器 pin 完整性检查（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: OPS-5
+    story: ENG-BASE
+    title: 解释器 pin 完整性检查：install_cockpit.py --action check 新增 pin 校验——python-path.txt 缺失/空/非绝对路径/目标不存在均 check 失败（exit 1）并给出 PinPython 指引，闭环 OPS-2 旧安装缺口；health_check.py 新增 pin 检查（缺失/无效 → degraded），接入 build_report；ops-runbook §1 检查表 + known-limitations OPS-2 条目更新；测试：installer +3（缺 pin/相对 pin/目标缺失 check 失败）、health_check +4（ok/缺失/相对/目标缺失 degraded）
+    status: ready
+    dependencies: [OPS-2]
+    acceptance_tests:
+      - tests/integration/test_installer.py
+      - tests/unit/test_ops_tooling.py
+    security_review: true
+    protocol_review: false

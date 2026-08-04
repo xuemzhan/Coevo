@@ -3991,6 +3991,35 @@ security-reviewer 双签门禁。
   变化未复核时按 git 历史回退 `0d05ed3`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- OPS-5 解释器 pin 完整性检查 done
+
+- 用户指令：继续对项目进行生产落地优化。本项闭环 OPS-2 遗留缺口：旧安装
+  （升级前未写过 sidecar）的看门狗会静默回退 PATH，且 `install_cockpit.py
+  --action check` 此前不校验 pin 是否存在。
+- 实现（commit `dc18853`，6 文件，+129/-4）：
+  ① `scripts/install_cockpit.py --action check` 新增 pin 校验——`python-path.txt`
+  缺失 / 空 / 非绝对路径 / 目标不存在均 check 失败（exit 1），错误信息给出
+  `register-autostart.ps1 -Action PinPython`（或重跑 `Register`）指引；
+  ② `scripts/health_check.py` 新增 `pin` 检查——pin 缺失/无效 → degraded
+  （监控侧可见性：看门狗将回退 PATH），接入 `build_report`；有效 pin 返回
+  绝对路径详情；
+  ③ 文档：ops-runbook §1 检查表 pin 行 + install check 强制说明；
+  known-limitations OPS-2 条目更新（旧安装需先 PinPython 才能通过 install
+  check）。
+- 安全边界：pin 校验只读（is_file/is_absolute/read_text），无敏感数据；
+  校验与 OPS-2 看门狗/自启的解析规则一致（绝对路径 + 目标存在）；
+  零新增依赖、不涉及锁链。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 886 / integration 257 / security 97 / e2e 13 全绿；
+  新增测试 7 项（installer 3 + health_check 4）；内联 verifier +
+  security-reviewer PASS（Critical/High 0）；protocol 不涉及。
+- 边界：install check 强制校验意味着"升级前未写过 pin 的旧安装"在升级后
+  首次 check 会失败——这是有意的可见性推手，操作指引已写入错误信息与文档；
+  回滚后的安装（pin 未变）check 仍通过。
+- 回滚条件：任一新增测试失败、pin 校验可被绕过（如相对路径被接受）、或门禁
+  指纹变化未复核时按 git 历史回退 `dc18853`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
