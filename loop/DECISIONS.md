@@ -3845,6 +3845,35 @@ security-reviewer 双签门禁。
   历史回退 `dce89c2`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- OPS-2 固化看门狗/自启的显式 Python 解释器路径 done
+
+- 用户指令：继续对项目进行生产落地优化。本项消除 known-limitations §2 首条
+  实现边界：看门狗/自启依赖 PATH 上的 python。
+- 实现（commit `46b2df1`，8 文件，+236/-19）：
+  ① `scripts/register-autostart.ps1` 新增 `PinPython` 动作——只写
+  `<install_root>\python-path.txt`、不碰计划任务（供刷新陈旧 pin）；
+  `Register` 在创建计划任务前把解析到的解释器（显式 `-PythonPath` 或 PATH
+  回退）持久化到 sidecar，写失败即中止（不产生"无 sidecar 的任务"）；
+  ② `scripts/cockpit-watchdog.ps1` 新增 `-PythonPath`，解析顺序：显式参数 →
+  sidecar → PATH；sidecar 为空、非绝对路径或指向缺失解释器时失败关闭，
+  不静默回退到 PATH（避免与任务实际解释器不一致）；
+  ③ `scripts/install_cockpit.py` 安装/升级成功时原子写入
+  `sys.executable`（tmp + fsync + replace，指针切换前执行，失败即中止安装）；
+  ④ 文档：ops-runbook §2/§2.1（PinPython/sidecar/解析顺序）+
+  known-limitations 条目更新（旧安装需先 PinPython 一次）。
+- 安全边界：sidecar 仅含绝对解释器路径（无敏感数据）；写入方均为安装根内的
+  受控工具，与可改写 run_cockpit.py 的信任域相同，无新信任边界；看门狗仍用
+  显式 FilePath/ArgumentList 启动，无 shell 拼接。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 863 / integration 254 / security 97 / e2e 13 全绿；
+  新增测试 9 项（看门狗 sidecar 4 + 自启 PinPython/Register 4 + 安装器 1）；
+  内联 verifier + security-reviewer PASS（Critical/High 0）；protocol 不涉及。
+- 边界：sidecar 为安装根内纯文本，异地拷贝由部署策略决定；`Unregister`/
+  `Uninstall` 不删除 sidecar（作为解释器记录保留，文档已说明）。
+- 回滚条件：任一新增测试失败、sidecar 可被绕过（如看门狗未失败关闭）、或
+  门禁指纹变化未复核时按 git 历史回退 `46b2df1`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

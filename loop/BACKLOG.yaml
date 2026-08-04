@@ -724,3 +724,15 @@ items:
       - tests/unit/test_benchmark_http.py
     security_review: true
     protocol_review: false
+  # ---------- 固化看门狗/自启的显式 Python 解释器路径（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: OPS-2
+    story: ENG-BASE
+    title: 固化看门狗/自启的显式 Python 解释器路径：register-autostart.ps1 新增 PinPython 动作（写 <install_root>\python-path.txt，不碰计划任务），Register 创建任务前固化解释器、写失败中止；cockpit-watchdog.ps1 新增 -PythonPath（解析顺序：显式 → sidecar → PATH；sidecar 空/相对/指向缺失均失败关闭）；install_cockpit.py 安装/升级原子写入 sys.executable（指针切换前，失败中止）；ops-runbook/known-limitations 同步；测试：看门狗 sidecar 4 项 + 自启 4 项 + 安装器 1 项
+    status: ready
+    dependencies: [AVAIL-1]
+    acceptance_tests:
+      - tests/unit/test_preflight_watchdog.py
+      - tests/unit/test_ops_tooling.py
+      - tests/integration/test_installer.py
+    security_review: true
+    protocol_review: false
