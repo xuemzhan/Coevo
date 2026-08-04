@@ -490,6 +490,25 @@ def _check(install_root: Path) -> int:
         log_dir = install_root / "logs"
         if not data_dir.is_dir() or not log_dir.is_dir():
             raise InstallerError("data/log directories are missing")
+        pin = install_root / PYTHON_PIN_FILE
+        if not pin.is_file():
+            raise InstallerError(
+                "python pin missing; run 'register-autostart.ps1 "
+                "-Action PinPython' (or re-run Register) to pin the "
+                "interpreter (OPS-5)"
+            )
+        pinned = pin.read_text(encoding="utf-8").strip()
+        if not pinned:
+            raise InstallerError("python pin is empty; re-run PinPython")
+        if not Path(pinned).is_absolute():
+            raise InstallerError(
+                f"python pin must be an absolute path: {pinned!r}"
+            )
+        if not Path(pinned).is_file():
+            raise InstallerError(
+                f"python pin target is missing: {pinned} "
+                "(re-run register-autostart.ps1 -Action PinPython)"
+            )
     except InstallerError as exc:
         print(f"check failed: {exc}", file=sys.stderr)
         return 1

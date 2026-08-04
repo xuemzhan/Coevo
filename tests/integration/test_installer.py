@@ -79,6 +79,28 @@ class InstallerIntegrationTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertIn("current=9.9.9", result.stdout)
 
+    def test_check_fails_without_python_pin(self):
+        self.assertEqual(0, run_installer(self.install_root, "--action", "install", "--version", "9.9.9").returncode)
+        (self.install_root / "python-path.txt").unlink()
+        result = run_installer(self.install_root, "--action", "check")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("python pin missing", result.stderr)
+
+    def test_check_fails_on_relative_python_pin(self):
+        self.assertEqual(0, run_installer(self.install_root, "--action", "install", "--version", "9.9.9").returncode)
+        (self.install_root / "python-path.txt").write_text("python.exe\n", encoding="utf-8")
+        result = run_installer(self.install_root, "--action", "check")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("absolute", result.stderr)
+
+    def test_check_fails_on_missing_pin_target(self):
+        self.assertEqual(0, run_installer(self.install_root, "--action", "install", "--version", "9.9.9").returncode)
+        missing = self.install_root / "missing-python.exe"
+        (self.install_root / "python-path.txt").write_text(str(missing) + "\n", encoding="utf-8")
+        result = run_installer(self.install_root, "--action", "check")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("missing", result.stderr)
+
     def test_upgrade_keeps_previous_and_switches_pointer(self):
         self.assertEqual(0, run_installer(self.install_root, "--action", "install", "--version", "9.9.9").returncode)
         self.assertEqual(0, run_installer(self.install_root, "--action", "upgrade", "--version", "9.9.10").returncode)

@@ -18,7 +18,11 @@ Checks
 * a backup exists under ``--backup-root`` (default
   ``<install-root>\\backups``) and the newest backup manifest is at most
   ``--max-backup-age-days`` (default 7) old (OPS-3). A missing or stale
-  backup is degraded (recovery posture), never critical.
+  backup is degraded (recovery posture), never critical;
+* the python interpreter pin (``<install-root>\\python-path.txt``, OPS-2)
+  exists, is absolute and points to an existing executable (OPS-5).
+  A missing or invalid pin is degraded (the watchdog would silently fall
+  back to PATH), never critical.
 
 All checks are read-only; no state is modified. This script is meant
 for monitoring hooks / scheduled checks, not for the quality gate.
@@ -210,6 +214,39 @@ def check_backup(backup_root: Path, max_age_days: int) -> dict[str, Any]:
     )
 
 
+def check_pin(install_root: Path) -> dict[str, Any]:
+    """Python interpreter pin integrity (OPS-5)."""
+    pin = install_root / "python-path.txt"
+    if not pin.is_file():
+        return _check(
+            "pin",
+            False,
+            "python pin missing (run register-autostart.ps1 -Action PinPython)",
+            level="degraded",
+        )
+    try:
+        value = pin.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        return _check("pin", False, f"python pin unreadable ({exc})", level="degraded")
+    if not value:
+        return _check("pin", False, "python pin is empty", level="degraded")
+    if not Path(value).is_absolute():
+        return _check(
+            "pin",
+            False,
+            f"python pin is not an absolute path: {value}",
+            level="degraded",
+        )
+    if not Path(value).is_file():
+        return _check(
+            "pin",
+            False,
+            f"python pin target is missing: {value}",
+            level="degraded",
+        )
+    return _check("pin", True, f"python pin ok: {value}")
+
+
 def build_report(
     *,
     install_root: Path,
@@ -227,6 +264,7 @@ def build_report(
         check_lock(install_root),
         check_cockpit(cockpit_url),
         check_audit(repo_root, audit_python),
+        check_pin(install_root),
         check_backup(
             backup_root or install_root / "backups",
             max_backup_age_days,

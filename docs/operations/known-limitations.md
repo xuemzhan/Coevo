@@ -19,8 +19,11 @@
   `<install_root>\python-path.txt`（`install_cockpit.py` 与
   `register-autostart.ps1` 的 `Register`/`PinPython`），看门狗按
   显式 `-PythonPath` → sidecar → PATH 解析；sidecar 缺失、非绝对路径或指向
-  不存在的解释器时失败关闭。旧安装（升级前未写过 sidecar）在看门狗首次使用
-  前需执行一次 `register-autostart.ps1 -Action PinPython`（或重跑 `Register`）。
+  不存在的解释器时失败关闭。OPS-5 起 `install_cockpit.py --action check` 强制
+  校验 pin（缺失/空/非绝对/目标缺失即 check 失败），`health_check.py` 增加
+  `pin` 检查（degraded）；旧安装（升级前未写过 sidecar）需先执行一次
+  `register-autostart.ps1 -Action PinPython`（或重跑 `Register`）才能通过
+  install check。
 - **备份默认位于安装根内**（`backups/`，与数据同卷）：BACKUP-2 起支持
   `--backup-root` 指向外部磁盘/共享并用 `--require-external` 强制异卷（同卷或
   在安装根内时失败关闭）；manifest 记录 `same_volume` 供自动化核查。异地拷贝

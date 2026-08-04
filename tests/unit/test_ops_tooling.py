@@ -27,6 +27,9 @@ class HealthCheckTests(unittest.TestCase):
         root = Path(tmp)
         (root / "logs").mkdir(parents=True, exist_ok=True)
         (root / "current").write_text(version + "\n", encoding="utf-8")
+        (root / "python-path.txt").write_text(
+            sys.executable + "\n", encoding="utf-8"
+        )
         version_py = root / "app" / version / "src" / "coevo" / "version.py"
         version_py.parent.mkdir(parents=True, exist_ok=True)
         version_py.write_text(
@@ -131,6 +134,40 @@ class HealthCheckTests(unittest.TestCase):
             self.assertEqual("degraded", result["level"])
             self.assertIn("future", result["detail"])
 
+    def test_pin_ok(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = health.check_pin(self._install_root(tmp))
+            self.assertTrue(result["ok"])
+            self.assertIn(sys.executable, result["detail"])
+
+    def test_pin_missing_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = health.check_pin(root)
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+            self.assertIn("missing", result["detail"])
+
+    def test_pin_relative_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._install_root(tmp)
+            (root / "python-path.txt").write_text("python.exe\n", encoding="utf-8")
+            result = health.check_pin(root)
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+            self.assertIn("absolute", result["detail"])
+
+    def test_pin_target_missing_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._install_root(tmp)
+            (root / "python-path.txt").write_text(
+                str(root / "nope.exe") + "\n", encoding="utf-8"
+            )
+            result = health.check_pin(root)
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+            self.assertIn("missing", result["detail"])
+
     def test_build_report_aggregation(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._install_root(tmp)
@@ -146,7 +183,8 @@ class HealthCheckTests(unittest.TestCase):
             self.assertIsInstance(report["checks"], list)
             self.assertTrue(report["checks"][0]["ok"])  # dirs
             names = [check["name"] for check in report["checks"]]
-            self.assertIn("backup", names)
+            for expected in ("backup", "pin"):
+                self.assertIn(expected, names)
 
 
 class AutostartHelperTests(unittest.TestCase):

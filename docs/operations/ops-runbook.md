@@ -24,8 +24,13 @@ python scripts\health_check.py --backup-root "D:\CoevoBackups" --max-backup-age-
 | cockpit | `/healthz` 返回 200 | degraded（未运行） |
 | audit | `audit_seal.py verify`：fully-sealed ok；未封尾=degraded；失败=critical | 分级 |
 | backup | 最新备份 manifest 存在且 ≤ `--max-backup-age-days`（默认 7 天；OPS-3） | degraded（缺失/过期，恢复姿态告警，不阻断服务） |
+| pin | `<install-root>\python-path.txt` 存在、绝对路径且指向存在的解释器（OPS-5） | degraded（缺失/无效，看门狗将回退 PATH） |
 
 可接入监控/计划任务定期执行；本脚本只读、不修改任何状态。
+
+`install_cockpit.py --action check`（OPS-5）会**强制**校验解释器 pin：缺失、空、
+非绝对路径或目标不存在时 check 失败（exit 1），提示先执行
+`register-autostart.ps1 -Action PinPython`（或重跑 `Register`）。
 
 进程内状态端点：`GET /api/health`（需会话令牌，认证只读）返回 service、version、
 started_at、uptime_sec、session_count、request_count、audit_records、log_errors，
