@@ -4,19 +4,24 @@ starts the installed Coevo cockpit.
 
 * Register  -- create a logon-triggered, limited-privilege scheduled task
               running `python <install>\app\<current>\scripts\run_cockpit.py`
-              in a hidden window;
+              in a hidden window, and persist the resolved interpreter path
+              to `<install>\python-path.txt` so the watchdog can reuse the
+              exact same interpreter (OPS-2);
+* PinPython -- write `<install>\python-path.txt` without touching the task
+              scheduler (used by operators to refresh a stale pin);
 * Unregister -- delete the task (no-op when it does not exist);
 * Status    -- report whether the task exists and is enabled;
 * -DryRun   -- validate and print the exact action without touching the
               system (used by tests and by operators before applying).
 
 Fail-closed: a missing install root / current pointer / runner / python
-aborts before any system change. The task runs at user logon only and
-requires no administrator rights.
+aborts before any system change; a sidecar that cannot be written aborts
+registration before the task is created. The task runs at user logon only
+and requires no administrator rights.
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)][ValidateSet('Register','Unregister','Status')][string]$Action,
+    [Parameter(Mandatory=$true)][ValidateSet('Register','Unregister','Status','PinPython')][string]$Action,
     [string]$InstallRoot,
     [string]$TaskName = 'CoevoCockpit',
     [string]$PythonPath,
@@ -38,17 +43,30 @@ if (-not (Test-Path -LiteralPath $runner -PathType Leaf)) {
     throw "run_cockpit.py missing: $runner"
 }
 
-if (-not $PythonPath) {
-    $command = Get-Command python -ErrorAction SilentlyContinue
-    if ($null -eq $command) { throw 'python is not on PATH; pass -PythonPath explicitly' }
-    $PythonPath = $command.Source
-}
-$PythonPath = [IO.Path]::GetFullPath($PythonPath)
-if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) {
-    throw "python executable missing: $PythonPath"
+function Resolve-PythonPath {
+    param([string]$Candidate)
+    if (-not $Candidate) {
+        $command = Get-Command python -ErrorAction SilentlyContinue
+        if ($null -eq $command) { throw 'python is not on PATH; pass -PythonPath explicitly' }
+        $Candidate = $command.Source
+    }
+    $Candidate = [IO.Path]::GetFullPath($Candidate)
+    if (-not (Test-Path -LiteralPath $Candidate -PathType Leaf)) {
+        throw "python executable missing: $Candidate"
+    }
+    return $Candidate
 }
 
+function Write-PythonPin {
+    param([string]$Root, [string]$Executable)
+    $sidecar = Join-Path $Root 'python-path.txt'
+    [IO.File]::WriteAllText($sidecar, $Executable + [Environment]::NewLine)
+    return $sidecar
+}
+
+$PythonPath = Resolve-PythonPath $PythonPath
 $taskArgs = ('"{0}" "{1}"' -f $PythonPath, $runner)
+$sidecar = Join-Path $InstallRoot 'python-path.txt'
 
 function Invoke-SchTasks([string[]]$Arguments) {
     $previous = $ErrorActionPreference
@@ -58,14 +76,24 @@ function Invoke-SchTasks([string[]]$Arguments) {
 }
 
 switch ($Action) {
+    'PinPython' {
+        if ($DryRun) {
+            Write-Output ("DRY-RUN pin python -> {0}" -f $sidecar)
+            exit 0
+        }
+        $sidecar = Write-PythonPin $InstallRoot $PythonPath
+        Write-Output ("pinned python '{0}' -> {1}" -f $PythonPath, $sidecar)
+    }
     'Register' {
         if ($DryRun) {
+            Write-Output ("DRY-RUN pin python -> {0}" -f $sidecar)
             Write-Output ("DRY-RUN register task '{0}' -> schtasks /create /tn {0} /tr {1} /sc onlogon /rl LIMITED /f" -f $TaskName, $taskArgs)
             exit 0
         }
+        $sidecar = Write-PythonPin $InstallRoot $PythonPath
         $code = Invoke-SchTasks @('/create', '/tn', $TaskName, '/tr', $taskArgs, '/sc', 'onlogon', '/rl', 'LIMITED', '/f')
         if ($code -ne 0) { throw "schtasks create failed: $code" }
-        Write-Output "registered task '$TaskName' (logon, $PythonPath)"
+        Write-Output ("registered task '{0}' (logon, {1}; pin -> {2})" -f $TaskName, $PythonPath, $sidecar)
     }
     'Unregister' {
         if ($DryRun) {

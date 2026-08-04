@@ -43,6 +43,7 @@ APP_DIR: Final[str] = "app"
 MANIFEST_DIR: Final[str] = "manifests"
 CURRENT_POINTER: Final[str] = "current"
 RELEASES_FILE: Final[str] = "releases.json"
+PYTHON_PIN_FILE: Final[str] = "python-path.txt"
 LOG_RELATIVE: Final[str] = "logs/install.log"
 LOCK_RELATIVE: Final[str] = "install.lock"
 STALE_LOCK_SECONDS: Final[int] = 600
@@ -340,6 +341,25 @@ def _append_log(install_root: Path, action: str, version: str, result: str, deta
         pass  # install log is best-effort; it must never fail the operation
 
 
+def _write_python_pin(install_root: Path) -> None:
+    """Persist the interpreter used to install (OPS-2).
+
+    The watchdog and autostart tooling read ``<install_root>/python-path.txt``
+    to pin the exact interpreter instead of depending on PATH. Writing it
+    before the ``current`` pointer switch keeps the install atomic: a failed
+    pin aborts the operation before any version becomes current.
+    The write is atomic (tmp + fsync + replace) so a crash never leaves a
+    torn path in the sidecar; a torn sidecar would fail the watchdog closed.
+    """
+    pin = install_root / PYTHON_PIN_FILE
+    tmp = install_root / f".python-path-{uuid.uuid4().hex}.tmp"
+    with tmp.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(sys.executable + "\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(tmp, pin)
+
+
 def _install_or_upgrade(
     source_root: Path,
     install_root: Path,
@@ -394,6 +414,7 @@ def _install_or_upgrade(
         }
     )
     _write_releases(install_root, entries)
+    _write_python_pin(install_root)
     _write_pointer(install_root, version)
     _append_log(install_root, action, version, "ok")
 

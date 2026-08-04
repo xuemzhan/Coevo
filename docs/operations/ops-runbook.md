@@ -37,13 +37,23 @@ started_at、uptime_sec、session_count、request_count、audit_records、log_er
 # 先预览（不触碰系统）
 .\scripts\register-autostart.ps1 -Action Register -DryRun
 
+# 固化解释器路径（写 <install_root>\python-path.txt，不碰计划任务）
+.\scripts\register-autostart.ps1 -Action PinPython -PythonPath "C:\Python314\python.exe"
+
 # 查询 / 卸载
 .\scripts\register-autostart.ps1 -Action Status
 .\scripts\register-autostart.ps1 -Action Unregister
 ```
 
 失败关闭：安装根缺失、current 指针无效、`run_cockpit.py` 缺失或 Python 不可解析时
-中止且不修改系统。任务基于 Windows 计划任务（`onlogon`、`LIMITED`），无需管理员。
+中止且不修改系统；`Register` 还会先把解析到的解释器写入
+`<install_root>\python-path.txt`（写失败则中止，不创建任务）。任务基于 Windows
+计划任务（`onlogon`、`LIMITED`），无需管理员。
+
+解释器固化（OPS-2）：`install_cockpit.py` 在安装/升级成功时与 `Register`/`PinPython`
+都会把绝对解释器路径写入 `<install_root>\python-path.txt`，看门狗优先读取该
+sidecar，不再依赖 PATH。显式 `-PythonPath` 参数优先级最高；sidecar 缺失或指向
+不存在的解释器时失败关闭（不静默回退）。
 
 ## 2.1 启动预检与看门狗（AVAIL-1）
 
@@ -56,10 +66,15 @@ python scripts\run_cockpit.py --preflight
 
 # 先探测一轮（不触系统）
 .\scripts\cockpit-watchdog.ps1 -DryRun
+
+# 显式指定解释器（跳过 sidecar 与 PATH）
+.\scripts\cockpit-watchdog.ps1 -PythonPath "C:\Python314\python.exe" -DryRun
 ```
 
 看门狗带重启冷却（默认 60 秒）防止崩溃循环；DryRun 只探测并打印将执行的动作。
 预检覆盖：配置、数据/日志目录可写、磁盘余量、审计封存状态、模型配置可加载。
+解释器解析顺序：显式 `-PythonPath` → `<install_root>\python-path.txt`（OPS-2
+sidecar）→ PATH；sidecar 内容必须是绝对路径且指向存在的可执行文件，否则失败关闭。
 
 ## 3. 日志轮转
 

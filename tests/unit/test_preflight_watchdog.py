@@ -128,6 +128,58 @@ class WatchdogTests(unittest.TestCase):
             self.assertIn("would restart", result.stdout)
             self.assertNotIn("Started", result.stdout)
 
+    def test_sidecar_pin_is_used_for_restart(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "python-path.txt").write_text(
+                sys.executable + "\n", encoding="utf-8"
+            )
+            result = self._run(
+                "-InstallRoot", self._fake_install(tmp),
+                "-Port", "9",
+                "-DryRun",
+            )
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertIn("DRY-RUN", result.stdout)
+            self.assertIn("would restart", result.stdout)
+            self.assertIn(sys.executable, result.stdout)
+
+    def test_sidecar_pin_missing_interpreter_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "python-path.txt").write_text(
+                str(Path(tmp) / "missing-python.exe") + "\n", encoding="utf-8"
+            )
+            result = self._run(
+                "-InstallRoot", self._fake_install(tmp),
+                "-Port", "9",
+                "-DryRun",
+            )
+            self.assertNotEqual(0, result.returncode)
+
+    def test_sidecar_pin_relative_path_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "python-path.txt").write_text(
+                "python.exe\n", encoding="utf-8"
+            )
+            result = self._run(
+                "-InstallRoot", self._fake_install(tmp),
+                "-Port", "9",
+                "-DryRun",
+            )
+            self.assertNotEqual(0, result.returncode)
+
+    def test_explicit_python_path_missing_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(
+                "-InstallRoot", self._fake_install(tmp),
+                "-PythonPath", str(Path(tmp) / "nope.exe"),
+                "-Port", "9",
+                "-DryRun",
+            )
+            self.assertNotEqual(0, result.returncode)
+
     def test_missing_install_root_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = self._run(

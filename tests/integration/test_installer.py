@@ -62,6 +62,17 @@ class InstallerIntegrationTests(unittest.TestCase):
         self.assertEqual(1, len(releases["entries"]))
         self.assertEqual("9.9.9", releases["entries"][0]["version"])
 
+    def test_install_pins_python_interpreter(self):
+        self.assertEqual(
+            0,
+            run_installer(
+                self.install_root, "--action", "install", "--version", "9.9.9"
+            ).returncode,
+        )
+        pin = self.install_root / "python-path.txt"
+        self.assertTrue(pin.is_file())
+        self.assertEqual(sys.executable, pin.read_text(encoding="utf-8").strip())
+
     def test_check_passes_after_install(self):
         self.assertEqual(0, run_installer(self.install_root, "--action", "install", "--version", "9.9.9").returncode)
         result = run_installer(self.install_root, "--action", "check")

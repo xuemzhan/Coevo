@@ -15,8 +15,12 @@
 
 ## 2. 已知实现边界
 
-- **看门狗/自启依赖 PATH 上的 python**：未固定显式解释器路径；生产部署建议把
-  Python 路径固化到注册脚本参数。
+- **解释器路径已固化（OPS-2）**：安装/注册会把绝对解释器路径写入
+  `<install_root>\python-path.txt`（`install_cockpit.py` 与
+  `register-autostart.ps1` 的 `Register`/`PinPython`），看门狗按
+  显式 `-PythonPath` → sidecar → PATH 解析；sidecar 缺失、非绝对路径或指向
+  不存在的解释器时失败关闭。旧安装（升级前未写过 sidecar）在看门狗首次使用
+  前需执行一次 `register-autostart.ps1 -Action PinPython`（或重跑 `Register`）。
 - **备份默认位于安装根内**（`backups/`）：异地拷贝由部署策略决定；密钥句柄/私钥
   不随备份（按身份库/密钥手册处置）。
 - **`secret_scan` 为高置信启发式**：覆盖主流私钥/令牌格式，不替代人工代码审查；

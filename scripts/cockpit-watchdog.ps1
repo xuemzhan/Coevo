@@ -5,11 +5,15 @@ it when it stays unreachable.
 * polls http://127.0.0.1:<Port>/healthz every <PollSeconds>;
 * after <MissThreshold> consecutive misses it restarts the cockpit with
   the same controlled command as the autostart task (hidden window);
+* the interpreter is resolved in this order (OPS-2): explicit -PythonPath,
+  then the pin sidecar <InstallRoot>\python-path.txt written by
+  register-autostart.ps1 / install_cockpit.py, then python on PATH;
+  a stale or malformed pin fails closed instead of silently falling back;
 * a restart cooldown (<RestartCooldownSeconds>) prevents crash loops;
 * -DryRun performs ONE probe, prints the would-be action, and exits
   without touching the system;
 * fail-closed: missing install root / current pointer / runner / python
-  aborts before any probe or restart.
+  (explicit, pinned, or on PATH) aborts before any probe or restart.
 
 Exit codes: 0 = healthy (or dry-run completed), 1 = degraded at exit
 (Ctrl+C), 2 = validation failure.
@@ -17,6 +21,7 @@ Exit codes: 0 = healthy (or dry-run completed), 1 = degraded at exit
 [CmdletBinding()]
 param(
     [string]$InstallRoot,
+    [string]$PythonPath,
     [int]$Port = 12701,
     [int]$PollSeconds = 10,
     [int]$MissThreshold = 3,
@@ -41,9 +46,39 @@ $runner = Join-Path $InstallRoot ("app\" + $version + '\scripts\run_cockpit.py')
 if (-not (Test-Path -LiteralPath $runner -PathType Leaf)) {
     throw "run_cockpit.py missing: $runner"
 }
-$command = Get-Command python -ErrorAction SilentlyContinue
-if ($null -eq $command) { throw 'python is not on PATH' }
-$python = $command.Source
+
+function Resolve-PythonPath {
+    param([string]$Root, [string]$Explicit)
+    $sidecar = Join-Path $Root 'python-path.txt'
+    if ($Explicit) {
+        $candidate = [IO.Path]::GetFullPath($Explicit)
+        if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+            throw "python executable missing: $candidate"
+        }
+        return $candidate
+    }
+    if (Test-Path -LiteralPath $sidecar -PathType Leaf) {
+        $candidate = (Get-Content -Raw -LiteralPath $sidecar).Trim()
+        if (-not $candidate) {
+            throw "python pin sidecar is empty: $sidecar"
+        }
+        if (-not [IO.Path]::IsPathRooted($candidate)) {
+            throw "python pin sidecar must contain an absolute path: $candidate"
+        }
+        $candidate = [IO.Path]::GetFullPath($candidate)
+        if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+            throw "python pin sidecar points to a missing executable: $candidate (re-run register-autostart.ps1 -Action PinPython or pass -PythonPath)"
+        }
+        return $candidate
+    }
+    $command = Get-Command python -ErrorAction SilentlyContinue
+    if ($null -eq $command) {
+        throw 'python is not on PATH and no pin sidecar exists; pass -PythonPath explicitly'
+    }
+    return $command.Source
+}
+
+$python = Resolve-PythonPath $InstallRoot $PythonPath
 
 $url = "http://127.0.0.1:$Port/healthz"
 $startCommand = @($python, $runner)

@@ -138,6 +138,57 @@ class AutostartHelperTests(unittest.TestCase):
             self.assertIn("DRY-RUN register", result.stdout)
             self.assertIn("run_cockpit.py", result.stdout)
 
+    def test_pin_python_writes_sidecar(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._fake_install(tmp)
+            result = self._run(
+                "-Action", "PinPython",
+                "-InstallRoot", root,
+                "-PythonPath", sys.executable,
+            )
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            sidecar = Path(root) / "python-path.txt"
+            self.assertTrue(sidecar.is_file())
+            self.assertEqual(
+                sys.executable,
+                sidecar.read_text(encoding="utf-8").strip(),
+            )
+
+    def test_pin_python_dry_run_does_not_write(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._fake_install(tmp)
+            result = self._run(
+                "-Action", "PinPython",
+                "-InstallRoot", root,
+                "-PythonPath", sys.executable,
+                "-DryRun",
+            )
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertIn("DRY-RUN pin python", result.stdout)
+            self.assertFalse((Path(root) / "python-path.txt").exists())
+
+    def test_pin_python_missing_install_root_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(
+                "-Action", "PinPython",
+                "-InstallRoot", str(Path(tmp) / "missing"),
+                "-PythonPath", sys.executable,
+            )
+            self.assertNotEqual(0, result.returncode)
+
+    def test_register_dry_run_prints_pin_and_task(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(
+                "-Action", "Register",
+                "-InstallRoot", self._fake_install(tmp),
+                "-PythonPath", sys.executable,
+                "-TaskName", "CoevoTest-" + "z" * 8,
+                "-DryRun",
+            )
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertIn("DRY-RUN pin python", result.stdout)
+            self.assertIn("DRY-RUN register", result.stdout)
+
     def test_missing_install_root_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = self._run(
