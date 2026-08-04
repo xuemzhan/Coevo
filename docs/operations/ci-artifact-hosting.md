@@ -1,7 +1,10 @@
 # CI 与制品托管方案（CI-1）
 
 > 状态：方案生效（2026-08-03，业务负责人批准 CI/制品托管方案）。
-> 激活前置：仓库所有者将工作流推送并发布锁定工具链制品（见 §5）。
+> 状态更新（2026-08-04，CI-2）：制品已在维护机本地构建并回填
+> `ci-artifact.json`（version=1.0.0，sha256=81dd3e7d…），工作流已随 main
+> 推送。剩余激活前置：所有者创建 `toolchain-1.0.0` GitHub Release 并上传
+> `coevo-toolchain-win64-1.0.0.zip`（见 §5）。
 
 ## 1. 目标
 
@@ -23,14 +26,13 @@ GitHub Releases 托管一个内容寻址制品：
 | 哈希锚定 | `docs/dependencies/ci-artifact.json` 的 `sha256` 字段（64-hex） |
 | 下载 | 仅 https，GitHub Releases |
 
-制品构建命令（在维护机执行）：
+制品构建命令（在维护机执行，可复现）：
 
 ```powershell
-Compress-Archive -Path .tools\python, .tools\node, .tools\gmssl, .tools\control `
-  -DestinationPath coevo-toolchain-win64-<version>.zip
+python scripts\ci-build-toolchain.py --version 1.0.0
 ```
 
-发布后计算并回填哈希：
+脚本输出路径、文件数与 SHA-256（已回填至 `ci-artifact.json`）。
 
 ```powershell
 Get-FileHash .\coevo-toolchain-win64-<version>.zip -Algorithm SHA256

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import subprocess
 import tempfile
@@ -14,6 +15,11 @@ ROOT = Path(__file__).resolve().parents[2]
 RESTORE = ROOT / "scripts" / "ci-restore-toolchain.ps1"
 WORKFLOW = ROOT / ".github" / "workflows" / "quality.yml"
 DESCRIPTOR = ROOT / "docs" / "dependencies" / "ci-artifact.json"
+BUILD_SPEC = importlib.util.spec_from_file_location(
+    "ci_build_toolchain", ROOT / "scripts" / "ci-build-toolchain.py"
+)
+build = importlib.util.module_from_spec(BUILD_SPEC)
+BUILD_SPEC.loader.exec_module(build)
 
 
 def _build_archive(path: Path, *, include_control: bool = True) -> str:
@@ -99,12 +105,83 @@ class CiRestoreScriptTests(unittest.TestCase):
 
     def test_pending_descriptor_is_fail_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            install_root = Path(tmp) / "restored"
+            tmp_dir = Path(tmp)
+            descriptor = tmp_dir / "ci-artifact.json"
+            descriptor.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1.0",
+                        "name": "coevo-toolchain-win64",
+                        "format": "zip",
+                        "url_pattern": "https://example.com/<version>.zip",
+                        "version": "pending",
+                        "url": "",
+                        "sha256": "pending",
+                        "contents": [],
+                        "publish_instructions": "",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            install_root = tmp_dir / "restored"
             # No -ArtifactSha256: the script reads the descriptor whose
             # sha256 is 'pending' until the artifact is published.
-            result = _run_restore("-InstallRoot", str(install_root))
+            result = _run_restore(
+                "-InstallRoot", str(install_root),
+                "-DescriptorPath", str(descriptor),
+            )
             self.assertNotEqual(0, result.returncode)
             self.assertIn("pinned", result.stderr.lower())
+
+
+class CiBuildToolchainTests(unittest.TestCase):
+    def _fake_tools(self, tmp: str) -> Path:
+        root = Path(tmp) / "tools"
+        (root / "python" / "3.14.3").mkdir(parents=True)
+        (root / "python" / "3.14.3" / "python.exe").write_text(
+            "x", encoding="utf-8"
+        )
+        (root / "node" / "24.14.0").mkdir(parents=True)
+        (root / "node" / "24.14.0" / "node.exe").write_text("x", encoding="utf-8")
+        (root / "control").mkdir()
+        (root / "control" / "control.pyz").write_text("x", encoding="utf-8")
+        (root / "gmssl" / "bin").mkdir(parents=True)
+        (root / "gmssl" / "bin" / "gmssl.dll").write_text("x", encoding="utf-8")
+        return root
+
+    def test_build_archive_layout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            out = tmp_dir / "out.zip"
+            code = build.main(
+                [
+                    "--version", "1.0.0",
+                    "--out", str(out),
+                    "--tools-root", str(self._fake_tools(tmp)),
+                ]
+            )
+            self.assertEqual(0, code)
+            with zipfile.ZipFile(out) as zf:
+                names = zf.namelist()
+            self.assertIn(".tools/python/3.14.3/python.exe", names)
+            self.assertIn(".tools/control/control.pyz", names)
+            self.assertIn(".tools/gmssl/bin/gmssl.dll", names)
+
+    def test_build_refuses_missing_runtime_entry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            tools = self._fake_tools(tmp)
+            (tools / "node" / "24.14.0" / "node.exe").unlink()
+            with self.assertRaises(SystemExit):
+                build.build_archive(tools, tmp_dir / "out.zip")
+
+    def test_build_refuses_existing_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            out = tmp_dir / "out.zip"
+            out.write_text("x", encoding="utf-8")
+            with self.assertRaises(SystemExit):
+                build.build_archive(self._fake_tools(tmp), out)
 
 
 class CiPlanConsistencyTests(unittest.TestCase):
@@ -119,12 +196,14 @@ class CiPlanConsistencyTests(unittest.TestCase):
         self.assertNotIn("--target quality", text)
         self.assertIn("upload-artifact@v4", text)
 
-    def test_artifact_descriptor_is_parseable_and_pending(self):
+    def test_artifact_descriptor_is_parseable_and_pinned(self):
         data = json.loads(DESCRIPTOR.read_text(encoding="utf-8"))
         self.assertEqual("1.0", data["schema_version"])
         self.assertEqual("coevo-toolchain-win64", data["name"])
         self.assertIn("url", data)
-        self.assertEqual("pending", data["sha256"])
+        self.assertRegex(data["sha256"], r"^[0-9a-f]{64}$")
+        self.assertRegex(data["version"], r"^\d+\.\d+\.\d+$")
+        self.assertTrue(data["url"].startswith("https://"))
         self.assertTrue(data["publish_instructions"])
 
 
