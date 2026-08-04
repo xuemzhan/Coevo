@@ -21458,3 +21458,239 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-04T10:33:19.048557Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cockpit_http_server.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "SECSCAN-3",
+      "title": "��Կɨ��ģʽ����չ��2026-08-04���û�ָ�������������Ż�����`scripts/secret_scan.py` �� ���� `stripe_key`��`sk_live_`/`sk_test_`/`rk_live_`+16+��Stripe ��ʵ/����/������Կ������ ���� `sendgrid_key`��`SG.<22>.<20>`������ ���� `pgp_private_key`��`PGP PRIVATE KEY BLOCK`������ tests/ PEM �������壩���� ȫ�������Ÿ�ʽ��������ȫ·�����أ��� tests/����lint �Ž� secret_scan �����Զ����档",
+      "code": [
+        "scripts/secret_scan.py"
+      ],
+      "tests": [
+        "tests/unit/test_secret_scan.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/secret_scan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_secret_scan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "AVAIL-2",
+      "title": "����̽����Ӧ����У�飨2026-08-04���û�ָ�������������Ż�����`scripts/health_check.py` `check_cockpit`����`/healthz` �� HTTP 200 ��У����Ӧ�� `service=coevo-cockpit` �� `status=ok`����ֹ�˿ڱ���������ռ��ʱ���н��������ǽ��������ɴ�/�� 200/�������/�����壩ͳһ degraded��������ǰ�� 200 �� critical ���ĵ�����Ĳ�һ�£�`scripts/cockpit-watchdog.ps1` `Test-CockpitHealth` ͬ��У����Ӧ�����ݣ��ĵ���ops-runbook ��1 cockpit �� + ��2.1 �����ж�˵����",
+      "code": [
+        "scripts/health_check.py",
+        "scripts/cockpit-watchdog.ps1",
+        "docs/operations/ops-runbook.md"
+      ],
+      "tests": [
+        "tests/unit/test_ops_tooling.py",
+        "tests/unit/test_preflight_watchdog.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/health_check.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/cockpit-watchdog.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_preflight_watchdog.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "OPS-6",
+      "title": "������鱸��������У�飨2026-08-04���û�ָ�������������Ż�����`scripts/health_check.py` ���� `--verify-backups`���������±���ִ�� `backup_state.py verify`�������Թ�ϣУ�飻�ӽ��� 120s ��ʱ fail-closed������ȱʧ/ʧ��/��ʱ �� degraded�����ɹ�ʱ detail �� `integrity=ok`��У��������ʶ� ok ʱִ�У���ѡ���н�ɱ����ջ� OPS-3 ��\"������У�����ֶ�\"�߽磩���ĵ���ops-runbook ��1 backup �� + ʾ����",
+      "code": [
+        "scripts/health_check.py",
+        "docs/operations/ops-runbook.md"
+      ],
+      "tests": [
+        "tests/unit/test_ops_tooling.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/health_check.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "AVAIL-3",
+      "title": "���Ź�����Ԥ�㣨2026-08-04���û�ָ�������������Ż��������� `scripts/restart-budget.ps1`���������� `Test-RestartBudget`���������������� `< MaxRestarts` �����������ɱ����Ź� dot-source��Ҳ�ɶ������й����ԣ�`scripts/cockpit-watchdog.ps1` ���� `-MaxRestarts`��Ĭ�� 5���� `-RestartWindowSeconds`��Ĭ�� 3600��������ǰ�ж�Ԥ�㣬�ľ�ʱ������ѯ��ֹͣ��������ӡ manual intervention required�����ڹ�����ָ������ĵ���ops-runbook ��2.1 ����Ԥ��˵����",
+      "code": [
+        "scripts/restart-budget.ps1",
+        "scripts/cockpit-watchdog.ps1",
+        "docs/operations/ops-runbook.md"
+      ],
+      "tests": [
+        "tests/unit/test_preflight_watchdog.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/restart-budget.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/cockpit-watchdog.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ops-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_preflight_watchdog.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "CI-2",
+      "title": "��������Ʒ�������ϣ���2026-08-04���û�ָ�push �� github ������������� `scripts/ci-build-toolchain.py`�����ɸ��ֹ������߹����� zip��python ��������ʱ+���ļ�/node/gmssl/control����Ϊ `.tools/`���������С�� SHA-256��fail-closed��ȱ��Ŀ/����Ѵ��ھܾ�����`docs/dependencies/ci-artifact.json` ���� version=1.0.0/url=Release ģʽ/sha256=81dd3e7d����80.08 MB��4934 �ļ�������ʵ��Ʒ�� `ci-restore-toolchain.ps1 -LocalPath` �ָ��ɹ����ָ����� python �� fmt/lint �� exit 0��ָ�� e225df61/4e9985cf��CI ����ָ����ά������ͬ��Ԥ�ڣ����ĵ���ci-artifact-hosting.md ״̬/�������known-limitations CI �и��£�ʣ�༤��裺�����ߴ��� `toolchain-1.0.0` Release �ϴ���Ʒ��",
+      "code": [
+        "scripts/ci-build-toolchain.py",
+        "docs/dependencies/ci-artifact.json",
+        "docs/operations/ci-artifact-hosting.md",
+        "docs/operations/known-limitations.md"
+      ],
+      "tests": [
+        "tests/unit/test_ci_restore.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/ci-build-toolchain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/ci-artifact.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/ci-artifact-hosting.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/known-limitations.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ci_restore.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "RECORDS-2",
+      "title": "BACKLOG ״̬������2026-08-04���û�ָ�������������Ż�����`loop/BACKLOG.yaml` 19 ��������� `ready �� done`���ָ�����״̬����������`ready` ������δ��ʼ��������� STATE/matrix ��ì�ܡ���release_check �� backlog �����\"19 ready item(s) explicitly deferred\"��Ϊ\"all items done\"�������ع���ԣ�BACKLOG �� done �����ǡΪ STATE `current_item`����Դһ���Բ���������",
+      "code": [
+        "loop/BACKLOG.yaml",
+        "tests/unit/test_release_check.py"
+      ],
+      "tests": [
+        "tests/unit/test_release_check.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "loop/BACKLOG.yaml",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "tests/unit/test_release_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_release_check.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```

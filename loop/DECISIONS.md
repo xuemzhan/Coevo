@@ -4227,6 +4227,29 @@ security-reviewer 双签门禁。
   复核时按 git 历史回退 `d198002`。
 - 提出者：loop-engineer（Codex）。决策者：用户（push 授权 + 继续）。
 
+## 2026-08-04 -- RECORDS-2 BACKLOG 状态补正 done
+
+- 用户指令：继续对项目进行生产落地优化。审查发现：BACKLOG 中 19 个已完成项
+  仍标 `ready`，导致 release_check 永远报 "19 ready item(s) explicitly
+  deferred"，与 STATE/matrix 的 `done` 矛盾（历史惯例曾在 4462584 做过
+  "BACKLOG 状态补正"，后续登记新项后未再补正）。
+- 实现（commit `4ded745`，2 文件，+35/-19）：
+  ① `loop/BACKLOG.yaml` 19 个已完成项 `ready → done`；`ready` 仅用于
+  未开始项（登记新项时用 ready，完成时随 records 置 done）；
+  ② release_check backlog 检查由 warning 变 "all items done"（exit 0）；
+  ③ 新增回归测试：真实 BACKLOG 中非 `done` 项必须恰为 STATE
+  `current_item`（三源一致性不变量，防未来漂移）。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 908 / integration 259 / security 97 / e2e 14 全绿；
+  release_check 实测 backlog="all items done"；
+  内联 verifier PASS（security-reviewer 不涉及：纯记录状态，无代码/安全
+  语义变化）；protocol 不涉及。
+- 边界：此补正不改变 STATE/matrix 的既有 done 语义；未来每轮登记新项仍以
+  `ready` 开始，完成时置 `done`（与 RECORDS-2 测试不变量一致）。
+- 回滚条件：回归测试失败、三源再漂移、或门禁指纹变化未复核时按 git 历史
+  回退 `4ded745`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

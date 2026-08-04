@@ -859,3 +859,13 @@ items:
       - tests/unit/test_ci_restore.py
     security_review: true
     protocol_review: false
+  # ---------- BACKLOG 状态补正（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: RECORDS-2
+    story: ENG-BASE
+    title: BACKLOG 状态补正：19 个已完成项 status ready → done（恢复状态补正惯例，ready 仅用于未开始项），消除与 STATE/matrix 矛盾；release_check backlog 检查变 all items done；新增回归测试（BACKLOG 非 done 项必须恰为 STATE current_item）
+    status: done
+    dependencies: [RELEASE-1]
+    acceptance_tests:
+      - tests/unit/test_release_check.py
+    security_review: false
+    protocol_review: false
