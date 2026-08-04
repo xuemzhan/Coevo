@@ -818,3 +818,14 @@ items:
       - tests/unit/test_secret_scan.py
     security_review: true
     protocol_review: false
+  # ---------- 健康探测响应身份校验（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: AVAIL-2
+    story: ENG-BASE
+    title: 健康探测响应身份校验：health_check.py check_cockpit 与 cockpit-watchdog.ps1 Test-CockpitHealth——/healthz 除 HTTP 200 外校验响应体 service=coevo-cockpit 且 status=ok，防止端口被其他服务占用时误判健康；非健康统一 degraded（修正非 200 误报 critical 与文档不一致）；ops-runbook §1/§2.1 更新；测试：health_check +4（身份 ok/错误服务 degraded/非 200 degraded/畸形体 degraded）、看门狗 e2e +2（真实驾驶舱 healthy/伪造服务 would restart）
+    status: ready
+    dependencies: [AVAIL-1]
+    acceptance_tests:
+      - tests/unit/test_ops_tooling.py
+      - tests/unit/test_preflight_watchdog.py
+    security_review: true
+    protocol_review: false

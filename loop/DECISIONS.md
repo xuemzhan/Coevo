@@ -4103,6 +4103,32 @@ security-reviewer 双签门禁。
   git 历史回退 `54b5b18`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- AVAIL-2 健康探测响应身份校验 done
+
+- 用户指令：继续对项目进行生产落地优化。审查发现：健康检查与看门狗此前只验
+  `/healthz` 的 HTTP 200，不验响应体身份——若端口被其他服务占用（配置错误/
+  端口冲突），会把错误服务误判为驾驶舱健康；且 health_check 对"可达但非 200"
+  返回 critical，与文档"degraded（未运行）"语义不一致。
+- 实现（commit `d856660`，5 文件，+140/-4）：
+  ① `scripts/health_check.py` `check_cockpit`——读响应体（≤4096 字节）并
+  JSON 解析，要求 `service=coevo-cockpit` 且 `status=ok`；不可达/非 200/
+  错误服务/畸形体统一 degraded（对齐文档语义，修正误报 critical）；
+  ② `scripts/cockpit-watchdog.ps1` `Test-CockpitHealth`——同样校验响应体
+  身份，端口被其他服务占用时不误判健康、不停止重启；
+  ③ 文档：ops-runbook §1 cockpit 检查行 + §2.1 健康判定说明。
+- 安全边界：只读响应体（无敏感数据），JSON 解析失败 fail-closed（degraded）；
+  校验与驾驶舱实际 `/healthz` 输出（service/status 字段）一致；零新增依赖。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 896 / integration 259 / security 97 / e2e 14 全绿；
+  新增测试 6 项（health_check 4：身份 ok/错误服务/非 200/畸形体；看门狗
+  e2e 2：真实驾驶舱 dry-run healthy、伪造服务 dry-run would restart）；
+  内联 verifier + security-reviewer PASS（Critical/High 0）；protocol 不涉及。
+- 边界：响应体校验基于 JSON 字段精确匹配（`coevo-cockpit`），若未来改名需
+  同步更新两处探测点；健康判定仍不重试、不做多探针聚合（保持轻量）。
+- 回滚条件：任一新增测试失败、误判健康（如错误服务被判 ok）、或门禁指纹
+  变化未复核时按 git 历史回退 `d856660`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
