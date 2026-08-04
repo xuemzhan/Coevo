@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import types
 import unittest
 from pathlib import Path
@@ -25,6 +26,7 @@ run_cockpit = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(run_cockpit)
 
 WATCHDOG = ROOT / "scripts" / "cockpit-watchdog.ps1"
+BUDGET = ROOT / "scripts" / "restart-budget.ps1"
 
 
 def _sealed_process() -> subprocess.CompletedProcess[str]:
@@ -327,6 +329,81 @@ class WatchdogTests(unittest.TestCase):
                 "-InstallRoot", str(Path(tmp) / "missing"), "-DryRun"
             )
             self.assertNotEqual(0, result.returncode)
+
+
+class RestartBudgetTests(unittest.TestCase):
+    """AVAIL-3: restart budget pure logic via the standalone helper."""
+
+    def _run(self, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(BUDGET),
+                *args,
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=60,
+        )
+
+    def _json(self, values: list[float]) -> str:
+        import json
+
+        return json.dumps(values)
+
+    def test_empty_history_allowed(self):
+        result = self._run(
+            "-TimestampsJson", self._json([]),
+            "-WindowSeconds", "3600",
+            "-MaxRestarts", "5",
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("allowed=True recent=0", result.stdout)
+
+    def test_under_budget_allowed(self):
+        now = time.time()
+        result = self._run(
+            "-TimestampsJson", self._json([now - 10, now - 20, now - 30, now - 40]),
+            "-WindowSeconds", "3600",
+            "-MaxRestarts", "5",
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("allowed=True recent=4", result.stdout)
+
+    def test_budget_exhausted_denied(self):
+        now = time.time()
+        result = self._run(
+            "-TimestampsJson", self._json([now - i for i in range(5)]),
+            "-WindowSeconds", "3600",
+            "-MaxRestarts", "5",
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("allowed=False recent=5", result.stdout)
+
+    def test_old_restarts_outside_window_ignored(self):
+        now = time.time()
+        result = self._run(
+            "-TimestampsJson", self._json([now - 10, now - 7200, now - 9000]),
+            "-WindowSeconds", "3600",
+            "-MaxRestarts", "5",
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("allowed=True recent=1", result.stdout)
+
+    def test_invalid_parameters_fail_closed(self):
+        result = self._run(
+            "-TimestampsJson", self._json([]),
+            "-WindowSeconds", "0",
+            "-MaxRestarts", "5",
+        )
+        self.assertNotEqual(0, result.returncode)
 
 
 if __name__ == "__main__":

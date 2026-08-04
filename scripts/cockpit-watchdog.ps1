@@ -10,6 +10,9 @@ it when it stays unreachable.
   register-autostart.ps1 / install_cockpit.py, then python on PATH;
   a stale or malformed pin fails closed instead of silently falling back;
 * a restart cooldown (<RestartCooldownSeconds>) prevents crash loops;
+* a restart budget (<MaxRestarts> per <RestartWindowSeconds>, AVAIL-3)
+  stops restarting a persistently crashing cockpit until the window
+  rolls, so process churn is bounded;
 * -DryRun performs ONE probe, prints the would-be action, and exits
   without touching the system;
 * fail-closed: missing install root / current pointer / runner / python
@@ -26,15 +29,19 @@ param(
     [int]$PollSeconds = 10,
     [int]$MissThreshold = 3,
     [int]$RestartCooldownSeconds = 60,
+    [int]$MaxRestarts = 5,
+    [int]$RestartWindowSeconds = 3600,
     [switch]$DryRun
 )
 $ErrorActionPreference = 'Stop'
 
 if (-not $InstallRoot) { $InstallRoot = Join-Path $env:LOCALAPPDATA 'KaiwuAgent' }
 $InstallRoot = [IO.Path]::GetFullPath($InstallRoot)
-if ($PollSeconds -lt 1 -or $MissThreshold -lt 1 -or $RestartCooldownSeconds -lt 1) {
-    throw 'PollSeconds/MissThreshold/RestartCooldownSeconds must be positive'
+if ($PollSeconds -lt 1 -or $MissThreshold -lt 1 -or $RestartCooldownSeconds -lt 1 -or $MaxRestarts -lt 1 -or $RestartWindowSeconds -lt 1) {
+    throw 'PollSeconds/MissThreshold/RestartCooldownSeconds/MaxRestarts/RestartWindowSeconds must be positive'
 }
+
+. (Join-Path $PSScriptRoot 'restart-budget.ps1')
 
 $pointer = Join-Path $InstallRoot 'current'
 if (-not (Test-Path -LiteralPath $pointer -PathType Leaf)) {
@@ -82,6 +89,7 @@ $python = Resolve-PythonPath $InstallRoot $PythonPath
 
 $url = "http://127.0.0.1:$Port/healthz"
 $startCommand = @($python, $runner)
+$restartHistory = [System.Collections.Generic.List[double]]::new()
 
 function Test-CockpitHealth {
     try {
@@ -127,10 +135,16 @@ try {
             if ($misses -ge $MissThreshold) {
                 $now = [int][DateTime]::UtcNow.Subtract([DateTime]::new(1970,1,1)).TotalSeconds
                 if ($now - $lastRestart -ge $RestartCooldownSeconds) {
-                    Write-Output "restarting cockpit (cooldown ${RestartCooldownSeconds}s)"
-                    Start-Cockpit
-                    $lastRestart = $now
-                    $misses = 0
+                    $budget = Test-RestartBudget -RestartTimes $restartHistory -WindowSeconds $RestartWindowSeconds -MaxRestarts $MaxRestarts
+                    if (-not $budget.allowed) {
+                        Write-Output ("restart budget exhausted ({0}/{1} in {2}s); manual intervention required" -f $budget.recent, $MaxRestarts, $RestartWindowSeconds)
+                    } else {
+                        Write-Output "restarting cockpit (cooldown ${RestartCooldownSeconds}s)"
+                        Start-Cockpit
+                        $lastRestart = $now
+                        $misses = 0
+                        $restartHistory.Add($now)
+                    }
                 } else {
                     Write-Output "restart cooldown active; skipping"
                 }

@@ -84,6 +84,10 @@ python scripts\run_cockpit.py --preflight
 ```
 
 看门狗带重启冷却（默认 60 秒）防止崩溃循环；DryRun 只探测并打印将执行的动作。
+重启预算（AVAIL-3）：最多 `-MaxRestarts`（默认 5）次/`-RestartWindowSeconds`
+（默认 3600 秒）——预算耗尽后看门狗继续轮询但停止重启（打印
+"restart budget exhausted; manual intervention required"），窗口滚动后恢复，
+持续崩溃的驾驶舱不会无限搅动进程。
 预检覆盖：配置、数据/日志目录可写、磁盘余量、审计封存状态、模型配置可加载。
 解释器解析顺序：显式 `-PythonPath` → `<install_root>\python-path.txt`（OPS-2
 sidecar）→ PATH；sidecar 内容必须是绝对路径且指向存在的可执行文件，否则失败关闭。
