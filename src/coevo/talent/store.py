@@ -254,6 +254,9 @@ class TalentStore:
         self._connection = connection
         self._path = path
         self._closed = False
+        # pool 元数据在 create 时写入且不可变：首次读取后缓存，避免每次
+        # register/pool_code 都执行一次 SQL 查询。
+        self._pool_meta_cache: tuple[str, str] | None = None
 
     @property
     def path(self) -> Path:
@@ -373,10 +376,15 @@ class TalentStore:
             raise TalentStoreError("talent store is closed")
 
     def _pool_meta(self) -> tuple[str, str]:
-        meta = dict(
-            self._connection.execute("SELECT key, value FROM meta").fetchall()
-        )
-        return meta["pool_code"], meta["pool_schema_version"]
+        if self._pool_meta_cache is None:
+            meta = dict(
+                self._connection.execute("SELECT key, value FROM meta").fetchall()
+            )
+            self._pool_meta_cache = (
+                meta["pool_code"],
+                meta["pool_schema_version"],
+            )
+        return self._pool_meta_cache
 
     # -- queries ------------------------------------------------------------
 

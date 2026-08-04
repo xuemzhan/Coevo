@@ -91,6 +91,9 @@ class AuditStreamStore:
         self._stream = stream
         self._last_hash = last_hash
         self._max_bytes = max_bytes
+        # 记录当前字节数：追加时增量维护，避免每条记录一次 stat() 系统调用。
+        # store 以“打开的文件流”独占追加，大小只经本实例变化，跟踪值即磁盘真实值。
+        self._size = path.stat().st_size
 
     @property
     def path(self) -> Path:
@@ -136,7 +139,7 @@ class AuditStreamStore:
         canonical = json.dumps(
             payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
         )
-        if self._path.stat().st_size + len(canonical.encode("utf-8")) > self._max_bytes:
+        if self._size + len(canonical.encode("utf-8")) > self._max_bytes:
             raise AuditStreamStoreError("audit stream store exceeds size limit")
         record = {
             "schema_version": SCHEMA_VERSION,
@@ -151,6 +154,7 @@ class AuditStreamStore:
         ) + "\n"
         self._stream.write(line)
         self._stream.flush()
+        self._size += len(line.encode("utf-8"))
         self._last_hash = record["record_hash"]
         return record["record_hash"]
 

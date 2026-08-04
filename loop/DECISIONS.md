@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-05 — 源码优化第三轮（I/O 与查询去重）
+
+- 提议：用户指令“继续”延续“继续优化你认为可以优化的代码”。在第二轮
+  复杂度收敛之后，聚焦持久化层的重复 I/O 与重复查询。
+- 决策（行为零变更，大小上限/校验语义逐项保持）：
+  1. `audit_governance/stream_store.py`：追加记录时由“每条一次
+     `stat()` 系统调用”改为构造期取一次大小 + 追加时增量维护；
+     大小上限判定仍与磁盘真实值一致（store 独占追加流）。
+  2. `talent/store.py`：`_pool_meta` 首次读取后缓存
+     （pool 元数据在 create 时写入且不可变），`register`/`pool_code`
+     不再每次执行 SQL 查询；close 语义与既有 `_closed` 防护不变。
+- 验证：定向测试全绿（audit_stream_store 6 / talent_store 17 /
+  talent_store_persistence 9 / audit_stream 10，合计 42）；全量 quality
+  exit 0（指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续优化授权）。
+
 ## 2026-08-05 — 源码优化第二轮（热点路径复杂度收敛）
 
 - 提议：用户指令“继续优化你认为可以优化的代码”。在 OPT-PERF-1 已覆盖
