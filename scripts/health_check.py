@@ -176,8 +176,51 @@ def check_lock(install_root: Path) -> dict[str, Any]:
     return _check("lock", True, f"lock fresh (age {age:.0f}s)")
 
 
-def check_backup(backup_root: Path, max_age_days: int) -> dict[str, Any]:
-    """Latest backup freshness (OPS-3): exists and <= max_age_days old."""
+def _verify_backup(
+    repo_root: Path, backup_root: Path, label: str
+) -> str:
+    """Run ``backup_state.py verify`` on one backup; return a short outcome."""
+    script = repo_root / "scripts" / "backup_state.py"
+    if not script.is_file():
+        return "tool missing"
+    try:
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--action",
+                "verify",
+                "--backup-root",
+                str(backup_root),
+                "--label",
+                label,
+            ],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        return "timed out"
+    try:
+        payload = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError:
+        return f"failed (exit {result.returncode})"
+    if payload.get("ok") is True:
+        return "ok"
+    return f"failed (exit {result.returncode})"
+
+
+def check_backup(
+    backup_root: Path,
+    max_age_days: int,
+    *,
+    verify: bool = False,
+    repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Latest backup freshness (OPS-3); optional integrity verify (OPS-6)."""
     backup_root = backup_root.resolve()
     if not backup_root.is_dir():
         return _check(
@@ -227,10 +270,21 @@ def check_backup(backup_root: Path, max_age_days: int) -> dict[str, Any]:
             f"(max {max_age_days})",
             level="degraded",
         )
+    detail = f"latest backup '{label}' is {age_days:.2f} days old"
+    if verify and repo_root is not None:
+        outcome = _verify_backup(repo_root, backup_root, label)
+        if outcome != "ok":
+            return _check(
+                "backup",
+                False,
+                f"{detail}; integrity check failed ({outcome})",
+                level="degraded",
+            )
+        detail += "; integrity=ok"
     return _check(
         "backup",
         True,
-        f"latest backup '{label}' is {age_days:.2f} days old",
+        detail,
     )
 
 
@@ -276,6 +330,7 @@ def build_report(
     audit_python: str | None,
     backup_root: Path | None = None,
     max_backup_age_days: int = 7,
+    verify_backups: bool = False,
 ) -> dict[str, Any]:
     checks = [
         check_dirs(install_root),
@@ -288,6 +343,8 @@ def build_report(
         check_backup(
             backup_root or install_root / "backups",
             max_backup_age_days,
+            verify=verify_backups,
+            repo_root=repo_root,
         ),
     ]
     critical = [c for c in checks if not c["ok"] and c["level"] == "critical"]
@@ -318,6 +375,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--audit-python", default=None)
     parser.add_argument("--backup-root", type=Path, default=None)
     parser.add_argument("--max-backup-age-days", type=int, default=7)
+    parser.add_argument(
+        "--verify-backups",
+        action="store_true",
+        help=(
+            "run backup_state.py verify on the newest backup (integrity "
+            "hash check; OPS-6)"
+        ),
+    )
     args = parser.parse_args(argv)
     if args.max_backup_age_days < 1:
         print("error: --max-backup-age-days must be a positive integer", file=sys.stderr)
@@ -330,6 +395,7 @@ def main(argv: list[str] | None = None) -> int:
         audit_python=args.audit_python,
         backup_root=args.backup_root,
         max_backup_age_days=args.max_backup_age_days,
+        verify_backups=args.verify_backups,
     )
     print(json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2))
     return 0 if report["status"] == "ok" else (1 if report["status"] == "degraded" else 2)

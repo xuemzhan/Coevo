@@ -179,6 +179,57 @@ class HealthCheckTests(unittest.TestCase):
             self.assertEqual("degraded", result["level"])
             self.assertIn("future", result["detail"])
 
+    def test_backup_verify_ok(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_backup(root, "b1", 0)
+            with mock.patch.object(
+                health.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess(
+                    [], 0, stdout='{"ok": true}', stderr=""
+                ),
+            ):
+                result = health.check_backup(
+                    root, 7, verify=True, repo_root=ROOT
+                )
+            self.assertTrue(result["ok"])
+            self.assertIn("integrity=ok", result["detail"])
+
+    def test_backup_verify_failure_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_backup(root, "b1", 0)
+            with mock.patch.object(
+                health.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess(
+                    [], 1, stdout='{"ok": false, "problems": ["hash mismatch"]}', stderr=""
+                ),
+            ):
+                result = health.check_backup(
+                    root, 7, verify=True, repo_root=ROOT
+                )
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+            self.assertIn("integrity", result["detail"])
+
+    def test_backup_verify_timeout_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_backup(root, "b1", 0)
+            with mock.patch.object(
+                health.subprocess,
+                "run",
+                side_effect=subprocess.TimeoutExpired(cmd="verify", timeout=120),
+            ):
+                result = health.check_backup(
+                    root, 7, verify=True, repo_root=ROOT
+                )
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+            self.assertIn("timed out", result["detail"])
+
     def test_pin_ok(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = health.check_pin(self._install_root(tmp))

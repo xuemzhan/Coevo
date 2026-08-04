@@ -10,6 +10,8 @@
 python scripts\health_check.py --install-root "%LOCALAPPDATA%\KaiwuAgent"
 # 异地备份监控（OPS-3）：备份根 + 最大备份年龄（天）
 python scripts\health_check.py --backup-root "D:\CoevoBackups" --max-backup-age-days 7
+# 附加备份完整性哈希校验（OPS-6，对最新备份跑 backup_state.py verify）
+python scripts\health_check.py --backup-root "D:\CoevoBackups" --verify-backups
 ```
 
 输出结构化 JSON（`checks[]` + `status`），退出码：0=ok、1=degraded、2=critical。
@@ -23,7 +25,7 @@ python scripts\health_check.py --backup-root "D:\CoevoBackups" --max-backup-age-
 | lock | 单实例锁未陈旧（<10 分钟） | critical |
 | cockpit | `/healthz` 返回 200 且响应体身份为 `service=coevo-cockpit`、`status=ok`（AVAIL-2，防止端口被其他服务占用时误判） | degraded（未运行/异常服务） |
 | audit | `audit_seal.py verify`：fully-sealed ok；未封尾=degraded；失败=critical | 分级 |
-| backup | 最新备份 manifest 存在且 ≤ `--max-backup-age-days`（默认 7 天；OPS-3） | degraded（缺失/过期，恢复姿态告警，不阻断服务） |
+| backup | 最新备份 manifest 存在且 ≤ `--max-backup-age-days`（默认 7 天；OPS-3）；加 `--verify-backups` 时对最新备份执行 `backup_state.py verify` 完整性哈希校验（OPS-6） | degraded（缺失/过期/完整性失败，恢复姿态告警，不阻断服务） |
 | pin | `<install-root>\python-path.txt` 存在、绝对路径且指向存在的解释器（OPS-5） | degraded（缺失/无效，看门狗将回退 PATH） |
 
 可接入监控/计划任务定期执行；本脚本只读、不修改任何状态。
