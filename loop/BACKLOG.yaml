@@ -808,3 +808,13 @@ items:
       - tests/integration/test_cockpit_http_server.py
     security_review: true
     protocol_review: false
+  # ---------- 密钥扫描模式再扩展（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: SECSCAN-3
+    story: ENG-BASE
+    title: 密钥扫描模式再扩展：secret_scan.py ① 新增 stripe_key（sk_live_/sk_test_/rk_live_+16+）；② 新增 sendgrid_key（SG.<22>.<20>）；③ 新增 pgp_private_key（PGP PRIVATE KEY BLOCK，并入 tests/ PEM 放行语义）；全部高置信格式、令牌类全路径拦截含 tests/；lint 门禁 secret_scan 步骤自动获益；测试 +4（Stripe 3 前缀检出/SendGrid 检出/PGP 库外检出/PGP tests 放行、仓库假阳性 0）
+    status: ready
+    dependencies: [SECSCAN-2]
+    acceptance_tests:
+      - tests/unit/test_secret_scan.py
+    security_review: true
+    protocol_review: false

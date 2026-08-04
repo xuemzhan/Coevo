@@ -4079,6 +4079,30 @@ security-reviewer 双签门禁。
   或门禁指纹变化未复核时按 git 历史回退 `07cbc9d`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- SECSCAN-3 密钥扫描模式再扩展 done
+
+- 用户指令：继续对项目进行生产落地优化。本项落实 SECSCAN-2 DECISIONS 登记的
+  后续扩展（"更多密钥格式留待按需扩展"），继续强化 lint 门禁 secret_scan
+  步骤。
+- 实现（commit `54b5b18`，2 文件，+71/-2）：
+  ① `stripe_key`——`sk_live_`/`sk_test_`/`rk_live_` + 16+ 字符（Stripe
+  真实/测试/受限密钥）；
+  ② `sendgrid_key`——`SG.<id 22+>.<key 20+>`；
+  ③ `pgp_private_key`——PGP 私钥块头（PRIVATE KEY BLOCK 变体），并入
+  tests/ PEM 放行语义（`_TESTS_ALLOWED_PATTERNS`），库外全路径拦截；
+  ④ 令牌类（stripe/sendgrid）保持全路径拦截含 tests/；仓库假阳性 0。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 890 / integration 259 / security 97 / e2e 14 全绿；
+  新增测试 4 项；`secret_scan` 实测 findings=0；
+  内联 verifier + security-reviewer PASS（Critical/High 0：仅加强门禁、
+  无新信任边界、无新增依赖、不改锁链）；protocol 不涉及。
+- 边界：仍为高置信启发式，不替代人工代码审查；Azure SAS/通用 JWT 等格式因
+  假阳性风险未纳入（留待出现真实样本时按需扩展，扩展须保持令牌全路径拦截
+  与窄 PEM 放行语义）。
+- 回滚条件：任一新增测试失败、仓库假阳性出现、或门禁指纹变化未复核时按
+  git 历史回退 `54b5b18`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
