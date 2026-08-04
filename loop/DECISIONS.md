@@ -3959,6 +3959,38 @@ security-reviewer 双签门禁。
   复核时按 git 历史回退 `cde90e5`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- OPS-4 模型外发审批可观测性 done
+
+- 用户指令：继续对项目进行生产落地优化。本项把模型外发审批从"机制正确但
+  不可见"补上可见性：known-limitations 记录的 `COEVO_LLM_EXTERNAL_DATA_OK`
+  兼容开关与 `config/model-config.json` 的 `external_data_ok` 审批此前无任何
+  启动提示，运维可能不知道数据会离开本机。
+- 实现（commit `0d05ed3`，4 文件，+125/-7）：
+  ① `scripts/run_cockpit.py` 新增 `model_egress_warnings()`——仅当**激活**
+  provider 非回环（https，经 `is_loopback` 判定）且 `external_data_ok=true`
+  时告警"data may leave this machine"；回环 provider（数据不出机）与
+  offline 不告警，避免误报；
+  ② 遗留开关 `COEVO_LLM_EXTERNAL_DATA_OK=1` 被设置时单独告警（兼容开关，
+  审批以配置为准）；
+  ③ `--preflight` 集成：外发获批或遗留开关 → degraded（exit 1），模型配置
+  不可读警告语义不变（并入 helper）；每次启动经 `setup_logging` 写
+  `model egress posture` 告警日志（coevo-app.log 留痕）；
+  ④ 审批机制本身 fail-closed 检查点（provider 内 `_external_data_ok`）未动，
+  本项只增加只读告警；
+  ⑤ 文档：configuration-reference 变量行 + ops-runbook §2.1 外发姿态节。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 882 / integration 254 / security 97 / e2e 13 全绿；
+  新增测试 5 项；当前仓库配置（provider=offline）预检仍为 0（无告警），
+  local_openai 为回环虽 `external_data_ok=true` 但不告警（符合语义）；
+  内联 verifier + security-reviewer PASS（Critical/High 0：只读配置、
+  无敏感数据、无新增依赖、不涉及锁链）；protocol 不涉及。
+- 边界：告警是可见性信号，不是审批门禁——审批仍由配置与 provider fail-closed
+  检查点决定；`model_egress_warnings` 读取的模型配置路径为仓库默认路径，
+  安装包内部署的配置读取沿用既有 `load_model_config` 语义。
+- 回滚条件：任一新增测试失败、非回环获批不再告警（如回环误判）、或门禁指纹
+  变化未复核时按 git 历史回退 `0d05ed3`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

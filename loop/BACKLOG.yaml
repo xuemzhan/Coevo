@@ -766,3 +766,13 @@ items:
       - tests/unit/test_ops_tooling.py
     security_review: true
     protocol_review: false
+  # ---------- 模型外发审批可观测性（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: OPS-4
+    story: ENG-BASE
+    title: 模型外发审批可观测性：run_cockpit.py 新增 model_egress_warnings()——激活 provider 非回环（https）且 external_data_ok=true，或遗留开关 COEVO_LLM_EXTERNAL_DATA_OK=1 被设置时输出告警；--preflight 集成（外发获批/遗留开关 → degraded exit 1；回环与 offline 静默）；每次启动写 model egress posture 告警日志；审批机制 fail-closed 不变；configuration-reference/ops-runbook 同步；测试 +5（非回环获批 degraded/回环获批 ok/遗留开关 degraded/消息内容/offline+回环静默）
+    status: ready
+    dependencies: [AVAIL-1]
+    acceptance_tests:
+      - tests/unit/test_preflight_watchdog.py
+    security_review: true
+    protocol_review: false
