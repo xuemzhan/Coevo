@@ -33,8 +33,10 @@ python scripts\health_check.py --backup-root "D:\CoevoBackups" --max-backup-age-
 `register-autostart.ps1 -Action PinPython`（或重跑 `Register`）。
 
 进程内状态端点：`GET /api/health`（需会话令牌，认证只读）返回 service、version、
-started_at、uptime_sec、session_count、request_count、audit_records、log_errors，
-供已登录管理端/运维脚本即时查看运行实例状态。
+started_at、uptime_sec、session_count、request_count、probe_count、
+audit_records、log_errors，供已登录管理端/运维脚本即时查看运行实例状态。
+`request_count` 只统计认证请求；`probe_count`（METRICS-2）单独统计 `/healthz`
+存活探测（看门狗/健康检查/基准探针），两者线程安全且互不混淆。
 
 ## 2. 自启守护（登录启动驾驶舱）
 

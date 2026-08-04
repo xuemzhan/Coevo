@@ -151,12 +151,28 @@ class CockpitHttpServerTests(unittest.TestCase):
             "uptime_sec",
             "session_count",
             "request_count",
+            "probe_count",
             "audit_records",
             "log_errors",
         ):
             self.assertIn(field, data, field)
         self.assertGreaterEqual(data["request_count"], 1)
         self.assertGreaterEqual(data["session_count"], 1)
+        self.assertGreaterEqual(data["probe_count"], 0)
+
+    def test_healthz_probes_counted_separately_from_requests(self):
+        for _ in range(2):
+            status, _, _ = _request(f"{self.base}/healthz")
+            self.assertEqual(200, status)
+        status, _, body = _request(f"{self.base}/api/health", token=self.token)
+        self.assertEqual(200, status)
+        first = json.loads(body)
+        self.assertGreaterEqual(first["probe_count"], 2)
+        # /healthz probes never count as authenticated requests.
+        status, _, body = _request(f"{self.base}/api/health", token=self.token)
+        second = json.loads(body)
+        self.assertEqual(second["probe_count"], first["probe_count"])
+        self.assertGreater(second["request_count"], first["request_count"])
 
     def test_index_with_token_serves_page_with_csp(self):
         status, headers, body = _request(f"{self.base}/?token={self.token}")

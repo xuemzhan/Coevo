@@ -330,6 +330,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             if method == "GET" and path == "/healthz":
                 # Process-supervisor probe: loopback + Host checked above;
                 # intentionally unauthenticated, returns no sensitive data.
+                self.server._count_probe()
                 self._send_json(
                     200,
                     {
@@ -525,6 +526,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 ),
                 "session_count": self.server.session_manager.session_count,
                 "request_count": self.server.request_count,
+                "probe_count": self.server.probe_count,
                 "audit_records": len(self.server.recent_audit()),
                 "log_errors": self.server.log_errors,
             },
@@ -775,6 +777,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
         self._started_monotonic = time.monotonic()
         self._started_at = started_at
         self._request_count = 0
+        self._probe_count = 0
         self._request_lock = threading.Lock()
         self._concurrency = threading.BoundedSemaphore(
             config.max_concurrent_requests
@@ -817,10 +820,19 @@ class CockpitHttpServer(ThreadingHTTPServer):
         with self._request_lock:
             self._request_count += 1
 
+    def _count_probe(self) -> None:
+        with self._request_lock:
+            self._probe_count += 1
+
     @property
     def request_count(self) -> int:
         with self._request_lock:
             return self._request_count
+
+    @property
+    def probe_count(self) -> int:
+        with self._request_lock:
+            return self._probe_count
 
     def process_request(self, request: Any, client_address: Any) -> None:
         """Bound concurrent handler threads; reject overflow with 503."""
