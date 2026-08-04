@@ -3904,6 +3904,32 @@ security-reviewer 双签门禁。
   或门禁指纹变化未复核时按 git 历史回退 `2b140a2`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- SECSCAN-2 密钥扫描模式扩展 done
+
+- 用户指令：继续对项目进行生产落地优化。本项落实 known-limitations §2
+  "secret_scan 为高置信启发式，新增密钥格式需扩展模式清单"的扩展动作，
+  强化 lint 门禁的 secret_scan 步骤。
+- 实现（commit `0403eb5`，2 文件，+82/-4）：
+  ① `pem_private_key` 正则增加 SM2 变体（国密私钥 PEM 块）；tests/ PEM 放行
+  语义不变（同属一个 pattern）；
+  ② `github_pat` 扩展为 GitHub 令牌家族：`ghp_`（经典 PAT）/`gho_`
+  （OAuth）/`ghu_`（user-to-server）/`ghs_`（server-to-server）/`ghr_`
+  （refresh）/`github_pat_`（fine-grained，22+59 位）；
+  ③ 新增 `google_api_key`（`AIza`+35）与 `npm_token`（`npm_`+36）；
+  ④ 令牌类模式保持全路径拦截（含 tests/），仅 PEM 类在 tests/ 放行——
+  与 SECSCAN-1 的窄白名单语义一致。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 872 / integration 254 / security 97 / e2e 13 全绿；
+  新增测试 5 项；仓库假阳性 0（`secret_scan` 实测 findings=0）；
+  内联 verifier + security-reviewer PASS（Critical/High 0：仅加强门禁、
+  无新信任边界、无新增依赖、不改锁链）；protocol 不涉及。
+- 边界：仍为高置信启发式，不替代人工代码审查；更多密钥格式（如 Stripe
+  `rk_live_`、Azure SAS）留待后续按需扩展，扩展时必须保持全路径令牌拦截与
+  窄 PEM 放行语义。
+- 回滚条件：任一新增测试失败、仓库假阳性出现、或门禁指纹变化未复核时按
+  git 历史回退 `0403eb5`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

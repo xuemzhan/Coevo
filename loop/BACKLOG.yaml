@@ -746,3 +746,13 @@ items:
       - tests/unit/test_backup_state.py
     security_review: true
     protocol_review: false
+  # ---------- 密钥扫描模式扩展（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: SECSCAN-2
+    story: ENG-BASE
+    title: 密钥扫描模式扩展：secret_scan.py ① pem_private_key 覆盖 SM2 PRIVATE KEY（国密格式，tests/ PEM 放行语义不变）；② github_pat 扩展为令牌家族 ghp_/gho_/ghu_/ghs_/ghr_/github_pat_；③ 新增 google_api_key（AIza+35）与 npm_token（npm_+36）；全部高置信格式、令牌类全路径拦截含 tests/；lint 门禁 secret_scan 步骤自动获益；测试 +5（SM2 检出/放行、GitHub 家族、Google、npm、仓库假阳性 0）
+    status: ready
+    dependencies: [SECSCAN-1]
+    acceptance_tests:
+      - tests/unit/test_secret_scan.py
+    security_review: true
+    protocol_review: false
