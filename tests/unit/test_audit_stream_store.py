@@ -87,6 +87,20 @@ class AuditStreamStoreTests(unittest.TestCase):
                     store.append(_event(f"event-{_}-" * 10))
             store.close()
 
+    def test_tracked_size_stays_in_sync_with_disk(self):
+        # 回归：增量维护的 _size 必须始终等于磁盘真实字节数，
+        # 保证大小上限判定与 stat() 语义一致。
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._path(tmp)
+            store = AuditStreamStore.create(path)
+            try:
+                self.assertEqual(path.stat().st_size, store._size)
+                for index in range(20):
+                    store.append(_event(f"sync-{index}"))
+                    self.assertEqual(path.stat().st_size, store._size)
+            finally:
+                store.close()
+
     def test_store_backs_hub_persistence_and_replay(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = self._path(tmp)

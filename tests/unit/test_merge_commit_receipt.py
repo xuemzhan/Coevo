@@ -30,6 +30,7 @@ from src.coevo.merge.receipt import (
     _normalize_canonical_plain,
     canonical_baseline_digest,
     build_signed_merge_commit_receipt,
+    append_signed_receipt,
     freeze_baseline,
     verify_signed_receipt,
 )
@@ -667,6 +668,68 @@ class MergeCommitReceiptTests(unittest.TestCase):
             copy.copy(store)
         with self.assertRaises(TypeError):
             dataclasses.replace(store)
+
+    def test_store_indexed_lookups_cover_all_receipts(self):
+        # 回归：构造期索引后，get/by_project 必须与原全量扫描语义一致。
+        authority = signing_authority()
+        trusted_time = dt.datetime(2026, 8, 20, tzinfo=dt.UTC)
+
+        def build(version: int, store_sequence: int, *, previous=None):
+            return build_signed_merge_commit_receipt(
+                authority=authority,
+                trusted_time=trusted_time,
+                baseline=baseline(version=version),
+                store_id="store-1",
+                store_sequence=store_sequence,
+                previous_receipt_id=(
+                    previous.receipt_id if previous is not None else None
+                ),
+                previous_receipt_hash=(
+                    hashlib.sha256(
+                        previous.payload + previous.signature
+                    ).hexdigest()
+                    if previous is not None
+                    else "0" * 64
+                ),
+                package_id=f"pkg-{store_sequence}",
+                package_digest=hashlib.sha256(
+                    f"pkg-{store_sequence}".encode("utf-8")
+                ).hexdigest(),
+                sender_cert_id="CERT-SENDER",
+                recipient_cert_id="CERT-OWNER",
+                sequence_no=store_sequence,
+                package_type="RESULT_SUBMISSION",
+                import_processed_at="2026-08-19T01:00:00Z",
+                project_id="PRJ001",
+                task_id="TASK-001",
+                report_status=ReportStatus.COMPLETED,
+                status_decision="accept",
+                base_revision=f"PRJ001-R{version:04d}",
+                current_revision=f"PRJ001-R{version:04d}",
+                merged_revision=f"PRJ001-R{version + 1:04d}",
+                commit_decided_at="2026-08-20T00:00:00Z",
+                decision_maker="CERT-OWNER",
+                baseline_digest_algorithm="sha256",
+                baseline_schema="coevo.project-baseline/1.0",
+                completed_task_id="TASK-001",
+            )
+
+        first = build(1, 1)
+        second = build(2, 2, previous=first)
+        self.assertNotEqual(first.receipt_id, second.receipt_id)
+        store = append_signed_receipt(
+            append_signed_receipt(MergeCommitReceiptStore.empty(), first),
+            second,
+        )
+        self.assertIs(first, store.get(first.receipt_id))
+        self.assertIs(second, store.get(second.receipt_id))
+        self.assertIsNone(store.get("missing-receipt"))
+        for project_id in {first.project_id, second.project_id}:
+            got = store.by_project(project_id)
+            self.assertEqual(
+                tuple(r for r in (first, second) if r.project_id == project_id),
+                got,
+            )
 
     def test_tampered_signature_and_wrong_trust_pin_are_rejected(self):
         authority = signing_authority()

@@ -43,6 +43,7 @@ from src.coevo.task_decomposition.dependency_graph import (
     cycle_in_components,
     topological_order,
 )
+from src.coevo.task_decomposition.agent import _flow_json
 from src.coevo.task_decomposition.models import (
     Deliverable,
     DependencyEdge,
@@ -227,6 +228,100 @@ class TaskFlowIndexTests(unittest.TestCase):
             mapping.get("a"),
             "first occurrence must win, matching the legacy scan",
         )
+
+
+class FlowJsonGroupingTests(unittest.TestCase):
+    """Regression for the 2026-08-05 _flow_json pre-indexing change.
+
+    Nodes must be grouped by stage without changing ordering semantics:
+    every stage lists exactly its own nodes, in the mapped order, and
+    stages that own no nodes are omitted.
+    """
+
+    def _canonical(self, stages: list[dict[str, object]]) -> dict[str, object]:
+        return {
+            "format": "canonical",
+            "flow": {
+                "unit_id": "unit_a",
+                "title": "grouping flow",
+                "stages": stages,
+                "roles": [
+                    {
+                        "role_id": "a.role",
+                        "name": "PM",
+                        "responsibility": "Owns intake",
+                    }
+                ],
+            },
+        }
+
+    def _node(
+        self, node_id: str, title: str, hint: str
+    ) -> dict[str, object]:
+        return {
+            "node_id": node_id,
+            "title": title,
+            "stage_hint": hint,
+            "inputs": ["doc"],
+            "outputs": ["out"],
+            "review_criteria": ["complete"],
+            "responsible_roles": ["a.role"],
+        }
+
+    def test_stages_group_only_their_own_nodes_in_order(self):
+        import json
+
+        from src.coevo.task_flow.service import FlowUnderstandingService
+
+        raw = self._canonical(
+            [
+                {
+                    "stage_id": "intake",
+                    "name": "intake",
+                    "nodes": [
+                        self._node("n1", "Receive", "intake"),
+                        self._node("n2", "Check", "intake"),
+                    ],
+                },
+                {
+                    "stage_id": "delivery",
+                    "name": "delivery",
+                    "nodes": [self._node("n3", "Submit", "delivery")],
+                },
+            ]
+        )
+        understanding = FlowUnderstandingService().understand(raw)
+        stages = json.loads(_flow_json(understanding))["flow_stages"]
+        self.assertEqual(["intake", "delivery"], [s["stage"] for s in stages])
+        self.assertEqual(
+            ["n1", "n2"],
+            [n["node_id"] for n in stages[0]["nodes"]],
+        )
+        self.assertEqual(
+            ["n3"],
+            [n["node_id"] for n in stages[1]["nodes"]],
+        )
+
+    def test_unmapped_node_is_omitted_without_stage(self):
+        import json
+
+        from src.coevo.task_flow.service import FlowUnderstandingService
+
+        # 解析器不允许空阶段，因此回归点放在“无 stage 映射的孤儿节点”
+        # 上：预索引只按已映射节点分组，未映射节点必须保持不可见。
+        raw = self._canonical(
+            [
+                {
+                    "stage_id": "intake",
+                    "name": "intake",
+                    "nodes": [self._node("n1", "Receive", "intake")],
+                },
+            ]
+        )
+        understanding = FlowUnderstandingService().understand(raw)
+        stages = json.loads(_flow_json(understanding))["flow_stages"]
+        self.assertEqual(["intake"], [s["stage"] for s in stages])
+        self.assertEqual(["n1"], [n["node_id"] for n in stages[0]["nodes"]])
 
 
 class TalentRecommendationOptimizationTests(unittest.TestCase):

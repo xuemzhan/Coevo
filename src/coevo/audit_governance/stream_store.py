@@ -91,9 +91,10 @@ class AuditStreamStore:
         self._stream = stream
         self._last_hash = last_hash
         self._max_bytes = max_bytes
-        # 记录当前字节数：追加时增量维护，避免每条记录一次 stat() 系统调用。
-        # store 以“打开的文件流”独占追加，大小只经本实例变化，跟踪值即磁盘真实值。
-        self._size = path.stat().st_size
+        # 当前字节数：create() 在构造后追加 init 记录，open() 直接对既有
+        # 文件打开，因此统一由 _sync_size() 在记录追加前校准，之后追加时
+        # 增量维护，避免每条记录一次 stat() 系统调用。
+        self._size = 0
 
     @property
     def path(self) -> Path:
@@ -115,7 +116,11 @@ class AuditStreamStore:
         stream = path.open("a", encoding="utf-8")
         store = cls(path, stream, GENESIS, max_bytes)
         store._append_record({"schema_version": SCHEMA_VERSION}, action="init")
+        store._sync_size()
         return store
+
+    def _sync_size(self) -> None:
+        self._size = self._path.stat().st_size
 
     @classmethod
     def open(
@@ -126,6 +131,7 @@ class AuditStreamStore:
         if not path.is_file():
             raise AuditStreamStoreError("audit stream store does not exist")
         store = cls(path, path.open("a", encoding="utf-8"), GENESIS, max_bytes)
+        store._sync_size()
         if not store.verify_chain():
             store.close()
             raise AuditStreamStoreError("audit stream store chain is invalid")
@@ -154,7 +160,9 @@ class AuditStreamStore:
         ) + "\n"
         self._stream.write(line)
         self._stream.flush()
-        self._size += len(line.encode("utf-8"))
+        # 文本模式写入时换行会被翻译为 os.linesep（Windows 上 \r\n），
+        # 磁盘增量需按行内换行数补上翻译产生的字节，保持与 stat() 一致。
+        self._size += len(line.encode("utf-8")) + line.count("\n")
         self._last_hash = record["record_hash"]
         return record["record_hash"]
 
