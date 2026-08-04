@@ -4020,6 +4020,31 @@ security-reviewer 双签门禁。
   指纹变化未复核时按 git 历史回退 `dc18853`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- METRICS-2 /healthz 探针计数 done
+
+- 用户指令：继续对项目进行生产落地优化。本项收口 known-limitations 已文档
+  边界"request_count 仅统计认证请求"的可观测性缺口：看门狗/健康检查/基准
+  探针的 `/healthz` 流量此前完全不可见。
+- 实现（commit `74ffa11`，4 文件，+40/-8）：
+  ① `src/coevo/cockpit/server.py` 新增 `_probe_count`（复用 `_request_lock`
+  线程安全）与 `_count_probe()`，`/healthz` 命中时递增——存活探测独立计数，
+  METRICS-1 的 `request_count` 认证语义不变；
+  ② `/api/health` 响应增加 `probe_count` 字段（新字段不破坏既有消费者）；
+  ③ 文档：ops-runbook §1 进程内端点说明 + known-limitations request_count
+  条目更新（注明 METRICS-2 起可区分探针与真实流量）。
+- 安全边界：仅新增整数计数器，不改变认证/审计/访问日志语义；`/healthz` 仍
+  无敏感数据；零新增依赖、不改 wire/协议/会话语义。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 886 / integration 258 / security 97 / e2e 13 全绿；
+  新增集成测试 1 项（healthz 两次 → probe_count ≥2，且两次 /api/health 读取
+  间 probe_count 不变、request_count 递增——探测与认证计数互不混淆）；
+  内联 verifier + security-reviewer PASS（Critical/High 0）；protocol 不涉及。
+- 边界：probe_count 为运行时内存计数（与 request_count 一致，不随状态快照
+  持久化）；503 并发拒绝请求不计入任何计数（保持现状）。
+- 回滚条件：任一新增测试失败、probe_count 与 request_count 混淆、或门禁指纹
+  变化未复核时按 git 历史回退 `74ffa11`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

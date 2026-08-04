@@ -787,3 +787,13 @@ items:
       - tests/unit/test_ops_tooling.py
     security_review: true
     protocol_review: false
+  # ---------- /healthz 探针计数（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: METRICS-2
+    story: ENG-BASE
+    title: /healthz 探针计数：cockpit server 新增 _probe_count（线程安全锁复用）——/healthz 存活探测独立计数，与认证 request_count 互不混淆；/api/health 响应增加 probe_count 字段；ops-runbook §1 + known-limitations request_count 条目更新；集成测试 +1（healthz 计入 probe_count 且不计入 request_count，两次读取对比）
+    status: ready
+    dependencies: [METRICS-1]
+    acceptance_tests:
+      - tests/integration/test_cockpit_http_server.py
+    security_review: true
+    protocol_review: false
