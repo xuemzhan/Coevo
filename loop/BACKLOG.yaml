@@ -756,3 +756,13 @@ items:
       - tests/unit/test_secret_scan.py
     security_review: true
     protocol_review: false
+  # ---------- 健康检查增加备份新鲜度监控（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: OPS-3
+    story: ENG-BASE
+    title: 健康检查增加备份新鲜度监控：health_check.py 新增 backup 检查——扫描 --backup-root（默认 <install-root>\backups）下备份 manifest，取最新 created_at，年龄 ≤ --max-backup-age-days（默认 7 天）为 ok；缺失/无有效 manifest/过期均 degraded（不阻断服务）；CLI 新增 --backup-root 与 --max-backup-age-days（<1 拒绝）；只读、纯 stdlib；ops-runbook §1 检查表更新；测试 +4（缺失 degraded/新鲜 ok/过期 degraded 断言消息/取最新）
+    status: ready
+    dependencies: [BACKUP-2]
+    acceptance_tests:
+      - tests/unit/test_ops_tooling.py
+    security_review: true
+    protocol_review: false

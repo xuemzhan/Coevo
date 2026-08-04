@@ -3930,6 +3930,35 @@ security-reviewer 双签门禁。
   git 历史回退 `0403eb5`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- OPS-3 健康检查增加备份新鲜度监控 done
+
+- 用户指令：继续对项目进行生产落地优化。本项把 BACKUP-1/2 的备份工具链闭环
+  到可观测性：有备份工具，但此前没有监控"备份是否真的发生、是否过期"。
+- 实现（commit `cde90e5`，3 文件，+143/-1）：
+  ① `scripts/health_check.py` 新增 `backup` 检查——遍历 `--backup-root`
+  （默认 `<install-root>\backups`）下带有效 manifest 的备份目录，取最新
+  `created_at`，年龄 ≤ `--max-backup-age-days`（默认 7 天）为 ok；
+  ② 备份根缺失 / 无有效 manifest / 最新备份过期 → degraded（恢复姿态告警，
+  不影响服务状态判定，不误报 critical）；未来时间戳（>1 天，篡改或时钟偏移
+  异常）同样 degraded，不当作"新鲜"；detail 含标签与天数；
+  ③ CLI 新增 `--backup-root` 与 `--max-backup-age-days`（<1 拒绝，退出 2）；
+  ④ 只读、纯 stdlib（datetime/fromisoformat，Z 后缀兼容处理）；
+  ⑤ 文档：ops-runbook §1 检查表新增 backup 行 + 异地备份监控示例
+  （`--backup-root D:\... --max-backup-age-days 7`）。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 877 / integration 254 / security 97 / e2e 13 全绿；
+  新增测试 5 项（缺失 degraded / 新鲜 ok / 过期 degraded 断言消息 / 多备份
+  取最新 / 未来时间戳 degraded）+ build_report 含 backup 检查；CLI 冒烟：
+  缺失=exit 1、新鲜=ok、过期=degraded（3.0 days old (max 1)）；
+  内联 verifier + security-reviewer PASS（Critical/High 0：只读 manifest
+  解析、无敏感数据、无新增依赖、不涉及锁链）；protocol 不涉及。
+- 边界：backup 检查只看 manifest 的 `created_at` 新鲜度与 schema 可解析性，
+  不重算文件哈希（完整完整性校验仍用 `backup_state.py verify`，可接入监控
+  定期执行）；备份缺失在首次安装后即 degraded，属预期告警而非故障。
+- 回滚条件：任一新增测试失败、未来时间戳被接受为新鲜、或门禁指纹变化未
+  复核时按 git 历史回退 `cde90e5`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
