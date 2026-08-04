@@ -49,6 +49,12 @@ jobs:
         shell: powershell
         run: & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" scripts\quality_gate.py --target test-e2e
 
+      - name: examples (service-api fast tests + compileall)
+        shell: powershell
+        run: |
+          & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" examples\service-api\run_tests.py --fast
+          & "$env:COEVO_REPO_ROOT\.tools\python\3.14.3\python.exe" -m compileall -q -f examples
+
       - name: Upload gate evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -59,7 +59,9 @@ python "%LOCALAPPDATA%\KaiwuAgent\app\<version>\scripts\run_cockpit.py"
 | 开发环境与离线规则 | `docs/development-environment.md` |
 | 生产运维手册（配置参考/安装升级/审计密钥） | `docs/operations/` |
 | 需求—代码—测试追踪 | `docs/traceability/requirements-test-matrix.md` |
+| 代码注释导览 | `docs/code-guide.md`（逐模块职责/调用链/安全不变量） |
 | 工程循环状态 | `loop/`（GOAL/STATE/BACKLOG/DECISIONS/VERIFICATION） |
+| 端到端示例 | `examples/`（跨单位小工具开发项目完整演示，含运行/核验脚本） |
 
 ## 交付边界
 

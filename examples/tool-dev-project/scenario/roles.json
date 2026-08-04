@@ -1,0 +1,60 @@
+{
+  "project": {
+    "project_id": "PRJ001",
+    "name": "内部工时统计小工具开发"
+  },
+  "actors": [
+    {
+      "actor_id": "u.pm",
+      "display_name": "王负责人",
+      "organization": "任务牵头单位",
+      "project_role": "任务/项目实际负责人",
+      "cert_id": "CERT-OWNER"
+    },
+    {
+      "actor_id": "u.dev",
+      "display_name": "李研发",
+      "organization": "unit_a 信息中心研发组",
+      "project_role": "研发工程师",
+      "cert_id": "CERT-DEV"
+    },
+    {
+      "actor_id": "u.qa",
+      "display_name": "赵测试",
+      "organization": "unit_b 质量与测试组",
+      "project_role": "测试工程师",
+      "cert_id": "CERT-QA"
+    },
+    {
+      "actor_id": "u.doc",
+      "display_name": "陈文档",
+      "organization": "unit_a 信息中心研发组",
+      "project_role": "文档工程师",
+      "cert_id": "CERT-DOC"
+    },
+    {
+      "actor_id": "u.review",
+      "display_name": "周评审",
+      "organization": "unit_b 质量与测试组",
+      "project_role": "评审专家",
+      "cert_id": "CERT-REV"
+    },
+    {
+      "actor_id": "u.auditor",
+      "display_name": "吴安全",
+      "organization": "安全保密管理部门",
+      "project_role": "系统安全管理员",
+      "cert_id": "CERT-AUD"
+    }
+  ],
+  "grants": {
+    "u.pm": [
+      "orchestrator:confirm-package:PRJ001",
+      "merge:confirm:PRJ001",
+      "risk:confirm:PRJ001",
+      "brief:generate:PRJ001",
+      "knowledge:review:PRJ001"
+    ],
+    "u.auditor": ["audit:read", "identity:write"]
+  }
+}

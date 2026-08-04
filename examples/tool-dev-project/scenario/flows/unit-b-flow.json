@@ -1,0 +1,59 @@
+{
+  "format": "tabular",
+  "unit_id": "unit_b",
+  "title": "质量与测试组-测试交付流程",
+  "columns": [
+    "stage",
+    "node_id",
+    "title",
+    "stage_hint",
+    "inputs",
+    "outputs",
+    "review_criteria",
+    "responsible_roles"
+  ],
+  "rows": [
+    {
+      "stage": "test_design",
+      "node_id": "n.test_design",
+      "title": "测试用例设计",
+      "stage_hint": "评审",
+      "inputs": ["需求清单"],
+      "outputs": ["测试用例"],
+      "review_criteria": ["用例覆盖关键场景"],
+      "responsible_roles": ["tech:testing"]
+    },
+    {
+      "stage": "test_execution",
+      "node_id": "n.test_exec",
+      "title": "功能与回归测试执行",
+      "stage_hint": "执行",
+      "inputs": ["可运行工具代码", "测试用例"],
+      "outputs": ["测试报告"],
+      "review_criteria": ["缺陷已记录"],
+      "responsible_roles": ["tech:testing"]
+    },
+    {
+      "stage": "acceptance",
+      "node_id": "n.acceptance",
+      "title": "验收评审与交付确认",
+      "stage_hint": "验收",
+      "inputs": ["测试报告"],
+      "outputs": ["验收结论"],
+      "review_criteria": ["验收标准满足"],
+      "responsible_roles": ["review:expert"]
+    }
+  ],
+  "roles": [
+    {
+      "role_id": "tech.testing",
+      "name": "测试工程师",
+      "responsibility": "设计与执行测试并输出测试报告"
+    },
+    {
+      "role_id": "review.expert",
+      "name": "评审专家",
+      "responsibility": "验收评审与交付确认"
+    }
+  ]
+}

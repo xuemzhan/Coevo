@@ -1,0 +1,75 @@
+{
+  "format": "canonical",
+  "flow": {
+    "unit_id": "unit_a",
+    "title": "信息中心研发组-小工具研发流程",
+    "stages": [
+      {
+        "stage_id": "planning_stage",
+        "name": "需求与方案",
+        "nodes": [
+          {
+            "node_id": "n.req_analysis",
+            "title": "需求澄清与方案确认",
+            "stage_hint": "方案策划",
+            "inputs": ["项目目标"],
+            "outputs": ["需求清单", "技术方案"],
+            "review_criteria": ["负责人确认需求范围"],
+            "responsible_roles": ["tech:python"]
+          }
+        ]
+      },
+      {
+        "stage_id": "execution_stage",
+        "name": "开发实施",
+        "nodes": [
+          {
+            "node_id": "n.impl_core",
+            "title": "核心统计功能实现",
+            "stage_hint": "开发阶段",
+            "inputs": ["需求清单"],
+            "outputs": ["可运行工具代码"],
+            "review_criteria": ["功能自测通过"],
+            "responsible_roles": ["tech:python"]
+          },
+          {
+            "node_id": "n.impl_report",
+            "title": "报表导出功能实现",
+            "stage_hint": "开发阶段",
+            "inputs": ["需求清单"],
+            "outputs": ["报表模块"],
+            "review_criteria": ["样例数据验证通过"],
+            "responsible_roles": ["tech:python"]
+          }
+        ]
+      },
+      {
+        "stage_id": "documentation_stage",
+        "name": "文档编制",
+        "nodes": [
+          {
+            "node_id": "n.docs_guide",
+            "title": "用户手册编写",
+            "stage_hint": "收尾",
+            "inputs": ["可运行工具代码"],
+            "outputs": ["用户手册"],
+            "review_criteria": ["手册覆盖主要功能"],
+            "responsible_roles": ["docs:writer"]
+          }
+        ]
+      }
+    ],
+    "roles": [
+      {
+        "role_id": "tech.python",
+        "name": "研发工程师",
+        "responsibility": "负责工具设计与编码实现"
+      },
+      {
+        "role_id": "docs.writer",
+        "name": "文档工程师",
+        "responsibility": "编写使用手册与交付说明"
+      }
+    ]
+  }
+}

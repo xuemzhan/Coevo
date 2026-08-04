@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "base_revision": "PRJ001-R0001",
+  "project_id": "PRJ001",
+  "task_id": "t.1",
+  "title": "内部工时统计小工具开发",
+  "objective": "基于 Python 开发一个内部工时统计小工具，支持工时录入、按人员/项目汇总统计与报表导出；由信息中心研发组（unit_a）和质量与测试组（unit_b）跨单位协作完成，工期三周，全程离线协同。",
+  "plan_start": "2026-08-01T00:00:00Z",
+  "plan_end": "2026-08-20T00:00:00Z",
+  "responsible_units": ["unit_a", "unit_b"],
+  "recipient_cert_id": "CERT-DEV",
+  "sender_cert_id": "CERT-OWNER",
+  "package_type": "TASK_ASSIGNMENT",
+  "payload_digest": "0000000000000000000000000000000000000000000000000000000000000000"
+}

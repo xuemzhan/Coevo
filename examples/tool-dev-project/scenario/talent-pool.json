@@ -1,0 +1,60 @@
+{
+  "pool_code": "pool.hr",
+  "schema_version": "1.0",
+  "talents": [
+    {
+      "talent_code": "t.dev1",
+      "skill_tags": ["tech:python", "domain:hr"],
+      "credentials": ["cert.python"],
+      "current_task_count": 1,
+      "max_parallel_tasks": 2,
+      "availability": {"start": "2026-08-01T00:00:00Z", "end": "2026-08-31T00:00:00Z"},
+      "redacted_identity": {"pool_code": "pool.hr", "display_hint": "T-01", "identity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+    },
+    {
+      "talent_code": "t.dev2",
+      "skill_tags": ["tech:python"],
+      "credentials": [],
+      "current_task_count": 2,
+      "max_parallel_tasks": 2,
+      "availability": {"start": "2026-08-21T00:00:00Z", "end": "2026-08-31T00:00:00Z"},
+      "redacted_identity": {"pool_code": "pool.hr", "display_hint": "T-02", "identity_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+    },
+    {
+      "talent_code": "t.qa1",
+      "skill_tags": ["tech:testing"],
+      "credentials": [],
+      "current_task_count": 2,
+      "max_parallel_tasks": 2,
+      "availability": {"start": "2026-08-01T00:00:00Z", "end": "2026-08-31T00:00:00Z"},
+      "redacted_identity": {"pool_code": "pool.hr", "display_hint": "T-11", "identity_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+    },
+    {
+      "talent_code": "t.qa2",
+      "skill_tags": ["tech:testing"],
+      "credentials": [],
+      "current_task_count": 1,
+      "max_parallel_tasks": 2,
+      "availability": {"start": "2026-08-01T00:00:00Z", "end": "2026-08-31T00:00:00Z"},
+      "redacted_identity": {"pool_code": "pool.hr", "display_hint": "T-12", "identity_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}
+    },
+    {
+      "talent_code": "t.doc1",
+      "skill_tags": ["docs:writer"],
+      "credentials": [],
+      "current_task_count": 0,
+      "max_parallel_tasks": 1,
+      "availability": {"start": "2026-08-01T00:00:00Z", "end": "2026-08-31T00:00:00Z"},
+      "redacted_identity": {"pool_code": "pool.hr", "display_hint": "T-21", "identity_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"}
+    },
+    {
+      "talent_code": "t.rev1",
+      "skill_tags": ["review:expert"],
+      "credentials": ["cert.audit"],
+      "current_task_count": 1,
+      "max_parallel_tasks": 2,
+      "availability": {"start": "2026-08-01T00:00:00Z", "end": "2026-08-31T00:00:00Z"},
+      "redacted_identity": {"pool_code": "pool.hr", "display_hint": "T-31", "identity_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}
+    }
+  ]
+}
