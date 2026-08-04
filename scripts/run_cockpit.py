@@ -15,7 +15,11 @@ writer are released, and the process exits 0.
 ``--preflight`` (AVAIL-1) runs the same fail-fast checks operators use
 before starting: config validity, data/log directory writability, free
 disk space, audit-seal state and model-config loadability. Exit codes:
-0 = ok, 1 = degraded (warnings), 2 = critical (do not start).
+0 = ok, 1 = degraded (warnings), 2 = critical (do not start). Model
+external-egress posture is reported as a degraded warning (OPS-4) when
+the active provider is non-loopback and has ``external_data_ok=true``,
+or when the legacy ``COEVO_LLM_EXTERNAL_DATA_OK`` switch is set; the
+same warning is written to the app log at every start.
 """
 from __future__ import annotations
 
@@ -41,6 +45,37 @@ from src.coevo.cockpit.server import (  # noqa: E402
 from src.coevo.config import AppConfig, ConfigError  # noqa: E402
 from src.coevo.logging_setup import setup_logging  # noqa: E402
 from src.coevo.version import version_string  # noqa: E402
+
+
+def model_egress_warnings() -> list[str]:
+    """Posture warnings when model external egress may be approved (OPS-4).
+
+    Approval itself is fail-closed and legitimate (``config/model-config.json``
+    ``external_data_ok``); this helper only makes it visible. Loopback
+    providers never warn because their traffic stays on the machine.
+    """
+    warnings: list[str] = []
+    if os.environ.get("COEVO_LLM_EXTERNAL_DATA_OK", "") == "1":
+        warnings.append(
+            "legacy COEVO_LLM_EXTERNAL_DATA_OK=1 is set "
+            "(compat switch only; approval via config/model-config.json governs)"
+        )
+    try:
+        from src.coevo.model.config import load_model_config
+        from src.coevo.model.openai_compatible import is_loopback
+
+        cfg = load_model_config()
+    except Exception as exc:  # noqa: BLE001 - model config is advisory for startup
+        warnings.append(
+            f"model config unreadable ({exc}); offline default will be used"
+        )
+        return warnings
+    if cfg.external_data_ok and cfg.base_url and not is_loopback(cfg.base_url):
+        warnings.append(
+            f"model external egress is APPROVED (provider={cfg.provider}, "
+            "external_data_ok=true): data may leave this machine"
+        )
+    return warnings
 
 
 def build_config(args: argparse.Namespace) -> AppConfig:
@@ -113,11 +148,7 @@ def preflight(config: AppConfig, *, python: str | None = None) -> int:
             )
     except subprocess.TimeoutExpired:
         problems.append("audit seal verify timed out")
-    try:
-        from src.coevo.model.config import load_model_config
-        load_model_config()
-    except Exception as exc:  # noqa: BLE001 - model config is advisory for startup
-        warnings.append(f"model config unreadable ({exc}); offline default will be used")
+    warnings.extend(model_egress_warnings())
     print("preflight ok" if not problems else "preflight critical")
     for problem in problems:
         print(f"  critical: {problem}")
@@ -137,6 +168,8 @@ def run(args: argparse.Namespace) -> int:
     if args.preflight:
         return preflight(config)
     logger = setup_logging(config)
+    for warning in model_egress_warnings():
+        logger.warning("model egress posture: %s", warning)
     http_config_kwargs = dict(
         bind_host=config.cockpit_host,
         bind_port=config.cockpit_port,

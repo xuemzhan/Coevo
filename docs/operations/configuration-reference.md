@@ -42,7 +42,7 @@
 | 变量 | 默认值 | 说明 |
 |---|---|---|
 | `COEVO_LLM_API_KEY` | 无 | 远程模型 API 密钥，仅经环境变量读取，绝不进配置/日志/repr/请求体 |
-| `COEVO_LLM_EXTERNAL_DATA_OK` | 未设置（=0） | 兼容性遗留开关：仅在**直接构造** `DeepSeekProvider` 且未显式传 `external_data_ok` 时生效；经 `select_provider` 的标准路径以外发审批由 `config/model-config.json` 的 `external_data_ok` 决定（fail-closed 检查点在 provider 内） |
+| `COEVO_LLM_EXTERNAL_DATA_OK` | 未设置（=0） | 兼容性遗留开关：仅在**直接构造** `DeepSeekProvider` 且未显式传 `external_data_ok` 时生效；经 `select_provider` 的标准路径以外发审批由 `config/model-config.json` 的 `external_data_ok` 决定（fail-closed 检查点在 provider 内）。设置时 `run_cockpit --preflight` 返回 degraded 并在启动日志告警（OPS-4 可见性） |
 
 回环地址（`127.0.0.1`/`localhost`/`::1`）自动判定为**本地模式**：免密钥、免外发审批、
 数据不出机（约束 §9.1）；非回环必须 https + 密钥 + 外发审批。

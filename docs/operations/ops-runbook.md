@@ -79,6 +79,12 @@ python scripts\run_cockpit.py --preflight
 解释器解析顺序：显式 `-PythonPath` → `<install_root>\python-path.txt`（OPS-2
 sidecar）→ PATH；sidecar 内容必须是绝对路径且指向存在的可执行文件，否则失败关闭。
 
+模型外发姿态（OPS-4）：当激活 provider 为非回环（https）且
+`config/model-config.json` 的 `external_data_ok=true`，或遗留开关
+`COEVO_LLM_EXTERNAL_DATA_OK=1` 被设置时，`--preflight` 返回 degraded 并在
+启动日志输出 `model egress posture` 告警——审批机制本身 fail-closed 且合法，
+此告警仅为让"数据可能离开本机"可见；回环 provider（数据不出机）不告警。
+
 ## 3. 日志轮转
 
 - 应用运行日志：`coevo-app.log`（5MB×5，自动轮转）；

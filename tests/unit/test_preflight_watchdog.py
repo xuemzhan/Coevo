@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -85,6 +87,83 @@ class PreflightTests(unittest.TestCase):
             ):
                 code = run_cockpit.preflight(self._config(tmp))
             self.assertEqual(1, code)
+
+
+class PreflightEgressTests(unittest.TestCase):
+    """OPS-4: model external-egress posture warnings in preflight."""
+
+    def _config(self, tmp: str):
+        return run_cockpit.AppConfig(
+            data_dir=Path(tmp),
+            log_dir=Path(tmp),
+            cockpit_host="127.0.0.1",
+            cockpit_port=12701,
+            log_level="INFO",
+        )
+
+    def _fake_config(self, provider: str, base_url: str | None, external_data_ok: bool):
+        return types.SimpleNamespace(
+            provider=provider,
+            base_url=base_url,
+            external_data_ok=external_data_ok,
+        )
+
+    def test_preflight_degraded_when_non_loopback_egress_approved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = self._fake_config(
+                "deepseek", "https://api.deepseek.com", True
+            )
+            with mock.patch.object(
+                run_cockpit.subprocess, "run", return_value=_sealed_process()
+            ), mock.patch(
+                "src.coevo.model.config.load_model_config", return_value=fake
+            ):
+                code = run_cockpit.preflight(self._config(tmp))
+            self.assertEqual(1, code)
+
+    def test_preflight_ok_when_loopback_egress_approved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = self._fake_config(
+                "local_openai", "http://127.0.0.1:8000/v1", True
+            )
+            with mock.patch.object(
+                run_cockpit.subprocess, "run", return_value=_sealed_process()
+            ), mock.patch(
+                "src.coevo.model.config.load_model_config", return_value=fake
+            ):
+                code = run_cockpit.preflight(self._config(tmp))
+            self.assertEqual(0, code)
+
+    def test_preflight_degraded_when_legacy_env_switch_set(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = self._fake_config("offline", None, False)
+            with mock.patch.object(
+                run_cockpit.subprocess, "run", return_value=_sealed_process()
+            ), mock.patch(
+                "src.coevo.model.config.load_model_config", return_value=fake
+            ), mock.patch.dict(
+                os.environ, {"COEVO_LLM_EXTERNAL_DATA_OK": "1"}
+            ):
+                code = run_cockpit.preflight(self._config(tmp))
+            self.assertEqual(1, code)
+
+    def test_egress_warnings_message_content(self):
+        fake = self._fake_config("deepseek", "https://api.deepseek.com", True)
+        with mock.patch(
+            "src.coevo.model.config.load_model_config", return_value=fake
+        ):
+            warnings = run_cockpit.model_egress_warnings()
+        self.assertTrue(any("APPROVED" in item for item in warnings), warnings)
+
+    def test_egress_warnings_silent_for_loopback_and_offline(self):
+        fake = self._fake_config("offline", None, False)
+        with mock.patch(
+            "src.coevo.model.config.load_model_config", return_value=fake
+        ), mock.patch.dict(
+            os.environ, {"COEVO_LLM_EXTERNAL_DATA_OK": ""}
+        ):
+            warnings = run_cockpit.model_egress_warnings()
+        self.assertEqual([], warnings)
 
 
 class WatchdogTests(unittest.TestCase):
