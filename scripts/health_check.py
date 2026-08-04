@@ -14,7 +14,11 @@ Checks
   (``fully-sealed`` ok; unsealed tail = degraded; failure = critical);
 * installed version consistency (install ``current`` pointer -> app
   version matches ``src/coevo/version.py`` in the installed bundle);
-* single-instance lock is not stale (age < 10 minutes).
+* single-instance lock is not stale (age < 10 minutes);
+* a backup exists under ``--backup-root`` (default
+  ``<install-root>\\backups``) and the newest backup manifest is at most
+  ``--max-backup-age-days`` (default 7) old (OPS-3). A missing or stale
+  backup is degraded (recovery posture), never critical.
 
 All checks are read-only; no state is modified. This script is meant
 for monitoring hooks / scheduled checks, not for the quality gate.
@@ -30,6 +34,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -147,6 +152,64 @@ def check_lock(install_root: Path) -> dict[str, Any]:
     return _check("lock", True, f"lock fresh (age {age:.0f}s)")
 
 
+def check_backup(backup_root: Path, max_age_days: int) -> dict[str, Any]:
+    """Latest backup freshness (OPS-3): exists and <= max_age_days old."""
+    backup_root = backup_root.resolve()
+    if not backup_root.is_dir():
+        return _check(
+            "backup",
+            False,
+            f"no backup root: {backup_root}",
+            level="degraded",
+        )
+    newest: tuple[str, datetime] | None = None
+    for child in sorted(backup_root.iterdir()):
+        if not child.is_dir():
+            continue
+        manifest = child / "manifest.json"
+        if not manifest.is_file():
+            continue
+        try:
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+            created = datetime.fromisoformat(
+                str(payload.get("created_at", "")).replace("Z", "+00:00")
+            )
+        except (OSError, UnicodeDecodeError, ValueError, json.JSONDecodeError):
+            continue
+        if newest is None or created > newest[1]:
+            newest = (child.name, created)
+    if newest is None:
+        return _check(
+            "backup",
+            False,
+            f"no valid backup manifests under {backup_root}",
+            level="degraded",
+        )
+    label, created = newest
+    now = datetime.now(UTC)
+    if created > now + timedelta(days=1):
+        return _check(
+            "backup",
+            False,
+            f"latest backup '{label}' has an invalid future timestamp",
+            level="degraded",
+        )
+    age_days = (now - created).total_seconds() / 86400
+    if age_days > max_age_days:
+        return _check(
+            "backup",
+            False,
+            f"latest backup '{label}' is {age_days:.1f} days old "
+            f"(max {max_age_days})",
+            level="degraded",
+        )
+    return _check(
+        "backup",
+        True,
+        f"latest backup '{label}' is {age_days:.2f} days old",
+    )
+
+
 def build_report(
     *,
     install_root: Path,
@@ -154,6 +217,8 @@ def build_report(
     cockpit_url: str,
     min_free_bytes: int,
     audit_python: str | None,
+    backup_root: Path | None = None,
+    max_backup_age_days: int = 7,
 ) -> dict[str, Any]:
     checks = [
         check_dirs(install_root),
@@ -162,6 +227,10 @@ def build_report(
         check_lock(install_root),
         check_cockpit(cockpit_url),
         check_audit(repo_root, audit_python),
+        check_backup(
+            backup_root or install_root / "backups",
+            max_backup_age_days,
+        ),
     ]
     critical = [c for c in checks if not c["ok"] and c["level"] == "critical"]
     degraded = [c for c in checks if not c["ok"] and c["level"] == "degraded"]
@@ -189,13 +258,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cockpit-url", default="http://127.0.0.1:12701")
     parser.add_argument("--min-free-bytes", type=int, default=512 * 1024 * 1024)
     parser.add_argument("--audit-python", default=None)
+    parser.add_argument("--backup-root", type=Path, default=None)
+    parser.add_argument("--max-backup-age-days", type=int, default=7)
     args = parser.parse_args(argv)
+    if args.max_backup_age_days < 1:
+        print("error: --max-backup-age-days must be a positive integer", file=sys.stderr)
+        return 2
     report = build_report(
         install_root=args.install_root.resolve(),
         repo_root=args.repo_root.resolve(),
         cockpit_url=args.cockpit_url,
         min_free_bytes=args.min_free_bytes,
         audit_python=args.audit_python,
+        backup_root=args.backup_root,
+        max_backup_age_days=args.max_backup_age_days,
     )
     print(json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2))
     return 0 if report["status"] == "ok" else (1 if report["status"] == "degraded" else 2)

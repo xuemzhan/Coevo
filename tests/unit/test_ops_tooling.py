@@ -70,6 +70,67 @@ class HealthCheckTests(unittest.TestCase):
             os.utime(lock, (old, old))
             self.assertFalse(health.check_lock(root)["ok"])
 
+    def _seed_backup(self, backup_root: Path, label: str, days_ago: float) -> None:
+        from datetime import UTC, datetime, timedelta
+
+        target = backup_root / label
+        target.mkdir(parents=True, exist_ok=True)
+        created = (datetime.now(UTC) - timedelta(days=days_ago)).isoformat().replace(
+            "+00:00", "Z"
+        )
+        (target / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0",
+                    "label": label,
+                    "created_at": created,
+                    "files": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    def test_backup_missing_root_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = health.check_backup(Path(tmp) / "nope", 7)
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+
+    def test_backup_fresh_ok(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_backup(root, "b1", 0)
+            result = health.check_backup(root, 7)
+            self.assertTrue(result["ok"])
+            self.assertIn("b1", result["detail"])
+
+    def test_backup_stale_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_backup(root, "old", 10)
+            result = health.check_backup(root, 7)
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+            self.assertIn("old", result["detail"])
+
+    def test_backup_picks_newest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_backup(root, "old", 10)
+            self._seed_backup(root, "fresh", 0.5)
+            result = health.check_backup(root, 7)
+            self.assertTrue(result["ok"])
+            self.assertIn("fresh", result["detail"])
+
+    def test_backup_future_timestamp_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_backup(root, "b-future", -3)  # 3 days in the future
+            result = health.check_backup(root, 7)
+            self.assertFalse(result["ok"])
+            self.assertEqual("degraded", result["level"])
+            self.assertIn("future", result["detail"])
+
     def test_build_report_aggregation(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._install_root(tmp)
@@ -84,6 +145,8 @@ class HealthCheckTests(unittest.TestCase):
             self.assertIn(report["status"], ("ok", "degraded"))
             self.assertIsInstance(report["checks"], list)
             self.assertTrue(report["checks"][0]["ok"])  # dirs
+            names = [check["name"] for check in report["checks"]]
+            self.assertIn("backup", names)
 
 
 class AutostartHelperTests(unittest.TestCase):

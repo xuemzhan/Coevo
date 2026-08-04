@@ -8,6 +8,8 @@
 
 ```powershell
 python scripts\health_check.py --install-root "%LOCALAPPDATA%\KaiwuAgent"
+# 异地备份监控（OPS-3）：备份根 + 最大备份年龄（天）
+python scripts\health_check.py --backup-root "D:\CoevoBackups" --max-backup-age-days 7
 ```
 
 输出结构化 JSON（`checks[]` + `status`），退出码：0=ok、1=degraded、2=critical。
@@ -21,6 +23,7 @@ python scripts\health_check.py --install-root "%LOCALAPPDATA%\KaiwuAgent"
 | lock | 单实例锁未陈旧（<10 分钟） | critical |
 | cockpit | `/healthz` 返回 200 | degraded（未运行） |
 | audit | `audit_seal.py verify`：fully-sealed ok；未封尾=degraded；失败=critical | 分级 |
+| backup | 最新备份 manifest 存在且 ≤ `--max-backup-age-days`（默认 7 天；OPS-3） | degraded（缺失/过期，恢复姿态告警，不阻断服务） |
 
 可接入监控/计划任务定期执行；本脚本只读、不修改任何状态。
 
