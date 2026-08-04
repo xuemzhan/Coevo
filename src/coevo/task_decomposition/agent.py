@@ -86,12 +86,16 @@ class ModelTaskSuggestion:
 def _flow_json(understanding: FlowUnderstanding) -> str:
     stages: list[dict[str, object]] = []
     node_count = 0
+    # 预索引：一次遍历把节点按 stage_id 分组，避免“每阶段全量扫描所有节点”
+    # 的 O(阶段数×节点数) 重复工作；分组顺序与输出语义保持不变。
+    nodes_by_stage: dict[str, list[object]] = {}
+    for m in understanding.mapped.nodes:
+        sid = understanding.graph.stage_id_for_node(m.node.node_id)
+        if sid is None:
+            continue
+        nodes_by_stage.setdefault(sid, []).append(m)
     for stage_id in understanding.graph.stage_ids_in_order:
-        nodes = [
-            m
-            for m in understanding.mapped.nodes
-            if understanding.graph.stage_id_for_node(m.node.node_id) == stage_id
-        ]
+        nodes = nodes_by_stage.get(stage_id, [])
         entries: list[dict[str, object]] = []
         for m in nodes:
             node_count += 1

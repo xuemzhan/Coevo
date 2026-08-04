@@ -247,7 +247,7 @@ def verify_signed_receipt(
 class MergeCommitReceiptStore:
     """Sealed persistent-value store; callers cannot inject initial records."""
 
-    __slots__ = ("_receipts",)
+    __slots__ = ("_receipts", "_by_id", "_by_project")
 
     def __init_subclass__(cls, **kwargs):
         raise TypeError("MergeCommitReceiptStore may not be subclassed")
@@ -257,6 +257,16 @@ class MergeCommitReceiptStore:
             raise MergeCommitReceiptError("receipt store construction is sealed")
         self._receipts = receipts
         self._validate_history()
+        # 构造期一次性建立 O(1) 查询索引：store 不可变，索引永不失效。
+        # 与原实现“每次 get/by_project 全量线性扫描+重校验”相比，查询从
+        # O(N) 降为 O(1)/O(k)，历史校验仍完整执行且失败即构造失败。
+        by_id: dict[str, MergeCommitReceipt] = {}
+        by_project: dict[str, list[MergeCommitReceipt]] = {}
+        for receipt in receipts:
+            by_id[receipt.receipt_id] = receipt
+            by_project.setdefault(receipt.project_id, []).append(receipt)
+        self._by_id = by_id
+        self._by_project = by_project
 
     @classmethod
     def empty(cls) -> "MergeCommitReceiptStore":
@@ -269,12 +279,10 @@ class MergeCommitReceiptStore:
         raise MergeCommitReceiptError("receipt store copying is forbidden")
 
     def get(self, receipt_id: str) -> MergeCommitReceipt | None:
-        self._validate_history()
-        return next((item for item in self._receipts if item.receipt_id == receipt_id), None)
+        return self._by_id.get(receipt_id)
 
     def by_project(self, project_id: str) -> tuple[MergeCommitReceipt, ...]:
-        self._validate_history()
-        return tuple(item for item in self._receipts if item.project_id == project_id)
+        return tuple(self._by_project.get(project_id, ()))
 
     def _append(self, receipt: MergeCommitReceipt, *, _seal) -> "MergeCommitReceiptStore":
         if _seal is not _STORE_SEAL or type(receipt) is not MergeCommitReceipt:

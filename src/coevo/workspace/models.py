@@ -94,7 +94,12 @@ class WorkspaceRegistry:
         return None
 
     def by_package(self, package_id: str) -> tuple[WorkspaceEntry, ...]:
-        return tuple(e for e in self._entries if e.package_id == package_id)
+        # ?????? package_id -> ????? O(1) ????
+        # ???????????????????????????
+        by_package: dict[str, list[WorkspaceEntry]] = {}
+        for entry in self._entries:
+            by_package.setdefault(entry.package_id, []).append(entry)
+        return tuple(by_package.get(package_id, ()))
 
     def register(self, entry: WorkspaceEntry) -> "WorkspaceRegistry":
         """Atomically insert ``entry``.
