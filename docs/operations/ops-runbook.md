@@ -91,6 +91,9 @@ sidecar）→ PATH；sidecar 内容必须是绝对路径且指向存在的可执
 # 备份（默认到 %LOCALAPPDATA%\KaiwuAgent\backups\<时间戳>\）
 python scripts\backup_state.py --action backup
 
+# 异地备份（另一磁盘/网络共享；BACKUP-2：强制异卷 + 安装根外）
+python scripts\backup_state.py --action backup --backup-root "D:\CoevoBackups" --require-external
+
 # 校验备份 / 列出备份 / 恢复（恢复前自动校验；运行中锁存在时拒绝）
 python scripts\backup_state.py --action verify --label <label>
 python scripts\backup_state.py --action list
@@ -102,6 +105,12 @@ python scripts\backup_state.py --action restore --label <label>
 恢复时把将被覆盖的文件先复制到 `.pre-restore-<ts>` 再回拷。审计链恢复后运行
 `python scripts/audit_seal.py verify` 确认封存状态。密钥材料（CNG KEK、私钥句柄）
 不随文件备份，需按 `audit-key-runbook.md` / 身份库方案另行处置。
+
+默认备份根（`<install_root>\backups`）与数据同卷；manifest 的 `same_volume`
+字段可供自动化检查。生产部署建议用 `--backup-root` 指向另一磁盘/共享并加
+`--require-external`：备份根位于安装根内、或与安装根同卷时直接失败（失败关闭），
+避免磁盘故障同时毁掉数据与备份。`--require-external` 仅作用于 `backup` 动作；
+`verify`/`restore` 不设此限制（恢复只看备份自身完整性）。
 
 ## 5. 排障速查
 

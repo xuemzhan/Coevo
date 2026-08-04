@@ -16,6 +16,13 @@ manifest (``manifest.json``). ``verify`` re-checks every file;
 lock is fresh (a live process may be writing state), and keeps a
 ``.pre-restore-<ts>`` copy of every replaced file.
 
+``--backup-root`` may point to an external volume (another drive or a
+network share); ``--require-external`` refuses to back up when the backup
+root is inside the install root or on the same volume as the install root,
+so a disk failure cannot destroy data and backup together (BACKUP-2).
+Every manifest records ``same_volume`` so automation can see whether the
+3-2-1 property was satisfied at backup time.
+
 Fail-closed: manifest paths must be relative and resolve inside the
 install root (no ``..``, no absolute paths, no reparse escapes).
 """
@@ -98,6 +105,28 @@ def _validate_label(label: str) -> str:
     return label
 
 
+def _volume_key(path: Path) -> str:
+    """Stable volume identifier for ``path`` (via its nearest existing ancestor)."""
+    candidate = path.resolve()
+    while not candidate.exists():
+        parent = candidate.parent
+        if parent == candidate:
+            break
+        candidate = parent
+    try:
+        return str(candidate.stat().st_dev)
+    except OSError as exc:
+        raise BackupValidationError(f"cannot stat backup volume: {path}") from exc
+
+
+def _inside(root: Path, child: Path) -> bool:
+    try:
+        child.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
 def _collect_files(install_root: Path) -> tuple[str, ...]:
     """Return existing state-file relative paths (directories expanded)."""
     found: list[str] = []
@@ -124,14 +153,44 @@ def backup(
     install_root: Path,
     backup_root: Path,
     label: str,
+    *,
+    require_external: bool = False,
 ) -> dict[str, Any]:
     install_root = install_root.resolve()
     backup_root = backup_root.resolve()
+    if backup_root.exists() and not backup_root.is_dir():
+        raise BackupValidationError(f"backup root is not a directory: {backup_root}")
+    if require_external:
+        if _inside(install_root, backup_root):
+            raise BackupValidationError(
+                "backup root must be external to the install root "
+                f"(got {backup_root})"
+            )
+        if _volume_key(install_root) == _volume_key(backup_root):
+            raise BackupValidationError(
+                "backup root is on the same volume as the install root; "
+                "--require-external demands a different volume "
+                f"(got {backup_root})"
+            )
+    same_volume = _volume_key(install_root) == _volume_key(backup_root)
     label = _validate_label(label)
     target = backup_root / label
     if target.exists():
         raise BackupValidationError(f"backup label already exists: {label}")
-    target.mkdir(parents=True, exist_ok=False)
+    try:
+        target.mkdir(parents=True, exist_ok=False)
+    except OSError as exc:
+        raise BackupValidationError(
+            f"cannot create backup target {target}: {exc}"
+        ) from exc
+    probe = target / ".write-test"
+    try:
+        probe.write_text("probe\n", encoding="utf-8")
+        probe.unlink()
+    except OSError as exc:
+        raise BackupValidationError(
+            f"backup root is not writable: {target}: {exc}"
+        ) from exc
     entries: list[dict[str, Any]] = []
     skipped: list[str] = []
     for relative in _collect_files(install_root):
@@ -153,6 +212,7 @@ def backup(
         "schema_version": MANIFEST_SCHEMA,
         "label": label,
         "created_at": _now_iso(),
+        "same_volume": same_volume,
         "files": entries,
         "skipped": sorted(skipped),
     }
@@ -290,6 +350,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--backup-root", type=Path, default=None)
     parser.add_argument("--label", default=None)
+    parser.add_argument(
+        "--require-external",
+        action="store_true",
+        help=(
+            "backup only when the backup root is outside the install root "
+            "and on a different volume (BACKUP-2)"
+        ),
+    )
     args = parser.parse_args(argv)
     install_root = args.install_root.resolve()
     backup_root = (
@@ -298,12 +366,23 @@ def main(argv: list[str] | None = None) -> int:
         else install_root / "backups"
     )
     try:
+        if args.require_external and args.action != "backup":
+            print(
+                "error: --require-external applies to the backup action only",
+                file=sys.stderr,
+            )
+            return 2
         if args.action == "list":
             print(json.dumps(list_backups(backup_root), ensure_ascii=False, indent=2))
             return 0
         label = args.label or datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         if args.action == "backup":
-            manifest = backup(install_root, backup_root, label)
+            manifest = backup(
+                install_root,
+                backup_root,
+                label,
+                require_external=args.require_external,
+            )
             print(json.dumps(manifest, ensure_ascii=False, indent=2))
         elif args.action == "verify":
             result = verify(backup_root, label)

@@ -94,6 +94,54 @@ class BackupFlowTests(unittest.TestCase):
             with self.assertRaises(backup_state.BackupValidationError):
                 backup_state.backup(install, backups, "b1")
 
+    def test_backup_external_root_flags_same_volume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            install = _seed_install(tmp)
+            external = Path(tmp) / "external-backups"
+            manifest = backup_state.backup(install, external, "b1")
+            self.assertTrue(manifest["same_volume"])
+            self.assertTrue((external / "b1" / "manifest.json").is_file())
+            result = backup_state.verify(external, "b1")
+            self.assertTrue(result["ok"])
+
+    def test_require_external_rejects_inside_install_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            install = _seed_install(tmp)
+            with self.assertRaises(backup_state.BackupValidationError) as ctx:
+                backup_state.backup(
+                    install,
+                    install / "backups",
+                    "b1",
+                    require_external=True,
+                )
+            self.assertIn("external to the install root", str(ctx.exception))
+
+    def test_require_external_rejects_same_volume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            install = base / "install"
+            (install / "loop").mkdir(parents=True)
+            (install / "current").write_text("0.2.0\n", encoding="utf-8")
+            (install / "loop" / "tool-audit.jsonl").write_text("{}\n", encoding="utf-8")
+            (install / "loop" / "audit-head.json").write_text("{}", encoding="utf-8")
+            external = base / "external-backups"  # sibling: same volume, not inside
+            with self.assertRaises(backup_state.BackupValidationError) as ctx:
+                backup_state.backup(
+                    install,
+                    external,
+                    "b1",
+                    require_external=True,
+                )
+            self.assertIn("same volume", str(ctx.exception))
+
+    def test_backup_root_that_is_a_file_fails_cleanly(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            install = _seed_install(tmp)
+            file_root = Path(tmp) / "not-a-dir"
+            file_root.write_text("x", encoding="utf-8")
+            with self.assertRaises(backup_state.BackupValidationError):
+                backup_state.backup(install, file_root, "b1")
+
 
 if __name__ == "__main__":
     unittest.main()
