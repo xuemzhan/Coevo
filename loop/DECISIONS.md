@@ -1,5 +1,24 @@
 # Loop 决策记录
 
+## 2026-08-05 — 源码优化第二轮（热点路径复杂度收敛）
+
+- 提议：用户指令“继续优化你认为可以优化的代码”。在 OPT-PERF-1 已覆盖
+  的图算法/索引之外，扫描 `src/coevo` 剩余线性扫描与重复校验热点。
+- 决策（行为零变更，公共 API 与输出语义不变）：
+  1. `task_decomposition/agent.py`：`_flow_json` 由“每阶段全量扫描全部
+     节点”改为单次预索引按 stage 分组，O(S×N) → O(N)；新旧实现 4 组
+     场景（正常/孤儿节点/空阶段/超 200 上限）输出逐字节一致。
+  2. `merge/receipt.py`：`MergeCommitReceiptStore` 由“每次 get 全量
+     重校验历史 + 线性扫描”改为构造期一次性校验 + O(1) 索引（store
+     不可变，索引不失效）；历史完整性校验仍完整执行，失败即构造失败。
+  3. `workspace/models.py`：`by_package` 改为单次遍历分组后 O(1) 取
+     结果，消除导入循环中每次全量过滤的重复扫描；`register` 路径不变。
+- 验证：相关单元测试全绿（task_decomposition 67 / merge_receipt 22 /
+  merge_engine 32 / workspace_init 33）；全量 quality exit 0
+  （指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续优化你认为可以优化的代码”）。
+
 ## 2026-08-05 — 推送授权（用户明确指令，覆盖仓库默认“不 git push”约束）
 
 - 用户指令：对“2026-08-05 生产源码清理 + examples 完整演示”批次，用户回复
