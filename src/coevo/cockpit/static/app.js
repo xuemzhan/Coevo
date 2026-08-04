@@ -155,7 +155,11 @@
   }
 
   if (!token) {
-    setStatus("No session token. Start the cockpit with ?token=?", true);
+    setStatus(
+      "No session token. Start the cockpit with --print-token and open " +
+      "the printed URL.",
+      true
+    );
     return;
   }
   loadProjects();

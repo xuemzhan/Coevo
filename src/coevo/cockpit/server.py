@@ -527,6 +527,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 "session_count": self.server.session_manager.session_count,
                 "request_count": self.server.request_count,
                 "probe_count": self.server.probe_count,
+                "rejected_count": self.server.rejected_count,
                 "audit_records": len(self.server.recent_audit()),
                 "log_errors": self.server.log_errors,
             },
@@ -778,6 +779,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
         self._started_at = started_at
         self._request_count = 0
         self._probe_count = 0
+        self._rejected_count = 0
         self._request_lock = threading.Lock()
         self._concurrency = threading.BoundedSemaphore(
             config.max_concurrent_requests
@@ -834,6 +836,11 @@ class CockpitHttpServer(ThreadingHTTPServer):
         with self._request_lock:
             return self._probe_count
 
+    @property
+    def rejected_count(self) -> int:
+        with self._request_lock:
+            return self._rejected_count
+
     def process_request(self, request: Any, client_address: Any) -> None:
         """Bound concurrent handler threads; reject overflow with 503."""
         if not self._concurrency.acquire(blocking=False):
@@ -853,7 +860,25 @@ class CockpitHttpServer(ThreadingHTTPServer):
             self._concurrency.release()
 
     def _reject_busy(self, request: Any, client_address: Any) -> None:
-        """Reply 503 and close the socket when the concurrency limit is reached."""
+        """Reply 503 and close the socket when the concurrency limit is reached.
+
+        The rejection is observable (REVIEW-FIX-2): the counter is exposed
+        via ``/api/health`` and a bounded ``busy_rejected`` row is appended
+        to the access log when one is configured. No request content is
+        read or recorded.
+        """
+        with self._request_lock:
+            self._rejected_count += 1
+        if self._log_writer is not None:
+            client = client_address[0] if isinstance(client_address, tuple) else ""
+            self._log_writer.write(
+                {
+                    "ts": now_utc_iso_z(),
+                    "event": "busy_rejected",
+                    "client_host": client,
+                    "reason": "concurrency_limit",
+                }
+            )
         try:
             request.sendall(
                 b"HTTP/1.1 503 Service Unavailable\r\n"

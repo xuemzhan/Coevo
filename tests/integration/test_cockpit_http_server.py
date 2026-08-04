@@ -152,6 +152,7 @@ class CockpitHttpServerTests(unittest.TestCase):
             "session_count",
             "request_count",
             "probe_count",
+            "rejected_count",
             "audit_records",
             "log_errors",
         ):
@@ -159,6 +160,7 @@ class CockpitHttpServerTests(unittest.TestCase):
         self.assertGreaterEqual(data["request_count"], 1)
         self.assertGreaterEqual(data["session_count"], 1)
         self.assertGreaterEqual(data["probe_count"], 0)
+        self.assertGreaterEqual(data["rejected_count"], 0)
 
     def test_healthz_probes_counted_separately_from_requests(self):
         for _ in range(2):
@@ -417,10 +419,53 @@ class CockpitConcurrencyLimitTests(unittest.TestCase):
             server.process_request(_FakeRequest(), ("127.0.0.1", 1234))
             self.assertIn(b"503", seen["data"])
             self.assertTrue(seen["closed"])
+            self.assertGreaterEqual(server.rejected_count, 1)
         finally:
             server._concurrency.release()
             server._concurrency.release()
             server.server_close()
+
+    def test_busy_rejection_is_written_to_access_log(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log_path = Path(tmp) / "access.jsonl"
+            server = CockpitHttpServer(
+                CockpitHttpConfig(
+                    bind_port=_free_port(),
+                    request_timeout_sec=3,
+                    lock_path=None,
+                    log_path=log_path,
+                    max_concurrent_requests=1,
+                ),
+                workspace_views=(),
+                role_views=(),
+            )
+            server._concurrency.acquire()
+            try:
+                class _FakeRequest:
+                    def sendall(self, data: bytes) -> None:
+                        pass
+
+                    def shutdown(self, how: int) -> None:
+                        pass
+
+                    def close(self) -> None:
+                        pass
+
+                server.process_request(_FakeRequest(), ("127.0.0.1", 4321))
+            finally:
+                server._concurrency.release()
+                if server._log_writer is not None:
+                    server._log_writer.close()
+                server.server_close()
+            rows = [
+                json.loads(line)
+                for line in log_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            busy = [row for row in rows if row.get("event") == "busy_rejected"]
+            self.assertEqual(1, len(busy), rows)
+            self.assertEqual("concurrency_limit", busy[0]["reason"])
+            self.assertEqual("127.0.0.1", busy[0]["client_host"])
 
 
 if __name__ == "__main__":

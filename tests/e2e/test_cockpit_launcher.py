@@ -10,6 +10,7 @@ shutdown (Windows CTRL+BREAK) and asserts:
 """
 from __future__ import annotations
 
+import json
 import os
 import signal
 import socket
@@ -117,6 +118,75 @@ class CockpitLauncherE2ETest(unittest.TestCase):
                     (base / "cockpit.lock").exists(),
                     "single-instance lock must be released on shutdown",
                 )
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=10)
+
+    def test_print_token_issues_usable_session(self):
+        if not hasattr(signal, "CTRL_BREAK_EVENT"):
+            self.skipTest("graceful shutdown via CTRL+BREAK is Windows-only")
+        with tempfile.TemporaryDirectory(prefix="coevo-token-e2e-") as tmp:
+            base = Path(tmp)
+            env = dict(os.environ)
+            env["COEVO_DATA_DIR"] = str(base / "data")
+            env["COEVO_LOG_DIR"] = str(base / "log")
+            env["COEVO_LOCK_PATH"] = str(base / "cockpit.lock")
+            port = _free_port()
+            flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+            process = subprocess.Popen(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "run_cockpit.py"),
+                    "--port",
+                    str(port),
+                    "--print-token",
+                ],
+                cwd=ROOT,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                creationflags=flags,
+            )
+            token = None
+            try:
+                deadline = time.time() + 30
+                while time.time() < deadline and token is None:
+                    line = process.stdout.readline()
+                    if not line:
+                        if process.poll() is not None:
+                            break
+                        time.sleep(0.1)
+                        continue
+                    if line.startswith("session token: "):
+                        token = line.strip().split("session token: ", 1)[1]
+                self.assertIsNotNone(
+                    token,
+                    "session token was not printed by --print-token",
+                )
+                request = urllib.request.Request(
+                    f"http://127.0.0.1:{port}/api/health",
+                    headers={"X-Cockpit-Token": token},
+                )
+                with urllib.request.urlopen(request, timeout=3) as response:
+                    self.assertEqual(200, response.status)
+                    data = json.loads(response.read().decode())
+                self.assertIn("request_count", data)
+                process.send_signal(signal.CTRL_BREAK_EVENT)
+                try:
+                    exit_code = process.wait(timeout=15)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=10)
+                    self.fail("cockpit did not exit gracefully after CTRL+BREAK")
+                self.assertEqual(0, exit_code)
+                access_log = base / "log" / "cockpit-access.jsonl"
+                if access_log.is_file():
+                    log_text = access_log.read_text(
+                        encoding="utf-8", errors="replace"
+                    )
+                    self.assertNotIn(token, log_text)
             finally:
                 if process.poll() is None:
                     process.kill()

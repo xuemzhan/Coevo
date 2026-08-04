@@ -92,6 +92,22 @@ sidecar）→ PATH；sidecar 内容必须是绝对路径且指向存在的可执
 启动日志输出 `model egress posture` 告警——审批机制本身 fail-closed 且合法，
 此告警仅为让"数据可能离开本机"可见；回环 provider（数据不出机）不告警。
 
+## 2.2 交互式访问（会话令牌，REVIEW-FIX-2）
+
+驾驶舱 UI/API 需要会话令牌（Bearer）。交互式启动时签发一次并在 stdout 显示：
+
+```powershell
+python scripts\run_cockpit.py --print-token
+# 输出：coevo cockpit ready: http://127.0.0.1:12701/
+#       session token: <token>
+# 浏览器打开 http://127.0.0.1:12701/?token=<token>
+```
+
+令牌只在 stdout 显示一次（flush 即时可见），不经过日志框架、不落盘；服务端仅保留
+SHA-256 摘要，超时自动失效。自启/看门狗等无控制台场景不打印令牌（进程内会话
+不可跨进程签发），headless 运维走 `/healthz` + 健康检查 + 访问日志即可；如确需
+在 headless 场景使用 UI，需另行决策令牌分发方案（如受控文件握手）。
+
 ## 3. 日志轮转
 
 - 应用运行日志：`coevo-app.log`（5MB×5，自动轮转）；

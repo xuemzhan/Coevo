@@ -4,6 +4,7 @@ Usage:
     python scripts/run_cockpit.py                  # start with env/defaults
     python scripts/run_cockpit.py --check          # validate config and exit
     python scripts/run_cockpit.py --preflight      # fail-fast startup checks and exit
+    python scripts/run_cockpit.py --print-token    # print a one-time UI session token
     python scripts/run_cockpit.py --version        # print version and exit
     python scripts/run_cockpit.py --port 12710     # override bind port
 
@@ -191,6 +192,12 @@ def run(args: argparse.Namespace) -> int:
         http_config.log_path,
     )
     print(f"coevo cockpit ready: {server.url}")
+    if args.print_token:
+        # REVIEW-FIX-2: interactive token handoff. The raw token is shown
+        # once on stdout (never via the logging framework and never written
+        # to disk); the server retains only its SHA-256 digest.
+        token = server.session_manager.create()
+        print(f"session token: {token}", flush=True)
     stop_event = threading.Event()
 
     def _shutdown(_signum: int, _frame: object) -> None:
@@ -220,6 +227,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Coevo local cockpit server")
     parser.add_argument("--port", type=int, default=None, help="bind port (loopback only)")
     parser.add_argument("--check", action="store_true", help="validate configuration and exit")
+    parser.add_argument(
+        "--print-token",
+        action="store_true",
+        help="issue and print a one-time UI session token at startup (stdout only)",
+    )
     parser.add_argument(
         "--preflight",
         action="store_true",
