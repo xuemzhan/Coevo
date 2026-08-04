@@ -4129,6 +4129,31 @@ security-reviewer 双签门禁。
   变化未复核时按 git 历史回退 `d856660`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- OPS-6 健康检查备份完整性校验 done
+
+- 用户指令：继续对项目进行生产落地优化。本项闭环 OPS-3 DECISIONS 记录的
+  边界："完整完整性校验仍用 `backup_state.py verify`，可接入监控定期执行"。
+- 实现（commit `c001c0c`，3 文件，+123/-4）：
+  ① `scripts/health_check.py` 新增 `--verify-backups`——对最新备份执行
+  `backup_state.py verify`（子进程，120s 超时 fail-closed；工具缺失/失败/
+  超时 → degraded），成功时 detail 追加 `integrity=ok`；
+  ② 校验仅在备份新鲜度 ok 时执行（可选、有界成本），运维可定期调度
+  `health_check --verify-backups` 获得"新鲜 + 完整"一体化视图；
+  ③ 文档：ops-runbook §1 backup 检查行 + 示例。
+- 安全边界：verify 为只读子进程（固定脚本路径、无 shell、参数经 argv），
+  无敏感数据；超时/失败均 fail-closed；零新增依赖、不涉及锁链。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 899 / integration 259 / security 97 / e2e 14 全绿；
+  新增测试 3 项（verify ok / verify 失败 degraded 断言消息 / verify 超时
+  degraded）；CLI 冒烟：新鲜备份 integrity=ok、篡改备份 failed (exit 1)；
+  内联 verifier + security-reviewer PASS（Critical/High 0）；protocol 不涉及。
+- 边界：完整性校验只作用于"最新"备份（有界成本），历史备份可手动
+  `backup_state.py verify`；--verify-backups 依赖 backup_state.py 所在
+  工具目录（repo_root，默认脚本上级）。
+- 回滚条件：任一新增测试失败、篡改备份未被检出、或门禁指纹变化未复核时按
+  git 历史回退 `c001c0c`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

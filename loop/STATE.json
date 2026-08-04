@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "AVAIL-2",
+  "current_item": "OPS-6",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "d856660639d7656307b306a823b54b6740ea5fdf",
+  "last_verified_commit": "c001c0ca38c8f017c837dec9f361c078c1b18a10",
   "blocking_issue": "",
-  "updated_at": "2026-08-04T02:33:34.410565Z"
+  "updated_at": "2026-08-04T02:46:01.732573Z"
 }

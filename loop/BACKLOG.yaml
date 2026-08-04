@@ -829,3 +829,13 @@ items:
       - tests/unit/test_preflight_watchdog.py
     security_review: true
     protocol_review: false
+  # ---------- 健康检查备份完整性校验（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: OPS-6
+    story: ENG-BASE
+    title: 健康检查备份完整性校验：health_check.py 新增 --verify-backups——对最新备份执行 backup_state.py verify（完整性哈希校验；子进程 120s 超时 fail-closed；失败/超时/工具缺失 → degraded），成功 detail 含 integrity=ok；仅在新鲜度 ok 时执行；闭环 OPS-3 手动完整性校验边界；ops-runbook §1 更新；测试 +3（verify ok/失败 degraded 断言消息/超时 degraded）
+    status: ready
+    dependencies: [OPS-3]
+    acceptance_tests:
+      - tests/unit/test_ops_tooling.py
+    security_review: true
+    protocol_review: false
