@@ -4154,6 +4154,35 @@ security-reviewer 双签门禁。
   git 历史回退 `c001c0c`。
 - 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
 
+## 2026-08-04 -- AVAIL-3 看门狗重启预算 done
+
+- 用户指令：继续对项目进行生产落地优化。审查发现：看门狗冷却 60s 只限速、
+  不限次——持续崩溃的驾驶舱会无限重启（1 次/分钟），造成进程搅动与日志
+  噪音，且无"停止自愈、转人工"的收敛语义。
+- 实现（commit `9c32b82`，4 文件，+146/-6）：
+  ① 新增 `scripts/restart-budget.ps1`——纯函数 `Test-RestartBudget`
+  （窗口内重启次数 `< MaxRestarts` 才允许，按 UTC 纪元秒判定，旧时间戳
+  自动忽略）；可被看门狗 dot-source，也可独立运行（`-TimestampsJson`
+  参数）供测试；
+  ② `scripts/cockpit-watchdog.ps1` 新增 `-MaxRestarts`（默认 5）与
+  `-RestartWindowSeconds`（默认 3600）；重启前判定预算，耗尽时继续轮询
+  但停止重启并打印 "restart budget exhausted ... manual intervention
+  required"，窗口滚动后自动恢复；
+  ③ 文档：ops-runbook §2.1 重启预算说明。
+- 安全边界：纯时间计算，无权限/敏感数据；dot-source 的 helper 与看门狗
+  同目录（受控脚本树）；零新增依赖、不改 wire/协议。
+- 验证：`make quality` exit=0 fingerprint=`e3a61c2f23c3031b`；audit
+  fully-sealed；unit 904 / integration 259 / security 97 / e2e 14 全绿；
+  新增测试 5 项（空历史 allowed / 预算内 allowed / 耗尽 denied / 窗口外
+  旧时间戳忽略 / 非法参数失败关闭）；内联 verifier + security-reviewer
+  PASS（Critical/High 0）；protocol 不涉及。
+- 边界：预算为"窗口内次数"上限，窗口滚动后自动恢复自愈；`restart-budget.ps1`
+  为独立可测单元，看门狗改动仅接线；若未来需要永久熔断（人工 reset），
+  属另一决策。
+- 回滚条件：任一新增测试失败、预算被绕过（如窗口外仍重启）、或门禁指纹
+  变化未复核时按 git 历史回退 `9c32b82`。
+- 提出者：loop-engineer（Codex）。决策者：用户（继续生产落地优化）。
+
 ### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
 - decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
 - .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.

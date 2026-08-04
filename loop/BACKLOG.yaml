@@ -839,3 +839,13 @@ items:
       - tests/unit/test_ops_tooling.py
     security_review: true
     protocol_review: false
+  # ---------- 看门狗重启预算（2026-08-04 用户指令：继续生产落地优化） ----------
+  - id: AVAIL-3
+    story: ENG-BASE
+    title: 看门狗重启预算：新增 scripts/restart-budget.ps1（纯函数 Test-RestartBudget，窗口内重启次数 < MaxRestarts 才允许，可 dot-source 亦可独立运行供测试）；cockpit-watchdog.ps1 新增 -MaxRestarts（默认 5）与 -RestartWindowSeconds（默认 3600），重启前判定预算，耗尽时继续轮询但停止重启并打印 manual intervention required；ops-runbook §2.1 更新；测试 +5（空历史 allowed/预算内 allowed/耗尽 denied/窗口外旧时间戳忽略/非法参数失败关闭）
+    status: ready
+    dependencies: [AVAIL-1]
+    acceptance_tests:
+      - tests/unit/test_preflight_watchdog.py
+    security_review: true
+    protocol_review: false
