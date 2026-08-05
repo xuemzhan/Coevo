@@ -355,7 +355,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 if not self.server.session_manager.validate(
                     self._bearer_token(), self._now()
                 ):
-                    self._send_json(401, {"error": "authentication required"})
+                    self._send_unauthorized()
                     return
                 self.server._count_request()
                 if path == "/api/health":
@@ -366,21 +366,21 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 elif path.startswith("/api/"):
                     self._serve_api_get(path, parsed.query)
                 else:
-                    self._send_json(404, {"error": "not found"})
+                    self._send_not_found()
                 return
             self.server._count_request()
             if not self.server.session_manager.validate(
                 self._bearer_token(), self._now()
             ):
                 self._drain_body()
-                self._send_json(401, {"error": "authentication required"})
+                self._send_unauthorized()
                 return
             if not self._check_csrf():
                 return
             if path == "/api/wps_open":
                 self._serve_wps_open()
             else:
-                self._send_json(404, {"error": "not found"})
+                self._send_not_found()
         except (ValueError, json.JSONDecodeError, CockpitValidationError) as exc:
             self._send_json(400, {"error": str(exc)})
         except Exception:  # noqa: BLE001 - never leak internals to the client
@@ -448,7 +448,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         token_values = params.get("token", [])
         token = token_values[0] if len(token_values) == 1 else ""
         if not self.server.session_manager.validate(token, self._now()):
-            self._send_json(401, {"error": "authentication required"})
+            self._send_unauthorized()
             return
         index = resolve_static_path(self.server.config.static_root, "index.html")
         if index is None:
@@ -506,7 +506,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             "/api/milestone_view": (CockpitRoute.MILESTONE_VIEW, "task_id"),
         }
         if path not in route_map:
-            self._send_json(404, {"error": "not found"})
+            self._send_not_found()
             return
         route, _ = route_map[path]
         request = CockpitRequest(
@@ -613,6 +613,14 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             separators=(",", ":"),
         ).encode("utf-8")
         self._send_bytes(code, body, "application/json; charset=utf-8")
+
+    def _send_unauthorized(self) -> None:
+        """Reply 401 with the fixed authentication-required body."""
+        self._send_json(401, {"error": "authentication required"})
+
+    def _send_not_found(self) -> None:
+        """Reply 404 with the fixed not-found body."""
+        self._send_json(404, {"error": "not found"})
 
     def _send_bytes(
         self,
