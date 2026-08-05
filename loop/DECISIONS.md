@@ -1,5 +1,18 @@
 # Loop 决策记录
 
+## 2026-08-05 — 源码优化第九轮（进度采集服务校验去重）
+
+- 提议：用户指令“继续优化”延续优化。`ProgressCaptureService` 的 5 个
+  公开方法（revise/reject/accept/to_report_draft/to_audit_record）以
+  完全相同的 4 行代码重复“capture 类型校验”。
+- 决策（行为零变更）：
+  - `progress_capture/service.py`：新增静态助手 `_require_capture`
+    （失败关闭类型门，异常类型与消息不变），5 个调用点统一收敛。
+- 验证：progress_capture 相关测试 49 项全绿；全量 quality exit 0
+  （指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续优化”延续授权）。
+
 ## 2026-08-05 — 源码优化第八轮（合并引擎回滚拒绝路径去重）
 
 - 提议：用户指令“继续”延续优化。`MergeEngine` 提交后校验的 5 条失败路径

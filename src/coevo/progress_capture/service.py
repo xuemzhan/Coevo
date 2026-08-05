@@ -24,6 +24,15 @@ class ProgressCaptureService:
     """
 
     @staticmethod
+    def _require_capture(capture: ProgressCapture) -> ProgressCapture:
+        """Fail-closed type gate shared by every capture-mutating operation."""
+        if not isinstance(capture, ProgressCapture):
+            raise ProgressCaptureValidationError(
+                "capture must be a ProgressCapture instance"
+            )
+        return capture
+
+    @staticmethod
     def extract_progress(
         workspace: WorkspaceEntry,
         evidence_inputs: Iterable[EvidenceInput],
@@ -99,10 +108,7 @@ class ProgressCaptureService:
         now: str,
     ) -> ProgressCapture:
         """AC-5: replace item fields and append an override."""
-        if not isinstance(capture, ProgressCapture):
-            raise ProgressCaptureValidationError(
-                "capture must be a ProgressCapture instance"
-            )
+        ProgressCaptureService._require_capture(capture)
         _check_iso_utc(now, field="now")
         _check_non_empty_str(reason, field="reason")
         if new_text is None and new_kind is None and new_confidence is None:
@@ -210,10 +216,7 @@ class ProgressCaptureService:
         now: str,
     ) -> ProgressCapture:
         """AC-5: mark item as REJECTED with a reason-bearing override."""
-        if not isinstance(capture, ProgressCapture):
-            raise ProgressCaptureValidationError(
-                "capture must be a ProgressCapture instance"
-            )
+        ProgressCaptureService._require_capture(capture)
         _check_iso_utc(now, field="now")
         _check_non_empty_str(reason, field="reason")
 
@@ -275,10 +278,7 @@ class ProgressCaptureService:
         now: str,
     ) -> ProgressCapture:
         """AC-6: flip formally_accepted to True; stamp accepted_by/at."""
-        if not isinstance(capture, ProgressCapture):
-            raise ProgressCaptureValidationError(
-                "capture must be a ProgressCapture instance"
-            )
+        ProgressCaptureService._require_capture(capture)
         if capture.formally_accepted:
             raise ProgressCaptureConflictError(
                 f"capture {capture.capture_id!r} is already formally_accepted"
@@ -329,10 +329,7 @@ class ProgressCaptureService:
         every segment; the draft binds every segment entry back to its
         source :class:`ProgressItem.item_id`.
         """
-        if not isinstance(capture, ProgressCapture):
-            raise ProgressCaptureValidationError(
-                "capture must be a ProgressCapture instance"
-            )
+        ProgressCaptureService._require_capture(capture)
         if not capture.formally_accepted:
             raise ProgressCaptureConflictError(
                 f"capture {capture.capture_id!r} is not formally_accepted; "
@@ -383,10 +380,7 @@ class ProgressCaptureService:
         free text. Sensitive business phrasing is never written into the
         audit chain.
         """
-        if not isinstance(capture, ProgressCapture):
-            raise ProgressCaptureValidationError(
-                "capture must be a ProgressCapture instance"
-            )
+        ProgressCaptureService._require_capture(capture)
         items_summary: list[dict] = []
         for item in capture.progress_items:
             items_summary.append(
