@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-06 — 源码优化第十六轮（基准探针覆盖新增优化路径）
+
+- 提议：用户指令“继续”延续优化。既有 SCALABILITY_PROBES 仅覆盖
+  OPT-PERF-1 的图/人才/注册表/watcher 探针，未覆盖后续轮次新增的
+  `_flow_json` 预索引与审计流尺寸增量维护。
+- 决策（行为零变更）：
+  - `benchmarks/models.py`：SCALABILITY_PROBES 新增
+    `flow_json_group`（1k 节点/40 阶段分组）与 `audit_stream_append`
+    （500 次追加）两项；
+  - `scripts/benchmark.py`：实现对应探针并接入 `run()`；
+  - `tests/unit/test_benchmark_suite.py`：期望探针名集合同步。
+- 验证：benchmark_suite 11 项全绿；`benchmark.py --check` 13 项全 OK
+  （flow_json_group 0.016s、audit_stream_append 0.043s）；全量 quality
+  exit 0（指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁、基准探针或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-06 — 源码优化第十五轮（代码导览性能特征文档化）
 
 - 提议：用户指令“继续优化”延续优化。代码层面热点已在前十四轮收敛，

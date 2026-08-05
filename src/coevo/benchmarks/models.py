@@ -28,4 +28,6 @@ SCALABILITY_PROBES: tuple[SlaTarget, ...] = (
     SlaTarget("watcher_rescan", "rescan of 200 unchanged files", 1.0, "seconds", "le"),
     SlaTarget("talent_recommend", "200 talents x 50 task slots", 5.0, "seconds", "le"),
     SlaTarget("registry_lookup", "20k processed-package get/by_digest", 1.0, "seconds", "le"),
+    SlaTarget("flow_json_group", "flow JSON grouping (1k nodes / 40 stages)", 1.0, "seconds", "le"),
+    SlaTarget("audit_stream_append", "500 audit stream appends", 1.0, "seconds", "le"),
 )

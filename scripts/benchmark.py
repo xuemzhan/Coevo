@@ -500,6 +500,91 @@ def run(samples: int = 1) -> tuple:
         )
     )
 
+    def flow_json_probe() -> None:
+        from src.coevo.task_decomposition.agent import _flow_json
+        from src.coevo.task_flow.service import FlowUnderstandingService
+
+        raw = {
+            "format": "canonical",
+            "flow": {
+                "unit_id": "unit.bench",
+                "title": "bench flow",
+                "stages": [
+                    {
+                        "stage_id": f"s{stage}",
+                        "name": f"stage {stage}",
+                        "nodes": [
+                            {
+                                "node_id": f"n{stage}.{node}",
+                                "title": f"task {stage}.{node}",
+                                "stage_hint": "intake",
+                                "inputs": ["doc"],
+                                "outputs": ["out"],
+                                "review_criteria": ["complete"],
+                                "responsible_roles": ["a.role"],
+                            }
+                            for node in range(25)
+                        ],
+                    }
+                    for stage in range(40)
+                ],
+                "roles": [
+                    {"role_id": "a.role", "name": "PM", "responsibility": "Owns intake"}
+                ],
+            },
+        }
+        understanding = FlowUnderstandingService().understand(raw)
+        _flow_json(understanding)
+
+    results.append(
+        measure(
+            "flow_json_group",
+            "flow JSON grouping (1k nodes / 40 stages, pre-indexed)",
+            flow_json_probe,
+            limit=1.0,
+            unit="seconds",
+            samples=1,
+        )
+    )
+
+    def audit_stream_probe() -> None:
+        from src.coevo.audit_governance import (
+            AuditEvent,
+            AuditEventResult,
+            AuditEventSource,
+            AuditStreamStore,
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = AuditStreamStore.create(Path(tmp) / "stream.jsonl")
+            try:
+                for index in range(500):
+                    store.append(
+                        AuditEvent(
+                            ts="2026-08-06T00:00:00Z",
+                            actor="u.bench",
+                            source=AuditEventSource.IMPORT,
+                            action=f"a{index}",
+                            project_id="PRJ001",
+                            task_id="t.1",
+                            result=AuditEventResult.OK,
+                            tool="benchmark",
+                        )
+                    )
+            finally:
+                store.close()
+
+    results.append(
+        measure(
+            "audit_stream_append",
+            "500 audit stream appends (size tracked incrementally)",
+            audit_stream_probe,
+            limit=1.0,
+            unit="seconds",
+            samples=1,
+        )
+    )
+
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         for index in range(200):

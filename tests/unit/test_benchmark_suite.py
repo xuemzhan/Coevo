@@ -38,6 +38,8 @@ class ScalabilityProbeTableTests(unittest.TestCase):
                 "watcher_rescan",
                 "talent_recommend",
                 "registry_lookup",
+                "flow_json_group",
+                "audit_stream_append",
             },
             names,
         )
