@@ -255,11 +255,13 @@ class CngKekStore:
 
 
 def base64_b64encode(data: bytes) -> str:
+    """Return canonical ASCII base64 for ``data`` (helper framing)."""
     import base64
     return base64.b64encode(data).decode("ascii")
 
 
 def base64_b64decode(value: str) -> bytes:
+    """Strictly decode canonical base64; malformed input fails closed."""
     import base64
     import binascii
     try:

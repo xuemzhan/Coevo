@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-06 — 注释全面化补全（第二十四轮）
+
+- 提议：用户指令“继续”延续注释全面化。模块级总览已全覆盖（第二十三轮），
+  本轮补齐模块级公开函数的文档字符串。
+- 决策（行为零变更，纯注释新增）：
+  - 为 17 个缺文档字符串的模块级公开函数补一行式 docstring
+    （base64 编解码、canonical/durable_write/exclusive_lock、
+    inspect_certificate、reject_sensitive_input/validate_id/
+    audit_identifier/assert_certificate_usable/validate_bundle、
+    canonical_baseline_digest/verify_signed_receipt/
+    append_signed_receipt、canonical_json_bytes/canonical_digest），
+    模块级公开函数 docstring 覆盖达到 100%。
+- 验证：相关模块 62 项测试全绿；全量 quality exit 0（指纹
+  `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-06 — 注释全面化（第二十三轮）
 
 - 提议：用户指令“代码注释要全面”。普查 88 个模块：模块文档字符串

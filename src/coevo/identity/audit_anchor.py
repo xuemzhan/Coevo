@@ -206,10 +206,12 @@ class WindowsFreshnessAuthority:
 
 
 def canonical(value: object) -> bytes:
+    """Render ``value`` as canonical UTF-8 JSON bytes (sorted keys, no spaces)."""
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
 
 
 def durable_write(path: Path, content: bytes) -> None:
+    """Atomically persist ``content`` via fsync + rename (crash-safe)."""
     temporary = Path(str(path) + ".tmp")
     with temporary.open("wb") as stream:
         stream.write(content); stream.flush(); os.fsync(stream.fileno())
@@ -218,6 +220,7 @@ def durable_write(path: Path, content: bytes) -> None:
 
 @contextlib.contextmanager
 def exclusive_lock(path: Path):
+    """Hold an exclusive advisory lock on ``path`` for the context duration."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a+b") as stream:
         stream.seek(0, os.SEEK_END)

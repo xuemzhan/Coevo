@@ -86,6 +86,7 @@ def freeze_baseline(baseline: ProjectBaseline) -> FrozenBaselineSnapshot:
 
 
 def canonical_baseline_digest(baseline: ProjectBaseline) -> str:
+    """Return the canonical digest for a frozen baseline snapshot."""
     return freeze_baseline(baseline).digest
 
 
@@ -223,6 +224,7 @@ def verify_signed_receipt(
     receipt: MergeCommitReceipt, *, authority: ReceiptSigningAuthority,
     trusted_time: dt.datetime, actor_id: str = "risk-analyzer",
 ) -> FrozenBaselineSnapshot:
+    """Verify a signed receipt against the trust policy and return its snapshot."""
     if type(receipt) is not MergeCommitReceipt:
         raise MergeCommitReceiptError("receipt must be exact MergeCommitReceipt")
     if type(authority) is not ReceiptSigningAuthority:
@@ -339,6 +341,7 @@ class MergeCommitReceiptStore:
 def append_signed_receipt(
     store: MergeCommitReceiptStore, receipt: MergeCommitReceipt,
 ) -> MergeCommitReceiptStore:
+    """Append a signed receipt to a sealed store, returning the new store."""
     if type(store) is not MergeCommitReceiptStore:
         raise MergeCommitReceiptError("store must be exact MergeCommitReceiptStore")
     return store._append(receipt, _seal=_STORE_SEAL)

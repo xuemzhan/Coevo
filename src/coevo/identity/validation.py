@@ -38,6 +38,7 @@ def _key_token(value: str) -> str:
 
 
 def reject_sensitive_input(value: Any) -> None:
+    """Reject payloads containing private-key material, secrets or cycles."""
     stack: list[tuple[Any, int]] = [(value, 0)]
     seen: set[int] = set()
     nodes = 0
@@ -76,12 +77,14 @@ def reject_sensitive_input(value: Any) -> None:
 
 
 def validate_id(name: str, value: Any) -> str:
+    """Validate ``value`` against the safe-ID grammar and return it."""
     if not isinstance(value, str) or not ID_RE.fullmatch(value):
         raise ValidationError(f"invalid {name}")
     return value
 
 
 def audit_identifier(value: Any) -> str:
+    """Return a safe audit identifier, hashing malformed inputs."""
     try:
         return validate_id("audit identifier", value)
     except ValidationError:
@@ -120,6 +123,7 @@ def _instant(value: str) -> datetime:
 
 
 def assert_certificate_usable(certificate: TrustedCertificate, trusted_time: datetime) -> None:
+    """Reject revoked, not-yet-valid or expired certificates (fail-closed)."""
     if trusted_time.tzinfo is None:
         raise CertificateStatusError("trusted time must include timezone")
     current = trusted_time.astimezone(UTC)
@@ -142,6 +146,7 @@ def _digestable(value: Any) -> Any:
 
 
 def validate_bundle(payload: Any) -> IdentityBundle:
+    """Validate an identity bundle payload and return the frozen model."""
     reject_sensitive_input(payload)
     root = _object("bundle", payload, {"organization", "user", "client", "certificate", "roles"})
     org = _object("organization", root["organization"], {"organization_id", "code", "name"})

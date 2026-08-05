@@ -57,6 +57,7 @@ def _instant(value: object) -> datetime:
 
 
 def inspect_certificate(certificate_der: bytes) -> InspectedCertificate:
+    """Inspect X.509 DER through the controlled Windows helper (fail-closed)."""
     if not isinstance(certificate_der, bytes) or not certificate_der or len(certificate_der) > 1024 * 1024:
         raise CertificateError("invalid certificate_der")
     if not HELPER.is_file():

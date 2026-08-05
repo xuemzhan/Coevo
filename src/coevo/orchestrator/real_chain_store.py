@@ -40,6 +40,7 @@ class RealChainStoreRecoveryRequired(RealChainStoreError):
 
 
 def canonical_json_bytes(value: Any) -> bytes:
+    """Serialize ``value`` to canonical JSON bytes with strict type checks."""
     def validate(item: Any, path: str) -> None:
         if item is None or isinstance(item, (str, bool)):
             return
@@ -67,6 +68,7 @@ def canonical_json_bytes(value: Any) -> bytes:
 
 
 def canonical_digest(value: Any) -> str:
+    """Return the SHA-256 hex digest of the canonical JSON form of ``value``."""
     return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
 
 
