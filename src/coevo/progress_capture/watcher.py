@@ -423,7 +423,7 @@ class WorkspaceWatcher:
                 ):
                     digest = prior.digest_hex
                 else:
-                    digest = self._digest(Path(full_path), size)
+                    digest = self._digest(full_path, size)
                 media = mimetypes.guess_type(name)[0] or "application/octet-stream"
                 result[relative] = FileSnapshot(
                     relative,
@@ -434,12 +434,12 @@ class WorkspaceWatcher:
                 )
         return result
 
-    def _digest(self, full: Path, size: int) -> str:
+    def _digest(self, full: str, size: int) -> str:
         if size > self._max_digest_bytes:
             return ""
         hasher = hashlib.sha256()
         try:
-            with full.open("rb") as stream:
+            with open(full, "rb") as stream:
                 for chunk in iter(lambda: stream.read(_CHUNK), b""):
                     hasher.update(chunk)
         except OSError:
