@@ -392,46 +392,46 @@ class RealChainStore:
             raise RealChainStoreError("real-chain store checkpoint is invalid")
 
     def recover(self) -> None:
-        with self._guard():
-            self.connection.execute("BEGIN")
-            try:
-                self._validate_schema()
-                self._verify_audit_chain_unlocked()
-                self._recover_unlocked()
-                self.connection.commit()
-                self._recovery_required = False
-            except Exception:
-                if self.connection.in_transaction:
-                    self.connection.rollback()
-                raise
+        self._run_checked_transaction(
+            require_operable=False,
+            on_commit=lambda: setattr(self, "_recovery_required", False),
+        )
 
     def _open_validate(self) -> None:
-        with self._guard():
-            self.connection.execute("BEGIN")
-            try:
-                self._validate_schema()
-                self._verify_audit_chain_unlocked()
-                self._recover_unlocked()
-                self.connection.commit()
-            except Exception:
-                if self.connection.in_transaction:
-                    self.connection.rollback()
-                raise
+        self._run_checked_transaction(require_operable=False)
 
     def _ensure_operable(self) -> None:
         if self._recovery_required:
             raise RealChainStoreRecoveryRequired("pending-anchor-promotion")
 
     def _read(self, operation: Any) -> Any:
+        return self._run_checked_transaction(operation)
+
+    def _run_checked_transaction(
+        self,
+        operation: Any = None,
+        *,
+        require_operable: bool = True,
+        on_commit: Any = None,
+    ) -> Any:
+        """Run the shared validate/verify/recover/commit sequence inside BEGIN.
+
+        Used by recover / _open_validate / _read. ``operation`` may return a
+        value; ``on_commit`` runs after commit (e.g. clearing the recovery
+        flag). Any failure rolls the transaction back and re-raises.
+        """
         with self._guard():
-            self._ensure_operable()
+            if require_operable:
+                self._ensure_operable()
             self.connection.execute("BEGIN")
             try:
                 self._validate_schema()
                 self._verify_audit_chain_unlocked()
                 self._recover_unlocked()
-                result = operation()
+                result = operation() if operation is not None else None
                 self.connection.commit()
+                if on_commit is not None:
+                    on_commit()
                 return result
             except Exception:
                 if self.connection.in_transaction:

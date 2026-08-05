@@ -1,5 +1,21 @@
 # Loop 决策记录
 
+## 2026-08-06 — 源码优化第十七轮（真实链存储事务样板收敛）
+
+- 提议：用户指令“继续”延续优化。`RealChainStore` 的 recover /
+  `_open_validate` / `_read` 三个方法重复“BEGIN → 校验 schema/审计链 →
+  恢复 → commit（失败回滚并重抛）”骨架（`_transaction` 语义独立，
+  不纳入）。
+- 决策（行为零变更）：
+  - `orchestrator/real_chain_store.py`：新增私有助手
+    `_run_checked_transaction(operation=None, *, require_operable=True,
+    on_commit=None)`，三处调用统一收敛；`recover` 的提交后清恢复标志
+    经 `on_commit` 表达，顺序与失败语义逐项保持。
+- 验证：real_chain_store 18 项、编排器+真实链集成 36 项全绿；全量
+  quality exit 0（指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-06 — 源码优化第十六轮（基准探针覆盖新增优化路径）
 
 - 提议：用户指令“继续”延续优化。既有 SCALABILITY_PROBES 仅覆盖
