@@ -48,7 +48,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from src.coevo.protocol import ImportOutcome
+from src.coevo.protocol import ImportOutcome, ImportTransaction
 
 from .models import (
     InitOutcome,
@@ -116,17 +116,21 @@ class WorkspaceInitService:
             raise WorkspaceInitValidationError(str(exc)) from exc
 
         env = import_outcome.transaction
+
+        def paths_for(env: ImportTransaction) -> WorkspacePaths:
+            return build_paths(
+                project_id=env.project_id,
+                role_id=role_id,
+                package_id=env.package_id,
+                quarantine_root=self.quarantine_root,
+                workspace_root=self.workspace_root,
+            )
+
         if env.step.value != "committed":
             # AC-4: a non-committed import must not produce a workspace.
             return InitOutcome(
                 entry=None,
-                paths=build_paths(
-                    project_id=env.project_id,
-                    role_id=role_id,
-                    package_id=env.package_id,
-                    quarantine_root=self.quarantine_root,
-                    workspace_root=self.workspace_root,
-                ),
+                paths=paths_for(env),
                 registry=registry,
                 created=False,
                 failure_reason=(
@@ -136,23 +140,11 @@ class WorkspaceInitService:
             )
 
         try:
-            paths = build_paths(
-                project_id=env.project_id,
-                role_id=role_id,
-                package_id=env.package_id,
-                quarantine_root=self.quarantine_root,
-                workspace_root=self.workspace_root,
-            )
+            paths = paths_for(env)
         except WorkspacePathError as exc:
             return InitOutcome(
                 entry=None,
-                paths=build_paths(
-                    project_id=env.project_id,
-                    role_id=role_id,
-                    package_id=env.package_id,
-                    quarantine_root=self.quarantine_root,
-                    workspace_root=self.workspace_root,
-                ),
+                paths=paths_for(env),
                 registry=registry,
                 created=False,
                 failure_reason=f"path construction rejected: {exc}",

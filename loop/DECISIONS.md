@@ -1,5 +1,18 @@
 # Loop 决策记录
 
+## 2026-08-06 — 源码优化第二十二轮（工作区初始化路径构造去重）
+
+- 提议：用户指令“继续”延续优化。`WorkspaceInitService.init_from_import`
+  中 3 处以完全相同实参调用 `build_paths`。
+- 决策（行为零变更）：
+  - `workspace/init_service.py`：提取局部助手 `paths_for(env)` 统一 3 处
+    调用（含异常分支的重调用，语义保持不变）；补导入 `ImportTransaction`
+    使注解可解析。
+- 验证：workspace 测试 33 项全绿；全量 quality exit 0（指纹
+  `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-06 — 源码优化第二十一轮（驾驶舱 HTTP 响应样板收敛）
 
 - 提议：用户指令“继续”延续优化。`CockpitRequestHandler` 中 3 处 401
