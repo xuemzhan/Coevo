@@ -232,6 +232,21 @@ def _outcome(chain: Any, event: Any, workspace: Any, report: Any,
     )
 
 
+def _finish_dispatch_terminal(chain: Any, event: Any, workspace: Any, traces: list[Any],
+                              outcome: Any, summaries: dict[str, list[str]],
+                              event_digest: str, project_digest: str,
+                              package_preview: PackagePreview | None,
+                              store: RealChainStore, now: str,
+                              result_label: str = "TERMINAL") -> RealChainOutcome:
+    """Build the terminal report/outcome, seal the dispatch and return it."""
+    report = _report(chain, event, workspace, traces, outcome, now)
+    result = _outcome(chain, event, workspace, report, summaries, event_digest,
+                      project_digest, package_preview=package_preview,
+                      store_id=store.store_id)
+    store.finish_dispatch(event.event_id, event_digest, result, result_label, now)
+    return result
+
+
 def project_baseline_to_requirements(baseline: Any) -> tuple[TaskRequirement, ...]:
     from src.coevo.talent.models import AvailabilityWindow
     return tuple(
@@ -290,12 +305,10 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
         if registration.status != AgentStatus.AVAILABLE:
             traces.append(_trace(event.event_id, step, OrchestrationStepResult.ESCALATED,
                                  now, "agent unavailable; human escalation required"))
-            report = _report(chain, event, workspace, traces, OrchestrationOutcome.ESCALATED, now)
-            result = _outcome(chain, event, workspace, report, summaries, event_digest,
-                              project_digest, package_preview=package_preview,
-                              store_id=store.store_id)
-            store.finish_dispatch(event.event_id, event_digest, result, "TERMINAL", now)
-            return result
+            return _finish_dispatch_terminal(
+                chain, event, workspace, traces, OrchestrationOutcome.ESCALATED,
+                summaries, event_digest, project_digest, package_preview, store, now,
+            )
         store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "attempt", now)
         try:
             output = invoke(step.step_index)
@@ -306,12 +319,10 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
             if step.on_failure != FailurePolicy.RETRY:
                 traces.append(_trace(event.event_id, step, OrchestrationStepResult.ESCALATED,
                                      now, "facade failed; human escalation required"))
-                report = _report(chain, event, workspace, traces, OrchestrationOutcome.ESCALATED, now)
-                result = _outcome(chain, event, workspace, report, summaries, event_digest,
-                                  project_digest, package_preview=package_preview,
-                                  store_id=store.store_id)
-                store.finish_dispatch(event.event_id, event_digest, result, "TERMINAL", now)
-                return result
+                return _finish_dispatch_terminal(
+                    chain, event, workspace, traces, OrchestrationOutcome.ESCALATED,
+                    summaries, event_digest, project_digest, package_preview, store, now,
+                )
             store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "retry_attempt", now)
             try:
                 output = invoke(step.step_index)
@@ -321,12 +332,10 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
                 store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "retry_failure", now)
                 traces.append(_trace(event.event_id, step, OrchestrationStepResult.ESCALATED,
                                      now, "facade retry failed; human escalation required"))
-                report = _report(chain, event, workspace, traces, OrchestrationOutcome.ESCALATED, now)
-                result = _outcome(chain, event, workspace, report, summaries, event_digest,
-                                  project_digest, package_preview=package_preview,
-                                  store_id=store.store_id)
-                store.finish_dispatch(event.event_id, event_digest, result, "TERMINAL", now)
-                return result
+                return _finish_dispatch_terminal(
+                    chain, event, workspace, traces, OrchestrationOutcome.ESCALATED,
+                    summaries, event_digest, project_digest, package_preview, store, now,
+                )
         outputs[step.step_index] = output
         if step.step_index == 0:
             summaries["flow"].append(f"step0:unit={output.flow.unit_id};version={output.flow.version};stages={len(output.flow.stages)}")
@@ -338,12 +347,11 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
 
     traces.append(_trace(event.event_id, chain.steps[3], OrchestrationStepResult.HELD_AT_CONFIRM,
                          now, "explicit human confirmation required before package build"))
-    report = _report(chain, event, workspace, traces, OrchestrationOutcome.HELD_AT_CONFIRM, now)
-    result = _outcome(chain, event, workspace, report, summaries, event_digest,
-                      project_digest, package_preview=package_preview,
-                      store_id=store.store_id)
-    store.finish_dispatch(event.event_id, event_digest, result, "HELD", now)
-    return result
+    return _finish_dispatch_terminal(
+        chain, event, workspace, traces, OrchestrationOutcome.HELD_AT_CONFIRM,
+        summaries, event_digest, project_digest, package_preview, store, now,
+        result_label="HELD",
+    )
 
 
 def confirm_real_chain(held: RealChainOutcome, *, preview: PackagePreview,

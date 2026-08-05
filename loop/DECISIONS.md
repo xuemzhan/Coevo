@@ -1,5 +1,19 @@
 # Loop 决策记录
 
+## 2026-08-05 — 源码优化第七轮（真实编排链终局收尾去重）
+
+- 提议：用户指令“继续”延续优化。`dispatch_real_chain` 中 4 段完全相同的
+  “报告→结果→finish_dispatch→return”终局收尾代码重复出现。
+- 决策（行为零变更）：
+  - `orchestrator/_real_chain.py`：新增私有助手 `_finish_dispatch_terminal`，
+    4 个调用点统一收敛（3 处 ESCALATED/TERMINAL + 1 处
+    HELD_AT_CONFIRM/HELD，通过 `result_label` 区分）；报告/结果构造、
+    存储落盘顺序与返回值语义逐项不变。
+- 验证：编排链相关测试 73 项全绿（含真实门面链集成 10 项）；全量 quality
+  exit 0（指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续优化授权）。
+
 ## 2026-08-05 — 源码优化第六轮（循环内 Path 对象开销收敛）
 
 - 提议：用户指令“继续”延续优化。扫描发现两处循环内逐项构建 `Path`
