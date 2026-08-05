@@ -286,6 +286,7 @@ class PackageStoreDb:
     # -- queries ------------------------------------------------------------
 
     def get(self, package_id: str) -> ProcessedPackageRecord | None:
+        """Fetch a processed-package record by package id."""
         self._ensure_open()
         if not isinstance(package_id, str):
             raise PackageStoreDbError("package_id must be a string")
@@ -298,6 +299,7 @@ class PackageStoreDb:
         return _row_to_record(row) if row is not None else None
 
     def by_digest(self, package_digest: str) -> ProcessedPackageRecord | None:
+        """Fetch a processed-package record by digest."""
         self._ensure_open()
         if not isinstance(package_digest, str):
             raise PackageStoreDbError("package_digest must be a string")
@@ -316,6 +318,7 @@ class PackageStoreDb:
         recipient_cert_id: str,
         project_id: str,
     ) -> tuple[ProcessedPackageRecord, ...]:
+        """List records within a sender scope."""
         self._ensure_open()
         rows = self._connection.execute(
             "SELECT package_id, package_digest, sender_cert_id, recipient_cert_id, "
@@ -328,6 +331,7 @@ class PackageStoreDb:
         return tuple(_row_to_record(row) for row in rows)
 
     def revision_for(self, project_id: str) -> str | None:
+        """Resolve the latest revision for a project."""
         self._ensure_open()
         row = self._connection.execute(
             "SELECT MAX(revision) FROM processed_packages WHERE project_id = ?",
@@ -336,6 +340,7 @@ class PackageStoreDb:
         return row[0] if row is not None and row[0] is not None else None
 
     def iter_records(self) -> Iterator[ProcessedPackageRecord]:
+        """Iterate all records in registration order."""
         self._ensure_open()
         cursor = self._connection.execute(
             "SELECT package_id, package_digest, sender_cert_id, recipient_cert_id, "

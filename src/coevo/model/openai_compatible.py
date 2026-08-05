@@ -124,6 +124,7 @@ class OpenAICompatibleProvider:
         max_tokens: int,
         timeout_seconds: float,
     ) -> str:
+        """Complete a chat request via the compatible endpoint."""
         api_key = os.environ.get(self._api_key_env, "")
         if not self._local:
             if not api_key:

@@ -35,6 +35,7 @@ class SupervisionCoordinator:
         project_recipient_cert_id: str,
         now: str,
     ) -> SupervisionOutcome:
+        """Coordinate supervision over risk and receipt inputs."""
         if not isinstance(risk_report, RiskReport):
             raise SupervisionValidationError("risk_report must be RiskReport")
         if not isinstance(project_recipient_cert_id, str) or not project_recipient_cert_id:
@@ -109,6 +110,7 @@ class SupervisionCoordinator:
         )
 
     def to_audit_record(self, outcome: SupervisionOutcome) -> dict[str, object]:
+        """Project a supervision outcome to an audit record."""
         if not isinstance(outcome, SupervisionOutcome):
             raise SupervisionError("outcome must be SupervisionOutcome")
         return {

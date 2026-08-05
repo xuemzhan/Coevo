@@ -90,6 +90,7 @@ class GmsslProtectedProvider:
     ) -> Any:
         # Recipient public-key operation only: functional without the
         # protected private key.
+        """Seal plaintext through the protected handle path."""
         return self._engine.seal(
             handle, plaintext, associated_data=associated_data, nonce=nonce
         )
@@ -99,6 +100,7 @@ class GmsslProtectedProvider:
         return self._engine.verify(handle, data, signature)
 
     def sign(self, handle: Any, data: bytes) -> bytes:
+        """Sign a payload through the protected handle path."""
         return self._engine.sign_wrapped(
             self._kek_ref.kek_name,
             self._wrapped,
@@ -108,6 +110,7 @@ class GmsslProtectedProvider:
         )
 
     def open(self, handle: Any, sealed: Any, *, associated_data: bytes) -> bytes:
+        """Open sealed ciphertext through the protected path."""
         return self._engine.open_wrapped(
             self._kek_ref.kek_name,
             self._wrapped,

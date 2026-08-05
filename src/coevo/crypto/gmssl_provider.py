@@ -106,6 +106,7 @@ class GmsslPrototypeProvider:
         return len(result) == 1 and result[0] == b"\x01"
 
     def seal(self, handle: GmsslPrototypeHandle, plaintext: bytes, *, associated_data: bytes, nonce: bytes | None = None) -> SealedPayload:
+        """Seal plaintext via GmSSL AEAD (approved scope)."""
         self._require(handle, "recipient")
         nonce = os.urandom(12) if nonce is None else nonce
         if not isinstance(nonce, bytes) or len(nonce) != 12:
@@ -116,6 +117,7 @@ class GmsslPrototypeProvider:
         return SealedPayload(*result)
 
     def open(self, handle: GmsslPrototypeHandle, sealed: SealedPayload, *, associated_data: bytes) -> bytes:
+        """Open sealed ciphertext after verification."""
         self._require(handle, "recipient")
         if not isinstance(sealed, SealedPayload):
             raise TypeError("sealed must be SealedPayload")

@@ -152,6 +152,7 @@ class MergeCommitReceipt:
         _validate_receipt(self)
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a receipt to a JSON-safe dict."""
         return {
             "receipt_id": self.receipt_id,
             "payload_base64": base64.b64encode(self.payload).decode("ascii"),

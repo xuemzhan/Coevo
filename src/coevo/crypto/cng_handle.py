@@ -220,6 +220,7 @@ class CngKekStore:
         return result.get("result", {})
 
     def create_kek(self, name: str | None = None) -> CngKekReference:
+        """Create a new CNG-protected KEK and return its handle."""
         kek_name = _validate_kek_name(name or f"{KEK_PREFIX}{uuid.uuid4().hex}")
         result = self._run("CreateKek", kek_name)
         return CngKekReference(
@@ -232,6 +233,7 @@ class CngKekStore:
         return self._run("Status", ref.kek_name)
 
     def wrap(self, ref: CngKekReference, plaintext: bytes) -> tuple[bytes, str]:
+        """Wrap a payload with the KEK, returning ciphertext."""
         if not isinstance(plaintext, bytes) or not plaintext:
             raise CngKekValidationError("wrap input must be non-empty bytes")
         if len(plaintext) > _MAX_INPUT_BYTES:
@@ -243,6 +245,7 @@ class CngKekStore:
         return wrapped, str(result["wrapped_sha256"])
 
     def unwrap_digest(self, ref: CngKekReference, wrapped: bytes) -> tuple[str, int]:
+        """Unwrap a payload and return its SHA-256 digest."""
         if not isinstance(wrapped, bytes) or not wrapped:
             raise CngKekValidationError("unwrap input must be non-empty bytes")
         result = self._run(
@@ -294,6 +297,7 @@ class CngWrappedKeyRegistry:
 
     @classmethod
     def create(cls, path: Path) -> "CngWrappedKeyRegistry":
+        """Create a new protected key registry file."""
         if Path(path).exists():
             raise CngKekValidationError("refusing to create registry over existing state")
         Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -303,6 +307,7 @@ class CngWrappedKeyRegistry:
 
     @classmethod
     def open(cls, path: Path) -> "CngWrappedKeyRegistry":
+        """Open an existing protected key registry."""
         if not Path(path).is_file():
             raise CngKekValidationError("registry does not exist; explicit create is required")
         registry = cls(path)
@@ -322,6 +327,7 @@ class CngWrappedKeyRegistry:
         certificate_id: str,
         created_at: str | None = None,
     ) -> str:
+        """Register a protected key handle after chain verification."""
         _validate_kek_name(kek_name)
         if role not in {"sender", "recipient"}:
             raise CngKekValidationError("role must be sender or recipient")
@@ -344,6 +350,7 @@ class CngWrappedKeyRegistry:
         return self._append(entry)
 
     def revoke(self, handle_id: str, *, reason: str) -> str:
+        """Revoke a handle with a reason (audited, fail-closed)."""
         if not isinstance(reason, str) or not reason.strip():
             raise CngKekValidationError("revocation reason is required")
         return self._append({
@@ -359,6 +366,7 @@ class CngWrappedKeyRegistry:
         })
 
     def destroy(self, handle_id: str, *, reason: str) -> str:
+        """Destroy a handle and record the retirement."""
         if not isinstance(reason, str) or not reason.strip():
             raise CngKekValidationError("destroy reason is required")
         return self._append({
@@ -374,6 +382,7 @@ class CngWrappedKeyRegistry:
         })
 
     def snapshot(self) -> tuple[dict[str, Any], ...]:
+        """Return an audited snapshot of all registered handles."""
         data = self._read()
         self._verify_chain(data["entries"])
         state: dict[str, dict[str, Any]] = {}

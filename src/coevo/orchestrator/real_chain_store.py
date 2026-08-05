@@ -192,6 +192,7 @@ class RealChainStore:
         cls, database: str | Path, *, signer: Signer | None = None,
         freshness: FreshnessAuthority | None = None,
     ) -> "RealChainStore":
+        """Create a new real-chain store."""
         return cls(
             database, signer=signer, freshness=freshness, create=True,
             _token=cls._CONSTRUCTION_TOKEN,
@@ -202,6 +203,7 @@ class RealChainStore:
         cls, database: str | Path, *, signer: Signer | None = None,
         freshness: FreshnessAuthority | None = None,
     ) -> "RealChainStore":
+        """Open an existing real-chain store."""
         return cls(
             database, signer=signer, freshness=freshness, create=False,
             _token=cls._CONSTRUCTION_TOKEN,
@@ -549,6 +551,7 @@ class RealChainStore:
 
     def begin_dispatch(self, event_id: str, event_digest: str,
                        project_id: str, now: str) -> Any | None:
+        """Begin a dispatch transaction with replay gate."""
         def operation() -> Any | None:
             row = self.connection.execute(
                 "SELECT * FROM real_chain_records WHERE event_id=?", (event_id,)
@@ -578,6 +581,7 @@ class RealChainStore:
 
     def finish_dispatch(self, event_id: str, event_digest: str,
                         outcome: Any, state: str, now: str) -> None:
+        """Finish a dispatch as TERMINAL/HELD."""
         def operation() -> None:
             row = self._require(event_id, event_digest)
             if row["state"] != "DISPATCHING":
@@ -598,6 +602,7 @@ class RealChainStore:
     def record_authorization_rejection(self, event_id: str, event_digest: str,
                                        action: str, actor_id: str,
                                        permission: str, now: str) -> None:
+        """Record an authorization rejection for an event."""
         digest = canonical_digest({"actor_id": actor_id, "permission": permission})
         self._transaction(lambda: (self._require(event_id, event_digest),
                                    self._audit(event_id, action, "unauthorized", digest, now)),
@@ -611,6 +616,7 @@ class RealChainStore:
 
     def confirm(self, event_id: str, event_digest: str, confirmation_digest: str,
                 outcome_factory: Any, now: str) -> Any:
+        """Confirm a held dispatch with a signed digest."""
         def operation() -> Any:
             row = self._require(event_id, event_digest)
             self._audit(event_id, "confirmation", "attempt", confirmation_digest, now)
@@ -638,6 +644,7 @@ class RealChainStore:
 
     def begin_resume(self, event_id: str, event_digest: str,
                      resume_digest: str, now: str) -> None:
+        """Begin the package-build resume transaction."""
         def operation() -> None:
             row = self._require(event_id, event_digest)
             self._audit(event_id, "resume", "attempt", resume_digest, now)
@@ -660,6 +667,7 @@ class RealChainStore:
 
     def finish_resume_failure(self, event_id: str, event_digest: str,
                               resume_digest: str, outcome: Any, code: str, now: str) -> None:
+        """Finish a failed resume with rollback."""
         def operation() -> None:
             row = self._require(event_id, event_digest)
             if row["state"] != "PACKAGE_BUILDING" or row["resume_digest"] != resume_digest:
@@ -674,6 +682,7 @@ class RealChainStore:
     def finish_resume_success(self, event_id: str, event_digest: str,
                               resume_digest: str, outcome: Any, package_digest: str,
                               now: str) -> None:
+        """Finish a successful resume with package wire digest."""
         def operation() -> None:
             row = self._require(event_id, event_digest)
             if row["state"] != "PACKAGE_BUILDING" or row["resume_digest"] != resume_digest:
@@ -686,6 +695,7 @@ class RealChainStore:
         self._transaction(operation, event_id=event_id)
 
     def recovery_context(self, event_id: str) -> RecoveryContext:
+        """Return the recovery context for an event."""
         def operation() -> RecoveryContext:
             row = self.connection.execute(
                 "SELECT event_id,event_digest,project_id,state FROM real_chain_records WHERE event_id=?",
@@ -697,6 +707,7 @@ class RealChainStore:
         return self._read(operation)
 
     def terminate_recovery(self, event_id: str, actor_digest: str, now: str) -> RecoveryContext:
+        """Terminate a recovery and mark it resolved."""
         def operation() -> RecoveryContext:
             row = self.connection.execute(
                 "SELECT event_id,event_digest,project_id,state FROM real_chain_records WHERE event_id=?",

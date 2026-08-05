@@ -61,6 +61,7 @@ class Risk:
         _parse_utc(self.suggested_deadline, field="suggested_deadline")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a risk to a JSON-safe dict."""
         return {
             "risk_id": self.risk_id,
             "kind": self.kind.value,
@@ -112,6 +113,7 @@ class RiskReport:
             raise ValueError("risk analysis cannot formally release risks")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a risk report to a JSON-safe dict."""
         return {
             "kind": "risk.report",
             "schema_version": "1.0",

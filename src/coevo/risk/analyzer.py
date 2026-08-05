@@ -195,6 +195,7 @@ class RiskAnalyzer:
         )
 
     def to_audit_record(self, report: RiskReport) -> dict[str, object]:
+        """Project a risk report to an audit record."""
         if not isinstance(report, RiskReport):
             raise RiskAnalysisError("report must be RiskReport")
         return {

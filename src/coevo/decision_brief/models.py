@@ -134,6 +134,7 @@ class BriefContent:
 
     @property
     def sections(self) -> tuple[tuple[BriefConclusion, ...], ...]:
+        """Return the brief content sections as a tuple."""
         return (
             self.overall_progress,
             self.important_changes,

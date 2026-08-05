@@ -106,6 +106,7 @@ class SupervisionItem:
         _parse_utc(self.created_at, field="created_at")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a supervision item to a dict."""
         return {
             "item_id": self.item_id,
             "project_id": self.project_id,
@@ -134,6 +135,7 @@ class EscalationSuggestion:
         _parse_utc(self.suggested_at, field="suggested_at")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize an escalation suggestion to a dict."""
         return {
             "item_id": self.item_id,
             "level": self.level.value,
@@ -162,6 +164,7 @@ class ReminderSuggestion:
         _parse_utc(self.suggested_at, field="suggested_at")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a reminder suggestion to a dict."""
         return {
             "item_id": self.item_id,
             "kind": self.kind.value,
@@ -191,6 +194,7 @@ class MeetingAgendaItem:
             raise SupervisionValidationError("open_questions must use stable sorted order")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a meeting agenda item to a dict."""
         return {
             "agenda_id": self.agenda_id,
             "title": self.title,
@@ -245,6 +249,7 @@ class MeetingProposal:
             raise SupervisionValidationError("meeting proposal cannot be formally released")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a meeting proposal to a dict."""
         return {
             "proposal_id": self.proposal_id,
             "project_id": self.project_id,
@@ -350,6 +355,7 @@ class SupervisionOutcome:
             raise SupervisionValidationError("supervision outcome cannot be formally released")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize a supervision outcome to a dict."""
         return {
             "kind": "supervision.outcome",
             "schema_version": "1.0",

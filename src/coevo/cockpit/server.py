@@ -235,6 +235,7 @@ class SingleInstanceLock:
         self._fd: int | None = None
 
     def acquire(self) -> None:
+        """Acquire the single-instance lock (fail-closed on contention)."""
         if self._fd is not None:
             return
         self._path.parent.mkdir(parents=True, exist_ok=True)
@@ -278,6 +279,7 @@ class SingleInstanceLock:
             return False
 
     def release(self) -> None:
+        """Release the single-instance lock."""
         if self._fd is None:
             return
         try:
@@ -689,6 +691,7 @@ class _CockpitLogWriter:
         self._stream = path.open("a", encoding="utf-8")
 
     def write(self, record: dict) -> None:
+        """Append one JSONL audit record to the access log."""
         try:
             line = json.dumps(
                 record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
@@ -926,6 +929,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
             self._snapshot_once()
 
     def start(self) -> None:
+        """Start serving HTTP on the bound loopback socket."""
         thread = threading.Thread(
             target=self.serve_forever,
             kwargs={"poll_interval": 0.05},
@@ -945,6 +949,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
             self._snapshot_thread.start()
 
     def stop(self) -> None:
+        """Stop serving and release resources."""
         if self._snapshot_thread is not None:
             self._snapshot_stop.set()
             self._snapshot_thread.join(

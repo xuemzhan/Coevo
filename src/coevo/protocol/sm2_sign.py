@@ -89,6 +89,7 @@ class SignatureRecord:
     signed_at: str     # ISO-8601 UTC 'Z'
 
     def to_mapping(self) -> dict[str, str]:
+        """Serialize a signature record to a mapping."""
         return {
             "algorithm": self.algorithm,
             "signer_cert_id": self.signer_cert_id,

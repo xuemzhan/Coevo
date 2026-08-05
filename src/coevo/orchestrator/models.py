@@ -178,6 +178,7 @@ class AgentRegistry:
         return tuple(r for r in self._by_id if r.spec.capability == capability)
 
     def register(self, registration: AgentRegistration) -> "AgentRegistry":
+        """Register an agent after validation."""
         if not isinstance(registration, AgentRegistration):
             raise OrchestratorValidationError(
                 "registration must be an AgentRegistration instance"
@@ -189,6 +190,7 @@ class AgentRegistry:
         return AgentRegistry(_by_id=self._by_id + (registration,))
 
     def set_status(self, agent_id: str, status: AgentStatus) -> "AgentRegistry":
+        """Transition an agent status atomically."""
         if not isinstance(agent_id, str) or not _SAFE_ID.match(agent_id):
             raise OrchestratorValidationError(
                 f"agent_id must be safe-id; got {agent_id!r}"

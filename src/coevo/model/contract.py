@@ -59,6 +59,7 @@ class NullModelProvider:
         max_tokens: int,
         timeout_seconds: float,
     ) -> str:
+        """Complete a model request with a provider."""
         raise ModelUnavailableError(
             "no model provider configured (offline mode)"
         )

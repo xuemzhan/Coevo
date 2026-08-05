@@ -43,6 +43,7 @@ class DecisionBriefService:
         period_end: str | None = None,
         topic_risk_ids: tuple[str, ...] | None = None,
     ) -> DecisionBrief:
+        """Generate a decision brief from verified inputs."""
         generated_time = _parse_utc(generated_at, field="generated_at")
         _safe_string(actor_id, field="actor_id", max_bytes=1024)
         if type(risk_repository) is not RiskConfirmationRepository:
@@ -109,6 +110,7 @@ class DecisionBriefService:
         event_id: str,
         template_registry: ApprovedTemplateRegistry,
     ) -> DecisionBrief:
+        """Revise a stored brief with a new content revision."""
         if type(brief_repository) is not DecisionBriefRepository:
             raise DecisionBriefValidationError("authoritative brief repository required")
         if type(template_registry) is not ApprovedTemplateRegistry:
@@ -126,6 +128,7 @@ class DecisionBriefService:
         )
 
     def to_audit_record(self, brief: DecisionBrief) -> dict[str, object]:
+        """Project a brief generation to an audit record."""
         if type(brief) is not DecisionBrief:
             raise DecisionBriefValidationError("brief must be exact DecisionBrief")
         content = brief.current.content

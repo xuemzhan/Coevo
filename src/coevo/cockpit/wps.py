@@ -52,6 +52,7 @@ class WpsLaunchResult:
     returncode: int | None = None
 
     def to_mapping(self) -> dict[str, Any]:
+        """Project a launch result to a JSON-safe mapping."""
         return {
             "decision": self.decision.value,
             "artifact_path_hash": self.artifact_path_hash,

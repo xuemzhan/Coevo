@@ -82,6 +82,7 @@ class KeyTransportBlock:
     wrapped_at: str              # ISO-8601 UTC 'Z'
 
     def to_mapping(self) -> dict[str, object]:
+        """Serialize a key-transport block to a mapping."""
         return {
             "format": self.format,
             "recipient_cert_id": self.recipient_cert_id,

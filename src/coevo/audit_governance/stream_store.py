@@ -113,6 +113,7 @@ class AuditStreamStore:
     def create(
         cls, path: Path, *, max_bytes: int = STORE_MAX_BYTES
     ) -> "AuditStreamStore":
+        """Create a new audit stream store (fails if it exists)."""
         if not isinstance(path, Path):
             raise AuditStreamStoreError("path must be a Path")
         if path.exists():
@@ -131,6 +132,7 @@ class AuditStreamStore:
     def open(
         cls, path: Path, *, max_bytes: int = STORE_MAX_BYTES
     ) -> "AuditStreamStore":
+        """Open an existing store after full chain verification."""
         if not isinstance(path, Path):
             raise AuditStreamStoreError("path must be a Path")
         if not path.is_file():
@@ -182,6 +184,7 @@ class AuditStreamStore:
         return tuple(events)
 
     def verify_chain(self) -> bool:
+        """Verify the full hash chain; False on any tampering."""
         try:
             previous = GENESIS
             for row in self._read_rows():

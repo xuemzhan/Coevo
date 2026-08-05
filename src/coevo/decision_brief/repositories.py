@@ -68,6 +68,7 @@ class ApprovedTemplateRegistry:
         self._lock = Lock()
 
     def approve(self, *, approval_id: str, template_ref: str) -> ApprovedTemplate:
+        """Approve a template after re-verifying its bytes."""
         _safe_string(approval_id, field="approval_id", max_bytes=1024)
         payload = self._read_safe(template_ref)
         approval = ApprovedTemplate(
@@ -84,6 +85,7 @@ class ApprovedTemplateRegistry:
         return approval
 
     def verify(self, *, approval_id: str, template_ref: str) -> ApprovedTemplate:
+        """Re-verify an approved template before use."""
         _safe_string(approval_id, field="approval_id", max_bytes=1024)
         with self._lock:
             record = self._approvals.get(approval_id)
@@ -165,6 +167,7 @@ class RiskConfirmationRepository:
         confirmed_by: str,
         event_id: str,
     ) -> RiskConfirmation:
+        """Confirm a risk against the latest verified receipt."""
         trusted_time = _parse_utc(confirmed_at, field="confirmed_at")
         _safe_string(confirmed_by, field="confirmed_by", max_bytes=1024)
         _safe_string(event_id, field="event_id", max_bytes=1024)
@@ -244,6 +247,7 @@ class RiskConfirmationRepository:
         receipt: MergeCommitReceipt,
         trusted_time: dt.datetime,
     ) -> RiskConfirmation:
+        """Return a verified risk confirmation for a receipt."""
         _safe_string(confirmation_id, field="confirmation_id", max_bytes=1024)
         with self._lock:
             item = self._items.get(confirmation_id)
@@ -304,6 +308,7 @@ class DecisionBriefRepository:
         self._lock = Lock()
 
     def get(self, brief_id: str) -> DecisionBrief:
+        """Fetch a stored brief by id (idempotent replay aware)."""
         _safe_string(brief_id, field="brief_id", max_bytes=1024)
         with self._lock:
             brief = self._briefs.get(brief_id)
@@ -313,6 +318,7 @@ class DecisionBriefRepository:
         return _clone_brief(brief)
 
     def create(self, brief: DecisionBrief, *, event_id: str) -> DecisionBrief:
+        """Create a brief version with replay detection."""
         if type(brief) is not DecisionBrief:
             raise DecisionBriefValidationError("brief must be exact DecisionBrief")
         _validate_stored_brief(brief)
@@ -350,6 +356,7 @@ class DecisionBriefRepository:
         event_id: str,
         template_registry: ApprovedTemplateRegistry,
     ) -> DecisionBrief:
+        """Revise a brief version with conflict checks."""
         if type(content) is not BriefContent:
             raise DecisionBriefValidationError("content must be exact BriefContent")
         _safe_string(brief_id, field="brief_id", max_bytes=1024)

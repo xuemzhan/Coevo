@@ -129,6 +129,7 @@ class WindowsFreshnessAuthority:
         return base.with_suffix(".json"), base.with_suffix(".main.p7s"), base.with_suffix(".survivor.p7s")
 
     def create_marker(self, store_id: str, generation: int, binding: str) -> dict:
+        """Create and persist a signed freshness marker."""
         transition_id = str(uuid.uuid4())
         partial = {"store_id": store_id, "generation": generation, "binding_sha256": binding, "transition_id": transition_id}
         output = self._run(self._arguments("Create", partial))
@@ -177,6 +178,7 @@ class WindowsFreshnessAuthority:
         self._signature("VerifySignature", content, marker, signature)
 
     def store_retirement(self, tombstone: dict, main_signature: bytes, survivor_signature: bytes | None) -> None:
+        """Persist a retirement tombstone for a marker."""
         target = tombstone["target_marker"]
         raw = canonical(tombstone)
         json_path, main_path, survivor_path = self._paths(target)
@@ -196,6 +198,7 @@ class WindowsFreshnessAuthority:
         durable_write(json_path, raw)
 
     def load_retirement(self, tombstone: dict) -> tuple[bytes, bytes, bytes | None]:
+        """Load a marker's retirement tombstone."""
         json_path, main_path, survivor_path = self._paths(tombstone["target_marker"])
         if not json_path.is_file() or not main_path.is_file():
             raise AuditAnchorError("identity retirement tombstone is incomplete")
@@ -329,6 +332,7 @@ class SignedAuditAnchor:
         self.freshness.verify_retired(target)
 
     def verify(self, checkpoint: dict) -> bool:
+        """Verify a marker's signature and freshness."""
         try:
             _, item = self._read_official()
             tombstone = item.get("retirement_tombstone")
@@ -339,6 +343,7 @@ class SignedAuditAnchor:
             return False
 
     def prepare(self, checkpoint: dict) -> None:
+        """Prepare a new audit head for promotion."""
         if any(path.exists() for path in (self.pending_head, self.pending_signature, self.pending_new_signature, self.pending_old_signature)):
             raise AuditAnchorError("an identity audit anchor transaction is already pending")
         generation = 1; previous_hash = "0" * 64; previous_marker = None
@@ -368,6 +373,7 @@ class SignedAuditAnchor:
             self.freshness.delete_marker(marker); self._unlink_pending(); raise
 
     def promote(self) -> None:
+        """Promote the prepared audit head atomically."""
         raw, item = self._read_pending()
         durable_write(self.signature, self.pending_signature.read_bytes()); durable_write(self.marker_signature, self.pending_new_signature.read_bytes()); durable_write(self.head, raw)
         if self._read_official()[1] != item:
@@ -386,6 +392,7 @@ class SignedAuditAnchor:
         self._complete_retirement(self._tombstone("aborted-retired", target, survivor, raw)); self._unlink_pending()
 
     def recover(self, checkpoint: dict) -> None:
+        """Recover the anchor from the last valid checkpoint."""
         pending_paths = (self.pending_head, self.pending_signature, self.pending_new_signature, self.pending_old_signature)
         if any(path.exists() for path in pending_paths):
             _, pending = self._read_pending()

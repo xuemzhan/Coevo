@@ -393,6 +393,7 @@ class TalentStore:
     # -- queries ------------------------------------------------------------
 
     def get(self, talent_code: str) -> Talent | None:
+        """Fetch a talent by code from the SQLite pool."""
         self._ensure_open()
         if not isinstance(talent_code, str) or not talent_code:
             raise TalentStoreError("talent_code must be a string")
@@ -406,6 +407,7 @@ class TalentStore:
         return _row_to_talent(row) if row is not None else None
 
     def iter_talents(self) -> Iterator[Talent]:
+        """Iterate all talents in registration order."""
         self._ensure_open()
         cursor = self._connection.execute(
             "SELECT talent_code, skill_tags, credentials, current_task_count, "

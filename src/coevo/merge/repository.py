@@ -189,6 +189,7 @@ class MergeReceiptRepository:
         self, builder: Callable[[str, int, str | None, str], MergeCommitReceipt],
         *, trusted_time: datetime,
     ) -> MergeCommitReceipt:
+        """Commit a signed receipt after full verification."""
         with self.anchor.locked():
             self._recover()
             self.connection.execute("BEGIN IMMEDIATE")
@@ -280,6 +281,7 @@ class MergeReceiptRepository:
     def get_verified(
         self, receipt_id: str, *, trusted_time: datetime,
     ) -> MergeCommitReceipt:
+        """Fetch and verify a receipt by id."""
         with self.anchor.locked():
             self._recover()
             receipts = self._verify_history(trusted_time)

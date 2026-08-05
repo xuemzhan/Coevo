@@ -188,6 +188,7 @@ class IdentityRepository:
             raise
 
     def record_rejection(self, actor_id: str, request_id: str, result: str, payload_digest: str | None = None) -> None:
+        """Record an authorization rejection event."""
         with self.anchor.locked():
             self._recover_and_require_consistent()
             self.connection.execute("BEGIN IMMEDIATE")
@@ -200,6 +201,7 @@ class IdentityRepository:
                 raise
 
     def register(self, actor_id: str, request_id: str, bundle: IdentityBundle) -> RegistrationResult:
+        """Register an identity bundle atomically with audit."""
         result = RegistrationResult(request_id, bundle.organization.organization_id, bundle.user.user_id, bundle.client.client_id, bundle.certificate.certificate_id)
         result_json = json.dumps(result.__dict__, sort_keys=True, separators=(",", ":"))
         with self.anchor.locked():

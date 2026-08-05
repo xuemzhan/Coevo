@@ -58,6 +58,7 @@ class DemoFreshnessAuthority:
         self._retirements: dict[str, tuple[bytes, bytes, bytes | None]] = {}
 
     def create_marker(self, store_id: str, generation: int, binding: str) -> dict:
+        """Create and persist a signed freshness marker."""
         token = os.urandom(20).hex().upper()
         key_id = "CoevoDemoMarker-" + os.urandom(16).hex()
         marker = {
@@ -104,6 +105,7 @@ class DemoFreshnessAuthority:
         return hmac.new(self._markers[marker["token"]][1], content, hashlib.sha256).digest()
 
     def verify_signature(self, content: bytes, signature: bytes, marker: dict) -> None:
+        """Verify a signature against the demo authority."""
         stored = self._known.get(marker.get("token"))
         secret = stored[1] if stored is not None else self._retired.get(marker.get("token"))
         if secret is None or not hmac.compare_digest(
@@ -117,6 +119,7 @@ class DemoFreshnessAuthority:
         main_signature: bytes,
         survivor_signature: bytes | None,
     ) -> None:
+        """Persist a retirement tombstone for a marker."""
         token = tombstone["target_marker"]["token"]
         value = (canonical(tombstone), main_signature, survivor_signature)
         if token in self._retirements and self._retirements[token] != value:

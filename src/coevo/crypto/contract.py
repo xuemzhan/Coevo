@@ -116,6 +116,7 @@ class ProviderRegistry:
         self._providers: dict[str, Any] = {}
 
     def register(self, name: str, provider: Any) -> None:
+        """Register a provider for an approved scope."""
         if not isinstance(name, str) or not name:
             raise TypeError("provider name must be a non-empty string")
         if name in self._providers:

@@ -93,6 +93,7 @@ class ProcessedPackageStore:
         return cls(_records=tuple(), _by_id=tuple(), _by_digest=tuple())
 
     def get(self, package_id: str) -> ProcessedPackageRecord | None:
+        """Fetch a record by package id (indexed)."""
         cache = self._id_cache
         if cache is None:
             cache = dict(self._by_id)
@@ -101,6 +102,7 @@ class ProcessedPackageStore:
         return self._records[idx] if idx is not None else None
 
     def by_digest(self, package_digest: str) -> ProcessedPackageRecord | None:
+        """Fetch a record by digest (indexed)."""
         cache = self._digest_cache
         if cache is None:
             cache = dict(self._by_digest)

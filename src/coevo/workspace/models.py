@@ -100,6 +100,7 @@ class WorkspaceRegistry:
     def by_package(self, package_id: str) -> tuple[WorkspaceEntry, ...]:
         # 单次遍历构建 package_id -> 条目分组后 O(1) 取结果；
         # 相比“逐条过滤整个条目表”保持同一语义且避免重复扫描。
+        """Return workspace entries for a package id."""
         by_package: dict[str, list[WorkspaceEntry]] = {}
         for entry in self._entries:
             by_package.setdefault(entry.package_id, []).append(entry)

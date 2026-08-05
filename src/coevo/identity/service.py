@@ -44,6 +44,7 @@ class IdentityService:
         self.authorizer = authorizer
 
     def register_identity_bundle(self, actor: Actor, request_id: str, payload: Any) -> RegistrationResult:
+        """Register an identity bundle after authorization."""
         raw_actor_id = getattr(actor, "actor_id", None)
         actor_audit_id = audit_identifier(raw_actor_id)
         request_audit_id = audit_identifier(request_id)

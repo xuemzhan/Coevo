@@ -325,6 +325,7 @@ class WindowsPrivateKeyStore:
         return _reference_from_helper(result, certificate_id)
 
     def use(self, reference: PrivateKeyReference, payload: bytes) -> bytes:
+        """Use a handle for a crypto operation via the store."""
         if not isinstance(payload, (bytes, bytearray)):
             raise PrivateKeyUsageError("private-key usage payload must be bytes")
         try:
@@ -349,6 +350,7 @@ class WindowsPrivateKeyStore:
         self, reference: PrivateKeyReference, payload: bytes, signature: bytes,
         *, parent_pinned_thumbprint: str
     ) -> bool:
+        """Verify a signature against a stored handle."""
         if not isinstance(payload, (bytes, bytearray)):
             raise PrivateKeyUsageError("private-key verification payload must be bytes")
         if not isinstance(signature, (bytes, bytearray)) or not signature:
@@ -385,6 +387,7 @@ class WindowsPrivateKeyStore:
             raise PrivateKeyHandleError("private-key helper timed out") from exc
 
     def destroy(self, reference: PrivateKeyReference) -> None:
+        """Destroy a handle and record retirement."""
         try:
             self._run("Destroy", handle=reference.key_id, public_digest=reference.key_public_sha256)
         except PrivateKeyHandleError as exc:
@@ -393,6 +396,7 @@ class WindowsPrivateKeyStore:
             raise
 
     def revoke(self, reference: PrivateKeyReference, *, reason: str) -> None:
+        """Revoke a handle with a reason (fail-closed)."""
         if not isinstance(reason, str) or not reason.strip():
             raise PrivateKeyValidationError("revocation reason is required")
         self._run(
@@ -453,6 +457,7 @@ class PrivateKeyService:
 
     def store(self, certificate_id: str, payload: Mapping[str, Any], *,
               actor_id: str = "system", request_id: str | None = None) -> PrivateKeyReference:
+        """Store a new handle with full validation."""
         self._require_actor(actor_id)
         try:
             reference = self._backend.store(certificate_id, payload)
@@ -468,6 +473,7 @@ class PrivateKeyService:
     def use(self, reference: PrivateKeyReference, payload: bytes, *,
             trusted_time: datetime, actor_id: str = "system",
             request_id: str | None = None) -> bytes:
+        """Use a stored handle for signing/sealing."""
         self._require_actor(actor_id)
         if trusted_time.tzinfo is None:
             raise PrivateKeyUsageError("trusted_time must include timezone information")
@@ -595,6 +601,7 @@ class PrivateKeyService:
         return revoked
 
     def destroy(self, reference: PrivateKeyReference, *, actor_id: str) -> None:
+        """Destroy a stored handle with audit."""
         self._require_actor(actor_id)
         try:
             self._backend.destroy(reference)
@@ -613,6 +620,7 @@ class PrivateKeyService:
             raise PrivateKeyValidationError("actor_id is required and must be a non-empty string")
 
     def verify_audit_chain(self) -> bool:
+        """Verify the private-key audit hash chain."""
         previous = "0" * 64
         for event in self.audit_trail:
             snapshot = {key: event[key] for key in event if key not in {"event_hash", "previous_hash"}}

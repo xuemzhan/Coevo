@@ -135,6 +135,7 @@ class AgentPackageFlags(IntFlag):
 
     @classmethod
     def parse(cls, value: int) -> "AgentPackageFlags":
+        """Parse raw flag bits into the closed flag set."""
         if isinstance(value, bool) or not isinstance(value, int):
             raise AgentPackageLayoutError("flags must be an integer bitmask")
         known_mask = int(
@@ -180,6 +181,7 @@ class EnvelopeHeader:
     required_client_version: str
 
     def to_mapping(self) -> dict[str, Any]:
+        """Serialize an envelope header to a mapping."""
         return {
             "schema_version": self.schema_version,
             "protocol_version": self.protocol_version,

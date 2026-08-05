@@ -25,6 +25,7 @@ class BenchmarkResult:
     detail: str = ""
 
     def to_mapping(self) -> dict[str, Any]:
+        """Project the benchmark result to a JSON-safe mapping."""
         return {
             "name": self.name,
             "metric": self.metric,

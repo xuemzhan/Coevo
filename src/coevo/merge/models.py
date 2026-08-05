@@ -78,6 +78,7 @@ class FieldMerge:
             raise ValueError("reason must be a non-empty string")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize the merge record to a JSON-safe dict."""
         def _to_jsonable(value):
             # JSON has no tuple / enum / MISSING-sentinel type;
             # convert recursively so the round-trip is exact
@@ -130,6 +131,7 @@ class MergeRecord:
     store_post: ProcessedPackageStore
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize the merge proposal to a JSON-safe dict."""
         return {
             "kind": "merge.record",
             "schema_version": "1.0",

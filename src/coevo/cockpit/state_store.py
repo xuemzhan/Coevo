@@ -260,6 +260,7 @@ class CockpitStateStore:
         workspace_views: tuple[WorkspaceView, ...],
         role_views: tuple[RoleView, ...],
     ) -> None:
+        """Atomically persist the current server state snapshot."""
         payload = serialize_views(workspace_views, role_views)
         body = json.dumps(
             payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
