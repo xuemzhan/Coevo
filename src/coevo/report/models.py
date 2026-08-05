@@ -24,6 +24,10 @@ Non-goals
   for assembling the wire bytes via US-5's
   :mod:`package_builder`.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-9 回传清单领域模型：状态/工件/覆盖与校验。
 from __future__ import annotations
 
 import enum

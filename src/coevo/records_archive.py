@@ -5,6 +5,10 @@ JSONL). This module implements the *planning* half of the archiving
 policy; ``scripts/archive_records.py`` applies it. All functions are
 pure: they never touch the filesystem.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 记录归档策略助手：VERIFICATION/DECISIONS/审计行分段与归档计划，纯函数。
 from __future__ import annotations
 
 import json

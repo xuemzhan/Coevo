@@ -24,6 +24,10 @@ What the parser refuses (fail-closed, AGENTS.md §3 第 7 条)
 * Non-finite or non-UTF-8 strings (defensive; safe to raise).
 * Confidence values outside [0, 1].
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-1 确定性流程解析器：canonical/tabular/tree 三 schema，失败关闭。
 from __future__ import annotations
 
 import datetime as dt

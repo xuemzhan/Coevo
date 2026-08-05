@@ -1,4 +1,8 @@
 """orchestrator.models - US-4 domain models, enums, errors, registry and orchestration value objects."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-4 编排领域模型：Agent 注册/状态/失败策略/链/报告与校验。
 
 from __future__ import annotations
 

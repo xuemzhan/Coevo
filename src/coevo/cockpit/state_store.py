@@ -9,6 +9,10 @@ an existing state on failure.
 
 No new dependency; Python stdlib only.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-7-AC-3 状态持久化：JSON 序列化 + 原子写（临时文件 + 换名），失败关闭。
 from __future__ import annotations
 
 import json

@@ -26,6 +26,10 @@ Algorithm
   ``O((V + E) log V)`` instead of the previous quadratic
   ``list.pop(0)`` + re-sort per insertion.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-2 依赖图：邻接索引 + heap 拓扑排序 + 显式栈环检测，O((V+E) log V)。
 from __future__ import annotations
 
 import heapq

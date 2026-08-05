@@ -12,6 +12,10 @@ where ``provider_key`` is ``"<provider>/<model>"`` (e.g.
 ``"default"`` variant is used. This lets operators tune prompts for
 different models without touching business code.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 版本化、可调模型提示词注册表：load_prompt_registry 校验并冻结。
 from __future__ import annotations
 
 import hashlib

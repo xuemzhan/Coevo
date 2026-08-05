@@ -1,4 +1,9 @@
 """Signed, sealed merge commit receipts for the US-10/US-11 trust boundary."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-10/11 信任边界：签名合并收据 + 密封收据 store（访问期全量重校验），
+# 快照冻结防篡改。
 from __future__ import annotations
 
 import base64

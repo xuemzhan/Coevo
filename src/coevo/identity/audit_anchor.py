@@ -1,4 +1,8 @@
 """Signed identity-audit heads with non-exportable per-generation freshness markers."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 身份审计锚点：签名审计头 + 每代不可导出新鲜度，防回滚/防篡改。
 
 from __future__ import annotations
 

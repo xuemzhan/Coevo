@@ -12,6 +12,11 @@ append-only journal so late subscribers can replay the event history:
 
 No new dependency; Python stdlib only.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-15-AC-2 审计流持久化：JSONL + SHA-256 哈希链，追加独占、失败关闭、
+# 尺寸增量维护（免逐条 stat）。
 from __future__ import annotations
 
 import hashlib

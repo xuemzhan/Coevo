@@ -23,6 +23,10 @@ The model layer enforces strict invariants at construction time so
 that any persisted record that violates AC-2's field-minimum contract
 fails closed (AGENTS.md §3 第 7 条).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-3 人才池领域模型：脱敏身份/技能/资质/窗口/负载告警。
 from __future__ import annotations
 
 import enum

@@ -1,4 +1,8 @@
 """progress_capture.models - US-8 progress-capture domain models, enums, errors and shared validators."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-8 进度采集领域模型：证据/条目/覆盖/草稿与全部校验。
 
 from __future__ import annotations
 

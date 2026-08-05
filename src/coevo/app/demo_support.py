@@ -1,4 +1,10 @@
 """app.demo_support - demo-only support: PKI profile bootstrap, in-memory demo signer/freshness stand-ins and sample inputs. Explicitly NOT production code."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 演示专用支撑（不进生产路径）：SM2 测试 PKI 引导、内存/文件模拟
+# 签名与新鲜度权威（HMAC）、样例项目输入。关键不变量：不携带私钥字节，
+# 仅测试环境使用。
 
 from __future__ import annotations
 

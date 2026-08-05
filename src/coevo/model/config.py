@@ -6,6 +6,10 @@ environment-variable *name* (``api_key_env``) and never stored in the
 file. Loading is fail-closed: unknown keys, malformed values or
 out-of-range numbers are rejected.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 模型访问配置：版本化配置文件加载与校验，失败关闭。
 from __future__ import annotations
 
 import json

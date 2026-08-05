@@ -23,6 +23,10 @@ Properties (fail-closed by construction)
 This module is pure-Python; no IO, no model, no crypto library other
 than :mod:`hashlib` (stdlib).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-3 PII 脱敏：稳定池码 + 不可逆哈希 + 有界显示提示。
 from __future__ import annotations
 
 import hashlib

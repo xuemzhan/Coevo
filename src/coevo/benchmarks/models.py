@@ -1,4 +1,8 @@
 """benchmarks.models - SLA target definitions and scalability probes (merged from the former package __init__)."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 基准模型：SLA_TARGETS 参考表 + SCALABILITY_PROBES 可扩展性探针清单。
 
 from __future__ import annotations
 

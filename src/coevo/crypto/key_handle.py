@@ -19,6 +19,10 @@ password and unlock the key inside the controlled crypto helper
 (HANDLE-2 actions 6/7); raw key bytes and the password never cross to
 Python.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 受保护密钥句柄契约：批准产品路径的句柄抽象与回退拦截。
 from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable

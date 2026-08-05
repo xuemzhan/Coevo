@@ -14,6 +14,11 @@ Opens workspace documents in WPS through a strictly validated path:
 No macro automation is performed; opening a document may still execute
 macros inside WPS, which is the host application's documented risk.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-7-AC-4 受控 WPS 文档启动器：允许列表扩展名、工作区内相对路径、
+# 超时与失败关闭；仅 Windows。
 from __future__ import annotations
 
 import enum

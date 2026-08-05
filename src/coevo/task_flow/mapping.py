@@ -10,6 +10,10 @@ The rule table is itself versioned (the default table is version 1)
 so we can later add new standard stages without invalidating
 already-confirmed flows.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-1 阶段映射：规则表把 unit 节点映射到 StandardStage，O(1) 查询。
 from __future__ import annotations
 
 from dataclasses import dataclass

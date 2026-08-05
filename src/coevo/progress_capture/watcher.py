@@ -22,6 +22,10 @@ The watcher detects file changes in a workspace and emits bounded
 
 No new dependency; Python stdlib only.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-8-AC-2 工作区文件 watcher：轮询 + 摘要复用 + 符号链接跳过，失败关闭。
 from __future__ import annotations
 
 import enum

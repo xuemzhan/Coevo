@@ -21,6 +21,10 @@ Protected-handle boundary (see ``cng_handle.py``):
   ``verify`` (public certificate) are functional today because they do
   not need the protected private key.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# HANDLE-1/2：CNG 句柄背书的 GmSSL 提供者，签名/解密经受控助手。
 from __future__ import annotations
 
 from typing import Any, Final

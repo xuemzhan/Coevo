@@ -1,4 +1,8 @@
 """SQLite identity persistence protected by signed, monotonic freshness anchors."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# SQLite 身份持久化 + 签名单调新鲜度锚：原子写、审计链、冲突即回滚。
 
 from __future__ import annotations
 

@@ -1,4 +1,9 @@
 """Fail-closed X.509 inspection through controlled Windows/.NET stdin."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# X.509 失败关闭检查：经受控 Windows/.NET stdin 助手解析，
+# 输出与输入 DER 摘要强制一致。
 
 from __future__ import annotations
 

@@ -1,4 +1,8 @@
 """cockpit.static - bounded static asset cache and path policy for the local cockpit."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 静态资源路径策略与有界缓存：安全解析、mtime 失效、FIFO 淘汰。
 
 
 

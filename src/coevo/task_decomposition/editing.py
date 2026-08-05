@@ -20,6 +20,10 @@ Non-goals
 * No I/O, no UI, no LLM -- this is the deterministic edit surface.
 * No cross-package task moves in this slice.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-2 任务编辑纯函数：增删改排 + Override 审计记录，经 build_baseline 重校验。
 from __future__ import annotations
 
 import dataclasses

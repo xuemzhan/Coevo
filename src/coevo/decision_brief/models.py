@@ -1,4 +1,9 @@
 """decision_brief.models - domain models, enums, errors and shared validation helpers for US-13 decision briefs."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-13 决策简报领域模型：简报/内容/模板/风险确认与全部校验；
+# 候选风险须经负责人密钥确认绑定最新合并回执。
 
 from __future__ import annotations
 

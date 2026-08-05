@@ -26,6 +26,10 @@ certified module. It is approved for this project's functional path
 as an offline, verifiable digest; national-certification remains the
 long-term requirement (see ``docs/dependencies/approved-crypto-provider-path.md``).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 纯 Python SM3 哈希（GB/T 32905-2016），零依赖离线实现。
 from __future__ import annotations
 
 from typing import Final

@@ -20,6 +20,11 @@ Boundaries (fail-closed by construction)
   unknown-task output raises :class:`ModelValidationError` and is
   never partially applied.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-2-AC-3 模型辅助任务分解建议代理：流程 JSON 预索引分组，
+# 建议仅草稿，正式状态须人工确认。
 from __future__ import annotations
 
 import json

@@ -13,6 +13,10 @@ Design notes
 * Cycle detection lives in :mod:`.dependency_graph` and runs at
   baseline-confirm time (fail-closed).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-2 任务分解领域模型：任务/工作包/里程碑/依赖/基线/覆盖。
 from __future__ import annotations
 
 import enum

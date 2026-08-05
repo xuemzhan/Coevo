@@ -1,4 +1,8 @@
 """Internal immutable identity data models."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 身份领域不可变模型：Actor/组织/用户/客户端/可信证书/角色绑定等。
 
 from __future__ import annotations
 

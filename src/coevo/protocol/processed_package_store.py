@@ -30,6 +30,10 @@ Non-goals
 * No LLM, no model, no network.
 * No mutation of US-5-AC-1 / US-5-AC-2 wire layout.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-5 已处理包持久化（§17）：去重 + 摘要索引，O(1) 查询。
 from __future__ import annotations
 
 from dataclasses import dataclass, field

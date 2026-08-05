@@ -22,6 +22,10 @@ Design notes
   stage names; the mapping layer (:mod:`.mapping`) translates them
   into the standardized enum.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-1 任务流领域模型：Traced/ProcessFlow/Override/Stage 等。
 from __future__ import annotations
 
 import enum

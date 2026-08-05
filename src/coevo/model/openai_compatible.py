@@ -13,6 +13,10 @@ Local vs remote (mandatory constraint 9.1)
 * Any other host requires **https** plus an API key and the
   ``external_data_ok`` approval switch (fail-closed egress).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# OpenAI 兼容聊天提供者（vLLM/llama.cpp/DeepSeek）：环回校验 + 超时。
 from __future__ import annotations
 
 import json

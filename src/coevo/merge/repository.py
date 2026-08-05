@@ -1,4 +1,8 @@
 """SQLite receipt history protected by signed monotonic freshness anchors."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# SQLite 收据历史 + 签名单调新鲜度锚：流式逐行校验，防超大/畸形行。
 from __future__ import annotations
 
 import base64

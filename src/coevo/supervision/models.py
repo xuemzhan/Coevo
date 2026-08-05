@@ -1,4 +1,8 @@
 """supervision.models - US-12 supervision/meeting domain models, enums, errors and shared validators."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-12 督办/会议领域模型：升级/提醒/会议结论与校验。
 
 from __future__ import annotations
 

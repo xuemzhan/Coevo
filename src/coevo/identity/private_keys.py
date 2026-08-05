@@ -29,6 +29,11 @@ The US-5 `.agent` envelope will read via this interface
 (``PrivateKeyService.use``) but US-5 stays ``blocked`` until actual
 CNG keys exist in ``Cert:\\CurrentUser\\My`` (next round, slice E).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-0-AC-2 私钥存储接口：仅元数据引用，私钥字节不进进程；
+# 格式/载荷严格校验（含敏感字段启发式拒绝）。
 
 from __future__ import annotations
 

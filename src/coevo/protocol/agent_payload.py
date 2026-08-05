@@ -31,6 +31,10 @@ Non-goals (out of scope for US-5-AC-2)
 * No tampering with the existing US-5-AC-1 wire layout (Fixed Header,
   Envelope, flags). This module plugs in only at the payload block.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-5 SM4 AEAD 载荷层（§7.4）：封装/解析，密文与规范载荷严格校验。
 from __future__ import annotations
 
 import secrets

@@ -28,6 +28,11 @@ receives private-key bytes"):
   zeroizes the password and key in helper memory (see
   ``docs/dependencies/approved-crypto-provider-path.md``).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# HANDLE-1：CNG 保护的 SM2 密钥句柄（KEK 包装）层，私钥字节不进入
+# Python 进程；句柄/回滚/吊销由受控助手完成。
 from __future__ import annotations
 
 import hashlib

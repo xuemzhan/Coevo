@@ -4,6 +4,10 @@ Backward-compatible subclass of :class:`OpenAICompatibleProvider`:
 remote https endpoint, API key from ``COEVO_LLM_API_KEY`` (or the
 configured ``api_key_env``), external-egress approval required.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# DeepSeek 提供者：OpenAI 兼容远程变体，仅经批准配置可用。
 from __future__ import annotations
 
 import os

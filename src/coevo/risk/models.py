@@ -1,4 +1,8 @@
 """risk.models - US-11 risk domain models, enums, errors and shared validation helpers (merged from the former package __init__)."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-11 风险领域模型：风险/报告/来源类型与校验。
 
 from __future__ import annotations
 

@@ -32,6 +32,10 @@ Non-goals
 * No IO, no model, no network.
 * No mutation of US-5-AC-1 fixed header / envelope wire layout.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-5 SM2 签名 + SM3 摘要层（§9+§12）：规范清单、签名记录与验证。
 from __future__ import annotations
 
 import base64

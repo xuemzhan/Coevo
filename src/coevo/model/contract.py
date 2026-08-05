@@ -10,6 +10,10 @@ Model output is **never** a formal state: callers consume it as a
 draft suggestion and route it through the existing human-confirmation
 boundaries (see ``task_decomposition.agent``).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 统一模型适配器契约（强制约束 9.2）：NullModelProvider 离线兜底。
 from __future__ import annotations
 
 import json

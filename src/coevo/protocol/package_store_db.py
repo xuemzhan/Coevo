@@ -37,6 +37,10 @@ Non-goals
 * External anchoring (signed checkpoints on a separate audit node) is
   out of scope; the global audit seal already provides that layer.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# PACKAGE-DB-1 已处理包注册（SQLite，§17）：哈希链 + 逐行校验。
 from __future__ import annotations
 
 import hashlib

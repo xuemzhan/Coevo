@@ -5,6 +5,10 @@ not define or advertise an RSA wire suite, and it does not encode extension
 fields. The protocol-mandated SM2/SM3 identifier is retained solely so later
 ACs can fail closed until an approved implementation is available.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 未来批准密码产品的算法标识占位：不支持的算法显式拒绝。
 
 from __future__ import annotations
 

@@ -26,6 +26,10 @@ Non-goals
 * No LLM, no IO, no model.
 * No mutation of US-5-AC-1 wire layout.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-5 重放/重复检测（§17）：决策失败关闭，包身份绑定校验。
 from __future__ import annotations
 
 import enum

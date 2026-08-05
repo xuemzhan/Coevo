@@ -1,4 +1,8 @@
 """cockpit.sessions - bearer-token session management for the local cockpit."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 驾驶舱 bearer-token 会话管理：内存令牌、过期与轮换，纯函数可测。
 
 
 

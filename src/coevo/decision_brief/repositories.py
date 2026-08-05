@@ -1,4 +1,9 @@
 """decision_brief.repositories - persistent repositories for approved templates, risk confirmations and decision brief versions."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-13 持久化仓库：受控模板注册、风险确认与简报版本 CAS；
+# 重放检测失败关闭（_replay_entry）。
 
 from __future__ import annotations
 

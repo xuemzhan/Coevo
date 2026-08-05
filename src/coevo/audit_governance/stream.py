@@ -18,6 +18,11 @@ The hub is in-memory: durable persistence remains the responsibility of
 the existing audit-chain stores; this slice is the real-time channel.
 No new dependency; Python stdlib only.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-15-AC-2 审计流：订阅/发布/重放内存历史，fail-isolated 投递；
+# 持久化委托 AuditStreamStore。
 from __future__ import annotations
 
 import re

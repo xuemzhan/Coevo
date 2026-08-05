@@ -1,4 +1,8 @@
 """Strict validation performed before identity data reaches SQLite or audit logs."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 身份数据入库存前严格校验：敏感键拒绝、循环/别名结构拒绝、证书可用性。
 
 from __future__ import annotations
 

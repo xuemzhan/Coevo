@@ -28,6 +28,10 @@ Path invariants (US-6 / 协议 § 19.1)
 The path strategy is the one component that produces the
 canonical names; downstream code MUST NOT compose its own paths.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-6 工作区路径策略：安全 ID、防穿越、默认根与完整路径装配。
 from __future__ import annotations
 
 import re

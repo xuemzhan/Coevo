@@ -27,6 +27,10 @@ Non-goals
 * No model / LLM / network.
 * No mutation of US-5-AC-1 / US-5-AC-2 wire layout.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-5 原子导入事务状态机（§15）：单调步进、审计投影、类型门校验。
 from __future__ import annotations
 
 import enum

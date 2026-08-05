@@ -22,6 +22,10 @@ AC mapping
 * AC-4 — covered by the explicit ``InitOutcome.created=False``
   flag on duplicate or rollback paths.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-6 工作区领域模型：角色绑定/注册表（索引化查询）/初始化结果。
 from __future__ import annotations
 
 from dataclasses import dataclass, field

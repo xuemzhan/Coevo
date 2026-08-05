@@ -1,4 +1,8 @@
 """SQLite-backed idempotency and hash-chain audit store for real orchestration."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 真实编排链 SQLite 幂等与哈希链审计存储：事务化、锚点恢复、失败关闭。
 from __future__ import annotations
 
 import dataclasses

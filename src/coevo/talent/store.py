@@ -32,6 +32,10 @@ Non-goals
 * No new dependency -- Python stdlib only (``sqlite3`` / ``hashlib`` /
   ``json`` / ``uuid`` / ``datetime`` / ``pathlib``).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-3-AC-2 SQLite 脱敏人才池持久化：哈希链 + 导入即脱敏 + 元数据缓存。
 from __future__ import annotations
 
 import hashlib

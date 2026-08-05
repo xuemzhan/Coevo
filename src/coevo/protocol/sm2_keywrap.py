@@ -36,6 +36,10 @@ Non-goals
 * No IO, no model, no network.
 * No mutation of US-5-AC-1 fixed header / envelope wire layout.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-5 SM2 密钥传输层（§7.3）：会话密钥封装/解封，规范编码。
 from __future__ import annotations
 
 import datetime as dt

@@ -16,6 +16,10 @@ with a locked schema and a hash-chained audit trail:
 
 No new dependency; Python stdlib only.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-14-AC-2 知识包持久化（SQLite）：JSON 载荷编解码 + 校验 + 原子提交。
 from __future__ import annotations
 
 import dataclasses

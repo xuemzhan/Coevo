@@ -53,6 +53,11 @@ Non-goals
 * No mutation of any existing module's ``to_audit_record`` schema.
 * No introduction of a new dependency.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-15 审计领域模型：AuditEvent 统一审计记录、拦截判定、查询/导出载荷
+# 与全部校验。关键不变量：敏感文本只保留哈希/计数，事件六核心字段有效。
 from __future__ import annotations
 
 import dataclasses

@@ -1,4 +1,8 @@
 """benchmarks.harness - BenchmarkResult, measure() and report() measurement harness."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 基准测量框架：BenchmarkResult / measure / report，SLA 比较与采样。
 
 from __future__ import annotations
 

@@ -11,6 +11,10 @@ never be routed through Python's standard logging.
 * both share one deterministic formatter
   (``timestamp level logger message``).
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 生产日志引导（stdlib logging）：格式/级别/重定向，无第三方依赖。
 from __future__ import annotations
 
 import logging

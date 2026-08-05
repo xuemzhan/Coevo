@@ -1,4 +1,9 @@
 """cockpit.models - US-7 cockpit domain models, enums, errors, view summaries, config/state and the WPS allow list."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-7 驾驶舱领域模型：路由/响应状态/视图快照/会话与服务器配置，
+# 含 AC-1 环回绑定失败关闭与 AC-8 WPS 允许列表。
 
 from __future__ import annotations
 

@@ -1,4 +1,8 @@
 """merge.models - domain models, enums, sentinels and errors for US-10 (merged from the former package __init__)."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-10 合并领域模型：字段合并/提案/提交结果/哨兵与错误类型。
 
 from __future__ import annotations
 

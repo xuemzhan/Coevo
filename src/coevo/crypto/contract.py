@@ -31,6 +31,11 @@ The orchestration layer receives providers by explicit injection only
 must declare a scope so policy can reject prototype providers wherever
 an approved product is required.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 密码提供者契约与作用域治理：ProviderScope/declared_scope 强制，
+# ProviderRegistry 只放行已批准作用域。
 from __future__ import annotations
 
 import enum

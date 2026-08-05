@@ -15,6 +15,10 @@ log level) behind one validated, environment-driven
 No new dependency; unknown environment values fail closed instead of
 silently falling back to insecure defaults.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# 生产运行配置（stdlib-only）：AppConfig 校验并冻结，失败关闭。
 from __future__ import annotations
 
 import logging

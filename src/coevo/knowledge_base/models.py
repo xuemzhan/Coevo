@@ -1,4 +1,8 @@
 """knowledge_base.models - US-14 knowledge-base domain models, enums, errors and shared validators."""
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-14 知识库领域模型：知识条目/分类/可复用模板/复盘草稿与全部校验。
 
 from __future__ import annotations
 

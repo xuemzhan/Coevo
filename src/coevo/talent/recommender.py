@@ -32,6 +32,10 @@ The recommender NEVER mutates the pool; it returns a fresh tuple
 of :class:`Recommendation` sorted by ``(-score, talent_code)`` so the
 ranking is deterministic across calls.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-3 确定性人才推荐：预热集合评分，O(R·N) 内环，结果可复现。
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -15,6 +15,10 @@ Validation done here
 * ``plan_end >= plan_start`` for the project window and for every
   task window.
 """
+#
+# 中文注释（仅注释，不改逻辑）
+# ---------------------------
+# US-2 基线工厂：build_baseline/confirm_baseline，每次确认全量重校验。
 from __future__ import annotations
 
 import datetime as dt
