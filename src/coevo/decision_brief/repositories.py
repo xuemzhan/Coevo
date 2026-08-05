@@ -15,6 +15,28 @@ from src.coevo.risk import RiskReport
 
 from .models import ApprovedTemplate, BRIEF_SCHEMA, BriefContent, DecisionBrief, DecisionBriefConflictError, DecisionBriefValidationError, MAX_BRIEF_CONTENT_BYTES, MAX_TEMPLATE_BYTES, RISK_CONFIRMATION_DOMAIN, RiskConfirmation, _clone_brief, _clone_confirmation, _clone_risk_report, _content_digest, _content_sources, _digest, _encode_json, _is_link_or_reparse, _latest_receipt, _make_version, _parse_utc, _risk_digest, _safe_string, _stat_is_reparse, _validate_bound_risk, _validate_docx, _validate_risk_report, _validate_stored_brief, _validate_template_ref
 
+
+def _replay_entry(
+    events: dict[str, tuple[str, object]],
+    event_id: str,
+    intent: str,
+    *,
+    conflict_message: str,
+) -> object | None:
+    """Return the stored entry for an idempotent replay, or None if fresh.
+
+    Shared by confirm/create/revise: an event_id already recorded with a
+    different intent is an ID conflict (fail-closed); a matching intent
+    returns the stored entry so the caller can apply its stale checks.
+    """
+    replay = events.get(event_id)
+    if replay is None:
+        return None
+    if replay[0] != intent:
+        raise DecisionBriefConflictError(conflict_message)
+    return replay[1]
+
+
 class ApprovedTemplateRegistry:
     """Pins reviewed DOCX bytes and re-verifies the file before every use."""
 
@@ -180,11 +202,12 @@ class RiskConfirmationRepository:
         payload = _encode_json(fields, max_bytes=16 * 1024)
         intent = hashlib.sha256(payload).hexdigest()
         with self._lock:
-            replay = self._events.get(event_id)
-            if replay is not None:
-                if replay[0] != intent:
-                    raise DecisionBriefConflictError("risk confirmation event ID conflict")
-                return _clone_confirmation(replay[1])
+            entry = _replay_entry(
+                self._events, event_id, intent,
+                conflict_message="risk confirmation event ID conflict",
+            )
+            if entry is not None:
+                return _clone_confirmation(entry)
             signature = self._authority.service.use(
                 self._authority.reference,
                 payload,
@@ -293,14 +316,15 @@ class DecisionBriefRepository:
             b"create\0" + brief.brief_id.encode() + b"\0" + brief.head_digest.encode()
         ).hexdigest()
         with self._lock:
-            replay = self._events.get(event_id)
-            if replay is not None:
-                if replay[0] != intent:
-                    raise DecisionBriefConflictError("brief event ID conflict")
-                current = self._briefs.get(replay[1].brief_id)
-                if current is None or current.head_digest != replay[1].head_digest:
+            entry = _replay_entry(
+                self._events, event_id, intent,
+                conflict_message="brief event ID conflict",
+            )
+            if entry is not None:
+                current = self._briefs.get(entry.brief_id)
+                if current is None or current.head_digest != entry.head_digest:
                     raise DecisionBriefConflictError("stale brief event replay")
-                return _clone_brief(replay[1])
+                return _clone_brief(entry)
             if brief.brief_id in self._briefs:
                 raise DecisionBriefConflictError("decision brief already exists")
             stored = _clone_brief(brief)
@@ -355,13 +379,14 @@ class DecisionBriefRepository:
                 "template_ref": approved_template.template_ref,
                 "template_digest": approved_template.template_digest,
             }, max_bytes=MAX_BRIEF_CONTENT_BYTES)).hexdigest()
-            replay = self._events.get(event_id)
-            if replay is not None:
-                if replay[0] != intent:
-                    raise DecisionBriefConflictError("brief event ID conflict")
-                if brief.head_digest != replay[1].head_digest:
+            entry = _replay_entry(
+                self._events, event_id, intent,
+                conflict_message="brief event ID conflict",
+            )
+            if entry is not None:
+                if brief.head_digest != entry.head_digest:
                     raise DecisionBriefConflictError("stale brief event replay")
-                return _clone_brief(replay[1])
+                return _clone_brief(entry)
             if (
                 brief.current.revision != expected_revision
                 or brief.head_digest != expected_head_digest

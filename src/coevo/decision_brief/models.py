@@ -315,11 +315,18 @@ def _latest_receipt(
     if type(repository) is not MergeReceiptRepository:
         raise DecisionBriefValidationError("authoritative receipt repository required")
     history = repository.verified_history(trusted_time=trusted_time)
-    receipt = next((item for item in history if item.receipt_id == receipt_id), None)
+    # 单遍扫描同时完成两件事：按 receipt_id 定位目标收据，并记录每个
+    # 项目在历史中的最后一条收据（历史有序，后见者即“最新”）。原实现
+    # 对同一份历史做了两遍线性扫描。
+    receipt: MergeCommitReceipt | None = None
+    project_latest: dict[str, MergeCommitReceipt] = {}
+    for item in history:
+        project_latest[item.project_id] = item
+        if item.receipt_id == receipt_id:
+            receipt = item
     if receipt is None:
         raise DecisionBriefValidationError("verified receipt is absent")
-    project_history = tuple(item for item in history if item.project_id == receipt.project_id)
-    if not project_history or project_history[-1].receipt_id != receipt.receipt_id:
+    if project_latest.get(receipt.project_id) is not receipt:
         raise DecisionBriefValidationError("latest confirmed project receipt required")
     expected = f"{receipt.project_id}-R{receipt.snapshot.baseline.version:04d}"
     if receipt.merged_revision != expected or receipt.baseline_digest != receipt.snapshot.digest:

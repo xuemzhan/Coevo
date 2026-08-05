@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-05 — 源码优化第十轮（决策简报历史扫描与重放去重）
+
+- 提议：用户指令“继续”延续优化。`decision_brief` 两处重复/多遍扫描：
+  `_latest_receipt` 对同一份收据历史做两遍线性扫描；三个仓库方法重复
+  “取重放条目 + intent 冲突检查”样板。
+- 决策（行为零变更）：
+  1. `decision_brief/models.py` `_latest_receipt`：两遍扫描收敛为单遍
+     （同时定位目标收据与各项目最新收据，`project_latest[pid] is receipt`
+     等价于原“项目历史最后一条即该收据”判定）。
+  2. `decision_brief/repositories.py`：新增模块级 `_replay_entry`
+     （intent 冲突失败关闭 + 返回已存条目），confirm/create/revise
+     三处重放样板统一收敛；冲突消息与陈旧校验逐项不变。
+- 验证：decision_brief 相关测试 28 项全绿；全量 quality exit 0
+  （指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-05 — 审查修正：MergeCommitReceiptStore 访问期校验恢复
 
 - 发现（用户指令“继续审查”）：第二轮优化把 `get/by_project` 的“每次访问
