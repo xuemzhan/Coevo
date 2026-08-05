@@ -396,7 +396,8 @@ class WorkspaceWatcher:
                     continue
                 if (
                     self._allow_extensions is not None
-                    and Path(name).suffix.lower() not in self._allow_extensions
+                    and os.path.splitext(name)[1].lower()
+                    not in self._allow_extensions
                 ):
                     continue
                 relative = name if rel_dir == "." else f"{rel_dir}/{name}"

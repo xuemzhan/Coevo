@@ -1,5 +1,21 @@
 # Loop 决策记录
 
+## 2026-08-05 — 源码优化第六轮（循环内 Path 对象开销收敛）
+
+- 提议：用户指令“继续”延续优化。扫描发现两处循环内逐项构建 `Path`
+  对象的小额开销。
+- 决策（行为零变更）：
+  1. `cockpit/wps.py` `_executable_available`：PATH 搜索由循环内
+     `Path(directory) / exe` 改为 `os.path.join` + `os.path.isfile`
+     字符串路径判断（绝对路径分支同样改用 `os.path.isabs/isfile`）。
+  2. `progress_capture/watcher.py` `_collect`：扩展名白名单过滤由循环内
+     `Path(name).suffix` 改为 `os.path.splitext(name)`，避免逐文件
+     构造 Path 对象。
+- 验证：watcher/wps/cockpit 相关测试 94 项全绿（2 项平台跳过）；
+  全量 quality exit 0（指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续优化授权）。
+
 ## 2026-08-05 — 源码优化第五轮（watcher 扫描系统调用收敛）
 
 - 提议：用户指令“继续”延续优化。逐文件扫描路径中每个文件原来执行

@@ -156,12 +156,11 @@ class WpsLauncher:
         )
 
     def _executable_available(self) -> bool:
-        path = Path(self._executable)
-        if path.is_absolute():
-            return path.is_file()
+        executable = self._executable
+        if os.path.isabs(executable):
+            return os.path.isfile(executable)
         for directory in os.environ.get("PATH", "").split(os.pathsep):
-            candidate = Path(directory) / self._executable
-            if candidate.is_file():
+            if os.path.isfile(os.path.join(directory, executable)):
                 return True
         return False
 
