@@ -1,5 +1,19 @@
 # Loop 决策记录
 
+## 2026-08-06 — 源码优化第十三轮（任务编辑 Override 值冻结去重）
+
+- 提议：用户指令“继续”延续优化。`update_task` 的 original/edited 字典推导
+  对每个字段调用两次 `getattr`（条件判断 + 取值），且“tuple → asdict”
+  内联条件在两处重复。
+- 决策（行为零变更）：
+  - `task_decomposition/editing.py`：新增模块级 `_freeze_override_value`
+    （tuple 字段 asdict 展开、其余透传），两处推导改为单次 getattr + 助手
+    调用；输出 Override 内容逐字节不变。
+- 验证：task_decomposition 测试 23 项全绿；全量 quality exit 0（指纹
+  `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-06 — 源码优化第十二轮（watcher 摘要读取去 Path 化）
 
 - 提议：用户指令“继续”延续优化。`_collect` 对“发生变化的文件”调用

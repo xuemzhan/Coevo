@@ -37,6 +37,11 @@ from .models import (
 )
 
 
+def _freeze_override_value(value: object) -> object:
+    """Flatten tuple fields for an Override record; other values pass through."""
+    return dataclasses.asdict(value) if isinstance(value, tuple) else value
+
+
 def _package_index(baseline: ProjectBaseline, work_package_id: str) -> int:
     for index, wp in enumerate(baseline.work_packages):
         if wp.work_package_id == work_package_id:
@@ -204,15 +209,11 @@ def update_task(
         (Override(
             target_path=f"work_packages[{wp_index}].tasks[{task_index}].{task_id}",
             original_value={
-                key: dataclasses.asdict(getattr(task, key))
-                if isinstance(getattr(task, key), tuple)
-                else getattr(task, key)
+                key: _freeze_override_value(getattr(task, key))
                 for key in updates
             },
             edited_value={
-                key: dataclasses.asdict(getattr(updated, key))
-                if isinstance(getattr(updated, key), tuple)
-                else getattr(updated, key)
+                key: _freeze_override_value(getattr(updated, key))
                 for key in updates
             },
             reason=reason,
