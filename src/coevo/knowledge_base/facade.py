@@ -16,6 +16,15 @@ class KnowledgeBaseFacade:
     """Pure-function US-14 service."""
 
     @staticmethod
+    def _require_bundle(bundle: KnowledgeBundle) -> KnowledgeBundle:
+        """Fail-closed type gate shared by every bundle operation."""
+        if not isinstance(bundle, KnowledgeBundle):
+            raise KnowledgeBaseValidationError(
+                "bundle must be a KnowledgeBundle instance"
+            )
+        return bundle
+
+    @staticmethod
     def aggregate(
         *,
         project_id: str,
@@ -105,10 +114,7 @@ class KnowledgeBaseFacade:
         when every requires_owner_approval=True entry has a decision AND
         all such decisions are APPROVE/REVISE (not REJECT).
         """
-        if not isinstance(bundle, KnowledgeBundle):
-            raise KnowledgeBaseValidationError(
-                "bundle must be a KnowledgeBundle instance"
-            )
+        KnowledgeBaseFacade._require_bundle(bundle)
         if not isinstance(decisions, tuple) or not all(
             isinstance(d, ReviewDecision) for d in decisions
         ):
@@ -194,10 +200,7 @@ class KnowledgeBaseFacade:
         now: str,
     ) -> KnowledgeBundle:
         """AC-5: classification check (fail-closed)."""
-        if not isinstance(bundle, KnowledgeBundle):
-            raise KnowledgeBaseValidationError(
-                "bundle must be a KnowledgeBundle instance"
-            )
+        KnowledgeBaseFacade._require_bundle(bundle)
         if not isinstance(actor_clearances, frozenset) or not all(
             isinstance(c, KnowledgeClassification) for c in actor_clearances
         ):
@@ -219,10 +222,7 @@ class KnowledgeBaseFacade:
         EXCLUDES body_summary / body_sections / template body. Keeps
         counts + classifications + decision counters.
         """
-        if not isinstance(bundle, KnowledgeBundle):
-            raise KnowledgeBaseValidationError(
-                "bundle must be a KnowledgeBundle instance"
-            )
+        KnowledgeBaseFacade._require_bundle(bundle)
         entries_summary: list[dict] = []
         for e in bundle.entries:
             entries_summary.append(

@@ -1,5 +1,18 @@
 # Loop 决策记录
 
+## 2026-08-06 — 源码优化第十八轮（知识库门面校验去重）
+
+- 提议：用户指令“继续”延续优化。`KnowledgeBaseFacade` 的 3 个公开方法
+  （review/check_classification/to_audit_record）以完全相同代码重复
+  “bundle 类型校验”。
+- 决策（行为零变更）：
+  - `knowledge_base/facade.py`：新增静态助手 `_require_bundle`
+    （失败关闭类型门，异常类型与消息不变），3 个调用点统一收敛。
+- 验证：knowledge_base 测试 24 项全绿；全量 quality exit 0（指纹
+  `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-06 — 源码优化第十七轮（真实链存储事务样板收敛）
 
 - 提议：用户指令“继续”延续优化。`RealChainStore` 的 recover /
