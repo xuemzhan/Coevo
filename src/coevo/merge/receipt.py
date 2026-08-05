@@ -257,9 +257,10 @@ class MergeCommitReceiptStore:
             raise MergeCommitReceiptError("receipt store construction is sealed")
         self._receipts = receipts
         self._validate_history()
-        # 构造期一次性建立 O(1) 查询索引：store 不可变，索引永不失效。
-        # 与原实现“每次 get/by_project 全量线性扫描+重校验”相比，查询从
-        # O(N) 降为 O(1)/O(k)，历史校验仍完整执行且失败即构造失败。
+        # 构造期建立 O(1) 查询索引：store 不可变，索引永不失效。
+        # 访问时仍按原语义全量重校验历史——收据对象虽为 frozen dataclass，
+        # 但 object.__setattr__ 可模拟构造后篡改，密封 store 必须在每次
+        # 访问时重新验证才能发现；校验失败即抛错，不返回脏数据。
         by_id: dict[str, MergeCommitReceipt] = {}
         by_project: dict[str, list[MergeCommitReceipt]] = {}
         for receipt in receipts:
@@ -279,9 +280,11 @@ class MergeCommitReceiptStore:
         raise MergeCommitReceiptError("receipt store copying is forbidden")
 
     def get(self, receipt_id: str) -> MergeCommitReceipt | None:
+        self._validate_history()
         return self._by_id.get(receipt_id)
 
     def by_project(self, project_id: str) -> tuple[MergeCommitReceipt, ...]:
+        self._validate_history()
         return tuple(self._by_project.get(project_id, ()))
 
     def _append(self, receipt: MergeCommitReceipt, *, _seal) -> "MergeCommitReceiptStore":

@@ -731,6 +731,19 @@ class MergeCommitReceiptTests(unittest.TestCase):
                 got,
             )
 
+    def test_store_get_revalidates_history_against_post_append_tampering(self):
+        # 安全回归：密封 store 每次访问都必须重校验历史。收据对象在
+        # append 之后被 object.__setattr__ 篡改（威胁模型内的模拟手段），
+        # get/by_project 必须抛错而不是返回脏数据。
+        receipt = committed().receipt
+        assert receipt is not None
+        store = append_signed_receipt(MergeCommitReceiptStore.empty(), receipt)
+        object.__setattr__(receipt.snapshot.baseline, "title", "tampered")
+        with self.assertRaises(MergeCommitReceiptError):
+            store.get(receipt.receipt_id)
+        with self.assertRaises(MergeCommitReceiptError):
+            store.by_project(receipt.project_id)
+
     def test_tampered_signature_and_wrong_trust_pin_are_rejected(self):
         authority = signing_authority()
         receipt = committed(authority=authority).receipt

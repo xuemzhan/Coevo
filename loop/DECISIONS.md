@@ -1,5 +1,20 @@
 # Loop 决策记录
 
+## 2026-08-05 — 审查修正：MergeCommitReceiptStore 访问期校验恢复
+
+- 发现（用户指令“继续审查”）：第二轮优化把 `get/by_project` 的“每次访问
+  全量重校验历史”改为仅构造期校验。收据对象虽是 frozen dataclass，但
+  威胁模型内 `object.__setattr__` 可模拟构造后篡改（既有安全测试即用此
+  手段）；原实现每次访问都会发现并抛 `MergeCommitReceiptError`，改后
+  `get()` 会直接返回脏数据——属安全语义回退。
+- 决策：恢复 `get/by_project` 的 `_validate_history()` 调用（与原始
+  密封语义一致），保留构造期 O(1) 索引（校验通过后省去二次扫描）；
+  新增安全回归测试固化“append 后篡改 → 访问抛错”。
+- 验证：merge 相关测试 24 项全绿；全量单元套件通过；全量 quality
+  exit 0（指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex（审查）。决策者：用户（“继续审查”）。
+
 ## 2026-08-05 — 源码优化第九轮（进度采集服务校验去重）
 
 - 提议：用户指令“继续优化”延续优化。`ProgressCaptureService` 的 5 个
@@ -117,9 +132,9 @@
   1. `task_decomposition/agent.py`：`_flow_json` 由“每阶段全量扫描全部
      节点”改为单次预索引按 stage 分组，O(S×N) → O(N)；新旧实现 4 组
      场景（正常/孤儿节点/空阶段/超 200 上限）输出逐字节一致。
-  2. `merge/receipt.py`：`MergeCommitReceiptStore` 由“每次 get 全量
-     重校验历史 + 线性扫描”改为构造期一次性校验 + O(1) 索引（store
-     不可变，索引不失效）；历史完整性校验仍完整执行，失败即构造失败。
+  2. `merge/receipt.py`：`MergeCommitReceiptStore` 增加构造期 O(1) 索引，
+     并保留“每次 get/by_project 全量重校验历史”的原始密封语义（后续审查
+     确认访问期校验是防篡改的必要属性，见 2026-08-05 审查修正条目）。
   3. `workspace/models.py`：`by_package` 改为单次遍历分组后 O(1) 取
      结果，消除导入循环中每次全量过滤的重复扫描；`register` 路径不变。
 - 验证：相关单元测试全绿（task_decomposition 67 / merge_receipt 22 /
