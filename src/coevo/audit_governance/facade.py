@@ -9,8 +9,9 @@
 #   query_events()：按主体/动作/结果/项目/任务/时间过滤审计事件，带
 #     limit 硬上限（10000）与 record_hash 游标分页；纯函数无 IO。
 #   export_events()：导出 JSON/JSONL，内容摘要 SHA-256 稳定可复验。
-#   关键不变量：AuditEvent 六字段（ts/actor/action/result/project/task）
-#     强制非空，审计投影排除敏感文本只保留哈希/计数。
+#   关键不变量：AuditEvent 核心字段（ts/actor/source/action/result）强制
+#     有效；project_id/task_id 允许为空字符串（过滤时空值不匹配非空条件），
+#     审计投影排除敏感文本只保留哈希/计数。
 from __future__ import annotations
 
 import hashlib

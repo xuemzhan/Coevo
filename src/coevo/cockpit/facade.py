@@ -6,7 +6,7 @@
 #   start_server()：只允许绑定环回地址（fail-closed），装配工作区与
 #     角色视图快照。
 #   dispatch()：按路由分发 项目/角色/任务/里程碑/WPS 打开 等请求；
-#     未绑定环回的服务直接返回 NOT_BOUND。
+#     服务器未绑定环回地址时直接返回 NOT_BOUND（AC-1 fail-closed）。
 #   _wps_open()：WPS 打开必须通过允许列表（WPSAllowList 扩展名闭集）
 #     且路径为工作区内相对路径，越权/非法扩展名一律 DENIED。
 #   to_audit_record()：每次请求投影一条审计记录，供访问日志与审计链消费。
