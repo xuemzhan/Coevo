@@ -1,5 +1,20 @@
 # Loop 决策记录
 
+## 2026-08-06 — 源码优化第十四轮（编排器 trace 构造去重）
+
+- 提议：用户指令“继续优化”延续优化。`Orchestrator.dispatch_event` 的
+  9 条路径以完全相同的 8 字段结构重复构造 `OrchestrationTrace`。
+- 决策（行为零变更）：
+  - `orchestrator/service.py`：新增模块级 `_append_trace` 助手
+    （trace_id/step/result/detail/now 必填，requires_human_confirmation、
+    confirmed_by、agent_id 可覆盖），9 个调用点统一收敛；各路径的
+    trace_id（含 retried_id）、agent_id（含空串）、结果与 detail
+    逐项不变。
+- 验证：编排器相关测试 54 项全绿；全量 quality exit 0（指纹
+  `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续优化”延续授权）。
+
 ## 2026-08-06 — 源码优化第十三轮（任务编辑 Override 值冻结去重）
 
 - 提议：用户指令“继续”延续优化。`update_task` 的 original/edited 字典推导

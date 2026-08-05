@@ -13,7 +13,32 @@ from src.coevo.workspace.models import WorkspaceEntry
 from ._real_chain import REAL_EXECUTION_MODE, PackagePreview, RealChainExecutor, RealChainOutcome, confirm_real_chain, dispatch_real_chain, recover_real_chain, resume_real_chain
 from .real_chain_store import RealChainStore
 
-from .models import AgentRegistry, AgentStatus, FailurePolicy, OrchestrationChain, OrchestrationEvent, OrchestrationOutcome, OrchestrationReport, OrchestrationStepKind, OrchestrationStepResult, OrchestrationTrace, OrchestratorConflictError, OrchestratorValidationError, _ISO_UTC_Z, _SAFE_ID, _make_report_id, _make_trace_id
+from .models import AgentRegistry, AgentStatus, FailurePolicy, OrchestrationChain, OrchestrationEvent, OrchestrationOutcome, OrchestrationReport, OrchestrationStep, OrchestrationStepKind, OrchestrationStepResult, OrchestrationTrace, OrchestratorConflictError, OrchestratorValidationError, _ISO_UTC_Z, _SAFE_ID, _make_report_id, _make_trace_id
+
+
+def _append_trace(
+    trace: list[OrchestrationTrace],
+    *,
+    trace_id: str,
+    step: OrchestrationStep,
+    result: OrchestrationStepResult,
+    detail: str,
+    now: str,
+    requires_human_confirmation: bool = False,
+    confirmed_by: str = "",
+    agent_id: str | None = None,
+) -> None:
+    """Append one deterministic step trace record (shared by every dispatch path)."""
+    trace.append(OrchestrationTrace(
+        trace_id=trace_id,
+        step_index=step.step_index,
+        agent_id=step.agent_id if agent_id is None else agent_id,
+        result=result,
+        requires_human_confirmation=requires_human_confirmation,
+        confirmed_by=confirmed_by,
+        detail=detail,
+        recorded_at=now,
+    ))
 
 class Orchestrator:
     """Pure-function orchestrator facade (US-4 AC-3..AC-7)."""
@@ -83,48 +108,30 @@ class Orchestrator:
                 )
                 if step.requires_human_confirmation or spec_requires_confirm:
                     outcome = OrchestrationOutcome.HELD_AT_CONFIRM
-                    trace.append(
-                        OrchestrationTrace(
-                            trace_id=trace_id,
-                            step_index=step.step_index,
-                            agent_id=step.agent_id,
-                            result=OrchestrationStepResult.HELD_AT_CONFIRM,
-                            requires_human_confirmation=True,
-                            confirmed_by="",
-                            detail=f"agent {step.agent_id} requires human confirmation",
-                            recorded_at=now,
-                        )
+                    _append_trace(
+                        trace, trace_id=trace_id, step=step,
+                        result=OrchestrationStepResult.HELD_AT_CONFIRM,
+                        detail=f"agent {step.agent_id} requires human confirmation",
+                        now=now, requires_human_confirmation=True,
                     )
                     break
 
                 if reg is None:
                     outcome = OrchestrationOutcome.FAILED
-                    trace.append(
-                        OrchestrationTrace(
-                            trace_id=trace_id,
-                            step_index=step.step_index,
-                            agent_id=step.agent_id,
-                            result=OrchestrationStepResult.FAILED,
-                            requires_human_confirmation=False,
-                            confirmed_by="",
-                            detail=f"agent {step.agent_id!r} not in registry",
-                            recorded_at=now,
-                        )
+                    _append_trace(
+                        trace, trace_id=trace_id, step=step,
+                        result=OrchestrationStepResult.FAILED,
+                        detail=f"agent {step.agent_id!r} not in registry",
+                        now=now,
                     )
                     break
 
                 if reg.status == AgentStatus.AVAILABLE:
-                    trace.append(
-                        OrchestrationTrace(
-                            trace_id=trace_id,
-                            step_index=step.step_index,
-                            agent_id=step.agent_id,
-                            result=OrchestrationStepResult.OK,
-                            requires_human_confirmation=False,
-                            confirmed_by="",
-                            detail=f"agent {step.agent_id} executed",
-                            recorded_at=now,
-                        )
+                    _append_trace(
+                        trace, trace_id=trace_id, step=step,
+                        result=OrchestrationStepResult.OK,
+                        detail=f"agent {step.agent_id} executed",
+                        now=now,
                     )
                     continue
 
@@ -136,101 +143,66 @@ class Orchestrator:
                     next_id_seed += 1
                     reg2 = registry.get(step.agent_id)
                     if reg2 is not None and reg2.status == AgentStatus.AVAILABLE:
-                        trace.append(
-                            OrchestrationTrace(
-                                trace_id=retried_id,
-                                step_index=step.step_index,
-                                agent_id=step.agent_id,
-                                result=OrchestrationStepResult.RETRIED,
-                                requires_human_confirmation=False,
-                                confirmed_by="",
-                                detail=f"agent {step.agent_id} retried successfully",
-                                recorded_at=now,
-                            )
+                        _append_trace(
+                            trace, trace_id=retried_id, step=step,
+                            result=OrchestrationStepResult.RETRIED,
+                            detail=f"agent {step.agent_id} retried successfully",
+                            now=now,
                         )
                         continue
                     # Retry didn't help -> escalate.
                     outcome = OrchestrationOutcome.ESCALATED
-                    trace.append(
-                        OrchestrationTrace(
-                            trace_id=trace_id,
-                            step_index=step.step_index,
-                            agent_id=step.agent_id,
-                            result=OrchestrationStepResult.ESCALATED,
-                            requires_human_confirmation=False,
-                            confirmed_by="",
-                            detail=(
-                                f"agent {step.agent_id} not available after retry; "
-                                f"escalating to human"
-                            ),
-                            recorded_at=now,
-                        )
+                    _append_trace(
+                        trace, trace_id=trace_id, step=step,
+                        result=OrchestrationStepResult.ESCALATED,
+                        detail=(
+                            f"agent {step.agent_id} not available after retry; "
+                            f"escalating to human"
+                        ),
+                        now=now,
                     )
                     break
 
                 if step.on_failure == FailurePolicy.SKIP:
-                    trace.append(
-                        OrchestrationTrace(
-                            trace_id=trace_id,
-                            step_index=step.step_index,
-                            agent_id=step.agent_id,
-                            result=OrchestrationStepResult.SKIPPED,
-                            requires_human_confirmation=False,
-                            confirmed_by="",
-                            detail=f"agent {step.agent_id} skipped",
-                            recorded_at=now,
-                        )
+                    _append_trace(
+                        trace, trace_id=trace_id, step=step,
+                        result=OrchestrationStepResult.SKIPPED,
+                        detail=f"agent {step.agent_id} skipped",
+                        now=now,
                     )
                     continue
 
                 # ESCALATE_HUMAN
                 outcome = OrchestrationOutcome.ESCALATED
-                trace.append(
-                    OrchestrationTrace(
-                        trace_id=trace_id,
-                        step_index=step.step_index,
-                        agent_id=step.agent_id,
-                        result=OrchestrationStepResult.ESCALATED,
-                        requires_human_confirmation=False,
-                        confirmed_by="",
-                        detail=(
-                            f"agent {step.agent_id} not available (status="
-                            f"{reg.status.value}); escalating to human"
-                        ),
-                        recorded_at=now,
-                    )
+                _append_trace(
+                    trace, trace_id=trace_id, step=step,
+                    result=OrchestrationStepResult.ESCALATED,
+                    detail=(
+                        f"agent {step.agent_id} not available (status="
+                        f"{reg.status.value}); escalating to human"
+                    ),
+                    now=now,
                 )
                 break
 
             if step.kind == OrchestrationStepKind.HUMAN_CONFIRM:
                 outcome = OrchestrationOutcome.HELD_AT_CONFIRM
-                trace.append(
-                    OrchestrationTrace(
-                        trace_id=trace_id,
-                        step_index=step.step_index,
-                        agent_id="",
-                        result=OrchestrationStepResult.HELD_AT_CONFIRM,
-                        requires_human_confirmation=True,
-                        confirmed_by="",
-                        detail="explicit human confirmation step",
-                        recorded_at=now,
-                    )
+                _append_trace(
+                    trace, trace_id=trace_id, step=step,
+                    result=OrchestrationStepResult.HELD_AT_CONFIRM,
+                    detail="explicit human confirmation step",
+                    now=now, requires_human_confirmation=True,
+                    agent_id="",
                 )
                 break
 
             # CONDITIONAL: this slice runs it as if it were an
             # AGENT_CALL with empty agent_id -> treated as OK.
-            trace.append(
-                OrchestrationTrace(
-                    trace_id=trace_id,
-                    step_index=step.step_index,
-                    agent_id="",
-                    result=OrchestrationStepResult.OK,
-                    requires_human_confirmation=False,
-                    confirmed_by="",
-                    detail="conditional step (default OK)",
-                    recorded_at=now,
-                )
+            _append_trace(
+                trace, trace_id=trace_id, step=step,
+                result=OrchestrationStepResult.OK,
+                detail="conditional step (default OK)",
+                now=now, agent_id="",
             )
 
         return OrchestrationReport(
