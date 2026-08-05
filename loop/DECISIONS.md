@@ -1,5 +1,18 @@
 # Loop 决策记录
 
+## 2026-08-06 — 源码优化第十一轮（原子导入事务校验去重）
+
+- 提议：用户指令“继续”延续优化。`AtomicImporter` 的 4 个方法
+  （advance/fail/check_replay/check_base_revision）以完全相同代码重复
+  “transaction 类型校验”。
+- 决策（行为零变更）：
+  - `protocol/import_transaction.py`：新增静态助手 `_require_transaction`
+    （失败关闭类型门，异常类型与消息不变），4 个调用点统一收敛。
+- 验证：原子导入集成测试 24 项全绿；全量 quality exit 0（指纹
+  `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续”延续授权）。
+
 ## 2026-08-05 — 源码优化第十轮（决策简报历史扫描与重放去重）
 
 - 提议：用户指令“继续”延续优化。`decision_brief` 两处重复/多遍扫描：

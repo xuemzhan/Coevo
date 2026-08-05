@@ -161,6 +161,15 @@ class AtomicImporter:
     projections.
     """
 
+    @staticmethod
+    def _require_transaction(
+        transaction: ImportTransaction,
+    ) -> ImportTransaction:
+        """Fail-closed type gate shared by every transaction operation."""
+        if not isinstance(transaction, ImportTransaction):
+            raise AgentPackageImportError("transaction must be ImportTransaction")
+        return transaction
+
     def begin(
         self,
         *,
@@ -199,8 +208,7 @@ class AtomicImporter:
         filesystem or DB; it only emits the next transaction
         state.
         """
-        if not isinstance(transaction, ImportTransaction):
-            raise AgentPackageImportError("transaction must be ImportTransaction")
+        AtomicImporter._require_transaction(transaction)
         if not isinstance(to_step, ImportStep):
             raise AgentPackageImportError("to_step must be ImportStep")
         return transaction.advance(to_step)
@@ -216,8 +224,7 @@ class AtomicImporter:
         delete incomplete workspace, retain the raw .agent file,
         log the error, leave the package in quarantine.
         """
-        if not isinstance(transaction, ImportTransaction):
-            raise AgentPackageImportError("transaction must be ImportTransaction")
+        AtomicImporter._require_transaction(transaction)
         return transaction.fail(reason)
 
     def check_replay(
@@ -232,8 +239,7 @@ class AtomicImporter:
         REPLAY_SEQUENCE, REVOKED_PACKAGE, INVALID_REFERENCE) are
         raised as :class:`AgentPackageImportReplayError`.
         """
-        if not isinstance(transaction, ImportTransaction):
-            raise AgentPackageImportError("transaction must be ImportTransaction")
+        AtomicImporter._require_transaction(transaction)
         if not isinstance(replay_decision, ReplayDecision):
             raise AgentPackageImportError("replay_decision must be ReplayDecision")
         if replay_decision.outcome is not ReplayOutcome.ACCEPT:
@@ -253,8 +259,7 @@ class AtomicImporter:
         (协议 § 16.4); a bare import without explicit acceptance
         is rejected with :class:`AgentPackageImportConflictError`.
         """
-        if not isinstance(transaction, ImportTransaction):
-            raise AgentPackageImportError("transaction must be ImportTransaction")
+        AtomicImporter._require_transaction(transaction)
         if transaction.base_revision is None:
             # First import into an empty project: acceptable.
             return
