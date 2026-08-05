@@ -275,3 +275,32 @@ flowchart TD
 4. `src/coevo/merge/engine.py` + `src/coevo/risk/analyzer.py`（回传链核心）
 5. `examples/tool-dev-project/scripts/run_example.py`（业务化端到端）
 6. `examples/service-api/service_api/`（一致性 API 封装视角）
+
+---
+
+## 六、性能与复杂度特征（2026-08-05/06 优化后）
+
+以下为各热点模块经优化后的复杂度/开销特征，全部为行为零变更的收敛
+（公共 API、输出语义与安全不变量不变）：
+
+| 模块/函数 | 优化后特征 |
+|---|---|
+| `task_decomposition/agent.py` `_flow_json` | 单次预索引按 stage 分组，O(阶段数×节点数) → O(节点数) |
+| `task_decomposition/dependency_graph.py` | 邻接集合索引 + heap 拓扑排序，O((V+E) log V)；显式栈 DFS 无递归深度问题 |
+| `task_flow/service.py` `StageGraph` 等 | 构造期 O(1) 字典索引，`stage_id_for_node` 单次查找 |
+| `talent/recommender.py` | 候选技能/资质集合预热，评分内环 O(R·N)；`by_code` O(1) 索引 |
+| `talent/store.py` | pool 元数据首次读取后缓存（create 后不可变），`register/pool_code` 零重复 SQL |
+| `merge/receipt.py` `MergeCommitReceiptStore` | 构造期 O(1) 索引；每次访问仍全量重校验历史（密封防篡改语义，见审查修正） |
+| `merge/engine.py` | 回滚拒绝路径统一助手，无重复两段式样板 |
+| `progress_capture/watcher.py` | 每文件单次 `lstat`（符号链接+元数据一次完成）；字符串路径运算；未变化文件复用摘要（O(条目数) 静默扫描） |
+| `audit_governance/stream_store.py` | 追加记录免逐条 `stat()`，尺寸增量维护与磁盘逐字节一致（含 os.linesep 补偿） |
+| `workspace/models.py` `by_package` | 单次遍历分组后 O(1) 取结果 |
+| `orchestrator/_real_chain.py` | 终局收尾统一助手；`service.py` trace 构造统一助手 |
+| `decision_brief/models.py` `_latest_receipt` | 单遍扫描同时定位目标收据与各项目最新收据 |
+| `decision_brief/repositories.py` | 三处重放检测统一 `_replay_entry`，intent 冲突失败关闭 |
+| `protocol/import_transaction.py` | 事务类型校验统一 `_require_transaction` |
+| `cockpit/server.py` | 静态资源 FIFO 缓存（mtime+size 失效），重复页面不再读盘 |
+
+性能验证入口：`python scripts/benchmark.py --check`（含 dag_toposort、
+graph_lookup、talent_recommend、registry_lookup、watcher_rescan、
+cockpit_http 等探针，全部在 SLA 内）。
