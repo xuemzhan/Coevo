@@ -29,6 +29,7 @@ import hashlib
 import mimetypes
 import os
 import re
+import stat
 import threading
 from collections import deque
 from dataclasses import dataclass
@@ -386,9 +387,10 @@ class WorkspaceWatcher:
         """
         previous = previous if self._reuse_digest_on_unchanged else {}
         result: dict[str, FileSnapshot] = {}
+        root = str(self._root)
         for dirpath, dirnames, filenames in os.walk(self._root, followlinks=False):
             dirnames[:] = [name for name in dirnames if not name.startswith(".")]
-            rel_dir = Path(dirpath).relative_to(self._root).as_posix()
+            rel_dir = os.path.relpath(dirpath, root).replace("\\", "/")
             for name in sorted(filenames):
                 if name.startswith("."):
                     continue
@@ -398,17 +400,20 @@ class WorkspaceWatcher:
                 ):
                     continue
                 relative = name if rel_dir == "." else f"{rel_dir}/{name}"
-                full = Path(dirpath) / name
+                full_path = os.path.join(dirpath, name)
                 try:
-                    if full.is_symlink():
+                    # 单次 lstat 同时完成符号链接判断与元数据读取，
+                    # 替代原来的 is_symlink() + stat() 两次系统调用。
+                    info = os.lstat(full_path)
+                    if stat.S_ISLNK(info.st_mode):
                         continue
-                    stat = full.stat()
-                    resolved = full.resolve(strict=True)
-                    resolved.relative_to(self._root)
+                    resolved = os.path.realpath(full_path)
+                    if os.path.commonpath([resolved, root]) != root:
+                        continue
                 except (OSError, ValueError):
                     continue
-                size = int(stat.st_size)
-                mtime_ns = int(stat.st_mtime_ns)
+                size = int(info.st_size)
+                mtime_ns = int(info.st_mtime_ns)
                 prior = previous.get(relative)
                 if (
                     prior is not None
@@ -417,7 +422,7 @@ class WorkspaceWatcher:
                 ):
                     digest = prior.digest_hex
                 else:
-                    digest = self._digest(full, size)
+                    digest = self._digest(Path(full_path), size)
                 media = mimetypes.guess_type(name)[0] or "application/octet-stream"
                 result[relative] = FileSnapshot(
                     relative,

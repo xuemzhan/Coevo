@@ -82,6 +82,27 @@ class WorkspaceWatcherScanTests(unittest.TestCase):
             self.assertEqual(5, event.size_bytes)
             self.assertEqual(64, len(event.digest_hex))
 
+    def test_symlinks_are_skipped_without_leaking_outside_root(self):
+        # 回归：单次 lstat + realpath 校验后，符号链接（含指向根外与根内）
+        # 必须全部跳过，仅普通文件进入事件，语义与逐文件 stat 版本一致。
+        import os
+
+        with tempfile.TemporaryDirectory() as tmp:
+            outside = Path(tmp) / "outside"
+            root = Path(tmp) / "workspace"
+            root.mkdir()
+            outside.mkdir()
+            (root / "docs").mkdir()
+            (root / "docs" / "draft.md").write_text("hello", encoding="utf-8")
+            try:
+                os.symlink(outside, root / "link-outside")
+                os.symlink(root / "docs", root / "link-inside")
+            except (OSError, NotImplementedError):
+                self.skipTest("symlink creation is unavailable")
+            watcher = _watcher(root)
+            events = watcher.scan(now=NOW)
+            self.assertEqual(["docs/draft.md"], [e.relative_path for e in events])
+
     def test_stability_gating_requires_two_scans(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
