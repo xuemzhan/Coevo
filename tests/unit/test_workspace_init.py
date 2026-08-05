@@ -298,6 +298,28 @@ class TestWorkspaceInitService(unittest.TestCase):
         self.assertEqual(0, len(result.registry))
         self.assertIn("not COMMITTED", result.failure_reason)
 
+    def test_init_propagates_path_error_for_unsafe_package_id(self):
+        # 回归：COMMITTED 事务携带不安全 package_id 时，路径构造失败关闭，
+        # WorkspacePathError 直接传播，不产生半成品 InitOutcome。
+        tx = ImportTransaction(
+            package_id="../etc",
+            project_id="PRJ001",
+            base_revision=None,
+            current_revision=None,
+            step=ImportStep.COMMITTED,
+            failure_reason="",
+            completed_steps=(),
+        )
+        outcome = ImportOutcome(
+            transaction=tx, store=ProcessedPackageStore.empty(), record=None,
+        )
+        with self.assertRaises(WorkspacePathError):
+            self.service.init_from_import(
+                import_outcome=outcome,
+                registry=WorkspaceRegistry.empty(),
+                role_id="a.pm",
+            )
+
     def test_init_idempotent_on_duplicate_package(self):
         # AC-8: same package_id re-imported for the same
         # (project, role) is a no-op.

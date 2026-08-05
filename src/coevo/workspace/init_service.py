@@ -139,16 +139,9 @@ class WorkspaceInitService:
                 ),
             )
 
-        try:
-            paths = paths_for(env)
-        except WorkspacePathError as exc:
-            return InitOutcome(
-                entry=None,
-                paths=paths_for(env),
-                registry=registry,
-                created=False,
-                failure_reason=f"path construction rejected: {exc}",
-            )
+        # 路径非法（如 import 事务携带不安全 package_id）时 build_paths
+        # 失败关闭：直接传播 WorkspacePathError，不产生半成品 InitOutcome。
+        paths = paths_for(env)
 
         # AC-8: same package_id re-imported for the same (project, role)
         # is a no-op. We compare against the registry BEFORE attempting

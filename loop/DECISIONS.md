@@ -1,5 +1,24 @@
 # Loop 决策记录
 
+## 2026-08-06 — 审查 + 优化（第二十六轮）
+
+- 提议：用户指令“继续审查并优化”。两件事：
+  1) 复核第二十三至二十五轮插入的注释准确性（抽查 6 处多行签名方法，
+     均正确落位）；
+  2) 审查发现 `WorkspaceInitService.init_from_import` 的
+     `except WorkspacePathError` 分支重调用 `paths_for(env)`（同参必然
+     再次抛错），导致 InitOutcome 分支不可达、异常直接传播——属死代码。
+- 决策：
+  - `workspace/init_service.py`：移除不可达 try/except，改为直接调用
+    `paths_for(env)`（可观测行为等价：路径非法时 WorkspacePathError
+    照常传播，失败关闭语义不变），并加注释说明；
+  - `tests/unit/test_workspace_init.py`：新增回归测试固定“COMMITTED
+    事务携带不安全 package_id → WorkspacePathError 传播”语义。
+- 验证：workspace 测试 34 项全绿（含新回归）；全量 quality exit 0
+  （指纹 `5c884c0872eb4b9a`）。
+- 回滚条件：任一质量门禁或定向测试失败（当前全部通过）。
+- 提出者：Codex。决策者：用户（“继续审查并优化”）。
+
 ## 2026-08-06 — 注释全面化收尾（第二十五轮）
 
 - 提议：用户指令“继续”延续注释全面化。普查发现 104 个含实质逻辑
