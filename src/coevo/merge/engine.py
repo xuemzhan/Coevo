@@ -518,14 +518,12 @@ class MergeEngine:
             or transaction.base_revision != report.base_revision
             or transaction.current_revision != report.base_revision
         ):
-            rolled_back = self._rollback_receipt_commit(
+            return self._reject_receipt_commit(
                 proposal=proposal,
                 baseline=baseline,
                 store=store,
+                receipt_store=receipt_store,
                 reason="authoritative import facts do not bind to the report",
-            )
-            return MergeCommitOutcome(
-                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
             )
 
         if (
@@ -537,14 +535,12 @@ class MergeEngine:
                 for field_merge in proposal.record.field_merges
             )
         ):
-            rolled_back = self._rollback_receipt_commit(
+            return self._reject_receipt_commit(
                 proposal=proposal,
                 baseline=baseline,
                 store=store,
+                receipt_store=receipt_store,
                 reason="committed merge contains an untrusted field decision",
-            )
-            return MergeCommitOutcome(
-                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
             )
 
         status_merges = tuple(
@@ -567,27 +563,23 @@ class MergeEngine:
             or proposal.record.decision_maker
             != imported_record.package.recipient_cert_id
         ):
-            rolled_back = self._rollback_receipt_commit(
+            return self._reject_receipt_commit(
                 proposal=proposal,
                 baseline=baseline,
                 store=store,
+                receipt_store=receipt_store,
                 reason=(
                     "committed merge lacks one accepted status field "
                     "or references an unknown task"
                 ),
             )
-            return MergeCommitOutcome(
-                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
-            )
 
         package = imported_record.package
         if receipt_authority.signer_certificate_id != package.recipient_cert_id:
-            rolled_back = self._rollback_receipt_commit(
+            return self._reject_receipt_commit(
                 proposal=proposal, baseline=baseline, store=store,
+                receipt_store=receipt_store,
                 reason="receipt signer is not the verified merge recipient",
-            )
-            return MergeCommitOutcome(
-                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
             )
         status_decision = status_merges[0].decision.value
         completed_task_id = (
@@ -630,14 +622,12 @@ class MergeEngine:
             )
             committed_receipts = append_signed_receipt(receipt_store, receipt)
         except (MergeCommitReceiptError, ValueError) as exc:
-            rolled_back = self._rollback_receipt_commit(
+            return self._reject_receipt_commit(
                 proposal=proposal,
                 baseline=baseline,
                 store=store,
+                receipt_store=receipt_store,
                 reason=f"receipt commit failed: {exc}",
-            )
-            return MergeCommitOutcome(
-                proposal=rolled_back, receipt=None, receipt_store=receipt_store,
             )
         return MergeCommitOutcome(
             proposal=proposal,
@@ -666,6 +656,26 @@ class MergeEngine:
             record=record,
             accepted=False,
             rejection_reason=reason,
+        )
+
+    def _reject_receipt_commit(
+        self,
+        *,
+        proposal: MergeProposal,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        receipt_store: MergeCommitReceiptStore,
+        reason: str,
+    ) -> MergeCommitOutcome:
+        """Roll back a provisional receipt commit and return the rejected outcome."""
+        rolled_back = self._rollback_receipt_commit(
+            proposal=proposal,
+            baseline=baseline,
+            store=store,
+            reason=reason,
+        )
+        return MergeCommitOutcome(
+            proposal=rolled_back, receipt=None, receipt_store=receipt_store,
         )
 
     def _reject(
