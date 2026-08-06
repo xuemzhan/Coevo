@@ -56,3 +56,12 @@
 - **上游依赖**：`workspace`（视图数据）、`protocol`（导入）、`config.py`；
 - **下游消费者**：`scripts/run_cockpit.py`、`scripts/cockpit-watchdog.ps1`、
   `scripts/health_check.py`（/healthz 身份校验）、`examples/service-api`。
+
+## 配置与错误语义
+
+- 环境变量（经 `AppConfig.from_env()` 失败关闭）：`COEVO_COCKPIT_HOST`（仅环回）、
+  `COEVO_COCKPIT_PORT`（默认 12701）、`COEVO_SESSION_TIMEOUT_SEC`（默认 28800）、
+  `COEVO_COCKPIT_CHECKPOINT_SEC`（默认 300）、`COEVO_STATE_PATH` / `COEVO_LOG_PATH` /
+  `COEVO_LOCK_PATH`；并发上限默认 16（`max_concurrent_requests`）。
+- HTTP 语义：401 未认证、403 Host/Origin/CSRF 拒绝、404 未找到、413 请求体过大、
+  500 内部错误（不泄露细节）、503 并发饱和。

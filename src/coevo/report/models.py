@@ -34,9 +34,6 @@ import enum
 import re
 from dataclasses import dataclass, field
 
-from src.coevo.task_decomposition import ProjectBaseline
-
-
 # 协议 § 9: schema_version is 1.0
 SCHEMA_VERSION: str = "1.0"
 

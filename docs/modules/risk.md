@@ -45,3 +45,8 @@ merge_and_analyze（合并成功且生成回执）→ RiskAnalyzer.analyze_after
 - **上游依赖**：`merge`（回执）、`task_decomposition`（基线）；
 - **下游消费者**：`supervision`（督办/会议）、`decision_brief`（风险专题）、
   `knowledge_base`（风险知识）。
+
+## 错误语义
+
+- `RiskValidationError`：输入/回执绑定校验失败（含旧状态、签名/信任失败）；
+- `RiskAnalysisError`：分析器/门面使用错误；回执链版本不连续失败关闭。

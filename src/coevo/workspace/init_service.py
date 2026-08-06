@@ -60,7 +60,6 @@ from .models import (
 )
 from .paths import (
     WorkspacePathError,
-    WorkspacePaths as _Paths,  # re-export
     build_paths,
     default_workspace_root,
     sanitize_id,

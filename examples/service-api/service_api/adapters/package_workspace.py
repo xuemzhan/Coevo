@@ -8,7 +8,6 @@ from typing import Any
 
 from coevo_demo_utils import build_and_verify_package, encrypt_and_verify  # noqa: E402
 from src.coevo.cockpit import (  # noqa: E402
-    MilestoneSummary,
     RoleView,
     TaskSummary,
     WorkspaceView,

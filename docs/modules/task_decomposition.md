@@ -50,3 +50,9 @@ FlowUnderstanding（US-1）→ TaskDecompositionService.propose
 - **上游依赖**：`task_flow`（流程模型/阶段图）；
 - **下游消费者**：`talent`（需求映射）、`orchestrator`（基线步骤）、`merge`、
   `report`、`risk`、`knowledge_base`。
+
+## 错误语义
+
+- `TaskDecompositionValidationError`：输入不可调和（可用户修正）；
+- `TaskDecompositionError`：结构不变量被破坏（依赖环、ID 冲突、版本回退等）；
+- 模型建议仅草稿，人工确认后才写正式状态。

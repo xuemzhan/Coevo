@@ -10,6 +10,10 @@
 6. **测试覆盖** — 对应单元/集成/安全/e2e 测试文件；
 7. **依赖与下游** — 上游依赖与消费者。
 
+安全关键模块（cockpit/model/protocol/crypto/merge/identity/decision_brief/risk/
+workspace/audit_governance 等）另含 **配置与错误语义** 小节，列出环境变量、
+HTTP 语义与异常类型。
+
 | 包 | 文档 | 故事 |
 |---|---|---|
 | `app/` | [app.md](app.md) | 应用组合根（演示流水线） |

@@ -7,7 +7,6 @@ from src.coevo.app.demo_support import (  # noqa: E402
     DemoSigner,
 )
 from src.coevo.identity.models import Actor  # noqa: E402
-from src.coevo.identity.service import StaticAuthorizer  # noqa: E402
 from src.coevo.orchestrator import (  # noqa: E402
     MVP_FIXED_CHAIN,
     AgentStatus,

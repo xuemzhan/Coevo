@@ -51,3 +51,9 @@
 
 - **下游消费者**：`task_decomposition`（阶段分组）、`orchestrator`（固定链第 1 步）、
   `app/pipeline`。
+
+## 错误语义
+
+- `ProcessFlowParseError`：解析失败（重复 ID/非法类型/置信度越界/非 UTF-8）；
+- `ProcessFlowError`：模型不变量（如 Traced 置信度越界）；`TaskFlowValidationError`：
+  服务层调用方错误。

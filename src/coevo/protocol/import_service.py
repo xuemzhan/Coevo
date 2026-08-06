@@ -45,8 +45,6 @@ import dataclasses
 
 from .agent_package import (
     AgentPackageError,
-    AgentPackageFlags,
-    EnvelopeHeader,
     encode_envelope,
 )
 from .import_transaction import (
@@ -57,7 +55,6 @@ from .import_transaction import (
 )
 from .package_builder import BuiltPackage
 from .processed_package_store import (
-    AgentPackageStoreDuplicateError,
     ProcessedPackageRecord,
     ProcessedPackageStore,
 )

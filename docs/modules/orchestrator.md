@@ -50,3 +50,9 @@ SQLite 幂等存储与审计。MVP 只实现两条固定链（任务下发链、
 - **上游依赖**：`task_flow`、`task_decomposition`、`talent`、`protocol`、
   `workspace`、`identity`（授权）；
 - **下游消费者**：`app/pipeline`、`examples/service-api` 编排服务。
+
+## 错误语义
+
+- `OrchestratorValidationError`：事件/确认/预览/授权校验失败（可修正）；
+- `OrchestratorConflictError`：重复事件/状态冲突（幂等失败关闭）；
+- `RealChainStoreRecoveryRequired`：审计锚点校验失败，必须先 `recover()`。

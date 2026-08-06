@@ -54,3 +54,10 @@
 
 - **上游依赖**：`docs/dependencies/toolchain-lock.json`（助手锁定）、PowerShell；
 - **下游消费者**：`identity/private_keys`、`protocol/`（包加密签名）、`app/pipeline`。
+
+## 错误语义
+
+- `GmsslPrototypeError`（code `AGT-CRY-001`）：助手进程/帧协议/密码级失败；
+- 启动级瞬态失败（`GCP-E-LAUNCH`）有界重试（默认 2 次）；密码级 `GCP-E-*`
+  诊断绝不重试；
+- `CngKekHelperError`：CNG KEK 助手锁定校验/超时/返回码失败。

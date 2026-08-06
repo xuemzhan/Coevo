@@ -30,7 +30,6 @@ from service_api import (  # noqa: E402
     ServiceFramework,
     ServiceRegistry,
     ServiceRequest,
-    ServiceResponse,
     ServiceSpec,
     build_openapi,
     error_response,

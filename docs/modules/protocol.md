@@ -62,3 +62,12 @@
 - **上游依赖**：`crypto`（密码运算）、`identity`（证书/句柄）、
   `docs/protocol/agent-package-protocol.md`；
 - **下游消费者**：`workspace`、`merge`、`report`、`orchestrator`、`cockpit`。
+
+## 错误码（协议 §22 实现面）
+
+- `AGT-PKG-*`：Magic/版本/结构/长度/信封规范错误；
+- `AGT-ID-*`：接收人不匹配 / 发送方不可信；
+- `AGT-CRY-*`：会话密钥解封 / 解密 / 验签 / 摘要失败（未批准算法统一
+  `AGT-CRY-001` fail-closed）；
+- `AGT-RPL-*`：重复包 / 疑似重放；`AGT-FILE-*`：禁止类型 / 路径越界 / 过大；
+- `AGT-IMP-*`：原子导入失败；`AGT-POL-*`：权限/密级；`AGT-TIME-*`：可信时间异常。

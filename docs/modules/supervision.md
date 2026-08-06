@@ -43,3 +43,8 @@ RiskReport（负责人已确认候选）→ SupervisionCoordinator.coordinate
 
 - **上游依赖**：`risk`（风险报告）、`merge`（回执）；
 - **下游消费者**：`knowledge_base`（会议结论知识）、`app/pipeline`、示例闭环。
+
+## 错误语义
+
+- `SupervisionValidationError`：输入校验失败（可修正）；`SupervisionError`：
+  结构不变量；纯函数门面无 IO，失败关闭。

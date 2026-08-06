@@ -52,3 +52,11 @@
 - **上游依赖**：`protocol`（ImportOutcome）、`report`（ReportManifest）、
   `task_decomposition`（ProjectBaseline）、`identity`（签名权威）；
 - **下游消费者**：`risk/`、`decision_brief/`、`knowledge_base/`。
+
+## 错误语义
+
+- `MergeValidationError`：输入契约非法（可用户修正）；`MergeError`：结构不变量
+  被破坏（工程缺陷）；两者均失败关闭；
+- `MergeCommitReceiptError`：收据构建/校验失败（版本跳号、快照不绑定、签名主体
+  不一致等）；
+- `MergeReceiptRepositoryError` / `AuditAnchorError`：持久化/锚点失败。

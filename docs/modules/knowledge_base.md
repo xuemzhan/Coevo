@@ -47,3 +47,9 @@
 - **上游依赖**：`merge`（回执）、`risk`、`supervision`、`decision_brief`、
   `progress_capture`、`task_decomposition`；
 - **下游消费者**：`app/pipeline`、`examples/` 演示闭环。
+
+## 错误语义
+
+- `KnowledgeBaseValidationError`：条目/密级/范围校验失败；
+- `KnowledgeStoreError` / `KnowledgeStoreConflictError`：持久化/冲突；
+- 模型总结未审批入库、密级不足（`ClassificationDenied`）一律拒绝。

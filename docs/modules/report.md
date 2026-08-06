@@ -45,3 +45,8 @@ ProgressDraft（US-8 已接受草稿）→ ReportBuilder.build
 - **上游依赖**：`progress_capture`（草稿）、`task_decomposition`（基线）、
   `protocol`（包构建）；
 - **下游消费者**：`merge`（合并输入）、`app/pipeline`、`examples/`。
+
+## 错误语义
+
+- `ReportManifestValidationError`：清单字段非法（大小/枚举/时间）；
+- `ReportBuilderError`：构建失败（如无效时间戳计算失效期，失败关闭）。

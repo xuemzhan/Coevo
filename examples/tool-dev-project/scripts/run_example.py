@@ -45,7 +45,7 @@ import urllib.request
 import zipfile
 import xml.sax.saxutils as _xml
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -83,7 +83,7 @@ from src.coevo.cockpit import (  # noqa: E402
     TaskSummary,
     WorkspaceView,
 )
-from src.coevo.cockpit.wps import WpsLaunchDecision, WpsLauncher  # noqa: E402
+from src.coevo.cockpit.wps import WpsLauncher  # noqa: E402
 from src.coevo.crypto import GmsslPrototypeProvider  # noqa: E402
 from src.coevo.decision_brief import (  # noqa: E402
     ApprovedTemplateRegistry,

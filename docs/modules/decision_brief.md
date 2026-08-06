@@ -50,3 +50,9 @@
 - **上游依赖**：`merge`（回执）、`risk`（风险报告）、`identity/private_keys`
   （签名权威）、`report`；
 - **下游消费者**：`examples/service-api` 决策简报服务、驾驶舱/报告生成链路。
+
+## 错误语义
+
+- `DecisionBriefValidationError`：输入/绑定/模板/确认校验失败（可修正）；
+- `DecisionBriefConflictError`：CAS 冲突 / 事件重放意图冲突（失败关闭）；
+- `DecisionBriefError`：其他结构不变量；模板篡改/宏/替代 registry 一律拒绝。

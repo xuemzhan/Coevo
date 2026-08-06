@@ -53,3 +53,11 @@
   `scripts/store_private_key.ps1`；
 - **下游消费者**：`protocol/`（接收人绑定、签名权威）、`merge/`（决策者白名单）、
   `decision_brief/`（owner 签名确认）。
+
+## 错误语义
+
+- `ValidationError` / `SensitiveInputError`：身份包校验失败、敏感键拒绝；
+- `PrivateKeyValidationError` / `PrivateKeyHandleError` / `PrivateKeyRevokedError` /
+  `PrivateKeyUsageError`：句柄格式、CNG 助手、吊销/有效期、使用策略；
+- `ConflictError`（证书指纹唯一冲突，回滚并记 conflict）、`UnauthorizedError`
+  （权限不足）、`AuditAnchorError`（审计锚签名/新鲜度失败）。

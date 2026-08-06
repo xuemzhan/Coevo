@@ -31,3 +31,17 @@
 
 - **下游消费者**：全仓（config/version/logging 被所有模块引用）；
   `scripts/archive_records.py` 消费 `records_archive`。
+
+## 配置项（环境变量）
+
+| 变量 | 默认 | 说明 |
+|---|---|---|
+| `COEVO_COCKPIT_HOST` | `127.0.0.1` | 仅允许环回（强制约束 §5.1） |
+| `COEVO_COCKPIT_PORT` | `12701` | 1..65535 |
+| `COEVO_DATA_DIR` / `COEVO_LOG_DIR` | `%LOCALAPPDATA%\KaiwuAgent` | 状态与日志根 |
+| `COEVO_SESSION_TIMEOUT_SEC` | `28800` | 会话不活动超时 |
+| `COEVO_COCKPIT_CHECKPOINT_SEC` | `300` | 状态周期快照间隔 |
+| `COEVO_LOG_LEVEL` | `INFO` | CRITICAL..DEBUG |
+| `COEVO_STATE_PATH` / `COEVO_LOG_PATH` / `COEVO_LOCK_PATH` | 派生 | 显式覆盖路径 |
+
+非法值一律抛 `ConfigError`，绝不静默回退。

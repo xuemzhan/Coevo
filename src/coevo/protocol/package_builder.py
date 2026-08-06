@@ -77,7 +77,6 @@ from .agent_payload import (
     encode_payload_header,
 )
 from .sm2_keywrap import (
-    AgentPackageCryptoUnavailableError as KeywrapCryptoUnavailable,
     KeyTransportBlock,
     decode_key_transport_bytes,
     encode_key_transport_bytes,

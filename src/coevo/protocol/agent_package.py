@@ -62,7 +62,12 @@ PROTOCOL_MINOR = 0
 #   4 bytes  Reserved (must be 0)
 FIXED_HEADER_FORMAT = ">8sHHIIQI4s"  # 8s(Magic) + 2H(major) + 2H(minor) + 4I(header_len) + 4I(key_block_len) + 8Q(payload_len) + 4I(flags) + 4s(reserved)
 FIXED_HEADER_SIZE = struct.calcsize(FIXED_HEADER_FORMAT)  # = 36 bytes
-assert FIXED_HEADER_SIZE == 36, "Fixed Header layout drifted"
+if FIXED_HEADER_SIZE != 36:
+    # OPTIMIZE-2: keep the wire-layout invariant active under ``python -O``
+    # (asserts are stripped).
+    raise RuntimeError(
+        f"Fixed Header layout drifted: expected 36 bytes, got {FIXED_HEADER_SIZE}"
+    )
 
 # Envelope field constraints ------------------------------------------------
 

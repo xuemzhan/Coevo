@@ -48,3 +48,9 @@ ImportOutcome（COMMITTED）→ WorkspaceInitService.init_from_import
 - **上游依赖**：`protocol`（ImportOutcome/事务）；
 - **下游消费者**：`progress_capture`（工作区扫描）、`cockpit`（工作区视图）、
   `examples/` 演示。
+
+## 错误语义
+
+- `WorkspacePathError`：路径非法（非 COMMITTED、越界、非法 ID），失败关闭传播；
+- `WorkspaceInitValidationError` / `WorkspaceInitError`：初始化输入/状态错误；
+- 同包同角色重复注册、重复导入幂等规则由 `WorkspaceRegistry` 强制。

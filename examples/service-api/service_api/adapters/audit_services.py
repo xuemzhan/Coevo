@@ -3,7 +3,6 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
-from pathlib import Path
 from typing import Any
 
 from coevo_demo_utils import build_and_verify_package  # noqa: E402
@@ -13,8 +12,7 @@ from src.coevo.audit_governance import (  # noqa: E402
     SecurityAuditFacade,
 )
 
-from ._core import AUDITOR_CERT, OWNER_CERT, _require_param, _require_safe_id
-from ..contract import ErrorCode, ServiceError  # noqa: E402
+from ._core import AUDITOR_CERT, OWNER_CERT, _require_param
 
 
 def audit_query(request: Any, ctx: dict[str, Any]) -> dict[str, Any]:

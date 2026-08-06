@@ -22,7 +22,6 @@
 
 from __future__ import annotations
 
-import dataclasses
 import datetime as _dt
 import traceback
 import uuid

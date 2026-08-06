@@ -50,3 +50,12 @@ OpenAI 兼容提供者；`NullModelProvider` 提供离线兜底，保证无网�
 - **上游依赖**：`config/model-config.json`、`config/model-prompts.json`（非密钥）；
 - **下游消费者**：`task_decomposition/agent.py`、`scripts/run_cockpit.py` 等
   模型消费方。
+
+## 配置与错误语义
+
+- 配置文件 `config/model-config.json`（非密钥，schema_version=1.0）；API 密钥经
+  环境变量名引用（`COEVO_LLM_API_KEY`，默认名），密钥本身不落文件；
+- 关键开关：`external_data_ok`（外发审批，默认 False）、`timeout_seconds`（1..60）、
+  `max_tokens`（1..8000）；`base_url` 必须 https 或环回 http；
+- 异常：`ModelUnavailableError`（离线/无 key）、`ModelValidationError`
+  （响应畸形/超限/非严格 JSON）、`ModelError`（配置非法，失败关闭）。

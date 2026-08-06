@@ -53,3 +53,9 @@
 - **上游依赖**：各领域模块的 `to_audit_record` 投影；
 - **下游消费者**：驾驶舱审计查询（`tests/e2e/test_cockpit_offline_frontend.py`）、
   `examples/service-api` 审计服务。
+
+## 错误语义
+
+- `AuditEventValidationError` / `AuditQueryValidationError`：事件/查询载荷非法；
+- `AuditGovernanceError`：门面级错误；`AuditStreamStoreError`：持久化/断链；
+- 哈希链篡改、追加独占冲突、尺寸越界一律失败关闭。

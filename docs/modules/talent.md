@@ -49,3 +49,10 @@
 ## 依赖与下游
 
 - **下游消费者**：`orchestrator`（固定链第 3 步）、`app/pipeline`、示例闭环。
+
+## 错误语义
+
+- `TalentValidationError`：人才/需求/limit 校验失败；`TalentRecommenderError`：
+  评分/门面错误；
+- `TalentStoreError` / `TalentStoreIntegrityError` / `TalentStoreDuplicateError`：
+  持久化/链校验/重复注册失败关闭。

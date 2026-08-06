@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from src.coevo.app.demo_support import DEMO_PROFILE  # noqa: E402
 from src.coevo.identity.models import Actor  # noqa: E402
-from src.coevo.identity.service import StaticAuthorizer  # noqa: E402
 from src.coevo.talent.models import AvailabilityWindow  # noqa: E402
 from src.coevo.talent.recommender import TaskRequirement  # noqa: E402
 from src.coevo.task_decomposition.baseline import build_baseline  # noqa: E402

@@ -32,9 +32,12 @@ def select_provider(config: ModelConfig | None = None) -> ModelProvider:
     if cfg.provider == "offline":
         return NullModelProvider()
     if cfg.provider == "deepseek":
-        assert cfg.api_key_env is not None
-        assert cfg.base_url is not None
-        assert cfg.model is not None
+        # OPTIMIZE-2: explicit fail-closed checks (asserts are stripped under -O).
+        if cfg.api_key_env is None or cfg.base_url is None or cfg.model is None:
+            raise ModelError(
+                "deepseek provider configuration is incomplete "
+                "(api_key_env/base_url/model are required)"
+            )
         return DeepSeekProvider(
             api_key_env=cfg.api_key_env,
             base_url=cfg.base_url,
@@ -42,8 +45,11 @@ def select_provider(config: ModelConfig | None = None) -> ModelProvider:
             external_data_ok=cfg.external_data_ok,
         )
     if cfg.provider == "local_openai":
-        assert cfg.base_url is not None
-        assert cfg.model is not None
+        if cfg.base_url is None or cfg.model is None:
+            raise ModelError(
+                "local_openai provider configuration is incomplete "
+                "(base_url/model are required)"
+            )
         return OpenAICompatibleProvider(
             name="local_openai",
             api_key_env=cfg.api_key_env or "COEVO_LLM_API_KEY",

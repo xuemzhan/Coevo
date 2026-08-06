@@ -72,33 +72,14 @@ from . import (
 from .state_store import CockpitStateStore
 
 from .sessions import (
-
-    DEFAULT_MAX_SESSIONS,
-
     DEFAULT_SESSION_TIMEOUT_SEC,
-
     CockpitSessionManager,
-
-    _ISO_UTC_Z,
-
     now_utc_iso_z,
-
 )
 
 from .static import (
-
-    STATIC_ALLOWED_EXTENSIONS,
-
-    STATIC_CACHE_MAX_BYTES,
-
-    STATIC_CACHE_MAX_ENTRIES,
-
-    STATIC_MAX_BYTES,
-
     _StaticAssetCache,
-
     resolve_static_path,
-
 )
 from src.coevo.version import APP_DISPLAY_NAME, VERSION
 

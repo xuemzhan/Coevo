@@ -32,7 +32,6 @@ from .models import (
     Milestone,
     ProjectBaseline,
     Task,
-    TaskDecompositionError,
     TaskDecompositionValidationError,
     WorkPackage,
 )

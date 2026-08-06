@@ -612,7 +612,10 @@ def _risk_conclusion(risk: Risk, *, pending: bool) -> BriefConclusion:
 
 def _make_version(**values: object) -> BriefVersion:
     content = values["content"]
-    assert type(content) is BriefContent
+    if type(content) is not BriefContent:
+        # OPTIMIZE-2: an assert would be stripped under ``python -O``;
+        # this is an internal type invariant that must stay fail-closed.
+        raise DecisionBriefValidationError("version content must be BriefContent")
     content_digest = _content_digest(content)
     digest = _version_digest_values(
         revision=values["revision"],
@@ -824,7 +827,6 @@ def _source_sort_key(source: SourceReference) -> tuple[str, str]:
 
 def _validate_template_ref(value: object) -> None:
     _safe_string(value, field="template_ref", max_bytes=1024)
-    assert isinstance(value, str)
     if "\\" in value or ":" in value or value.startswith("/"):
         raise DecisionBriefValidationError("template_ref must be relative POSIX path")
     path = PurePosixPath(value)

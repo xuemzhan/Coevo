@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-import json
 from typing import Any
 
 from src.coevo.decision_brief import (  # noqa: E402
@@ -18,7 +17,6 @@ from src.coevo.protocol import (  # noqa: E402
     ProcessedPackage,
     ProcessedPackageStore,
     ReplayDecision,
-    ReplayOutcome,
     check_replay,
     parse_package_bytes,
 )
