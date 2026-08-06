@@ -18,7 +18,16 @@ def main() -> int:
         print("STATE.json does not exist.")
         return 20
 
-    state = json.loads(state_path.read_text(encoding="utf-8"))
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
+        # OPTIMIZE-11: a malformed state file must block the loop with exit
+        # code 20 instead of crashing the runner (fail-closed).
+        print(f"STATE.json is unreadable or malformed: {exc}")
+        return 20
+    if not isinstance(state, dict):
+        print("STATE.json is not a JSON object.")
+        return 20
     status = state.get("status")
 
     if status == "mvp-complete":

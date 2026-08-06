@@ -79,7 +79,7 @@ class FieldMerge:
 
     def to_dict(self) -> dict[str, object]:
         """Serialize the merge record to a JSON-safe dict."""
-        def _to_jsonable(value):
+        def _to_jsonable(value: object) -> object:
             # JSON has no tuple / enum / MISSING-sentinel type;
             # convert recursively so the round-trip is exact
             # (to_dict() -> json.dumps -> json.loads yields a

@@ -206,7 +206,7 @@ class ReportManifest:
         return _replace(self, submitted_at=new_submitted_at, overrides=overrides)
 
 
-def _replace(obj, **changes):
+def _replace(obj: object, **changes: object) -> object:
     """Cheap dataclass ``replace`` that works on frozen dataclasses."""
     from dataclasses import replace
     return replace(obj, **changes)

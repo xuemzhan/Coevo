@@ -12,6 +12,7 @@ import math
 import sqlite3
 import threading
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -279,7 +280,7 @@ class RealChainStore:
         self.database.unlink(missing_ok=True)
 
     @contextmanager
-    def _guard(self):
+    def _guard(self) -> Iterator[None]:
         with self._lock:
             with self.anchor.locked():
                 yield

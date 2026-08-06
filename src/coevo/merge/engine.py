@@ -23,7 +23,7 @@ from src.coevo.protocol.import_transaction import ImportStep
 from src.coevo.protocol.processed_package_store import AgentPackageStoreDuplicateError, ProcessedPackageRecord, ProcessedPackageStore
 from src.coevo.report import ReportManifest, ReportStatus
 from src.coevo.task_decomposition import ProjectBaseline
-from .receipt import BASELINE_DIGEST_ALGORITHM, BASELINE_SCHEMA, MergeCommitReceiptError, MergeCommitReceiptStore, ReceiptSigningAuthority, append_signed_receipt, build_signed_merge_commit_receipt
+from .receipt import BASELINE_DIGEST_ALGORITHM, BASELINE_SCHEMA, MergeCommitReceipt, MergeCommitReceiptError, MergeCommitReceiptStore, ReceiptSigningAuthority, append_signed_receipt, build_signed_merge_commit_receipt
 from .repository import MergeReceiptRepository
 
 from .models import FieldMerge, MERGEABLE_PACKAGE_TYPES, MISSING, MergeCommitOutcome, MergeDecision, MergeError, MergeProposal, MergeRecord, MergeValidationError, _master_revision
@@ -589,7 +589,12 @@ class MergeEngine:
             trusted_time = dt.datetime.fromisoformat(
                 decided_at.removesuffix("Z") + "+00:00"
             )
-            def receipt_builder(store_id, store_sequence, previous_id, previous_hash):
+            def receipt_builder(
+                store_id: str,
+                store_sequence: int,
+                previous_id: str | None,
+                previous_hash: str,
+            ) -> MergeCommitReceipt:
                 return build_signed_merge_commit_receipt(
                 authority=receipt_authority,
                 trusted_time=trusted_time,

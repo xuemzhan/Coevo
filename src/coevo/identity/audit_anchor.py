@@ -13,6 +13,7 @@ import os
 import subprocess
 import tempfile
 import uuid
+from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
@@ -222,7 +223,7 @@ def durable_write(path: Path, content: bytes) -> None:
 
 
 @contextlib.contextmanager
-def exclusive_lock(path: Path):
+def exclusive_lock(path: Path) -> Iterator[None]:
     """Hold an exclusive advisory lock on ``path`` for the context duration."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a+b") as stream:
@@ -254,7 +255,7 @@ class SignedAuditAnchor:
         self.pending_new_signature = Path(str(base) + "-pending.new-marker.p7s"); self.pending_old_signature = Path(str(base) + "-pending.old-marker.p7s")
         self.lock_path = Path(str(base) + ".lock"); self.signer = signer; self.freshness = freshness
 
-    def locked(self):
+    def locked(self) -> Iterator[None]:
         return exclusive_lock(self.lock_path)
 
     def artifacts(self) -> tuple[Path, ...]:
