@@ -33,3 +33,12 @@ mapping: `docs/traceability/requirements-test-matrix.md`; guided tour:
 
 Domain vocabulary (closed-set enums/constants) is indexed in
 [README.md](README.md) ("关键常量与闭集枚举索引").
+
+Full English docs for the security-critical modules:
+
+- [protocol.en.md](protocol.en.md) — `.agent` wire format, replay/atomic import;
+- [crypto.en.md](crypto.en.md) — SM2/SM3/SM4 adapters and protected handles;
+- [identity.en.md](identity.en.md) — identity, certificates, private-key handles;
+- [merge.en.md](merge.en.md) — field merge, receipts, sealed store;
+- [audit_governance.en.md](audit_governance.en.md) — audit events, interception,
+  hash-chained stream.

@@ -182,6 +182,28 @@ class InterceptionTests(unittest.TestCase):
         d = self._eval(expiration_ts="2026-08-22T23:59:59Z")
         self.assertNotIn(InterceptionReason.EXPIRED, d.reasons)
 
+    def test_expiration_equal_to_now_passes(self):
+        # OPTIMIZE-9: boundary — `now > expiration_ts` is strict, so an
+        # expiration instant equal to the trusted now is not yet expired.
+        d = self._eval(expiration_ts=NOW)
+        self.assertNotIn(InterceptionReason.EXPIRED, d.reasons)
+        self.assertFalse(d.intercepted)
+
+    def test_corrupted_with_expired_lists_both_in_order(self):
+        # OPTIMIZE-9: CORRUPTED only short-circuits TAMPERED; EXPIRED is an
+        # independent reason and must still be listed, in positional order.
+        d = self._eval(
+            envelope_status="corrupted",
+            expiration_ts="2026-08-21T00:00:00Z",
+        )
+        self.assertEqual(
+            (
+                InterceptionReason.CORRUPTED,
+                InterceptionReason.EXPIRED,
+            ),
+            d.reasons,
+        )
+
     def test_duplicate_replay_intercepts(self):
         d = self._eval(replay_status="duplicate")
         self.assertTrue(d.intercepted)
