@@ -231,6 +231,7 @@ python "%LOCALAPPDATA%\KaiwuAgent\app\<version>\scripts\run_cockpit.py"
 | 生产运维手册（配置参考/安装升级/审计密钥） | `docs/operations/` |
 | 需求—代码—测试追踪 | `docs/traceability/requirements-test-matrix.md` |
 | 代码注释导览 | `docs/code-guide.md` |
+| 逐包模块文档 | `docs/modules/`（每个 `src/coevo` 包一份：定位/文件/入口/约束） |
 | 工程循环状态 | `loop/`（GOAL/STATE/BACKLOG/DECISIONS/VERIFICATION） |
 | 端到端示例 | `examples/`（含运行/核验脚本） |
 | 审计链 | `loop/audit-head.json` / `loop/tool-audit.jsonl` |
