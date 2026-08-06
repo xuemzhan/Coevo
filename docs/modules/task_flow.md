@@ -41,6 +41,12 @@
 - 每字段携带 source_path + confidence ∈ [0,1] + SourceKind 闭集；
 - 审计投影只记结构事实。
 
+## 性能与复杂度
+
+- `StageGraph`：构造期 O(1) 字典索引，`stage_id_for_node` 单次查找；
+- 映射规则表：排序后按 hint 建字典，节点解析 O(1) 命中；
+- 解析器为单遍确定性状态机，输入规模线性。
+
 ## 测试覆盖
 
 - `tests/unit/test_task_flow_models.py`（18 项）、`test_task_flow_service.py`

@@ -39,6 +39,12 @@ FlowUnderstanding（US-1）→ TaskDecompositionService.propose
 - 阶段顺序种子边 + 显式边，拓扑排序确定性与输入顺序无关；
 - 建议须人工确认后才写正式状态（模型输出不直接改基线）。
 
+## 性能与复杂度
+
+- 依赖图：邻接索引 O(1) 查询，heap 拓扑排序 O((V+E) log V)，显式栈 DFS 无递归深度风险；
+- `_flow_json`：按 stage 预索引分组，O(节点数)；
+- 每次 confirm 全量重校验（正确性优先，基线规模受控）。
+
 ## 测试覆盖
 
 - `tests/unit/test_task_decomposition.py`（23 项：输入/图/基线/服务）、

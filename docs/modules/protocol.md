@@ -49,6 +49,13 @@
 - 原子导入失败回滚不留半态；异常包留在隔离区；
 - 未批准算法显式拒绝；私钥/口令不进入协议层（经受控句柄）。
 
+## 性能与复杂度
+
+- 信封解析字节精确、长度双向一致，所有上限（64KiB 信封/1TiB 载荷硬上限）
+  在解析前拒绝，防 DoS；
+- 重放/重复检测按 (sender, recipient, project) 作用域线性扫描登记表；
+- 原子导入 7 步事务状态机，状态转换 O(1)。
+
 ## 测试覆盖
 
 - `tests/integration/package_header_test.py`（56 项）、`package_header_extended_test.py`、

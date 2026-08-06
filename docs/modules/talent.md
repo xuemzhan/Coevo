@@ -40,6 +40,12 @@
 - 识别负荷过高（AT_CAPACITY/OVER_CAPACITY）与时间窗口冲突（WINDOW_CONFLICT）；
 - 人员调整过程形成操作记录。
 
+## 性能与复杂度
+
+- 候选技能/资质集合预热，评分内环 O(R·N)（R 需求数、N 候选数）；
+- `by_code` O(1) 索引；store 元数据首次读取后缓存（create 后不可变）；
+- 推荐结果确定性排序，与输入顺序无关。
+
 ## 测试覆盖
 
 - `tests/unit/test_talent_recommender.py`（32 项：模型/脱敏/排序/理由/负载/服务）、

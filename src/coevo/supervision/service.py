@@ -40,11 +40,9 @@ class SupervisionCoordinator:
             raise SupervisionValidationError("risk_report must be RiskReport")
         if not isinstance(project_recipient_cert_id, str) or not project_recipient_cert_id:
             raise SupervisionValidationError("project_recipient_cert_id must be a non-empty string")
-        _parse_utc(now, field="now")
-        try:
-            reference_time = _parse_utc(now, field="now")
-        except SupervisionValidationError:
-            raise
+        # OPTIMIZE-3: single parse — the previous code parsed `now` twice
+        # (once for validation, once for the value) with a no-op except.
+        reference_time = _parse_utc(now, field="now")
         # Reject any risk that fails our kind-allow-list (defense in depth:
         # US-11's RiskKind enum is closed so this is a no-op today, but
         # a future additive enum value would be rejected here).

@@ -41,6 +41,12 @@
   （含 `os.linesep` 补偿）；
 - 导出内容哈希稳定（同一数据同一导出 → 同一 SHA-256）。
 
+## 性能与复杂度
+
+- `AuditStreamStore` 追加记录免逐条 `stat()`，尺寸增量维护与磁盘逐字节一致
+  （含 `os.linesep` 补偿）；
+- 查询游标分页按 `record_hash` 定位，limit 硬上限 10000，防无界扫描。
+
 ## 测试覆盖
 
 - `tests/unit/test_audit_governance.py`（29 项：事件/拦截/查询/导出/投影）；

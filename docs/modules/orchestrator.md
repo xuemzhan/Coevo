@@ -39,6 +39,12 @@ SQLite 幂等存储与审计。MVP 只实现两条固定链（任务下发链、
 - 失败策略确定性执行：RETRY 有界重试，其余 ESCALATE_HUMAN，绝不静默降级；
 - 模型/规则输出不直接写正式状态。
 
+## 性能与复杂度
+
+- 每步原子落盘 + 审计链（真实链 SQLite 幂等，事务样板统一助手）；
+- trace 构造与终局收尾统一助手，避免重复样板；
+- 恢复必须先通过锚点校验（失败关闭，不做猜测性修复）。
+
 ## 测试覆盖
 
 - `tests/unit/test_orchestrator.py`、`test_real_chain_store.py`；

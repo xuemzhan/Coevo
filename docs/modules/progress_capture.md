@@ -39,6 +39,12 @@
 - 条目必须关联 ≥1 条证据（EvidenceRef），证据摘要可核验；
 - 审计投影排除 text/confidence/override reason 敏感字段。
 
+## 性能与复杂度
+
+- watcher：每文件单次 `lstat`（符号链接+元数据一次完成）；未变化文件复用
+  摘要（O(条目数) 静默扫描）；字符串路径运算无 IO；
+- 稳定性门控：连续 N 次扫描一致才发事件，避免半写误报。
+
 ## 测试覆盖
 
 - `tests/unit/test_progress_capture.py`（29 项：模型常量/闭集/提取/门控/修订/

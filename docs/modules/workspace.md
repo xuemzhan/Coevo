@@ -37,6 +37,12 @@ ImportOutcome（COMMITTED）→ WorkspaceInitService.init_from_import
 - 路径拒绝绝对路径、`..`、设备前缀、符号链接越界（POSIX + Windows 双方言）；
 - 工作区目录用系统生成唯一 ID，不只用用户输入名称（强制约束 §6.1）。
 
+## 性能与复杂度
+
+- `WorkspaceRegistry.by_package` 单次遍历分组后 O(1) 取结果；
+- 路径构造统一助手（`paths_for`），避免重复样板；
+- 纯字符串路径运算，无 IO；防穿越检查为双方言（POSIX+Windows）O(路径长度)。
+
 ## 测试覆盖
 
 - `tests/unit/test_workspace_init.py`（30 项：QuarantinePath/WorkspacePath/
