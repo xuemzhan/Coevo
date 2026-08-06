@@ -42,3 +42,15 @@ Full English docs for the security-critical modules:
 - [merge.en.md](merge.en.md) — field merge, receipts, sealed store;
 - [audit_governance.en.md](audit_governance.en.md) — audit events, interception,
   hash-chained stream.
+
+English docs for the remaining modules:
+
+- [app.en.md](app.en.md), [benchmarks.en.md](benchmarks.en.md),
+  [cockpit.en.md](cockpit.en.md), [decision_brief.en.md](decision_brief.en.md),
+  [knowledge_base.en.md](knowledge_base.en.md), [model.en.md](model.en.md),
+  [orchestrator.en.md](orchestrator.en.md),
+  [progress_capture.en.md](progress_capture.en.md), [report.en.md](report.en.md),
+  [risk.en.md](risk.en.md), [root_modules.en.md](root_modules.en.md),
+  [supervision.en.md](supervision.en.md), [talent.en.md](talent.en.md),
+  [task_decomposition.en.md](task_decomposition.en.md),
+  [task_flow.en.md](task_flow.en.md), [workspace.en.md](workspace.en.md).
