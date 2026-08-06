@@ -58,6 +58,8 @@
   `parse_package_bytes` 与 `parse_package_header` 均强制 envelope 与 Fixed Header
   一致（两条解析面行为统一，2026-08-07 OPTIMIZE-5）；
 - 重放/重复检测按 (sender, recipient, project) 作用域线性扫描登记表；
+- 包序号必须**严格递增**（协议 §13）：同序号但内容不同的包视为重排/重放异常
+  拒绝（2026-08-07 OPTIMIZE-7 收紧，原实现仅拒绝更早序号）；
 - 原子导入 7 步事务状态机，状态转换 O(1)。
 
 ## 测试覆盖

@@ -322,6 +322,24 @@ class TestReplayDetector(unittest.TestCase):
         d = check_replay(candidate=cand, registry=[prior])
         self.assertEqual(ReplayOutcome.REPLAY_SEQUENCE, d.outcome)
 
+    def test_equal_sequence_with_different_content_is_rejected(self):
+        # OPTIMIZE-7: protocol § 13 requires strictly increasing sequence
+        # numbers. A package with the SAME sequence as a prior one but
+        # different content is a reordering/replay anomaly and must not
+        # silently pass the sequence gate.
+        prior = ProcessedPackage(
+            package_id="p.1", package_digest="d.1",
+            sender_cert_id="S", recipient_cert_id="R",
+            project_id="PRJ", sequence_no=7,
+        )
+        cand = ProcessedPackage(
+            package_id="p.2", package_digest="d.2",
+            sender_cert_id="S", recipient_cert_id="R",
+            project_id="PRJ", sequence_no=7,
+        )
+        d = check_replay(candidate=cand, registry=[prior])
+        self.assertEqual(ReplayOutcome.REPLAY_SEQUENCE, d.outcome)
+
     def test_revoked_package_id_rejected(self):
         cand = ProcessedPackage(
             package_id="p.1", package_digest="d.1",

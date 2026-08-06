@@ -204,6 +204,17 @@ class TestWorkspacePath(unittest.TestCase):
     def test_sanitize_id_accepts_safe(self):
         self.assertEqual("a-b_c.d", sanitize_id("a-b_c.d", name="x"))
 
+    def test_sanitize_id_accepts_exactly_maximum_length(self):
+        # OPTIMIZE-7: boundary — exactly PROJECT_ID_MAX characters is valid.
+        self.assertEqual(
+            "a" * PROJECT_ID_MAX,
+            sanitize_id("a" * PROJECT_ID_MAX, name="x"),
+        )
+
+    def test_sanitize_id_rejects_maximum_plus_one(self):
+        with self.assertRaises(WorkspacePathError):
+            sanitize_id("a" * (PROJECT_ID_MAX + 1), name="x")
+
 
 # ----------------------- AC-5: WorkspaceRegistry -----------------------
 

@@ -10,8 +10,11 @@ pure function over a sequence of :class:`ProcessedPackage` records:
 
 * same ``package_id`` ⇒ duplicate (协议 § 17 情况 1)
 * same package digest ⇒ duplicate (协议 § 17 情况 2)
-* ``sequence_no`` strictly less than the most recent processed
+* ``sequence_no`` not greater than the most recent processed
   sequence from the same sender + project ⇒ replay candidate
+  (协议 § 13 requires strictly increasing sequence numbers, so an
+  equal sequence with different content is a reordering/replay
+  anomaly and must not silently pass)
   (协议 § 17 情况 3)
 * reference to an unknown original package (CORRECTION_PACKAGE /
   REVOCATION_PACKAGE) ⇒ invalid (协议 § 17 情况 4 / 5)
@@ -170,13 +173,16 @@ def check_replay(
                     f"processed at sequence_no {record.sequence_no}"
                 ),
             )
-    # 协议 § 17 情况 3: sequence_no earlier than the most recent
+    # 协议 § 17 情况 3 + § 13: sequence_no must be strictly greater
+    # than the most recent processed sequence. An equal sequence with
+    # different content is a reordering/replay anomaly and is rejected
+    # (previously only strictly-earlier sequences were caught).
     previous_sequence_no = max(
         (r.sequence_no for r in same_scope), default=None
     )
     if (
         previous_sequence_no is not None
-        and candidate.sequence_no < previous_sequence_no
+        and candidate.sequence_no <= previous_sequence_no
     ):
         return ReplayDecision(
             outcome=ReplayOutcome.REPLAY_SEQUENCE,

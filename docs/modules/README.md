@@ -1,5 +1,17 @@
 # 模块文档索引
 
+## Overview (English)
+
+`src/coevo` contains the production packages behind the Coevo distributed
+task-management MVP. Each package has one doc below with: scope and boundaries,
+file-by-file responsibilities, key entry points and data flow, security
+invariants, test coverage, upstream/downstream dependencies, and (for
+security-critical modules) configuration and error semantics. Domain
+vocabulary (closed-set enums and constants) is indexed in the table at the
+bottom. The authoritative requirements-to-code-to-test mapping lives in
+`docs/traceability/requirements-test-matrix.md`; the full guided tour is
+`docs/code-guide.md`.
+
 `src/coevo` 每个包一份独立文档，统一采用以下模板（2026-08-06 细化）：
 
 1. **定位** — 模块解决什么问题、对应哪个用户故事；
