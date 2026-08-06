@@ -945,3 +945,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第七轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-6） ----------
+  - id: OPTIMIZE-7
+    story: ENG-BASE
+    title: 第七轮逐文件深度审查：docstring/类型注解覆盖审计 + 核心纯函数变异探针（验证测试杀伤力），文档索引补充英文总览
+    status: done
+    dependencies: [OPTIMIZE-6]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false
