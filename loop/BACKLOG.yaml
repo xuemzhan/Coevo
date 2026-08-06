@@ -965,3 +965,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第九轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-8） ----------
+  - id: OPTIMIZE-9
+    story: ENG-BASE
+    title: 第九轮逐文件深度审查：安全审计拦截判定变异探针（五类原因与多因优先级）、关键模块英文全量文档
+    status: done
+    dependencies: [OPTIMIZE-8]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false
