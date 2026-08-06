@@ -975,3 +975,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第十轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-9） ----------
+  - id: OPTIMIZE-10
+    story: ENG-BASE
+    title: 第十轮逐文件深度审查：依赖图环检测边界探针（自环/双节点环）、剩余 16 个模块英文全量文档
+    status: done
+    dependencies: [OPTIMIZE-9]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false
