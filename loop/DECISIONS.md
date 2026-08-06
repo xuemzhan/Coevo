@@ -1,5 +1,28 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-4 第四轮逐文件深度审查与优化（用户指令）done
+
+- 提议：用户再次指令"逐个文件的检查语法、数据结构、算法及架构，评估是否合理，
+  是否可以优化的地方，然后进行修复和优化，然后细化每一个模块的README文档"。
+- 审查结论（第四轮，聚焦尚未细查的安全助手与工具链）：
+  - PowerShell/C# 安全助手（invoke-gmssl-crypto / audit_signature /
+    windows-native-security / gmssl helpers）：句柄级文件锁定、reparse-point
+    拒绝、非导出私钥强制、环境净化、请求/超时边界均正确，未发现新问题；
+  - opencode 工具链（loop_state.ts 包装、path-policy.mjs 保护集）与测试质量
+    抽查通过；examples 全量联合验证（run_all.py）通过；
+  - 模块文档引用核验无过时符号。
+- 修复与优化：
+  - 清掉全仓最后 2 处死导入（锁定脚本 `check_loop_stop.py` / `traceability_check.py`
+    的 sys），并同步工具链锁链（python-script-lock.tsv / toolchain-lock.json /
+    make.cs ScriptInventorySha256 + source_sha256），dev-environment 24 项回归通过；
+  - `deepseek.py` 重复声明 `HttpPost` 改为从 `openai_compatible` 导入；
+  - 文档索引新增模块依赖关系 mermaid 图。
+- 验证：unit / integration 259 / security 97 / e2e 14 全绿，examples run_all
+  通过，e2e ResourceWarning=0；主仓库最终 `make quality` exit=0；audit fully-sealed。
+- 安全审查：静态 STRIDE 复核 PASS——锁链同步一致、死导入清理零行为变更、
+  护栏未放宽。
+- 决策者：用户；提出者：loop-engineer。回滚条件：任一质量门禁失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-3 第三轮逐文件深度审查与优化（用户指令）done
 
 - 提议：用户再次指令"逐个文件的检查语法、数据结构、算法及架构，评估是否合理，

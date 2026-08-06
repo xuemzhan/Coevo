@@ -915,3 +915,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第四轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-3） ----------
+  - id: OPTIMIZE-4
+    story: ENG-BASE
+    title: 第四轮逐文件深度审查：补查 PowerShell/C# 安全助手与 opencode 工具链一致性，examples 全量验证，模块 README 准确性复核
+    status: done
+    dependencies: [OPTIMIZE-3]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false
