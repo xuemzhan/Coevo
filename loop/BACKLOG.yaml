@@ -869,3 +869,29 @@ items:
       - tests/unit/test_release_check.py
     security_review: false
     protocol_review: false
+  # ---------- 整体审查问题修复（2026-08-06 用户指令：进行所有问题的修复与优化） ----------
+  - id: REVIEW-FIX-3
+    story: ENG-BASE
+    title: 修复整体审查发现的问题：H-1 单实例锁心跳刷新（防陈旧接管误伤长期进程）；M-1 e2e 测试 ResourceWarning 清理；M-2 质量门禁并行互斥与串行说明；L-1 循环状态同步（RECORD 阶段 loop_state 落盘）；L-2 驾驶舱静态资源 charset 分支修正；L-3 首页令牌响应增加 no-store/no-referrer 头；L-4 记录归档阈值下调并在 DECISIONS 留痕
+    status: done
+    dependencies: [RELEASE-1]
+    acceptance_tests:
+      - tests/unit/test_cockpit_http.py
+      - tests/unit/test_quality_gate_lock.py
+      - tests/unit/test_records_archive.py
+      - tests/integration/test_cockpit_http_server.py
+      - tests/e2e/test_cockpit_launcher.py
+      - tests/e2e/test_cockpit_offline_frontend.py
+    security_review: true
+    protocol_review: false
+  # ---------- 逐文件深度审查与优化 + 模块 README 细化（2026-08-06 用户指令） ----------
+  - id: OPTIMIZE-1
+    story: ENG-BASE
+    title: 逐文件检查语法/数据结构/算法/架构并修复优化；细化 docs/modules/ 每个模块的 README 文档（22 个模块）
+    status: in-progress
+    dependencies: [REVIEW-FIX-3]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+      - tests/unit/test_production_docs.py
+    security_review: true
+    protocol_review: false
