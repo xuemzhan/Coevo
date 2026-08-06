@@ -1,5 +1,26 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-5 第五轮逐文件深度审查与优化（用户指令"继续"）done
+
+- 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
+  细化每一个模块的README文档"。
+- 审查结论（第五轮，对象扩展至测试套件与 CI）：
+  - 测试质量扫描：5 个无断言测试，3 个为真弱断言（`test_payload_block_header_is_valid`
+    仅"不抛错"、2 个 base-revision 测试无副作用断言），已补断言；另 2 个断言在
+    辅助函数内，无需改；
+  - CI 工作流（.github/workflows/quality.yml）与门禁模型一致；
+  - 发现并修复真实缺陷：协议 `payload_length` 一致性——`build_encrypted_package`
+    归一化 envelope 而 `build_unsigned_package` 不归一化，且 `parse_package_bytes`
+    不校验 envelope 与 Fixed Header 一致性（`parse_package_header` 严格校验），
+    两条解析面行为不一致。修复为 builder 归一化 + parser 强制一致（协议 §7.1）；
+  - 文档：测试运行指引、协议 payload_length 语义说明。
+- 验证：unit / integration 259 / security 97 / e2e 14 全绿，e2e ResourceWarning=0；
+  协议相关 184 项定向测试全绿；主仓库最终 `make quality` exit=0；audit fully-sealed。
+- 安全审查：静态 STRIDE 复核 PASS——payload_length 一致性修复为收紧解析面
+  （拒绝不一致 wire），测试补断言零行为变更；协议 wire 布局未变，无需
+  protocol-reviewer 主版本审查。
+- 决策者：用户；提出者：loop-engineer。回滚条件：任一质量门禁失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-4 第四轮逐文件深度审查与优化（用户指令）done
 
 - 提议：用户再次指令"逐个文件的检查语法、数据结构、算法及架构，评估是否合理，

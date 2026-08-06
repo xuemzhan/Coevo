@@ -925,3 +925,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第五轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-4） ----------
+  - id: OPTIMIZE-5
+    story: ENG-BASE
+    title: 第五轮逐文件深度审查：测试套件质量（弱断言/无断言/重复夹具）、CI 工作流与配置一致性，模块 README 补充测试策略说明
+    status: done
+    dependencies: [OPTIMIZE-4]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false
