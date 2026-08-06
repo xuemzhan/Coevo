@@ -340,6 +340,37 @@ class TestReplayDetector(unittest.TestCase):
         d = check_replay(candidate=cand, registry=[prior])
         self.assertEqual(ReplayOutcome.REPLAY_SEQUENCE, d.outcome)
 
+    def test_equal_sequence_across_scopes_is_accepted(self):
+        # OPTIMIZE-8: the strict-increment gate is scoped to
+        # (sender, recipient, project); the same sequence in a different
+        # scope must still be accepted (sequence spaces are per-recipient).
+        prior = ProcessedPackage(
+            package_id="p.1", package_digest="d.1",
+            sender_cert_id="S", recipient_cert_id="R",
+            project_id="PRJ", sequence_no=7,
+        )
+        for label, cand in (
+            (
+                "different-project",
+                ProcessedPackage(
+                    package_id="p.2", package_digest="d.2",
+                    sender_cert_id="S", recipient_cert_id="R",
+                    project_id="PRJ2", sequence_no=7,
+                ),
+            ),
+            (
+                "different-recipient",
+                ProcessedPackage(
+                    package_id="p.3", package_digest="d.3",
+                    sender_cert_id="S", recipient_cert_id="R2",
+                    project_id="PRJ", sequence_no=7,
+                ),
+            ),
+        ):
+            with self.subTest(scope=label):
+                d = check_replay(candidate=cand, registry=[prior])
+                self.assertEqual(ReplayOutcome.ACCEPT, d.outcome)
+
     def test_revoked_package_id_rejected(self):
         cand = ProcessedPackage(
             package_id="p.1", package_digest="d.1",

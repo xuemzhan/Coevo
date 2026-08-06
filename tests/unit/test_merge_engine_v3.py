@@ -268,6 +268,20 @@ class TestDecisionMakerAuthority(unittest.TestCase):
         self.assertIn("8.4", proposal.rejection_reason)
         self.assertIn(report.recipient_cert_id, proposal.rejection_reason)
 
+    def test_authorized_recipient_certs_empty_rejects_all(self):
+        # OPTIMIZE-8: an empty allow-list must reject every decision maker
+        # (fail-closed boundary; the recipient is never in the empty set).
+        report = _report(base_revision=_base_revision_for(self.baseline))
+        outcome = _import_outcome(report)
+        proposal = self.engine.merge(
+            import_outcome=outcome, report=report,
+            baseline=self.baseline, store=self.store,
+            decided_at="2026-08-20T01:00:00Z",
+            authorized_recipient_certs=frozenset(),
+        )
+        self.assertFalse(proposal.accepted)
+        self.assertIn("8.4", proposal.rejection_reason)
+
     def test_attacker_cannot_inject_decision_maker(self):
         # PROBE 14 regression: an attacker who controls the engine ctor
         # used to be able to set decision_maker=ANYONE-CAN-LIE and have

@@ -71,6 +71,8 @@ flowchart TD
 `identity` 与 `crypto` 为协议/合并/简报提供证书与密码能力；完整需求到测试映射
 见 [../../docs/traceability/requirements-test-matrix.md](../../docs/traceability/requirements-test-matrix.md)。
 
+English one-paragraph overview per module: [README.en.md](README.en.md)。
+
 ## 关键常量与闭集枚举索引
 
 | 模块 | 闭集枚举 / 关键常量 |
