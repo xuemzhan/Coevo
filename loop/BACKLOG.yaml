@@ -905,3 +905,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第三轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-2） ----------
+  - id: OPTIMIZE-3
+    story: ENG-BASE
+    title: 第三轮逐文件深度审查（语法/数据结构/算法/架构），补读剩余模块并修复发现的问题，模块 README 做准确性与性能/复杂度细化
+    status: done
+    dependencies: [OPTIMIZE-2]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false

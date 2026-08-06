@@ -1,5 +1,26 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-3 第三轮逐文件深度审查与优化（用户指令）done
+
+- 提议：用户再次指令"逐个文件的检查语法、数据结构、算法及架构，评估是否合理，
+  是否可以优化的地方，然后进行修复和优化，然后细化每一个模块的README文档"。
+- 审查结论（第三轮）：
+  - 补读剩余模块（cockpit 全量、progress_capture/supervision/merge models、
+    crypto contract/key_handle、model prompts/deepseek、backup_state/audit_seal/
+    run_cockpit/release_check 等脚本）——语法、数据结构、算法与架构未发现新缺陷；
+    复杂度热点集中在刻意穷举的失败关闭校验函数与演示脚本，属合理设计；
+  - 修复：`supervision/service.py` 冗余双 `_parse_utc`（一次校验一次取值 + 空
+    try/except）→ 单次解析；
+  - 护栏一致性：`.opencode/plugins/loop-guard.ts` 比 `.codex/hooks/loop-guard.mjs`
+    少拦截 `Invoke-RestMethod` 与 `(pnpm|yarn) (install|add)`，已对齐收紧；
+  - 文档：10 个关键模块补充"性能与复杂度"章节（依赖图/映射/评分/收据/watcher/
+    审计流/编排/简报/工作区/协议的复杂度特征与设计取舍）。
+- 验证：unit / integration 259 / security 97 / e2e 14 全绿，e2e ResourceWarning=0；
+  主仓库最终 `make quality` exit=0；audit fully-sealed。
+- 安全审查：静态 STRIDE 复核 PASS——护栏对齐为收紧（非放宽），冗余解析清理为
+  行为零变更；未触碰协议/密码/锁链。
+- 决策者：用户；提出者：loop-engineer。回滚条件：任一质量门禁失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-2 第二轮逐文件深度审查与优化（用户指令）done
 
 - 提议：用户再次指令"逐个文件的检查语法、数据结构、算法及架构，评估是否合理，
