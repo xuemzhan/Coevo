@@ -191,6 +191,8 @@ class TestImportTransaction(unittest.TestCase):
             base_revision="PRJ-R0001", current_revision="PRJ-R0001",
         )
         importer.check_base_revision(tx)  # no error
+        # OPTIMIZE-5: the check must not corrupt the transaction state.
+        self.assertNotEqual(ImportStep.ROLLED_BACK, tx.step)
 
     def test_check_base_revision_mismatch_rejected(self):
         importer = AtomicImporter()
@@ -208,6 +210,7 @@ class TestImportTransaction(unittest.TestCase):
             base_revision=None, current_revision=None,
         )
         importer.check_base_revision(tx)  # no error
+        self.assertNotEqual(ImportStep.ROLLED_BACK, tx.step)
 
     def test_audit_record_is_json_safe(self):
         import json

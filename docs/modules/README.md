@@ -14,6 +14,10 @@
 workspace/audit_governance 等）另含 **配置与错误语义** 小节，列出环境变量、
 HTTP 语义与异常类型。
 
+**测试运行**：每个模块文档的"测试覆盖"小节列出对应测试文件；单独验证某模块
+可运行 `python -m unittest <测试文件模块路径>`（如 `python -m unittest
+tests.unit.test_merge_engine`），全量门禁用 `make quality`（串行）。
+
 ## 模块依赖关系（数据流）
 
 ```mermaid

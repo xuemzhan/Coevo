@@ -53,6 +53,10 @@
 
 - 信封解析字节精确、长度双向一致，所有上限（64KiB 信封/1TiB 载荷硬上限）
   在解析前拒绝，防 DoS；
+- `payload_length` 语义为**整块密文尺寸**（header+nonce+ciphertext+tag）：
+  `build_encrypted_package` 与 `build_unsigned_package` 都会归一化 envelope，
+  `parse_package_bytes` 与 `parse_package_header` 均强制 envelope 与 Fixed Header
+  一致（两条解析面行为统一，2026-08-07 OPTIMIZE-5）；
 - 重放/重复检测按 (sender, recipient, project) 作用域线性扫描登记表；
 - 原子导入 7 步事务状态机，状态转换 O(1)。
 

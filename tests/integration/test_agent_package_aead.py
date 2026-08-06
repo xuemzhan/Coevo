@@ -411,7 +411,7 @@ class TestPackageBuilder(unittest.TestCase):
             project_id="PRJ",
             package_type="TASK_ASSIGNMENT",
             sequence_no=1,
-            payload_length=16,
+            payload_length=52,
             nonce_b64=nonce_b64,
         )
         key_block = build_key_transport_block(recipient_cert_id="R")
@@ -422,6 +422,25 @@ class TestPackageBuilder(unittest.TestCase):
         data = pkg.to_bytes()
         rebuilt = parse_package_bytes(data)
         decode_payload_header(rebuilt.payload_block.header)
+        # OPTIMIZE-5: the round trip must preserve envelope and payload facts;
+        # previously this test only asserted "no exception".
+        # payload_length is the full encrypted block size (header+nonce+
+        # ciphertext+tag), and fixed header must agree with the envelope.
+        self.assertEqual(
+            rebuilt.fixed_header.payload_length,
+            rebuilt.envelope.payload_length,
+        )
+        self.assertEqual(
+            len(rebuilt.payload_block.header)
+            + len(rebuilt.payload_block.nonce)
+            + len(rebuilt.payload_block.ciphertext)
+            + len(rebuilt.payload_block.tag),
+            rebuilt.fixed_header.payload_length,
+        )
+        self.assertEqual(nonce_b64, rebuilt.envelope.nonce)
+        self.assertEqual(12, len(rebuilt.payload_block.nonce))
+        self.assertEqual(16, len(rebuilt.payload_block.tag))
+        self.assertEqual(16, len(rebuilt.payload_block.ciphertext))
 
 
 if __name__ == "__main__":

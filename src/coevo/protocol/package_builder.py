@@ -198,6 +198,13 @@ def build_unsigned_package(
         + payload_block.ciphertext
         + payload_block.tag
     )
+    # OPTIMIZE-5: normalize the envelope's payload_length to the full
+    # encrypted block size (header+nonce+ciphertext+tag), exactly like
+    # build_encrypted_package does. Protocol § 7.1 requires the envelope
+    # and Fixed Header payload_length to agree; emitting an inconsistent
+    # package would be rejected by parse_package_header.
+    if envelope.payload_length != len(payload_bytes):
+        envelope = dataclasses.replace(envelope, payload_length=len(payload_bytes))
     fixed = FixedHeader(
         major=PROTOCOL_MAJOR,
         minor=PROTOCOL_MINOR,
@@ -247,6 +254,13 @@ def parse_package_bytes(data: bytes) -> BuiltPackage:
     env_bytes = data[cursor : cursor + fixed.header_length]
     cursor += fixed.header_length
     envelope = decode_envelope(env_bytes)
+    if envelope.payload_length != fixed.payload_length:
+        # OPTIMIZE-5: mirror the strict parse_package_header consistency rule
+        # (协议 § 7.1) so both parse surfaces reject the same wire.
+        raise AgentPackageError(
+            "envelope.payload_length disagrees with fixed header payload_length: "
+            f"envelope={envelope.payload_length} fixed={fixed.payload_length}"
+        )
     key_bytes = data[cursor : cursor + fixed.key_block_length]
     cursor += fixed.key_block_length
     if fixed.key_block_length > 0:
