@@ -451,7 +451,7 @@ class LocalProviderTests(unittest.TestCase):
                 captured,
             ),
         )
-        self.assertTrue(provider.name == "local_openai")
+        self.assertEqual("local_openai", provider.name)
         content = provider.complete(
             system="s", user="u", max_tokens=100, timeout_seconds=5
         )

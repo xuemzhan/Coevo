@@ -121,7 +121,7 @@ class WindowsCNGPrivateKeyTests(unittest.TestCase):
         store_response = _call_helper(payload_dict=payload)
         self.assertEqual(store_response.get("schema_version"), "1.0")
         reference = store_response["reference"]
-        self.assertEqual(reference["revoked"], False)
+        self.assertFalse(reference["revoked"])
         key_id = reference["key_id"]
         public_digest = reference["key_public_sha256"]
         self.assertTrue(key_id.startswith("CoevoPrivateKey-"))

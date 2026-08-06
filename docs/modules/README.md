@@ -59,6 +59,30 @@ flowchart TD
 `identity` 与 `crypto` 为协议/合并/简报提供证书与密码能力；完整需求到测试映射
 见 [../../docs/traceability/requirements-test-matrix.md](../../docs/traceability/requirements-test-matrix.md)。
 
+## 关键常量与闭集枚举索引
+
+| 模块 | 闭集枚举 / 关键常量 |
+|---|---|
+| `task_flow` | `StandardStage`（六阶段）、`SourceKind`（LITERAL/DERIVED/DEFAULTED/OVERRIDDEN）、`DEFAULT_MAPPING_RULES`（27 条） |
+| `task_decomposition` | `DependencyEdge.kind`（仅 `"fs"`）、交付物种类闭集（document/code/review/report/evidence） |
+| `talent` | `SkillTag`、`OverloadReason`（AT_CAPACITY/OVER_CAPACITY/WINDOW_CONFLICT）、评分权重（技能 2.0/资质 1.0/窗口 1.5/0.5/负荷 1.0） |
+| `orchestrator` | `AgentCapability`（11 类）、`AgentStatus`、`FailurePolicy`（RETRY/SKIP/ESCALATE_HUMAN）、`MVP_FIXED_CHAIN`（5 步） |
+| `protocol` | `PACKAGE_TYPES`（10 类）、`AgentPackageFlags`（4 位）、`CIPHER_SUITE`、`ReplayOutcome`、`ImportStep`（7 步事务） |
+| `workspace` | `_SAFE_ID` 字母表、`DEFAULT_QUARANTINE_ROOT`/`DEFAULT_WORKSPACE_ROOT` |
+| `cockpit` | `CockpitRoute`（7 路由）、`CockpitResponseStatus`（6 状态）、`DEFAULT_ALLOWED_HOSTS`（环回白名单） |
+| `progress_capture` | `EvidenceKind`（4 类，排除 FILE_MTIME_ONLY）、`ProgressItemKind`、`ProgressItemStatus` |
+| `report` | `ReportStatus`（4 态）、`DEFAULT_REPORT_PACKAGE_TYPE`（RESULT_SUBMISSION） |
+| `merge` | `MergeDecision`（ACCEPT/REJECT/HOLD/MANUAL）、`MERGEABLE_PACKAGE_TYPES`、`MISSING` 哨兵 |
+| `risk` | `RiskKind`、`SourceKind`、可配置阈值（延期/沉默/证据不足） |
+| `supervision` | `SUPERVISABLE_RISK_KINDS`、`COORDINATION_RECOMMENDED_KINDS`、`EscalationLevel`、`MeetingConclusionKind` |
+| `decision_brief` | `BriefType`（STAGE/PERIODIC/RISK_TOPIC）、输入/模板硬上限常量 |
+| `knowledge_base` | `KnowledgeSourceKind`、`ReusableTemplateKind`、`ReviewDecisionKind`、密级排序 |
+| `audit_governance` | `InterceptionReason`（5 类）、`AuditEventSource`/`AuditEventResult`、查询 limit 硬上限 |
+| `identity` | 角色码闭集（project_owner/project_member）、`HANDLE_PREFIX`、算法 OID 校验 |
+| `crypto` | `ProviderScope`（MVP_PROTOTYPE/APPROVED_PRODUCT）、KEK 常量 |
+| `model` | provider 闭集（offline/deepseek/local_openai）、`MAX_RESPONSE_BYTES`（4MiB） |
+| `config` | `LOOPBACK_HOST`、`VALID_LOG_LEVELS` |
+
 | 包 | 文档 | 故事 |
 |---|---|---|
 | `app/` | [app.md](app.md) | 应用组合根（演示流水线） |
