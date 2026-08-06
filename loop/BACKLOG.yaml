@@ -935,3 +935,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第六轮逐文件深度审查与优化（2026-08-07 用户指令"继续"，延续 OPTIMIZE-5） ----------
+  - id: OPTIMIZE-6
+    story: ENG-BASE
+    title: 第六轮逐文件深度审查：测试断言语义精确化（assertTrue(x==y)/assertTrue(isinstance) 等改精确断言），文档补充关键常量与枚举索引
+    status: done
+    dependencies: [OPTIMIZE-5]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false

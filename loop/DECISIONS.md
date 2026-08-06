@@ -1,5 +1,21 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-6 第六轮逐文件深度审查与优化（用户指令"继续"）done
+
+- 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
+  细化每一个模块的README文档"。
+- 审查结论（第六轮，测试断言语义）：
+  - 全仓扫描 assertTrue(x==y) / assertTrue(isinstance) / assertEqual(x,False) /
+    assertTrue(not) 等弱断言模式——套件整体健康，仅 2 处可精确化：
+    `test_model_provider.py` 与 `private_key_windows_store_test.py`；
+  - 其余 assertTrue(all/any(...)) 为集合谓词断言，属合理用法，不改。
+- 修复：2 处断言语义精确化（assertEqual / assertFalse，失败信息更清晰）。
+- 文档：模块文档索引新增"关键常量与闭集枚举索引"总览表（18 个模块）。
+- 验证：unit / integration 259 / security 97 / e2e 14 全绿，e2e ResourceWarning=0；
+  主仓库最终 `make quality` exit=0；audit fully-sealed。
+- 安全审查：静态 STRIDE 复核 PASS——断言语义精确化零行为变更，文档无安全影响。
+- 决策者：用户；提出者：loop-engineer。回滚条件：任一质量门禁失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-5 第五轮逐文件深度审查与优化（用户指令"继续"）done
 
 - 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
