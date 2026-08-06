@@ -11,12 +11,8 @@ configured ``api_key_env``), external-egress approval required.
 from __future__ import annotations
 
 import os
-from typing import Callable
 
-from .openai_compatible import OpenAICompatibleProvider
-
-
-HttpPost = Callable[[str, bytes, dict[str, str], float], tuple[int, bytes]]
+from .openai_compatible import HttpPost, OpenAICompatibleProvider
 
 
 class DeepSeekProvider(OpenAICompatibleProvider):

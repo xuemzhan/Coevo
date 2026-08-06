@@ -14,6 +14,47 @@
 workspace/audit_governance 等）另含 **配置与错误语义** 小节，列出环境变量、
 HTTP 语义与异常类型。
 
+## 模块依赖关系（数据流）
+
+```mermaid
+flowchart TD
+  APP[app/ 组合根] --> ORC[orchestrator/ 运行中枢]
+  ORC --> TF[task_flow/ US-1]
+  ORC --> TD[task_decomposition/ US-2]
+  ORC --> TL[talent/ US-3]
+  ORC --> PROTO[protocol/ US-5]
+  TD --> TF
+  TL --> TD
+  PROTO --> ID[identity/ US-0]
+  PROTO --> CRY[crypto/ 国密]
+  WS[workspace/ US-6] --> PROTO
+  PC[progress_capture/ US-8] --> WS
+  RP[report/ US-9] --> PC
+  RP --> PROTO
+  MG[merge/ US-10] --> RP
+  MG --> TD
+  RK[risk/ US-11] --> MG
+  SP[supervision/ US-12] --> RK
+  DB[decision_brief/ US-13] --> RK
+  KB[knowledge_base/ US-14] --> MG
+  KB --> RK
+  KB --> DB
+  KB --> PC
+  KB --> SP
+  CP[cockpit/ US-7] --> WS
+  CP --> PROTO
+  APP --> CP
+  APP --> KB
+  APP --> AG[audit_governance/ US-15]
+  AG -.to_audit_record.-> 各领域模块
+  MODEL[model/ 适配层] -.建议草稿.-> TD
+  BENCH[benchmarks/] -.探针.-> 被测模块
+```
+
+说明：`audit_governance` 与 `model` 为横切依赖（审计投影 / 模型适配），
+`identity` 与 `crypto` 为协议/合并/简报提供证书与密码能力；完整需求到测试映射
+见 [../../docs/traceability/requirements-test-matrix.md](../../docs/traceability/requirements-test-matrix.md)。
+
 | 包 | 文档 | 故事 |
 |---|---|---|
 | `app/` | [app.md](app.md) | 应用组合根（演示流水线） |

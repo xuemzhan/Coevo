@@ -1,6 +1,6 @@
 """Validate every code/test path for active traceability rows."""
 from __future__ import annotations
-import argparse, json, os, re, sys
+import argparse, json, os, re
 from pathlib import Path
 ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1])); MATRIX=ROOT/"docs/traceability/requirements-test-matrix.md"
 ACTIVE={"in-progress","done"}
