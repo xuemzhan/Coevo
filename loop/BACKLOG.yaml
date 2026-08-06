@@ -985,3 +985,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第十一轮逐文件深度审查与优化（2026-08-07 用户指令"继续"，延续 OPTIMIZE-10） ----------
+  - id: OPTIMIZE-11
+    story: ENG-BASE
+    title: 第十一轮逐文件深度审查：补 6 处缺失返回类型注解、核查锁定脚本 check_loop_stop 测试覆盖
+    status: done
+    dependencies: [OPTIMIZE-10]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false

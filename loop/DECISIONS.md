@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-11 第十一轮逐文件深度审查与优化（用户指令"继续"）done
+
+- 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
+  细化每一个模块的README文档"。
+- 审查结论（第十一轮）：
+  - 锁定脚本 `check_loop_stop.py` 此前零测试；发现真实健壮性缺陷——STATE.json
+    畸形或非对象时 `json.loads` 直接崩溃，而非按失败关闭返回阻断码；
+  - 修复：畸形/非对象状态 → 打印原因并返回 20；新增 6 项退出码测试；
+  - 补 6 处缺失返回类型注解（锁/回执构造器/JSON 转换/guard/replace）；
+  - 锁链同步（check_loop_stop 哈希 → TSV → toolchain-lock → make.cs），
+    dev-environment 回归通过。
+- 验证：unit（+6 新测试）/ integration 261 / security 97 / e2e 14 全绿，
+  e2e ResourceWarning=0；主仓库最终 `make quality` exit=0；audit fully-sealed。
+- 安全审查：静态 STRIDE 复核 PASS——畸形状态失败关闭为收紧、类型注解零行为
+  变更、锁链一致。
+- 决策者：用户；提出者：loop-engineer。回滚条件：任一质量门禁失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-10 第十轮逐文件深度审查与优化（用户指令）done
 
 - 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
