@@ -47,7 +47,6 @@ from .models import (
     OverloadReason,
     Recommendation,
     RecommendationReason,
-    SkillTag,
     Talent,
     TalentPool,
     TalentValidationError,

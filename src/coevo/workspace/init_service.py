@@ -57,10 +57,8 @@ from .models import (
     WorkspaceInitValidationError,
     WorkspacePaths,
     WorkspaceRegistry,
-    WorkspaceRole,
 )
 from .paths import (
-    WorkspacePath,
     WorkspacePathError,
     WorkspacePaths as _Paths,  # re-export
     build_paths,

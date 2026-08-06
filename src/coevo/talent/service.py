@@ -30,11 +30,8 @@ import dataclasses
 from typing import Any, Iterable
 
 from .models import (
-    AvailabilityWindow,
-    OverloadReason,
     Recommendation,
     TalentPool,
-    TalentValidationError,
 )
 from .recommender import TaskRequirement, recommend
 

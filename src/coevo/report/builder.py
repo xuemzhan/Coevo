@@ -37,31 +37,21 @@ Non-goals
 
 from __future__ import annotations
 
-import base64
 from dataclasses import dataclass
 
 from src.coevo.protocol import (
     BuiltPackage,
     EnvelopeHeader,
-    KeyTransportBlock,
     PayloadBlock,
-    SignatureRecord,
     build_key_transport_block,
     build_unsigned_package,
-    check_replay,
-    ProcessedPackage,
-    ReplayDecision,
-    ReplayOutcome,
 )
 
 from src.coevo.task_decomposition import ProjectBaseline
 
 from .models import (
-    ReportArtifact,
     ReportManifest,
-    ReportManifestError,
     ReportManifestValidationError,
-    ReportStatus,
 )
 
 
@@ -314,7 +304,7 @@ def _one_year_after(iso_z: str) -> str:
     expiry value. An unparseable timestamp is an invariant
     violation, so it now raises :class:`ReportBuilderError`.
     """
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
     try:
         base = datetime.fromisoformat(iso_z.replace("Z", "+00:00"))
     except (TypeError, ValueError) as exc:

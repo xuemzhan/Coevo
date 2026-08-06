@@ -282,6 +282,60 @@ class HealthCheckTests(unittest.TestCase):
             for expected in ("backup", "pin"):
                 self.assertIn(expected, names)
 
+    def _audit_result(self, status: str, returncode: int = 0) -> subprocess.CompletedProcess[str]:
+        payload = {"status": status} if status else {}
+        return subprocess.CompletedProcess(
+            ["python", "audit_seal.py", "verify"], returncode,
+            stdout=json.dumps(payload), stderr="" if returncode == 0 else "verify failed",
+        )
+
+    def test_check_audit_fully_sealed_ok(self):
+        # OPTIMIZE-1: check_audit must use --allow-tail so an unsealed tail
+        # is degraded, never critical (matching the documented semantics).
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(health.subprocess, "run", return_value=self._audit_result("fully-sealed")) as run:
+                result = health.check_audit(Path(tmp))
+            self.assertTrue(result["ok"])
+            self.assertEqual("ok", result["level"])
+            args = run.call_args.args[0]
+            self.assertIn("--allow-tail", args)
+
+    def test_check_audit_unsealed_tail_degraded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(
+                health.subprocess,
+                "run",
+                return_value=self._audit_result("valid-prefix-with-unsealed-tail"),
+            ):
+                result = health.check_audit(Path(tmp))
+            self.assertTrue(result["ok"])
+            # _check collapses ok=True to level "ok"; the degraded posture is
+            # carried in the detail text so build_report never sees critical.
+            self.assertEqual("ok", result["level"])
+            self.assertIn("unsealed tail", result["detail"])
+
+    def test_check_audit_failure_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(
+                health.subprocess,
+                "run",
+                return_value=self._audit_result("", returncode=14),
+            ):
+                result = health.check_audit(Path(tmp))
+            self.assertFalse(result["ok"])
+            self.assertEqual("critical", result["level"])
+
+    def test_check_audit_timeout_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(
+                health.subprocess,
+                "run",
+                side_effect=subprocess.TimeoutExpired(cmd="verify", timeout=60),
+            ):
+                result = health.check_audit(Path(tmp))
+            self.assertFalse(result["ok"])
+            self.assertEqual("critical", result["level"])
+
 
 class AutostartHelperTests(unittest.TestCase):
     def _run(self, *args: str) -> subprocess.CompletedProcess[str]:

@@ -19,7 +19,6 @@ Design notes
 # US-2 任务分解领域模型：任务/工作包/里程碑/依赖/基线/覆盖。
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass, field, replace
 
 

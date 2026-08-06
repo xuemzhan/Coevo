@@ -63,7 +63,6 @@ from __future__ import annotations
 import dataclasses
 import enum
 import hashlib
-import json
 import re
 from typing import Mapping
 

@@ -119,7 +119,11 @@ def check_audit(repo_root: Path, python: str | None = None) -> dict[str, Any]:
     script = repo_root / "scripts" / "audit_seal.py"
     try:
         result = subprocess.run(
-            [interpreter, str(script), "verify"],
+            # --allow-tail: an unsealed tail (e.g. after loop_state/audit
+            # writes that precede the next gate seal) is a degraded posture,
+            # not a critical failure; genuine tamper still surfaces as an
+            # error and stays critical. Matches the lint gate semantics.
+            [interpreter, str(script), "verify", "--allow-tail"],
             cwd=repo_root,
             capture_output=True,
             text=True,

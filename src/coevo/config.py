@@ -21,7 +21,6 @@ silently falling back to insecure defaults.
 # 生产运行配置（stdlib-only）：AppConfig 校验并冻结，失败关闭。
 from __future__ import annotations
 
-import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path

@@ -36,7 +36,6 @@ from typing import Any, Mapping
 
 from .models import (
     Node,
-    Override,
     ProcessFlow,
     ProcessFlowParseError,
     Role,

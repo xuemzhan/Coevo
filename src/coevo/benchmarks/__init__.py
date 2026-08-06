@@ -15,10 +15,6 @@ The harness is pure and small; the actual measurements live in
 
 from __future__ import annotations
 
-import time
-from dataclasses import dataclass
-from typing import Any, Callable
-
 from .models import (SCALABILITY_PROBES, SLA_TARGETS, SlaTarget)
 
 from .harness import (BenchmarkResult, measure, report)
