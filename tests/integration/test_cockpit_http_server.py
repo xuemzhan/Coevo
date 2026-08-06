@@ -143,7 +143,9 @@ class CockpitHttpServerTests(unittest.TestCase):
         self.assertEqual(401, status)
 
     def test_api_health_returns_in_process_status(self):
-        status, _, body = _request(f"{self.base}/api/health", token=self.token)
+        status, headers, body = _request(
+            f"{self.base}/api/health", token=self.token
+        )
         self.assertEqual(200, status)
         data = json.loads(body)
         self.assertTrue(data["service"])
@@ -164,6 +166,10 @@ class CockpitHttpServerTests(unittest.TestCase):
         self.assertGreaterEqual(data["session_count"], 1)
         self.assertGreaterEqual(data["probe_count"], 0)
         self.assertGreaterEqual(data["rejected_count"], 0)
+        # API payloads stay uncacheable and never leak the URL token via
+        # the browser referrer (same hardening as the index response).
+        self.assertEqual("no-store", headers.get("Cache-Control"))
+        self.assertEqual("no-referrer", headers.get("Referrer-Policy"))
 
     def test_healthz_probes_counted_separately_from_requests(self):
         for _ in range(2):
@@ -218,6 +224,12 @@ class CockpitHttpServerTests(unittest.TestCase):
             # REVIEW-FIX-3 (L-2): text assets must carry an explicit charset;
             # non-text assets must not gain a charset parameter.
             self.assertIn("charset=utf-8", headers.get("Content-Type", ""))
+            # Static assets opt into a bounded public cache but still never
+            # leak their URL through the browser referrer.
+            self.assertEqual(
+                "public, max-age=300", headers.get("Cache-Control"), path
+            )
+            self.assertEqual("no-referrer", headers.get("Referrer-Policy"), path)
             self.assertTrue(body)
 
     def test_static_traversal_is_blocked(self):

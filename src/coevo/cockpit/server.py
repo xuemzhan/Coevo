@@ -742,11 +742,22 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         *,
         extra_headers: dict[str, str] | None = None,
     ) -> None:
+        headers: dict[str, str] = {
+            "Content-Type": content_type,
+            "Content-Length": str(len(body)),
+            "X-Content-Type-Options": "nosniff",
+            # Default hardening: session-bearing responses must never be
+            # cached and no response should leak its URL through the
+            # browser referrer. extra_headers may override a key (e.g.
+            # static assets opt into a public cache policy) but may not
+            # remove the defaults it does not mention.
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer",
+        }
+        if extra_headers:
+            headers.update(extra_headers)
         self.send_response(code)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("X-Content-Type-Options", "nosniff")
-        for key, value in (extra_headers or {}).items():
+        for key, value in headers.items():
             self.send_header(key, value)
         self.end_headers()
         if body:
