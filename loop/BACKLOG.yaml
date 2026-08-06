@@ -955,3 +955,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第八轮逐文件深度审查与优化（2026-08-07 用户指令"继续"，延续 OPTIMIZE-7） ----------
+  - id: OPTIMIZE-8
+    story: ENG-BASE
+    title: 第八轮逐文件深度审查：重放收紧的跨作用域回归测试、merge 边界分支测试核查、文档补英文模块总览文件
+    status: done
+    dependencies: [OPTIMIZE-7]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false
