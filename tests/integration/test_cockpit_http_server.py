@@ -87,7 +87,10 @@ def _request(url, *, token="", headers=None, method="GET", body=None):
         with urllib.request.urlopen(request, timeout=20) as response:
             return response.status, dict(response.headers), response.read()
     except urllib.error.HTTPError as exc:
-        return exc.code, dict(exc.headers), exc.read()
+        try:
+            return exc.code, dict(exc.headers), exc.read()
+        finally:
+            exc.close()
 
 
 def _raw_request(port: int, payload: bytes) -> bytes:
@@ -182,6 +185,10 @@ class CockpitHttpServerTests(unittest.TestCase):
         self.assertIn(b"Coevo Cockpit", body)
         self.assertIn("Content-Security-Policy", headers)
         self.assertIn("default-src 'self'", headers["Content-Security-Policy"])
+        # REVIEW-FIX-3 (L-3): the index response must never be cached or
+        # leak the URL token via the browser referrer/history.
+        self.assertEqual("no-store", headers.get("Cache-Control"))
+        self.assertEqual("no-referrer", headers.get("Referrer-Policy"))
 
     def test_bearer_authorization_header_is_accepted(self):
         status, _, _ = _request(
@@ -208,6 +215,9 @@ class CockpitHttpServerTests(unittest.TestCase):
             status, headers, body = _request(f"{self.base}{path}", token=self.token)
             self.assertEqual(200, status, path)
             self.assertIn(expected, headers.get("Content-Type", ""))
+            # REVIEW-FIX-3 (L-2): text assets must carry an explicit charset;
+            # non-text assets must not gain a charset parameter.
+            self.assertIn("charset=utf-8", headers.get("Content-Type", ""))
             self.assertTrue(body)
 
     def test_static_traversal_is_blocked(self):

@@ -7,7 +7,7 @@
 
 | 文件 | 保留策略 | 触发 |
 |---|---|---|
-| `loop/VERIFICATION.md` | 最近 60 个门禁条目（或 ≤1MB） | 旧条目按 30 天归档 |
+| `loop/VERIFICATION.md` | 最近 30 个门禁条目（或 ≤500KB） | 旧条目按 30 天归档 |
 | `loop/DECISIONS.md` | 最近 20 个决策章节（或 ≤500KB） | 旧章节按 90 天归档 |
 | `loop/tool-audit.jsonl` | 最近 2000 行（或 ≤5MB） | 旧行按 30 天归档 |
 

@@ -15,6 +15,7 @@ from src.coevo.cockpit import (
     SingleInstanceLock,
     resolve_static_path,
 )
+from src.coevo.cockpit.server import _process_exists
 
 
 T0 = "2026-08-22T00:00:00Z"
@@ -78,6 +79,16 @@ class CockpitHttpConfigTests(unittest.TestCase):
         for value in (0, -1, True, "5"):
             with self.assertRaises(CockpitValidationError):
                 CockpitHttpConfig(state_snapshot_interval_sec=value)
+
+    def test_invalid_lock_heartbeat_interval_is_rejected(self):
+        for value in (0, -1, True, "5"):
+            with self.assertRaises(CockpitValidationError):
+                CockpitHttpConfig(lock_heartbeat_interval_sec=value)
+
+    def test_lock_heartbeat_interval_default_and_none(self):
+        self.assertEqual(60.0, CockpitHttpConfig().lock_heartbeat_interval_sec)
+        config = CockpitHttpConfig(lock_heartbeat_interval_sec=None)
+        self.assertIsNone(config.lock_heartbeat_interval_sec)
 
     def test_hardening_defaults(self):
         config = CockpitHttpConfig()
@@ -184,7 +195,9 @@ class SingleInstanceLockTests(unittest.TestCase):
     def test_stale_lock_is_recovered(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "cockpit.lock"
-            path.write_text(str(os.getpid()), encoding="ascii")
+            # A pid that is no longer running: recovery must proceed once
+            # both the mtime is stale AND the recorded owner is dead.
+            path.write_text(str(999_999_999), encoding="ascii")
             old = time.time() - SingleInstanceLock.STALE_AFTER_SECONDS - 60
             os.utime(path, (old, old))
             lock = SingleInstanceLock(path)
@@ -193,6 +206,43 @@ class SingleInstanceLockTests(unittest.TestCase):
                 self.assertTrue(path.exists())
             finally:
                 lock.release()
+            self.assertFalse(path.exists())
+
+    def test_stale_lock_with_live_pid_is_not_reclaimed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cockpit.lock"
+            path.write_text(str(os.getpid()), encoding="ascii")
+            old = time.time() - SingleInstanceLock.STALE_AFTER_SECONDS - 60
+            os.utime(path, (old, old))
+            lock = SingleInstanceLock(path)
+            with self.assertRaises(CockpitValidationError):
+                lock.acquire()
+            self.assertTrue(path.exists())
+
+    def test_process_exists_probe(self):
+        # The current test process is alive; a far-out pid is not.
+        self.assertTrue(_process_exists(os.getpid()))
+        self.assertFalse(_process_exists(999_999_999))
+        self.assertFalse(_process_exists(0))
+        self.assertFalse(_process_exists(-1))
+
+    def test_heartbeat_refreshes_lock_mtime(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cockpit.lock"
+            lock = SingleInstanceLock(path)
+            lock.acquire()
+            try:
+                old = time.time() - SingleInstanceLock.STALE_AFTER_SECONDS - 60
+                os.utime(path, (old, old))
+                lock.refresh()
+                self.assertGreater(path.stat().st_mtime, old + 1)
+            finally:
+                lock.release()
+
+    def test_refresh_without_acquire_is_noop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cockpit.lock"
+            SingleInstanceLock(path).refresh()
             self.assertFalse(path.exists())
 
     def test_context_manager(self):

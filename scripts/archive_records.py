@@ -20,7 +20,7 @@ from src.coevo.records_archive import archive_plan  # noqa: E402
 
 
 POLICY = {
-    "verification": {"keep_recent": 60, "min_age_days": 30, "size": 1_000_000},
+    "verification": {"keep_recent": 30, "min_age_days": 30, "size": 500_000},
     "decisions": {"keep_recent": 20, "min_age_days": 90, "size": 500_000},
     "audit": {"keep_recent": 2000, "min_age_days": 30, "size": 5_000_000},
 }

@@ -190,6 +190,46 @@ class SecretScanTests(unittest.TestCase):
             findings = secret_scan.scan(root)
             self.assertEqual([], findings)
 
+    def test_pgp_private_key_in_loop_records_allowed(self):
+        # REVIEW-FIX-3: loop/ records quote gate output that legitimately
+        # contains PGP fixture text; it must not fail the real-repo scan.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            loop = root / "loop"
+            loop.mkdir()
+            (loop / "VERIFICATION.md").write_text(
+                "SECRET pgp_private_key: loop/DECISIONS.md:4091 "
+                "(-----BEGIN PGP PRIVATE KEY BLOCK-----)\n",
+                encoding="utf-8",
+            )
+            findings = secret_scan.scan_file(root, "loop/VERIFICATION.md")
+            self.assertEqual([], findings)
+
+    def test_pem_private_key_in_loop_records_allowed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            loop = root / "loop"
+            loop.mkdir()
+            (loop / "DECISIONS.md").write_text(_fake_pem(), encoding="utf-8")
+            findings = secret_scan.scan_file(root, "loop/DECISIONS.md")
+            self.assertEqual([], findings)
+
+    def test_token_pattern_still_applies_in_loop_records(self):
+        # Token-style secrets are never exempt, even inside loop/ records.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            loop = root / "loop"
+            loop.mkdir()
+            (loop / "VERIFICATION.md").write_text(
+                "quoted output token = " + repr(_fake_token()) + "\n",
+                encoding="utf-8",
+            )
+            findings = secret_scan.scan_file(root, "loop/VERIFICATION.md")
+            self.assertTrue(
+                any(item["pattern"] == "github_pat" for item in findings),
+                findings,
+            )
+
     def test_key_assignment_detected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -1,10 +1,17 @@
-"""Zero-download, fail-closed quality gate with a signed final audit seal."""
+"""Zero-download, fail-closed quality gate with a signed final audit seal.
+
+The gate is serialized by an exclusive lock (``loop/.quality-gate.lock``):
+a concurrent invocation waits briefly for the lock and then fails with a
+clear error instead of interleaving VERIFICATION.md writes or racing the
+audit seal. Run one gate at a time (the test suites are not parallel-safe).
+"""
 from __future__ import annotations
 import argparse, datetime as dt, hashlib, json, os, subprocess, sys
 from pathlib import Path
-from audit_log import append_record
+from audit_log import append_record, exclusive_lock
 from audit_seal import seal, verify_seal
 ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1])); VERIFICATION=ROOT/"loop/VERIFICATION.md"; os.environ.setdefault("COEVO_REPO_ROOT",str(ROOT))
+GATE_LOCK=ROOT/"loop/.quality-gate.lock"
 CONTROL=os.environ.get("COEVO_CONTROL_ARCHIVE",str(ROOT/".tools"/"control"/"control.pyz"))
 def control(module,*args): return [sys.executable,CONTROL,module,*args]
 TARGETS={
@@ -16,6 +23,16 @@ TARGETS={
 def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
 def fingerprint(argvs): return hashlib.sha256(json.dumps(argvs,separators=(",",":")).encode()).hexdigest()[:16]
 def run(target):
+    try:
+        with exclusive_lock(GATE_LOCK):
+            return _run_locked(target)
+    except OSError as exc:
+        raise RuntimeError(
+            "quality gate is already running in another process "
+            f"({GATE_LOCK}): {exc}"
+        ) from exc
+
+def _run_locked(target):
     argvs=commands(target); fp=fingerprint(argvs); output=[]; rc=0
     try:
         seal()
@@ -49,5 +66,10 @@ def run(target):
     with VERIFICATION.open("a",encoding="utf-8") as stream: stream.write(f"\n## {ts} — target=`{target}` fingerprint=`{fp}`\n- exit_code: `{rc}`\n```text\n{''.join(output)[-8000:]}\n```\n")
     print(json.dumps({"ok":rc==0,"exit_code":rc,"fingerprint":fp})); return rc
 def main():
-    parser=argparse.ArgumentParser(); parser.add_argument("--target",required=True,choices=[*TARGETS,"quality"]); return run(parser.parse_args().target)
+    parser=argparse.ArgumentParser(); parser.add_argument("--target",required=True,choices=[*TARGETS,"quality"])
+    try:
+        return run(parser.parse_args().target)
+    except RuntimeError as exc:
+        print(json.dumps({"ok":False,"exit_code":15,"error":str(exc)},ensure_ascii=True))
+        return 15
 if __name__=="__main__": raise SystemExit(main())

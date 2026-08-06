@@ -21,6 +21,10 @@ Allow-listing (kept deliberately narrow):
 * ``tests/`` files may contain fake PEM blocks and fake key-like
   assignments (negative-test fixtures); token-style patterns
   (``AKIA``/``ghp_``/``sk-``/``xox``) still apply everywhere.
+* ``loop/`` record files (VERIFICATION.md / DECISIONS.md / BACKLOG.yaml)
+  legitimately quote gate output and test fixtures, so the same
+  PEM / PGP / key-assignment fixture patterns are allowed there;
+  token-style patterns still apply everywhere.
 * the scanner skips its own source (it necessarily contains the pattern
   literals).
 
@@ -49,6 +53,7 @@ _TESTS_ALLOWED_PATTERNS: Final[frozenset[str]] = frozenset({
     "pgp_private_key",
     "key_assignment",
 })
+_FIXTURE_ALLOWED_PREFIXES: Final[tuple[str, ...]] = ("tests/", "loop/")
 _SELF_SKIP: Final[frozenset[str]] = frozenset({"scripts/secret_scan.py"})
 
 _PATTERNS: Final[dict[str, re.Pattern[str]]] = {
@@ -124,7 +129,7 @@ def scan_file(root: Path, relative: str) -> list[dict[str, Any]]:
     for name, pattern in _PATTERNS.items():
         if (
             name in _TESTS_ALLOWED_PATTERNS
-            and relative.startswith("tests/")
+            and relative.startswith(_FIXTURE_ALLOWED_PREFIXES)
         ):
             continue
         for match in pattern.finditer(text):

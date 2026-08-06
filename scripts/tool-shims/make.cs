@@ -11,7 +11,7 @@ using System.Text;
 internal static class CoevoMake
 {
     private const string RuntimeInventorySha256 = "829b9f4c69430fe1ed18573bedd828552eca242f8c5d128324ad2b1a844534c2";
-    private const string ScriptInventorySha256 = "7def486b847dba71aa8c7ed979fb22e124729889d005ed0736a765334a59df55";
+    private const string ScriptInventorySha256 = "d89434fba11454e7433e752d739a474194211e87a197da5fc8b126cafba80983";
     private const string ControlArchiveSha256 = "c2e06563ca38b22386d094317fb17074b61a0592f0d5f3d4adb69bba0fe058d0";
     private const string AuditSignatureSha256 = "f558826f8f809591beee788094480c9af1ec7320549eb0a4a8d9b78fdf9a13d0";
 

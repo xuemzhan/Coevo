@@ -122,6 +122,10 @@ class CockpitLauncherE2ETest(unittest.TestCase):
                 if process.poll() is None:
                     process.kill()
                     process.wait(timeout=10)
+                if process.stdout is not None:
+                    process.stdout.close()
+                if process.stderr is not None:
+                    process.stderr.close()
 
     def test_print_token_issues_usable_session(self):
         if not hasattr(signal, "CTRL_BREAK_EVENT"):
@@ -191,6 +195,10 @@ class CockpitLauncherE2ETest(unittest.TestCase):
                 if process.poll() is None:
                     process.kill()
                     process.wait(timeout=10)
+                if process.stdout is not None:
+                    process.stdout.close()
+                if process.stderr is not None:
+                    process.stderr.close()
 
 
 if __name__ == "__main__":

@@ -133,6 +133,72 @@ def _hostname_of(value: str) -> str:
     return hostname.lower() if isinstance(hostname, str) else ""
 
 
+def _process_exists(pid: int) -> bool:
+    """Return whether a process with the given pid is still running.
+
+    Windows probes with OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION) plus
+    GetExitCodeProcess (STILL_ACTIVE); POSIX uses ``os.kill(pid, 0)``. Any
+    probe failure is treated as "not running" so a dead pid never blocks
+    stale-lock recovery.
+    """
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        return _windows_process_exists(pid)
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
+def _windows_process_exists(pid: int) -> bool:
+    """Windows liveness probe with correct 64-bit HANDLE usage.
+
+    ``ctypes.windll`` defaults to a 32-bit ``c_int`` return type, which
+    truncates 64-bit HANDLE values; that would make a valid handle look
+    like a failure (or worse, close an unrelated handle). Declare the
+    signatures explicitly and check ``GetExitCodeProcess`` == STILL_ACTIVE
+    so an exited-but-not-yet-reaped process is reported as dead.
+    """
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        STILL_ACTIVE = 259
+        kernel32.OpenProcess.restype = wintypes.HANDLE
+        kernel32.OpenProcess.argtypes = (
+            wintypes.DWORD,
+            wintypes.BOOL,
+            wintypes.DWORD,
+        )
+        kernel32.GetExitCodeProcess.restype = wintypes.BOOL
+        kernel32.GetExitCodeProcess.argtypes = (
+            wintypes.HANDLE,
+            ctypes.POINTER(wintypes.DWORD),
+        )
+        kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+        handle = kernel32.OpenProcess(
+            PROCESS_QUERY_LIMITED_INFORMATION, False, pid
+        )
+        if not handle:
+            return False
+        try:
+            exit_code = wintypes.DWORD()
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+                return False
+            return exit_code.value == STILL_ACTIVE
+        finally:
+            kernel32.CloseHandle(handle)
+    except Exception:  # noqa: BLE001 - probe is best-effort, fail to "dead"
+        return False
+
 
 # ---------------------------------------------------------------------------
 # HTTP config + single instance lock
@@ -155,6 +221,7 @@ class CockpitHttpConfig:
     log_path: Path | None = None
     max_concurrent_requests: int = 16
     state_snapshot_interval_sec: float | None = 300.0
+    lock_heartbeat_interval_sec: float | None = 60.0
 
     def __post_init__(self) -> None:
         if not isinstance(self.bind_host, str) or self.bind_host != LOOPBACK_HOST:
@@ -220,11 +287,26 @@ class CockpitHttpConfig:
             raise CockpitValidationError(
                 "state_snapshot_interval_sec must be positive or None"
             )
+        heartbeat = self.lock_heartbeat_interval_sec
+        if heartbeat is not None and (
+            not isinstance(heartbeat, (int, float))
+            or isinstance(heartbeat, bool)
+            or heartbeat <= 0
+        ):
+            raise CockpitValidationError(
+                "lock_heartbeat_interval_sec must be positive or None"
+            )
 
 
 
 class SingleInstanceLock:
-    """Exclusive-create lock file (Windows-safe) for cockpit single instance."""
+    """Exclusive-create lock file (Windows-safe) for cockpit single instance.
+
+    The owning process refreshes the lock mtime as a heartbeat while it is
+    alive, and stale recovery additionally verifies the recorded pid is no
+    longer running. Together these prevent a long-lived cockpit from being
+    stolen by a second launcher that merely sees an old lock mtime.
+    """
 
     STALE_AFTER_SECONDS: int = 600
 
@@ -265,18 +347,41 @@ class SingleInstanceLock:
             return False
 
     def _recover_stale(self) -> bool:
-        """Take over a lock file left by a crashed process (mtime heuristic)."""
+        """Take over a lock file left by a crashed process.
+
+        Requires both an expired mtime AND a recorded owner pid that is no
+        longer running, so an alive process is never evicted by age alone.
+        """
         try:
             age_seconds = time.time() - self._path.stat().st_mtime
         except OSError:
             return False
         if age_seconds < self.STALE_AFTER_SECONDS:
             return False
+        if self._owner_alive():
+            return False
         try:
             self._path.unlink()
             return True
         except OSError:
             return False
+
+    def _owner_alive(self) -> bool:
+        """Return whether the recorded lock owner pid is still running."""
+        try:
+            pid = int(self._path.read_text(encoding="ascii").strip())
+        except (OSError, ValueError):
+            return False
+        return _process_exists(pid)
+
+    def refresh(self) -> None:
+        """Refresh the lock heartbeat so a live owner is never seen as stale."""
+        if self._fd is None:
+            return
+        try:
+            os.utime(self._path, None)
+        except OSError:
+            pass
 
     def release(self) -> None:
         """Release the single-instance lock."""
@@ -470,6 +575,11 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                     "img-src 'self' data:; connect-src 'self'; form-action 'self'; "
                     "frame-ancestors 'none'; base-uri 'none'"
                 ),
+                # REVIEW-FIX-3 (L-3): the index URL carries a session token,
+                # so the response must never be cached and must not leak the
+                # token through the browser referrer or history.
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer",
             },
         )
 
@@ -479,7 +589,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             self._send_json(404, {"error": "static asset not found"})
             return
         media_type = mimetypes.guess_type(candidate.name)[0] or "application/octet-stream"
-        if not media_type.startswith("text/"):
+        if media_type.startswith("text/"):
             media_type = f"{media_type}; charset=utf-8"
         body = self.server.static_cache.get(candidate)
         if body is None:
@@ -636,8 +746,6 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("Cache-Control", "no-store")
         for key, value in (extra_headers or {}).items():
             self.send_header(key, value)
         self.end_headers()
@@ -803,6 +911,8 @@ class CockpitHttpServer(ThreadingHTTPServer):
         )
         self._snapshot_stop = threading.Event()
         self._snapshot_thread: threading.Thread | None = None
+        self._heartbeat_stop = threading.Event()
+        self._heartbeat_thread: threading.Thread | None = None
         try:
             super().__init__(
                 (config.bind_host, config.bind_port),
@@ -928,6 +1038,12 @@ class CockpitHttpServer(ThreadingHTTPServer):
         while not self._snapshot_stop.wait(interval):
             self._snapshot_once()
 
+    def _heartbeat_loop(self) -> None:
+        interval = self.config.lock_heartbeat_interval_sec
+        while not self._heartbeat_stop.wait(interval):
+            if self._lock is not None:
+                self._lock.refresh()
+
     def start(self) -> None:
         """Start serving HTTP on the bound loopback socket."""
         thread = threading.Thread(
@@ -947,9 +1063,26 @@ class CockpitHttpServer(ThreadingHTTPServer):
                 daemon=True,
             )
             self._snapshot_thread.start()
+        if (
+            self._lock is not None
+            and self.config.lock_heartbeat_interval_sec is not None
+        ):
+            self._heartbeat_stop.clear()
+            self._heartbeat_thread = threading.Thread(
+                target=self._heartbeat_loop,
+                name="cockpit-lock-heartbeat",
+                daemon=True,
+            )
+            self._heartbeat_thread.start()
 
     def stop(self) -> None:
         """Stop serving and release resources."""
+        if self._heartbeat_thread is not None:
+            self._heartbeat_stop.set()
+            self._heartbeat_thread.join(
+                timeout=(self.config.lock_heartbeat_interval_sec or 0) + 5
+            )
+            self._heartbeat_thread = None
         if self._snapshot_thread is not None:
             self._snapshot_stop.set()
             self._snapshot_thread.join(

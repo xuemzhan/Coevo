@@ -1,7 +1,10 @@
 """Unit tests for the records archiving policy helpers."""
 from __future__ import annotations
 
+import importlib.util
+import sys
 import unittest
+from pathlib import Path
 
 from src.coevo.records_archive import (
     archive_plan,
@@ -9,6 +12,33 @@ from src.coevo.records_archive import (
     split_decisions_sections,
     split_verification_sections,
 )
+
+
+ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+
+class ArchiveScriptPolicyTests(unittest.TestCase):
+    """REVIEW-FIX-3 (L-4): pin the lowered VERIFICATION archive threshold."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "archive_records", SCRIPTS / "archive_records.py"
+        )
+        cls.script = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.script)
+
+    def test_verification_policy_keeps_file_readable(self):
+        policy = self.script.POLICY["verification"]
+        self.assertLessEqual(policy["keep_recent"], 30)
+        self.assertLessEqual(policy["size"], 500_000)
+
+    def test_other_policies_are_unchanged(self):
+        self.assertEqual(20, self.script.POLICY["decisions"]["keep_recent"])
+        self.assertEqual(2000, self.script.POLICY["audit"]["keep_recent"])
 
 
 class SplitTests(unittest.TestCase):

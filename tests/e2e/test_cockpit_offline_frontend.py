@@ -42,7 +42,12 @@ def _request(url, *, token=""):
         with urllib.request.urlopen(request, timeout=10) as response:
             return response.status, dict(response.headers), response.read()
     except urllib.error.HTTPError as exc:
-        return exc.code, dict(exc.headers), exc.read()
+        try:
+            return exc.code, dict(exc.headers), exc.read()
+        finally:
+            # REVIEW-FIX-3 (M-1): close the error response so the suite
+            # never leaves unclosed HTTPError resources behind.
+            exc.close()
 
 
 class OfflineFrontendTests(unittest.TestCase):
@@ -97,12 +102,18 @@ class OfflineFrontendTests(unittest.TestCase):
         csp = headers.get("Content-Security-Policy", "")
         self.assertIn("default-src 'self'", csp)
         self.assertEqual("nosniff", headers.get("X-Content-Type-Options"))
+        # REVIEW-FIX-3 (L-3): the token-bearing index response must not be
+        # cached nor leak the token through the referrer/history.
+        self.assertEqual("no-store", headers.get("Cache-Control"))
+        self.assertEqual("no-referrer", headers.get("Referrer-Policy"))
 
     def test_local_assets_load_and_have_no_external_urls(self):
         for asset in ("/static/style.css", "/static/app.js"):
             status, headers, body = _request(f"{self.base}{asset}", token=self.token)
             self.assertEqual(200, status, asset)
             self.assertEqual("nosniff", headers.get("X-Content-Type-Options"))
+            # REVIEW-FIX-3 (L-2): text assets carry an explicit charset.
+            self.assertIn("charset=utf-8", headers.get("Content-Type", ""))
             if asset.endswith(".js"):
                 text = body.decode("utf-8")
                 self.assertNotIn("http://", text)
