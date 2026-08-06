@@ -888,10 +888,20 @@ items:
   - id: OPTIMIZE-1
     story: ENG-BASE
     title: 逐文件检查语法/数据结构/算法/架构并修复优化；细化 docs/modules/ 每个模块的 README 文档（22 个模块）
-    status: in-progress
+    status: done
     dependencies: [REVIEW-FIX-3]
     acceptance_tests:
       - tests/unit/test_optimizations.py
       - tests/unit/test_production_docs.py
+    security_review: true
+    protocol_review: false
+  # ---------- 第二轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-1） ----------
+  - id: OPTIMIZE-2
+    story: ENG-BASE
+    title: 第二轮逐文件深度审查（语法/数据结构/算法/架构），修复发现的真实问题，进一步细化 docs/modules/ 模块 README
+    status: done
+    dependencies: [OPTIMIZE-1]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
