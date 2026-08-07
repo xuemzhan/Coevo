@@ -174,9 +174,9 @@ def validate_tool(tool: Tool) -> None:
         raise ToolValidationError("side_effects must be a ToolSideEffect member")
     if not isinstance(tool.requires_consent, bool):
         raise ToolValidationError("requires_consent must be bool")
-    if not isinstance(tool.timeout_sec, int) or tool.timeout_sec <= 0:
+    if type(tool.timeout_sec) is not int or tool.timeout_sec <= 0:
         raise ToolValidationError("timeout_sec must be a positive integer")
-    if not isinstance(tool.size_in_bytes_max, int) or tool.size_in_bytes_max < 0:
+    if type(tool.size_in_bytes_max) is not int or tool.size_in_bytes_max < 0:
         raise ToolValidationError("size_in_bytes_max must be a non-negative integer")
     if not isinstance(tool.crypto_scope, ProviderScope):
         raise ToolValidationError("crypto_scope must be a ProviderScope member")

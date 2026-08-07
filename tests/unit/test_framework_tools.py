@@ -73,7 +73,11 @@ class ToolTests(unittest.TestCase):
         with self.assertRaises(ToolValidationError):
             validate_tool(make_tool(timeout_sec=0))
         with self.assertRaises(ToolValidationError):
+            validate_tool(make_tool(timeout_sec=True))  # type: ignore[arg-type]
+        with self.assertRaises(ToolValidationError):
             validate_tool(make_tool(size_in_bytes_max=-1))
+        with self.assertRaises(ToolValidationError):
+            validate_tool(make_tool(size_in_bytes_max=True))  # type: ignore[arg-type]
         with self.assertRaises(ToolValidationError):
             validate_tool(make_tool(crypto_scope="mvp-prototype"))  # type: ignore[arg-type]
 
