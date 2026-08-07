@@ -308,6 +308,56 @@ class MappingTests(unittest.TestCase):
         with self.assertRaises(models.ProcessFlowError):
             mapping.apply_mapping(bad_flow)
 
+    def test_custom_rule_priority_and_tie_break(self):
+        # OPTIMIZE-13: custom rules sort by (priority ASC, rule_id ASC);
+        # lower priority number wins, ties break on rule_id.
+        node = models.Node(
+            node_id="n1", title="T",
+            stage_hint=models.Traced(
+                "custom-hint", "src", 0.9, models.SourceKind.LITERAL,
+            ),
+            inputs=(), outputs=(), review_criteria=(), responsible_roles=(),
+        )
+        stage = models.Stage("s1", "S", (node,))
+        flow = models.ProcessFlow(
+            unit_id="u", version=1, created_at="2026-08-01T00:00:00Z",
+            title="T", stages=(stage,), roles=(),
+            source_mapping={}, overrides=(), mapping_rules_version=1,
+        )
+
+        # Priority: rule.low (10) must beat rule.high (20).
+        mapped = mapping.apply_mapping(
+            flow,
+            rules=(
+                models.MappingRule(
+                    "rule.high", "custom-hint", models.StandardStage.PLANNING, 20,
+                ),
+                models.MappingRule(
+                    "rule.low", "custom-hint", models.StandardStage.EXECUTION, 10,
+                ),
+            ),
+        )
+        self.assertEqual(
+            models.StandardStage.EXECUTION, mapped.nodes[0].standard_stage,
+        )
+
+        # Tie: same priority -> lexicographically smaller rule_id wins.
+        mapped = mapping.apply_mapping(
+            flow,
+            rules=(
+                models.MappingRule(
+                    "rule.b", "custom-hint", models.StandardStage.DELIVERY, 5,
+                ),
+                models.MappingRule(
+                    "rule.a", "custom-hint", models.StandardStage.CLOSURE, 5,
+                ),
+            ),
+        )
+        self.assertEqual(
+            models.StandardStage.CLOSURE, mapped.nodes[0].standard_stage,
+        )
+        self.assertEqual("rule.a", mapped.nodes[0].rule_id)
+
     def test_default_rule_table_is_non_empty(self):
         self.assertGreater(len(mapping.DEFAULT_MAPPING_RULES), 0)
 

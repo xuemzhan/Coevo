@@ -285,6 +285,17 @@ class ClassificationTests(unittest.TestCase):
                 now=NOW2,
             )
 
+    def test_bundle_classification_is_max_across_mixed_entries(self):
+        # OPTIMIZE-13: AC-5 takes the max classification over ALL entries;
+        # an INTERNAL baseline plus a RESTRICTED brief must yield RESTRICTED.
+        b = _aggregate(
+            baseline=_baseline(),
+            decision_briefs=(
+                {"id": "db.1", "title": "brief", "classification": "restricted"},
+            ),
+        )
+        self.assertEqual(KnowledgeClassification.RESTRICTED, b.bundle_classification)
+
 
 # ---------------------------------------------------------------------------
 # AC-7 fail-closed at construction

@@ -302,6 +302,37 @@ class SupervisionCoordinatorTests(unittest.TestCase):
         self.assertEqual(EscalationLevel.WATCH,
                          by_id["sup.PRJ001.risk.od.04"])
 
+    def test_escalation_at_exact_due_boundary(self):
+        # OPTIMIZE-13: `delta >= 0` fires when due_at == now exactly
+        # (due is not "future"), so the escalation must be active.
+        now = "2026-08-21T00:00:00Z"
+        risks = (
+            _risk(
+                risk_id="risk.coord_due_now",
+                kind=RiskKind.SEVERE_COORDINATION_NEEDED,
+                due=now, severity=5,
+            ),
+            _risk(
+                risk_id="risk.silence_due_now",
+                kind=RiskKind.LONG_SILENCE, due=now,
+            ),
+        )
+        report = _report(risks=risks)
+        outcome = SupervisionCoordinator().coordinate(
+            risk_report=report,
+            project_recipient_cert_id="CERT-OWNER",
+            now=now,
+        )
+        by_id = {e.item_id: e.level for e in outcome.escalations}
+        self.assertEqual(
+            EscalationLevel.EMERGENCY,
+            by_id["sup.PRJ001.risk.coord_due_now.00"],
+        )
+        self.assertEqual(
+            EscalationLevel.WATCH,
+            by_id["sup.PRJ001.risk.silence_due_now.01"],
+        )
+
     def test_meeting_proposal_emitted_only_when_coordination_recommended(self):
         report_no = _report(coordination=False)
         outcome_no = SupervisionCoordinator().coordinate(
