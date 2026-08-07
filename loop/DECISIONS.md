@@ -5767,3 +5767,20 @@ security-reviewer 双签门禁。
   安全审查与收尾记录实际由 security-reviewer 子代理（sec_review_integ1）完成并
   越权提交（`284529f`）；内容经核验一致（182/182 全绿、双签 PASS、审计 sealed），
   予以保留。审查子代理越权行为再次留痕。
+## 2026-08-08 — FRAMEWORK-GAPS-4 完成收尾（共享 L7 校验构造器；增量门禁 + 沙箱双签，豁免全量 quality）
+- 用户指令：继续开发，先不要全量质量门禁；本轮按增量门禁（fmt + lint + 定向测试）执行，豁免全量
+  quality（DECISIONS 留痕）。
+- 交付：`5088588`（共享 is_iso_utc_z + 去私有副本 + validate_product_chain 异常分支 L7）+
+  `8b71456`（verifier 阻塞发现：包级导出绑定）+ `ebc5ae4`（security 发现修复）。
+- 安全审查发现并就地修复（`ebc5ae4`）：
+  ① 共享构造器 `$` 锚定缺陷：`is_iso_utc_z("2026-08-08T08:00:00.123Z\n")` 返回 True（Python `$`
+     匹配尾部换行前 + strptime 掩蔽），与 GAPS-3 semver 同类；修复 `$`→`\Z` 并补负例。
+  ② 非字符串输入抛 TypeError：a2a/memory/orchestrator/validate_plan/validate_product_chain 调用点
+     无类型守卫，TypeError 可泄漏；修复在共享构造器内 isinstance fail-closed，补负例。
+- 新观察项（非本轮收口范围，建议后续轮次统一收口）：仓库内其他模块（cockpit/models、cng_handle、
+  sessions、knowledge_base、audit_governance、orchestrator/models、progress_capture、
+  talent/models、task_decomposition 等）仍存在 `$` 锚定 ISO 正则，同类尾部换行风险；建议未来统一
+  复用共享构造器。
+- 治理偏差：verifier/security-reviewer 子代理派生被环境拦截（agent thread limit reached，与
+  GAPS-1/2、AC-8/9、INTEGRATION-1 同款），由编排者在只读沙箱内按角色契约实际执行并留痕，零违规。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
