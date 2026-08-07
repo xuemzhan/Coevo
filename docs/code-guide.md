@@ -213,6 +213,30 @@ NEW_SUPERVISION_ITEM；不实际召集会议，只产出建议）。
 （`CryptoProvider` 协议与作用域）→ `sm3.py`（纯 Python SM3）→
 `protected_provider.py`/`cng_handle.py`（受保护密钥句柄的接口层）。
 
+### 2.18 `framework/` —— 框架层（CTAF US-16）
+
+受控编排治理层，全部为纯函数 / 注入协议 / fail-closed：
+
+- `manifest_checker.py` —— 部署点 Manifest 强制校验（能力闭集、人工确认缺省 true、
+  crypto_scope 闭集、审计脱敏子集、spec_hash 排除自指字段、policy_ref 三段绑定、
+  policy_version 绑定；校验通过才注册）；
+- `capability.py` —— CTAF §5.2 能力闭集收敛（MVP 映射 AgentCapability、框架抽象、
+  CRYPTO_PROXY 限 approved scope、双名解析 + 双向一致性守卫）；
+- `policy.py` / `plan.py` / `lifecycle.py` / `validation.py` —— Policy 数值边界
+  （L16 / EMERGENCY fail-fast）、Plan 纯结构 + L18 白名单 + 规范化序列化（Plan-LSP）、
+  八态生命周期（L19）、`validate_plan` 五项不变量 + L18 + L19；
+- `memory.py` —— Memory 统一模型（Episodic 审计投影 / Semantic 审批 / L12 脱敏）；
+- `tools.py` —— Tool 统一模型 + MCP 路径 A 双向转换（零三方依赖）；
+- `a2a.py` —— A2A 信封 + policy_ref 五步验证 + `.agent` 字段映射 + 大小边界；
+- `k8s_listing.py` —— K8s CRD 纸面清单生成器（确定性可哈希、零 IO）；
+- `orchestrator.py` / `integration.py` —— Hybrid 三模式编排核心 + 注册/派发双门
+  适配 + `chain_to_plan` 存量链抬升；`app/pipeline.py` 已在真实派发前接入框架门。
+
+### 2.19 `timefmt.py` —— 共享 ISO-8601 UTC 时间戳校验
+
+依赖无关叶模块（仅标准库）：`is_iso_utc_z()` —— `\Z` 锚定（无尾部换行绕过）、
+小数秒、日历校验、非字符串 fail-closed；框架层与产品模块统一引用，消除全仓重复正则。
+
 ---
 
 ## 三、应用组合根 `src/coevo/app/`

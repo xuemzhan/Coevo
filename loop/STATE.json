@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-GAPS-6",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "FRAMEWORK-DOCS-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "ffafaf35bb87b1ce867a6a702d5f42823631e393",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T23:38:33.928643Z"
+  "updated_at": "2026-08-07T23:51:21.418470Z"
 }

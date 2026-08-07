@@ -1,5 +1,15 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-DOCS-1 登记并开始执行（框架层文档治理收口）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：登记 `FRAMEWORK-DOCS-1`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-GAPS-6]）：把 CTAF 框架层纳入 README / code-guide / docs 索引，
+  新增文档治理守卫测试；STATE 切换至 ENG-BASE / FRAMEWORK-DOCS-1。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-6 完成收尾（共享 ISO 构造器全仓落地；增量门禁 + 沙箱双签；全量 quality 豁免留待后续）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"；按已批准切片计划

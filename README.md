@@ -41,11 +41,17 @@ Coevo 是一个**分布式任务管理具身智能体系统**的 MVP 实现。�
 | US-13 | 决策简报（负责人密钥确认绑定） | `decision_brief/` |
 | US-14 | 知识沉淀与可复用模板 | `knowledge_base/` |
 | US-15 | 安全审计（统一事件 + 哈希链 + 拦截判定） | `audit_governance/` |
+| US-16 | 框架层（CTAF v0.4.1）：Manifest 校验 / 能力闭集 / Policy+validate_plan / Memory / Tool+MCP 路径 A / A2A+policy_ref / Plan-LSP / Hybrid Orchestrator / K8s 纸面清单 | `framework/`、`timefmt.py` |
 
 两条**固定编排链**均已端到端验证：
 
 - 任务下发链：`tests/e2e/test_demo_runner.py`（流程理解 → 分解 → 推荐 → 人工确认 → 加密包导出）；
 - 成果回传链：`tests/e2e/test_return_chain.py`（真实 SM2/SM4 加密成果包 → 原子导入 → 合并回执 → 风险/简报/知识）。
+
+**框架层（US-16 / CTAF）**：在 MVP 之上新增受控编排治理层——部署点 Manifest 强制校验、
+能力闭集收敛、Policy 数值边界与 `validate_plan` 五项不变量 + L18/L19、Memory 脱敏与审批、
+Tool/MCP 路径 A、A2A policy_ref 五步验证、Plan 规范化序列化（Plan-LSP）、Hybrid
+Orchestrator 与 K8s 纸面清单；真实管线（`app/pipeline.py`）已在派发前接入框架 Plan 门。
 
 ## 3. 架构总览
 
@@ -70,6 +76,10 @@ src/coevo/                   生产代码
 ├── knowledge_base/          知识沉淀（US-14）
 ├── audit_governance/        安全审计（US-15）
 ├── crypto/                  国密引擎适配（SM2/SM3/SM4）
+├── framework/               框架层（CTAF US-16：manifest-checker / capability / policy /
+│                            plan / lifecycle / validation / memory / tools / a2a /
+│                            k8s_listing / orchestrator / integration）
+├── timefmt.py               共享 ISO-8601 UTC 时间戳校验（依赖无关叶模块）
 ├── benchmarks/              可扩展性探针
 ├── config.py / version.py / logging_setup.py / records_archive.py
 scripts/                     工程底座与运维脚本
@@ -232,6 +242,8 @@ python "%LOCALAPPDATA%\KaiwuAgent\app\<version>\scripts\run_cockpit.py"
 | 需求—代码—测试追踪 | `docs/traceability/requirements-test-matrix.md` |
 | 代码注释导览 | `docs/code-guide.md` |
 | 逐包模块文档 | `docs/modules/`（每个 `src/coevo` 包一份：定位/文件/入口/约束） |
+| 框架设计（CTAF v0.4.1） | `docs/plans/distributed-agent-framework/` |
+| 框架适配映射文档 | `docs/framework/`（memory / tool / a2a / plan-lsp / hybrid / integration / k8s-crd / capability） |
 | 工程循环状态 | `loop/`（GOAL/STATE/BACKLOG/DECISIONS/VERIFICATION） |
 | 端到端示例 | `examples/`（含运行/核验脚本） |
 | 审计链 | `loop/audit-head.json` / `loop/tool-audit.jsonl` |
@@ -240,6 +252,9 @@ python "%LOCALAPPDATA%\KaiwuAgent\app\<version>\scripts\run_cockpit.py"
 
 - 工程循环：迭代与状态以 `loop/STATE.json` 为准（本快照：iteration 30，BACKLOG 全部 `done`）。
 - 能力面：US-0..US-15 全部落地并通过门禁。
+- 框架层：CTAF v0.4.1（US-16 AC-1..AC-9，M1..M9 代码里程碑 + GAPS/INTEGRATION
+  工程项）落地，`src/coevo/framework/` 全量模块 + 共享 `timefmt.py`；真实管线已接入
+  框架 Plan 门（派发前 validate_plan）。
 - 两条固定编排链均已 E2E 验证：任务下发链与成果回传链（真实 SM2/SM4 加密成果包闭环）。
 - 离线自洽：全部门禁、本地服务、工具调用在断网条件下可复现（`make quality`）。
 - 性能：参考架构 SLA 与可扩展性探针全部达标（`python scripts/benchmark.py --check`）。

@@ -1249,3 +1249,13 @@ items:
       - tests/unit/test_framework_gaps6.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-DOCS-1（2026-08-08 用户指令继续开发；框架层文档治理收口） ----------
+  - id: FRAMEWORK-DOCS-1
+    story: ENG-BASE
+    title: 框架层文档治理收口：README（US-16 核心能力行 / 架构总览加 framework+timefmt / 文档索引加 docs-framework 与 CTAF plans / 当前状态加框架层）、docs/code-guide.md（framework 引导节）、docs/README.md（索引登记）；L17 一致性
+    status: ready
+    dependencies: [FRAMEWORK-GAPS-6]
+    acceptance_tests:
+      - tests/unit/test_framework_docs.py
+    security_review: true
+    protocol_review: false
