@@ -1,5 +1,19 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-6 完成收尾（共享 ISO 构造器全仓落地；增量门禁 + 沙箱双签；全量 quality 豁免留待后续）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"；按已批准切片计划
+  `docs/plans/FRAMEWORK-GAPS-6-slice.md` 执行增量门禁并豁免全量 quality。
+- 实现：`ffafaf3`（新增 `src/coevo/timefmt.py` 叶模块 + 10 个产品模块与 framework.validation
+  统一引用共享 `is_iso_utc_z`，去 11 处正则副本与包级再导出）。
+- 验证：主仓库增量门禁 fmt/lint 全绿（audit fully-sealed），定向测试 15 组全绿；沙箱
+  fwgaps6b-verify / fwgaps6b-sec（pin=`ffafaf3`）零违规，verifier 增量门禁 + security-reviewer
+  STRIDE PASS（Critical/High/Medium/Low 0/0/0/0）。
+- 决策：STATE 置 phase=decide / status=done / last_verified_commit=`ffafaf3`；BACKLOG done；
+  追溯矩阵新增行；全量 quality 按用户指示本轮豁免，留待后续轮次补跑并在 VERIFICATION 留痕。
+- 决策者：用户；提出者：loop-engineer。回滚条件：任一新增测试失败、门禁指纹变化未复核、
+  或审计链非 fully-sealed 时按 git 历史回退 `ffafaf3`。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-6 登记并开始执行（共享 ISO 构造器全仓落地）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

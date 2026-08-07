@@ -233,6 +233,38 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-GAPS-6 完成收尾（共享 ISO 校验构造器全仓落地；增量门禁 + 沙箱双签；全量 quality 按用户指示豁免）
+
+- 工作项：`FRAMEWORK-GAPS-6`（ENG-BASE，dependencies=[FRAMEWORK-GAPS-5]）。实现提交：
+  `ffafaf3`（新增依赖无关叶模块 `src/coevo/timefmt.py`——`is_iso_utc_z`：`\Z` 锚定拒尾部换行、
+  小数秒、日历校验、非字符串 fail-closed；`docs/modules/root_modules.md` 登记 L17；
+  `framework/validation.py` 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，
+  去 11 处正则副本与包级 `_ISO` 再导出；`tests/unit/test_framework_gaps6.py` 新增 +
+  `test_iso_anchor_regression.py` 改测共享构造器）。
+- 用户指令：继续开发，先不要全量质量门禁；按已批准切片计划
+  `docs/plans/FRAMEWORK-GAPS-6-slice.md` 执行增量门禁（fmt + lint + 定向测试）并豁免全量 quality。
+- 验证（增量门禁，主仓库）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（validate_opencode / traceability_check / audit_log verify /
+  audit_seal verify / secret_scan 全过，audit fully-sealed）；定向测试 15 组全绿
+  （test_framework_gaps6 + test_iso_anchor_regression + 框架族 + 受影响产品模块；skip 均为既有
+  平台跳过：progress symlink 1、private_key 2）。
+- 独立复核（沙箱，pin=`ffafaf3`；fwgaps6b-verify / fwgaps6b-sec）：
+  * verifier 契约：沙箱内 fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+    fingerprint=`7403ab836a8c7db7`（沙箱根解析差异，与主仓库指纹不同属预期）；定向测试全绿；
+    `review_sandbox.py check` violations=[]（loop/ 门禁证据输出为合法 delta），已 discard。
+  * security-reviewer 契约：STRIDE 逐项 PASS，Critical/High/Medium/Low 0/0/0/0；行为级探测：
+    共享构造器及框架公开入口（a2a created_at / memory occurred_at / validate_plan validated_at /
+    orchestrator transition / validate_product_chain 双分支）尾部换行、非法日历、非 Z 时区、全类别
+    非字符串全部干净拒绝、无 TypeError 泄漏；`tests/security` 相对 `88668af` 零改动（未删未降级）；
+    无私有 `_ISO` 正则副本残留；timefmt 纯 stdlib 零 IO；check violations=[]，已 discard。
+- 治理说明：verifier/security-reviewer 子代理派生再次被环境拦截（agent thread limit reached，与
+  GAPS-1/2/4 同款限制），按既有预案由编排者在只读沙箱内按角色契约实际执行并留痕；报告不落盘、
+  沙箱零违规。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-GAPS-6 行（无悬空）；BACKLOG GAPS-6 置 done；
+  STATE 置 phase=decide / status=done / last_verified_commit=`ffafaf3`；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git 历史回退
+  `ffafaf3`。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-2 完成收尾（GAPS-1 新观察项收口；增量门禁 + 沙箱双签，豁免全量 quality）
 - 工作项：`FRAMEWORK-GAPS-2`（ENG-BASE）。实现提交：`e29e290`（Policy Timeout/Retry/Consent
   严格整数类型 `type(...) is int`、semver 禁前导对零、ISO-8601 日历范围校验、
@@ -19971,3 +20003,4 @@ OK
 audit seal: fully-sealed
 
 ```
+

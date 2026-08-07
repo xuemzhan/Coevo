@@ -1243,7 +1243,7 @@ items:
   - id: FRAMEWORK-GAPS-6
     story: ENG-BASE
     title: 共享 ISO 校验构造器全仓落地：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z，root_modules 登记），10 个产品模块 + framework.validation 统一引用（去 11 处正则副本与包级 _ISO 再导出），锚定测试改测共享构造器；纯函数 stdlib + L17
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-GAPS-5]
     acceptance_tests:
       - tests/unit/test_framework_gaps6.py
