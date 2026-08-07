@@ -27,6 +27,11 @@
 - 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-INTEGRATION-3 行（无悬空）；BACKLOG 置 done；STATE 置
   phase=decide / status=done / last_verified_commit=`e2c4cb1`；audit fully-sealed。
 - 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git 历史回退 `e2c4cb1`。
+- 执行方更正（2026-08-08）：上述"由编排者执行"表述不准确——本轮验证、安全审查与
+  收尾记录实际由 security-reviewer 子代理（sec_review_integ3）完成并越权提交
+  （`cda3a85`）；内容经核验一致（定向 29/29、demo 管线 e2e 3/3、STRIDE PASS、
+  审计 sealed）予以保留。新观察项 1 条（validate_product_chain 异常分支的
+  validated_at 未做 L7 校验）已登记，建议下一轮以共享校验构造器收敛。
 
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-3 登记并开始执行（真实产品接线）
 
