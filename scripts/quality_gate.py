@@ -14,12 +14,23 @@ ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1]))
 GATE_LOCK=ROOT/"loop/.quality-gate.lock"
 CONTROL=os.environ.get("COEVO_CONTROL_ARCHIVE",str(ROOT/".tools"/"control"/"control.pyz"))
 def control(module,*args): return [sys.executable,CONTROL,module,*args]
+def go_test_argv():
+    """Resolve the locked Go executable and return the offline Go test argv.
+
+    GO-MIGRATE slice: `go test ./...` runs inside the `go/` module; the
+    quality gate keeps the toolchain fully offline (GOPROXY=off) and only
+    stdlib is permitted (no third-party Go modules).
+    """
+    lock=json.loads((ROOT/"docs"/"dependencies"/"toolchain-lock.json").read_text(encoding="utf-8"))
+    go_tool=lock["tools"]["go"]["executable"]["path"]
+    return [go_tool,"test","./..."]
 TARGETS={
  "fmt":[[sys.executable,"-m","compileall","-q","-f","scripts","src","tests"]],
  "lint":[[sys.executable,str(ROOT/"scripts"/"validate_opencode.py")],control("traceability_check"),control("audit_log","verify"),[sys.executable,str(ROOT/"scripts"/"audit_seal.py"),"verify","--allow-tail"],[sys.executable,str(ROOT/"scripts"/"secret_scan.py")]],
- "test":[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"],[sys.executable,"-m","unittest","discover","-s","tests/integration","-p","*test*.py","-v"]],
+ "test":[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"],[sys.executable,"-m","unittest","discover","-s","tests/integration","-p","*test*.py","-v"],go_test_argv()],
  "test-security":[[sys.executable,"-m","unittest","discover","-s","tests/security","-v"],[os.environ.get("COEVO_NODE_PATH",str(ROOT/".tools"/"node"/"24.14.0"/"node.exe")),"tests/security/path_policy_test.mjs"]],
  "test-e2e":[[sys.executable,"-m","unittest","discover","-s","tests/e2e","-v"]]}
+GO_TEST_ARGV=TARGETS["test"][-1]
 def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
 def fingerprint(argvs): return hashlib.sha256(json.dumps(argvs,separators=(",",":")).encode()).hexdigest()[:16]
 def run(target):
@@ -43,7 +54,12 @@ def _run_locked(target):
         output.append("preflight audit seal failed: "+str(exc)+"\n")
     for argv in argvs:
         if rc: break
-        process=subprocess.run(argv,cwd=ROOT,capture_output=True,text=True,encoding="utf-8",errors="replace")
+        cwd=ROOT
+        env=None
+        if argv==GO_TEST_ARGV:
+            cwd=ROOT/"go"
+            env=os.environ.copy(); env["GOPROXY"]="off"
+        process=subprocess.run(argv,cwd=cwd,env=env,capture_output=True,text=True,encoding="utf-8",errors="replace")
         combined=process.stdout+process.stderr
         output.append("$ "+" ".join(argv)+"\n"+combined)
         if process.returncode:

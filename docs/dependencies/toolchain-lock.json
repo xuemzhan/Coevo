@@ -179,6 +179,26 @@
       "audit_signature_size": 5993,
       "audit_signature_sha256": "f558826f8f809591beee788094480c9af1ec7320549eb0a4a8d9b78fdf9a13d0"
     },
+    "go": {
+      "name": "Go",
+      "version": "1.18.8",
+      "source_url": "https://go.dev/dl/",
+      "offline_source": "D:/Go (preinstalled offline toolchain; not imported into .tools in GO-ENV-1)",
+      "license": "BSD-3-Clause",
+      "license_path": "docs/dependencies/licenses/go-BSD-3-Clause.txt",
+      "executable": {
+        "path": "D:/Go/bin/go.exe",
+        "size": 14482944,
+        "sha256": "2387141451bee608d8af8eb18596105e8dd37dabef215a470985dd3766c67984",
+        "authenticode_status": "NotSigned"
+      },
+      "runtime": {
+        "root": "D:/Go",
+        "version": "1.18.8"
+      },
+      "network_access": false,
+      "risk_note": "go1.18.8 is end-of-life; approved as the only available offline Go toolchain for the GO-MIGRATE slice (GO-ENV-1). Go code is stdlib-only (no third-party modules), enforced by GOPROXY=off in the quality gate. Upgrading to a supported Go release requires a new dependency approval."
+    },
     "make_compatibility_shim": {
       "node": {
         "name": "Node.js",
@@ -210,11 +230,11 @@
       "name": "Coevo Make compatibility shim",
       "version": "1.0",
       "source": "scripts/tool-shims/make.cs",
-      "source_sha256": "fc4fe8dd99a5274be990e56bb5591e5e1ae5a1271c0346e22520788de6f1039c",
+      "source_sha256": "5252d6c00cc45e3744c15da3d9a7fd57445483ecc610a27974ce0957b21b1df8",
       "script_inventory": {
         "path": "docs/dependencies/python-script-lock.tsv",
         "size": 951,
-        "sha256": "d2d626309d4dfcdb998ad720225c11502113aeaa93d6fad88ea408e73dc802fe"
+        "sha256": "18cf685a41db8d21f1b975574458cf619aa45c02096b39331467584e8d44576d"
       },
       "compiler": "%WINDIR%/Microsoft.NET/Framework64/v4.0.30319/csc.exe",
       "compiler_lock": {

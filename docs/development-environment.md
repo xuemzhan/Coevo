@@ -3,6 +3,8 @@
 Coevo 的 Loop 开发环境是仓库本地、锁版本且默认离线的。当前基线使用：
 
 - CPython 3.14.3 官方签名离线制品（仓库 `.tools/python/3.14.3`，逐文件锁清单）；
+- Go 1.18.8（离线预装 `D:\Go`，`toolchain-lock.json` 的 `tools.go` 条目登记；
+  仅限标准库，已接入质量门禁 `test` 目标，`GOPROXY=off` 强制离线）；
 - OpenCode CLI 1.18.2（官方 Windows x64 发布包）；
 - Coevo Make compatibility shim 1.0（仅允许仓库 Makefile 已定义的固定目标）；
 - Windows PowerShell 5.1+ / .NET X.509、CMS 与 CNG API；
@@ -61,6 +63,25 @@ make quality
 二进制位于 `.tools/` 且不进入 Git。若本地缓存缺失或哈希不符，环境入口失败关闭；不得自动升级或静默改用系统同名程序。重新导入必须从清单中的官方发布地址取得同一构件并复核哈希。升级版本属于新的依赖审批工作项。
 
 项目级 `opencode.jsonc` 继续禁止联网工具、外部目录和依赖安装。组织级 `%ProgramData%\opencode\opencode.jsonc` 需要管理员独立部署，本仓库和入口脚本均不会修改它。
+
+## Go 迁移切片
+
+GO-MIGRATE 使用仓库内 `go/` 模块承载 Go 实现（`module coevo/go`，`go 1.18`）。
+首个切片已移植 US-1 `task_flow` 纯模型与阶段映射（`go/taskflow`），行为与
+`src/coevo/task_flow` 的 Python 参考实现对齐。
+
+```powershell
+# 在 go/ 目录下运行（离线，GOPROXY=off）
+D:\Go\bin\go.exe test ./...
+```
+
+- Go 工具链以 `docs/dependencies/toolchain-lock.json` 的 `tools.go` 条目锁定
+  （版本、可执行文件 SHA-256、许可证），来源为离线预装 `D:\Go`，未复制进
+  `.tools`；
+- 质量门禁 `test` 目标自动执行 `go test ./...`（在 `go/` 模块内、
+  `GOPROXY=off`）；Go 代码仅允许标准库，禁止第三方 Go 模块；
+- 后续迁移切片（parser / service / 协议等）逐模块在 `go/` 内落地，保持与
+  Python 参考实现语义一致；升级 Go 版本属于新的依赖审批工作项。
 
 ## Loop 使用边界
 
