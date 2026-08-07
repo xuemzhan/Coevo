@@ -61,10 +61,12 @@ from .integration import (
     GUARD_PROJECTION_KEYS,
     GuardResult,
     IntegrationError,
+    chain_to_plan,
     guard_registration,
     guarded_dispatch,
     plan_to_chain,
     report_to_outcome,
+    validate_product_chain,
 )
 from .memory import (
     MEMORY_PROJECTION_KEYS,
@@ -195,6 +197,7 @@ __all__ = [
     "ValidationResult",
     "can_transition",
     "chain_plan",
+    "chain_to_plan",
     "canonical_record_bytes",
     "capability_entry",
     "canonical_descriptor_bytes",
@@ -236,6 +239,7 @@ __all__ = [
     "validate_plan",
     "validate_plan_json",
     "validate_policy",
+    "validate_product_chain",
     "validate_payload_size",
     "validate_schema",
     "validate_tool",

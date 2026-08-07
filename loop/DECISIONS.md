@@ -1,5 +1,17 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-2 登记并开始执行（存量链抬升 + 集成收口）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：登记 `FRAMEWORK-INTEGRATION-2`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-INTEGRATION-1]），交付 chain_to_plan / validate_product_chain
+  （存量产品链抬升为框架 Plan 后走 validate_plan）并收 INTEGRATION-1 Low
+  （plan_to_chain 闭集外能力错误类型统一为 IntegrationError）；STATE 切换至
+  ENG-BASE / FRAMEWORK-INTEGRATION-2。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — 推送授权（用户明确指令，覆盖仓库默认"不 git push"约束）
 
 - 用户指令："push到github"。

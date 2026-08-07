@@ -22,7 +22,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
-from src.coevo.framework.capability import CapabilityKind, resolve_capability
+from src.coevo.framework.capability import (
+    CapabilityKind,
+    CapabilityValidationError,
+    resolve_capability,
+)
 from src.coevo.framework.manifest_checker import (
     AgentManifest,
     ManifestCheckInput,
@@ -33,11 +37,18 @@ from src.coevo.framework.orchestrator import (
     OrchestrationOutcome,
     OrchestrationStatus,
 )
-from src.coevo.framework.plan import Plan, PlanNodeKind
+from src.coevo.framework.plan import (
+    Plan,
+    PlanEdge,
+    PlanNode,
+    PlanNodeKind,
+    plan_fingerprint,
+)
 from src.coevo.framework.policy import Policy
 from src.coevo.framework.validation import (
     RbacChecker,
     ToolScopeChecker,
+    ValidationResult,
     validate_plan,
 )
 from src.coevo.orchestrator.models import (
@@ -146,7 +157,10 @@ def plan_to_chain(
                 f"TOOL node {node.node_id!r} cannot be executed by the "
                 "product orchestrator (integration scope)"
             )
-        entry = resolve_capability(node.agent_capability)
+        try:
+            entry = resolve_capability(node.agent_capability)
+        except CapabilityValidationError as exc:
+            raise IntegrationError(str(exc)) from exc
         if entry.kind is not CapabilityKind.MVP or entry.agent_capability is None:
             raise IntegrationError(
                 f"AGENT node {node.node_id!r} uses non-MVP capability "
@@ -169,6 +183,97 @@ def plan_to_chain(
             )
         )
     return OrchestrationChain(chain_id=chain_id, steps=tuple(steps))
+
+
+def chain_to_plan(
+    chain: OrchestrationChain,
+    registry: AgentRegistry,
+    policy: Policy,
+    *,
+    plan_version: str = "1.0",
+) -> Plan:
+    """Lift an existing product OrchestrationChain into a framework Plan."""
+
+    nodes: list[PlanNode] = []
+    edges: list[PlanEdge] = []
+    previous: str | None = None
+    for index, step in enumerate(chain.steps):
+        node_id = f"c{index}"
+        if step.kind is OrchestrationStepKind.HUMAN_CONFIRM:
+            node = PlanNode(
+                node_id=node_id,
+                kind=PlanNodeKind.HUMAN_GATE,
+                human_gate_reason="product chain confirmation",
+                requires_human_confirmation=True,
+            )
+        elif step.kind is OrchestrationStepKind.AGENT_CALL:
+            registration = registry.get(step.agent_id)
+            if registration is None:
+                raise IntegrationError(
+                    f"agent {step.agent_id!r} is not registered"
+                )
+            try:
+                entry = resolve_capability(registration.spec.capability.value)
+            except CapabilityValidationError as exc:
+                raise IntegrationError(str(exc)) from exc
+            if entry.kind is not CapabilityKind.MVP:
+                raise IntegrationError(
+                    f"agent {step.agent_id!r} has non-MVP capability "
+                    f"{registration.spec.capability.value!r}; not liftable"
+                )
+            node = PlanNode(
+                node_id=node_id,
+                kind=PlanNodeKind.AGENT,
+                agent_capability=registration.spec.capability.value,
+                requires_human_confirmation=step.requires_human_confirmation,
+            )
+        else:
+            raise IntegrationError(
+                f"chain step kind {step.kind!r} cannot be lifted to a Plan"
+            )
+        nodes.append(node)
+        if previous is not None:
+            edges.append(PlanEdge(previous, node_id))
+        previous = node_id
+    plan = Plan(
+        plan_id="0" * 64,
+        plan_version=plan_version,
+        policy_profile=policy.profile,
+        policy_version=policy.policy_version,
+        nodes=tuple(nodes),
+        edges=tuple(edges),
+    )
+    return Plan(
+        plan_id=plan_fingerprint(plan),
+        plan_version=plan.plan_version,
+        policy_profile=plan.policy_profile,
+        policy_version=plan.policy_version,
+        nodes=plan.nodes,
+        edges=plan.edges,
+    )
+
+
+def validate_product_chain(
+    chain: OrchestrationChain,
+    registry: AgentRegistry,
+    policy: Policy,
+    *,
+    scope_checker: ToolScopeChecker,
+    rbac_checker: RbacChecker,
+    actor: str,
+    validated_at: str,
+) -> ValidationResult:
+    """Lift a product chain and run validate_plan (five invariants + L18 + L19)."""
+
+    plan = chain_to_plan(chain, registry, policy)
+    return validate_plan(
+        plan,
+        policy,
+        scope_checker=scope_checker,
+        rbac_checker=rbac_checker,
+        actor=actor,
+        validated_at=validated_at,
+    )
 
 
 def report_to_outcome(

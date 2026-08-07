@@ -40,7 +40,7 @@ FRAMEWORK-INTEGRATION-1 交付框架接入现有编排（GuardedOrchestrator 适
 | `a2a.py` | `A2aMessage`、`PolicyRef`、`verify_policy_ref`、`to_agent_fields`/`from_agent_fields`、`validate_payload_size` | A2A 信封 + policy_ref 五步验证 + `.agent` 字段映射 + 大小边界 |
 | `orchestrator.py` | `plan_for`、`dispatch`、`transition`、`chain_plan`、`StaticChainProvider`/`LlmPlanProvider`/`PlanExecutor`（注入协议）、`OrchestrationOutcome` | Hybrid Orchestrator：validate_plan 前置 + 三种模式 + L19 + HOLD 门 |
 | `k8s_listing.py` | `generate_listing`、`listing_fingerprint`、`render_yaml`、`validate_listing_bytes`、`ListingInput` | 声明式纸面清单生成（JSON + YAML 子集），确定性可哈希、零 IO |
-| `integration.py` | `guard_registration`、`plan_to_chain`、`guarded_dispatch`、`report_to_outcome`、`GuardResult` | 框架门禁接入现有编排：注册过 manifest、派发过 validate_plan、Plan→OrchestrationChain 适配 |
+| `integration.py` | `guard_registration`、`plan_to_chain`、`guarded_dispatch`、`report_to_outcome`、`chain_to_plan`、`validate_product_chain`、`GuardResult` | 框架门禁接入现有编排：注册过 manifest、派发过 validate_plan、Plan↔OrchestrationChain 双向适配 |
 
 ## 关键入口与数据流
 
@@ -94,6 +94,7 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 - `tests/unit/test_framework_orchestrator.py`（AC-8.1..8.5，M7 Hybrid 核心）。
 - `tests/unit/test_framework_k8s_listing.py`（AC-9.1..9.5，M9 纸面清单）。
 - `tests/unit/test_framework_integration.py`（FRAMEWORK-INTEGRATION-1）。
+- `tests/unit/test_framework_integration2.py`（FRAMEWORK-INTEGRATION-2）。
 
 ## 依赖与下游
 
