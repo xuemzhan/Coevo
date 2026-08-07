@@ -1213,7 +1213,7 @@ items:
   - id: FRAMEWORK-INTEGRATION-3
     story: ENG-BASE
     title: 真实产品接线：app/pipeline.py 在真实派发前用 validate_product_chain 校验 MVP_FIXED_CHAIN（框架门前置，失败即中止）；L7 ISO 校验兼容小数秒（产品 now_utc_iso_z 格式）；管线门前置条件测试 + demo 管线 e2e 回归
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-INTEGRATION-2]
     acceptance_tests:
       - tests/unit/test_pipeline_framework_gate.py

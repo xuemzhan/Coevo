@@ -1,5 +1,33 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-3 完成收尾（真实产品接线；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-INTEGRATION-3`（ENG-BASE，dependencies=[FRAMEWORK-INTEGRATION-2]）。实现提交：`e2c4cb1`
+  （app/pipeline.py 真实派发前插入 validate_product_chain 框架门前置：RBAC/L4 使用结构 allow-all 留待产品
+  接线，门失败抛 RuntimeError 中止；chain_to_plan 抬升异常收敛为 rejected 结果（IntegrationError →
+  ValidationResult fail-closed）；L7 ISO 校验兼容小数秒，a2a/memory/validation/orchestrator 四模块统一）。
+- 用户指令："继续开发，但先不要全量质量门禁检查"；本轮按增量门禁（fmt + lint + 定向测试 + demo 管线 e2e
+  回归）执行并豁免留痕（与 2026-08-03 起门禁口径一致）。
+- 独立验证（mvp-verifier 契约，只读沙箱 int3-verify，pin=`e2c4cb1`）：主仓库 fmt exit=0
+  fingerprint=`fe39766e2048d2bc`、lint exit=0 fingerprint=`252ad24e526f6728`（audit fully-sealed）；
+  定向测试 29/29 全绿（test_pipeline_framework_gate 2 项 + test_framework_gaps2 + integration1/2 +
+  module_docs）；demo 管线 e2e 3/3（91.5s，真实 PKI/持久化）；沙箱内 fmt exit=0
+  fingerprint=`8d456a2ce09245c7`、lint exit=0 fingerprint=`ee8c60275d86e47f`
+  （COEVO_CONTROL_ARCHIVE 指向主仓工具归档，沙箱路径指纹与维护机基线不同属预期，CI 同款）、定向 29/29
+  全绿；e2e 在沙箱内因 .tools/gmssl 未跟踪不入沙箱而无法实跑，以主仓同 pin 实测 3/3 为证；
+  review_sandbox check violations=[]，已 discard。
+- 独立安全审查（security-reviewer 契约，只读沙箱 integ3_security，pin=`e2c4cb1`）：STRIDE 逐项 PASS；
+  Critical/High/Medium 0；探针证据：MVP_FIXED_CHAIN 门禁 accepted、缺注册代理 rejected（"not
+  registered"）、小数秒 ISO accepted 且 7 类畸形时间戳全部拒绝、异常分支 fail-closed、失败消息无密钥
+  标记、变更模块导入面为 stdlib + 一阶包内模块；Low 1：validate_product_chain 异常分支构造 rejected
+  结果时 validated_at 未经 L7 校验原样回传（fail-closed 不受影响，审计投影可能携带畸形时间戳，建议后续
+  收敛为共享校验构造器）；check violations=[]，已 discard。
+- 治理偏差留痕：verifier/security-reviewer 子代理派生被环境拦截（agent thread limit reached，与
+  GAPS-1/2、AC-8/9 同款限制），按既有预案由编排者在只读沙箱内按角色契约实际执行并留痕，零违规。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-INTEGRATION-3 行（无悬空）；BACKLOG 置 done；STATE 置
+  phase=decide / status=done / last_verified_commit=`e2c4cb1`；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git 历史回退 `e2c4cb1`。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-3 登记并开始执行（真实产品接线）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

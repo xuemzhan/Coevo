@@ -9,7 +9,7 @@ class TraceabilityTests(unittest.TestCase):
             with self.assertRaises(ValueError): trace.safe_path(value)
     def test_eng_base_is_fully_covered(self):
         result=trace.check("ENG-BASE")
-        self.assertEqual(43,result["checked"])
+        self.assertEqual(49,result["checked"])
         self.assertEqual(0,result["missing"])
         self.assertTrue(all(item["status"] == "done" for item in result["items"]))
     def test_eng_loop_env_is_fully_covered(self):
