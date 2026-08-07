@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-9 登记并开始执行（K8s CRD 纸面清单生成器，CTAF M9）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：推进 CTAF 路线图 M9（K8s CRD 纸面清单生成器；M8 为跨组织演练，属外部
+  协调型交付，留待 staging 环境另行排期），登记 `US-16-AC-9-k8s-crd-listing-v0.1`
+  （ready，dependencies=[AC-3/AC-5/AC-2/AC-7]）；US-16 故事新增 AC-9（5 项验收
+  标准）；STATE 切换至 US-16 / US-16-AC-9。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — US-16-AC-8 Hybrid Orchestrator 完成（增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`US-16-AC-8-hybrid-orchestrator-v0.1`（CTAF §6.6 / §8 / M7）。

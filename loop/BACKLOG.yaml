@@ -1148,3 +1148,13 @@ items:
       - tests/unit/test_framework_orchestrator.py
     security_review: true
     protocol_review: false
+  # ---------- US-16-AC-9（CTAF v0.4.1 / M9，2026-08-08 用户指令继续开发） ----------
+  - id: US-16-AC-9-k8s-crd-listing-v0.1
+    story: US-16
+    title: 框架层 K8s CRD 纸面清单生成器（CTAF §14.2 / §16.4 / M9）：从能力/Tool/Policy/Plan 声明生成确定性纸面清单（规范 JSON + YAML 渲染子集）、listing_fingerprint 可哈希、opt-in 零 IO 副作用、清单结构校验（字段白名单/重复键/未知字段/BOM/超限 fail-closed）、纯函数离线 stdlib + L17（k8s-crd-listing.md）
+    status: ready
+    dependencies: [US-16-AC-3-framework-capability-closedset-v0.1, US-16-AC-5-framework-tool-registry-v0.1, US-16-AC-2-framework-policy-abstractions-v0.1, US-16-AC-7-plan-lsp-v0.1]
+    acceptance_tests:
+      - tests/unit/test_framework_k8s_listing.py
+    security_review: true
+    protocol_review: false

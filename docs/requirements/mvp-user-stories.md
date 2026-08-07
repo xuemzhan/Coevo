@@ -440,6 +440,16 @@ MVP用于验证以下三类核心能力：
    纯函数离线 stdlib（LLM / 链 / 执行器全部注入）+ L17 文档守卫
    （hybrid-orchestrator.md）。
 
+**AC-9：K8s CRD 纸面清单生成器（CTAF §14.2 / §16.4 / M9）**
+
+1. 从框架声明（能力注册表 / Tool 注册表 / Policy / Plan）生成确定性声明式
+   纸面清单（规范 JSON + YAML 渲染子集），与 K8s 解耦、不承诺 reconcile loop；
+2. 生成器为纯函数：输入声明集合 → 规范清单字节，确定性可哈希
+   （listing_fingerprint）；
+3. opt-in 沙箱：生成器独立可执行、零 IO 副作用，只读输入；
+4. 清单结构校验：字段白名单 + 重复键 / 未知字段 / BOM / 超限拒绝；
+5. 纯函数、离线、stdlib、审计投影、L17 文档守卫（k8s-crd-listing.md）。
+
 ---
 
 # 二、MVP实施优先级

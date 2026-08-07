@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "US-16",
-  "current_item": "US-16-AC-8-hybrid-orchestrator-v0.1",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "US-16-AC-9-k8s-crd-listing-v0.1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "0c9a352",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T18:44:33.987531Z"
+  "updated_at": "2026-08-07T18:47:02.217713Z"
 }

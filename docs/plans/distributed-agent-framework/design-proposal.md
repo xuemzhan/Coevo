@@ -910,6 +910,10 @@ flowchart TB
 
 ### 16.4 K8s CRD 与 CTA 的真正区别 (v0.4 术语更新, A12 落地)
 
+> 纸面清单落位：`src/coevo/framework/k8s_listing.py`（M9 / US-16-AC-9，
+> 2026-08-08）。仅声明导出、无 reconcile loop；适配映射见
+> `docs/framework/k8s-crd-listing.md`。
+
 > v0.4 改术语 **"discrete-execute + fail-up"** (取代 v0.3 的 "explore-then-execute")。
 
 | 维度 | K8s CRD | CTA v0.4 |

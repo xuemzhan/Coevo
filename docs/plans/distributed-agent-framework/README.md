@@ -85,7 +85,7 @@
 | `plan-lsp.md` | `src/coevo/framework/plan.py` | **M6（已交付 2026-08-08，US-16-AC-7）** | 五项不变量 + L18 + 序列化与指纹同规则 | 10 周 |
 | `hybrid-orchestrator.md` | `src/coevo/framework/orchestrator.py` | **M7（核心切片已交付 2026-08-08，US-16-AC-8）** | validate_plan 前置 + 三模式 + L19 + HOLD 门 | 12 周 |
 | `cross-org-validation.md` | 演练手册 | M8 (14 周) | 跨网 + 跨组织 | 14 周 |
-| `k8s-crd-listing.md` | 纸面清单生成器 | M9 (8 周) opt-in 沙箱 | 与 K8s 解耦 | 8 周 |
+| `k8s-crd-listing.md` | `src/coevo/framework/k8s_listing.py` | **M9（已交付 2026-08-08，US-16-AC-9）** | 与 K8s 解耦 + 确定性可哈希 + YAML 安全引号 | 8 周 |
 
 ## 业务负责人审阅清单（建议逐项签字）
 
