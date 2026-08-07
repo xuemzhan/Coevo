@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-14 第十四轮逐文件深度审查与优化（用户指令"继续"）done
+
+- 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
+  细化每一个模块的README文档"，延续"不做全量质量门"。
+- 审查结论（第十四轮）：
+  - `scripts/run_validation.py`（锁定报告脚本）此前零测试；依赖 PyYAML，
+    已在受控锁链 python（.tools/python/3.14.3 捆绑 yaml 6.0.3）验证可用，
+    属受控环境设计（venv 无 yaml，须用锁链 python 运行）；
+  - 补 4 项测试：JSONC 注释剥离（行/块注释移除、字符串内 `//` 保留）、
+    collect_extra_metrics（opencode.jsonc 权限解析、BACKLOG 状态计数、
+    tool-audit 行数，patch ROOT 到临时目录）、render_text 关键字段。
+- 修复：纯测试增补，无生产代码行为变更。
+- 验证：定向 `E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest
+  tests.unit.test_run_validation` 4 项全绿；**按用户指示未跑全量质量门**。
+- 安全审查：纯测试增补，不涉及生产代码/协议/密码。
+- 决策者：用户；提出者：loop-engineer。回滚条件：定向测试失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-13 第十三轮逐文件深度审查与优化（用户指令）done
 
 - 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
