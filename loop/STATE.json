@@ -3,11 +3,11 @@
   "iteration": 30,
   "current_story": "US-16",
   "current_item": "US-16-AC-9-k8s-crd-listing-v0.1",
-  "phase": "plan",
-  "status": "in-progress",
+  "phase": "decide",
+  "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "0c9a352",
+  "last_verified_commit": "51d4faa",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T18:47:02.217713Z"
+  "updated_at": "2026-08-07T19:32:31.494695Z"
 }

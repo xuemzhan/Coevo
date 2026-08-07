@@ -5457,3 +5457,29 @@ security-reviewer 双签门禁。
 - historical git blobs were scrubbed from repository history on 2026-08-02
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
+## 2026-08-08 -- US-16-AC-9 完成收尾：K8s CRD 纸面清单生成器（M9，豁免全量 quality）
+
+- 工作项：`US-16-AC-9-k8s-crd-listing-v0.1`（CTAF §14.2 / §16.4 / M9）。提交：
+  `76d15f8`（实现）+ `ce352f6`（零 IO 副作用守卫测试）+ `ac95e57`（审计投影
+  按故事修正）+ `51d4faa`（security-review Low 深度上限修复）。
+- 用户指令：继续开发，先不做全量质量门禁；本轮按增量门禁（fmt + lint + 定向
+  测试）执行并豁免留痕（与 2026-08-03 门禁策略一致）。
+- 独立验证（mvp-verifier 契约，只读沙箱 ac9-verify2，pin=`51d4faa`）：
+  fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0（沙箱指纹
+  `f033a91718e4ffe9`）；定向 `test_framework_k8s_listing.py` 9/9、
+  `test_module_docs.py` 4/4 全绿；review_sandbox check violations=[]；已 discard。
+- 独立安全审查（security-reviewer 契约，只读沙箱 ac9-sec2，pin=`51d4faa`）：
+  STRIDE 逐项 PASS，Critical/High/Medium 0；**Low 2** —— ①
+  `validate_listing_bytes` 接受 64KiB 内深度超过 Python 递归上限的合法 JSON，
+  `render_yaml` 触发 RecursionError（fail-closed 缺口），已修复于 `51d4faa`
+  （新增 `MAX_LISTING_DEPTH=64` 迭代深度校验 + 回归测试）；② spec.*[] 项内
+  未知字段未校验（按已批准切片范围仅校验顶层/spec 键，留观察，建议未来按项
+  字段白名单收紧）。无阻断项。
+- 治理偏差留痕：子代理并发额度受限（agent thread limit reached），独立验证与
+  安全审查无法以子代理形式派发；按 AC-8 同款预案由编排者在只读沙箱内按技能
+  与只读契约实际执行（不落盘报告、零违规、证据为沙箱内命令输出与 pin 检查）。
+- 记录：追溯矩阵新增 US-16 | AC-9 行（无悬空）；BACKLOG `US-16-AC-9-*` 置
+  done（含 L17 守卫测试）；STATE 置 US-16 / US-16-AC-9 / phase=decide /
+  status=done / last_verified_commit=`51d4faa`；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed
+  时按 git 历史回退 `51d4faa`。
