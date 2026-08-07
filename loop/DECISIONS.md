@@ -1,5 +1,35 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-6 A2A wire 0.1 + policy_ref 三段绑定完成（增量门禁 + 安全/协议审查，豁免全量 quality）
+
+- 工作项：`US-16-AC-6-a2a-wire-v0.1`（CTAF §7.3 / M5）。
+- 实现：`src/coevo/framework/a2a.py`（A2aMessage / PolicyRef frozen 模型、validate_a2a
+  全字段 fail-closed、verify_policy_ref §7.3.3 五步验证——证书链解析→DER 指纹→
+  spec_hash（排除自指字段，复用 manifest_spec_hash）→SM2 验签（公钥取自证书链）→
+  接受；注入 resolver/verifier 异常与畸形 manifest 深度均 fail-closed；to/from_agent_fields
+  字段映射往返一致；validate_payload_size 64KiB 边界）；`manifest_checker.py` 公开
+  manifest_spec_hash；`__init__.py` 导出；`docs/framework/a2a-protocol.md` +
+  `docs/modules/framework.md` L17；`tests/unit/test_framework_a2a.py` 13 项。
+- 验证（增量门禁，按用户指示豁免全量 quality，留痕）：主仓库定向 126/126 全绿
+  （AC-6 13 项 + 框架族/wire/文档守卫相邻回归）；fmt exit=0
+  fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`252ad24e526f6728`；
+  audit fully-sealed。
+- 审查（security-reviewer + protocol-reviewer 技能，只读沙箱 ac6-sec / ac6-proto，
+  pin=`28c26ac`）：check violations=[]（零违规）、沙箱内定向 45/13 项全绿、已 discard；
+  判定均 PASS：Critical/High 0；Low 2——① manifest_spec_hash 深度嵌套 RecursionError
+  未收敛（verify_policy_ref 非 fail-closed）；② policy_ref.signature 无长度上限
+  （200k-hex 可接受）；均就地修复于 `6ed67b0`（SIGNATURE_MAX_HEX_LEN=1024 + 深度异常
+  拒绝 + 2 项负例测试）。协议面结论：A2A 仅为 `.agent` v1.0 payload 层约定、信封字节
+  T6 不变、字段映射无信息丢失/语义漂移、无需主版本升级。
+- 治理偏差留痕：子代理并发额度受限（agent thread limit reached），安全/协议审查由
+  编排者在只读沙箱内按技能与只读契约实际执行（不落盘、零违规、证据为沙箱内命令输出），
+  与 AC-3/AC-5 同口径；审查后沙箱 check + discard 完成。
+- 提交：`0c0f9c9`（feat）、`28c26ac`（fix bool-int，security-review Low 1）、
+  `6ed67b0`（fix fail-closed hardening，Low 2）+ records。
+- 决策者：用户（"继续开发，但先不要全量质量门禁检查"）；执行：Codex。
+- 下一项：M6（Plan-LSP）/ M7（Hybrid）等在 CTAF v0.4.1 中维持 v0.5 暂缓清单
+  （A2A gossip / MCP-B / K8s CRD），待业务负责人指示。
+
 ## 2026-08-08 — US-16-AC-6 登记并开始执行（A2A wire 0.1 + policy_ref，CTAF M5）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。
@@ -180,7 +210,7 @@
 - 用户指令：继续下一步（起草 US-16 用户故事与 AC，供审批后再进 BACKLOG）。
 - 决策：起草 US-16【框架层】受控智能体声明校验与策略抽象，含 AC-1（manifest-checker，
   对应 M1a / CTAF §5.3，10 项）与 AC-2（Policy 抽象 + validate_plan，对应 M2 /
-  CTAF §6.5，8 项），并给出 AC ↔ 落点 ↔ 测试映射、范围边界与完成定义。
+  CTAF §6.5，8 项），并给出 AC <-> 落点 <-> 测试映射、范围边界与完成定义。
 - 落盘：`docs/plans/US-16-framework-stories-draft.md`（草案，未并入需求文档）。
 - 前置：审批通过后，将 US-16 并入 `docs/requirements/mvp-user-stories.md`、
   `loop/BACKLOG.yaml`（US-16-AC-1 / US-16-AC-2 两条 ready 项）与追溯矩阵；
