@@ -59,6 +59,14 @@ def broken_chain() -> OrchestrationChain:
 
 
 class SharedIsoTests(unittest.TestCase):
+    def test_package_level_export(self) -> None:
+        """verifier finding: package __all__ must actually import the name."""
+
+        from src.coevo.framework import is_iso_utc_z as exported
+
+        self.assertTrue(exported("2026-08-08T08:00:00Z"))
+        self.assertFalse(exported("2026-08-08 08:00:00Z"))
+
     def test_is_iso_utc_z_shared(self) -> None:
         """FRAMEWORK-GAPS-4: one canonical L7 validator."""
 
