@@ -1,5 +1,18 @@
 # Loop 决策记录
 
+## 2026-08-08 — 推送授权（用户明确指令，覆盖仓库默认"不 git push"约束）
+
+- 用户指令："push到github"。
+- 决策：用户（仓库所有者）明确授权将本地 `main` 推送至
+  `origin`（https://github.com/xuemzhan/Coevo.git）；该授权覆盖 AGENTS.md 与
+  loop-engineer 技能中的默认"不执行 git push"约束，仅针对推送动作本身；
+  不授权 merge/tag/release。
+- 落地：`git push origin main` 推送 `e96af06..13728f5`（68 个提交，覆盖
+  CTAF v0.4.1 文档、US-16 框架层 AC-1..AC-9（M1a/M1b/M2/M3/M4/M5/M6/M7/M9）、
+  FRAMEWORK-GAPS-1/2/3、FRAMEWORK-INTEGRATION-1 及全部审查修复与审计封尾）；
+  `origin/main` 与本地 HEAD 一致（0 ahead / 0 behind）。
+- 决策者：用户指令；执行：Codex；记录：Codex。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-1 登记并开始执行（框架接入现有编排）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。
