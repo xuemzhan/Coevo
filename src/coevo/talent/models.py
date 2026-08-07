@@ -48,7 +48,7 @@ class TalentValidationError(TalentRecommenderError):
 
 
 _SAFE_CODE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.\-]{0,63}$")
-_ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 
 
 @dataclass(frozen=True)
@@ -86,11 +86,11 @@ class AvailabilityWindow:
     end: str
 
     def __post_init__(self) -> None:
-        if not _ISO_Z.match(self.start):
+        if not is_iso_utc_z(self.start):
             raise TalentValidationError(
                 f"availability.start must be ISO-8601 UTC 'Z'; got {self.start!r}"
             )
-        if not _ISO_Z.match(self.end):
+        if not is_iso_utc_z(self.end):
             raise TalentValidationError(
                 f"availability.end must be ISO-8601 UTC 'Z'; got {self.end!r}"
             )

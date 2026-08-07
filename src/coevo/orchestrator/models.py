@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 
 class OrchestratorError(Exception):
     """Base class for all US-4 errors. Fail-closed by default."""
@@ -313,7 +313,7 @@ class OrchestrationEvent:
             )
         if not isinstance(self.payload, dict):
             raise OrchestratorValidationError("payload must be a dict")
-        if not isinstance(self.triggered_at, str) or not _ISO_UTC_Z.match(self.triggered_at):
+        if not is_iso_utc_z(self.triggered_at):
             raise OrchestratorValidationError(
                 f"triggered_at must be ISO-8601 UTC 'Z'; got {self.triggered_at!r}"
             )
@@ -354,7 +354,7 @@ class OrchestrationTrace:
             raise OrchestratorValidationError("confirmed_by must be a string")
         if not isinstance(self.detail, str):
             raise OrchestratorValidationError("detail must be a string")
-        if not isinstance(self.recorded_at, str) or not _ISO_UTC_Z.match(self.recorded_at):
+        if not is_iso_utc_z(self.recorded_at):
             raise OrchestratorValidationError(
                 f"recorded_at must be ISO-8601 UTC 'Z'; got {self.recorded_at!r}"
             )
@@ -393,7 +393,7 @@ class OrchestrationReport:
             raise OrchestratorValidationError(
                 "trace must be a tuple of OrchestrationTrace"
             )
-        if not isinstance(self.completed_at, str) or not _ISO_UTC_Z.match(self.completed_at):
+        if not is_iso_utc_z(self.completed_at):
             raise OrchestratorValidationError(
                 f"completed_at must be ISO-8601 UTC 'Z'; got {self.completed_at!r}"
             )

@@ -23,6 +23,8 @@ import dataclasses
 import hashlib
 import json
 from dataclasses import dataclass
+
+from src.coevo.timefmt import is_iso_utc_z
 from typing import Any, Mapping
 
 from src.coevo.identity.models import Actor
@@ -360,7 +362,7 @@ def confirm_real_chain(held: RealChainOutcome, *, preview: PackagePreview,
     """Confirm the stored hold but remain pending package generation."""
     from . import (
         OrchestrationOutcome, OrchestrationReport, OrchestrationStepResult,
-        OrchestrationTrace, OrchestratorValidationError, _ISO_UTC_Z, _SAFE_ID,
+        OrchestrationTrace, OrchestratorValidationError, _SAFE_ID,
     )
     if (not isinstance(held, RealChainOutcome) or held.orch_report.execution_mode != REAL_EXECUTION_MODE
             or held.orch_report.outcome != OrchestrationOutcome.HELD_AT_CONFIRM):
@@ -370,7 +372,7 @@ def confirm_real_chain(held: RealChainOutcome, *, preview: PackagePreview,
         raise OrchestratorValidationError("actor must carry a safe actor_id")
     if not callable(getattr(authorizer, "is_allowed", None)):
         raise OrchestratorValidationError("authorizer must implement is_allowed")
-    if not isinstance(now, str) or not _ISO_UTC_Z.match(now):
+    if not is_iso_utc_z(now):
         raise OrchestratorValidationError("now must be ISO-8601 UTC Z")
     if not isinstance(preview, PackagePreview) or preview != held.package_preview:
         raise OrchestratorValidationError("package preview does not match held context")
@@ -427,7 +429,7 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
     """Build the US-5 package only after the stored confirmation is validated."""
     from . import (
         FailurePolicy, OrchestrationOutcome, OrchestrationStepResult,
-        OrchestratorValidationError, _ISO_UTC_Z,
+        OrchestratorValidationError,
     )
     if (not isinstance(confirmed, RealChainOutcome)
             or confirmed.orch_report.outcome != OrchestrationOutcome.CONFIRMED_PENDING_PACKAGE
@@ -438,7 +440,7 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
     _validate_fixed_chain(registry, chain)
     if not isinstance(executor, RealChainExecutor) or not isinstance(store, RealChainStore):
         raise OrchestratorValidationError("executor/store type is invalid")
-    if not isinstance(now, str) or not _ISO_UTC_Z.match(now):
+    if not is_iso_utc_z(now):
         raise OrchestratorValidationError("now must be ISO-8601 UTC Z")
     if (chain.chain_id != confirmed.chain_id or event.event_id != confirmed.event_id
             or workspace.project_id != confirmed.workspace_project_id):
@@ -582,13 +584,14 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
 def recover_real_chain(event_id: str, *, actor: Actor, authorizer: Authorizer,
                        store: RealChainStore, now: str) -> Any:
     """Manually terminate an interrupted dispatch/build; never retries work."""
-    from . import OrchestratorValidationError, _ISO_UTC_Z, _SAFE_ID
+    from src.coevo.timefmt import is_iso_utc_z
+    from . import OrchestratorValidationError, _SAFE_ID
     actor_id = getattr(actor, "actor_id", None)
     if not isinstance(actor, Actor) or not isinstance(actor_id, str) or not _SAFE_ID.match(actor_id):
         raise OrchestratorValidationError("actor must carry a safe actor_id")
     if not callable(getattr(authorizer, "is_allowed", None)):
         raise OrchestratorValidationError("authorizer must implement is_allowed")
-    if not isinstance(now, str) or not _ISO_UTC_Z.match(now):
+    if not is_iso_utc_z(now):
         raise OrchestratorValidationError("now must be ISO-8601 UTC Z")
     try:
         context = store.recovery_context(event_id)

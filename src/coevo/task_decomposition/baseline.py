@@ -37,7 +37,7 @@ from .models import (
 )
 
 
-_ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 _DELIVERABLE_KINDS = frozenset({"document", "code", "review", "report", "evidence"})
 _SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.\-]{0,63}$")
 
@@ -66,7 +66,7 @@ def _now_utc_iso_z() -> str:
 
 
 def _validate_iso_z(value: str, path: str) -> None:
-    if not isinstance(value, str) or not _ISO_Z.match(value):
+    if not is_iso_utc_z(value):
         raise TaskDecompositionValidationError(
             f"{path} must be ISO-8601 UTC with 'Z' suffix; got {value!r}"
         )

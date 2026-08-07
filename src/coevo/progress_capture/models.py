@@ -19,7 +19,7 @@ _HEX_64 = re.compile(r"^[0-9a-f]{64}$")
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 
 class ProgressCaptureError(Exception):
     """Base class for all US-8 errors. Fail-closed by default."""
@@ -349,7 +349,7 @@ def _check_hex64(value: object, *, field: str) -> None:
 
 def _check_iso_utc(value: object, *, field: str) -> None:
     _check_non_empty_str(value, field=field)
-    if not _ISO_UTC_Z.match(value):  # type: ignore[arg-type]
+    if not is_iso_utc_z(value):
         raise ProgressCaptureValidationError(
             f"{field} must be ISO-8601 UTC with 'Z' suffix; got {value!r}"
         )

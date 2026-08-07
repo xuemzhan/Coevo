@@ -14,7 +14,7 @@ from pathlib import Path
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 
 _HEX_64 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -223,7 +223,7 @@ class CockpitRequest:
                     f"artifact_path must be a non-traversing workspace-relative path; "
                     f"got {self.artifact_path!r}"
                 )
-        if not isinstance(self.ts, str) or not _ISO_UTC_Z.match(self.ts):
+        if not is_iso_utc_z(self.ts):
             raise CockpitValidationError(
                 f"ts must be ISO-8601 UTC 'Z'; got {self.ts!r}"
             )
@@ -251,7 +251,7 @@ class CockpitResponse:
                 raise CockpitValidationError(f"{label} must be a string")
         if not isinstance(self.payload, dict):
             raise CockpitValidationError("payload must be a dict")
-        if not isinstance(self.ts, str) or not _ISO_UTC_Z.match(self.ts):
+        if not is_iso_utc_z(self.ts):
             raise CockpitValidationError(
                 f"ts must be ISO-8601 UTC 'Z'; got {self.ts!r}"
             )
@@ -317,7 +317,7 @@ class CockpitServerState:
             raise CockpitValidationError(
                 "role_views must be a tuple of RoleView"
             )
-        if self.started_at and not _ISO_UTC_Z.match(self.started_at):
+        if self.started_at and not is_iso_utc_z(self.started_at):
             raise CockpitValidationError(
                 f"started_at must be ISO-8601 UTC 'Z'; got {self.started_at!r}"
             )

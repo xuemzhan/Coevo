@@ -70,7 +70,7 @@ from typing import Mapping
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
 # ISO-8601 UTC 'Z' -- strict format used everywhere else (US-8 / US-9 / US-13).
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 
 # Result codes that mirror what audit_log.py's append_record already uses,
 # plus the explicit "blocked" code introduced for AC-1 interception.
@@ -179,7 +179,7 @@ class AuditEvent:
     record_hash: str = ""
 
     def __post_init__(self) -> None:
-        if not isinstance(self.ts, str) or not _ISO_UTC_Z.match(self.ts):
+        if not is_iso_utc_z(self.ts):
             raise AuditEventValidationError(
                 f"AuditEvent.ts must be ISO-8601 UTC with 'Z' suffix; got {self.ts!r}"
             )
@@ -303,7 +303,7 @@ class InterceptionDecision:
             )
         if not isinstance(self.detail, str):
             raise AuditEventValidationError("detail must be a string")
-        if not isinstance(self.decided_at, str) or not _ISO_UTC_Z.match(self.decided_at):
+        if not is_iso_utc_z(self.decided_at):
             raise AuditEventValidationError(
                 f"decided_at must be ISO-8601 UTC 'Z'; got {self.decided_at!r}"
             )
@@ -361,11 +361,11 @@ class AuditQuery:
             raise AuditQueryValidationError(
                 f"result must be AuditEventResult; got {self.result!r}"
             )
-        if self.ts_from and not _ISO_UTC_Z.match(self.ts_from):
+        if self.ts_from and not is_iso_utc_z(self.ts_from):
             raise AuditQueryValidationError(
                 f"ts_from must be ISO-8601 UTC 'Z'; got {self.ts_from!r}"
             )
-        if self.ts_to and not _ISO_UTC_Z.match(self.ts_to):
+        if self.ts_to and not is_iso_utc_z(self.ts_to):
             raise AuditQueryValidationError(
                 f"ts_to must be ISO-8601 UTC 'Z'; got {self.ts_to!r}"
             )
@@ -433,7 +433,7 @@ class AuditExportPayload:
             raise AuditEventValidationError("byte_count must be a non-negative integer")
         if not isinstance(self.event_count, int) or self.event_count < 0:
             raise AuditEventValidationError("event_count must be a non-negative integer")
-        if not isinstance(self.exported_at, str) or not _ISO_UTC_Z.match(self.exported_at):
+        if not is_iso_utc_z(self.exported_at):
             raise AuditEventValidationError(
                 f"exported_at must be ISO-8601 UTC 'Z'; got {self.exported_at!r}"
             )

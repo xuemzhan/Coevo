@@ -16,7 +16,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .models import CockpitRequest, CockpitResponse, CockpitResponseStatus, CockpitRoute, CockpitServerConfig, CockpitServerState, CockpitValidationError, LOOPBACK_HOST, RoleView, STATIC_ROOT, WPSAllowList, WorkspaceView, _ISO_UTC_Z, _hash_path
+from src.coevo.timefmt import is_iso_utc_z
+from .models import CockpitRequest, CockpitResponse, CockpitResponseStatus, CockpitRoute, CockpitServerConfig, CockpitServerState, CockpitValidationError, LOOPBACK_HOST, RoleView, STATIC_ROOT, WPSAllowList, WorkspaceView, _hash_path
 
 class CockpitFacade:
     """Pure-function cockpit dispatch (US-7 AC-5..AC-9)."""
@@ -62,7 +63,7 @@ class CockpitFacade:
             raise CockpitValidationError("request must be a CockpitRequest")
         if not isinstance(server_state, CockpitServerState):
             raise CockpitValidationError("server_state must be a CockpitServerState")
-        if not isinstance(now, str) or not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise CockpitValidationError(f"now must be ISO-8601 UTC 'Z'; got {now!r}")
 
         # AC-1 fail-closed: refuse dispatch if the server isn't bound to loopback.

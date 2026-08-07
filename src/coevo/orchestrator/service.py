@@ -13,7 +13,8 @@ from src.coevo.workspace.models import WorkspaceEntry
 from ._real_chain import REAL_EXECUTION_MODE, PackagePreview, RealChainExecutor, RealChainOutcome, confirm_real_chain, dispatch_real_chain, recover_real_chain, resume_real_chain
 from .real_chain_store import RealChainStore
 
-from .models import AgentRegistry, AgentStatus, FailurePolicy, OrchestrationChain, OrchestrationEvent, OrchestrationOutcome, OrchestrationReport, OrchestrationStep, OrchestrationStepKind, OrchestrationStepResult, OrchestrationTrace, OrchestratorConflictError, OrchestratorValidationError, _ISO_UTC_Z, _SAFE_ID, _make_report_id, _make_trace_id
+from src.coevo.timefmt import is_iso_utc_z
+from .models import AgentRegistry, AgentStatus, FailurePolicy, OrchestrationChain, OrchestrationEvent, OrchestrationOutcome, OrchestrationReport, OrchestrationStep, OrchestrationStepKind, OrchestrationStepResult, OrchestrationTrace, OrchestratorConflictError, OrchestratorValidationError, _SAFE_ID, _make_report_id, _make_trace_id
 
 
 def _append_trace(
@@ -81,7 +82,7 @@ class Orchestrator:
             raise OrchestratorValidationError(
                 "workspace must be a WorkspaceEntry instance"
             )
-        if not isinstance(now, str) or not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise OrchestratorValidationError(
                 f"now must be ISO-8601 UTC 'Z'; got {now!r}"
             )
@@ -248,7 +249,7 @@ class Orchestrator:
             raise OrchestratorValidationError(
                 f"confirmed_by must be safe-id; got {confirmed_by!r}"
             )
-        if not isinstance(now, str) or not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise OrchestratorValidationError(
                 f"now must be ISO-8601 UTC 'Z'; got {now!r}"
             )

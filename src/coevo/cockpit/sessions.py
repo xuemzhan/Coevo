@@ -20,9 +20,7 @@ from .models import CockpitValidationError
 
 
 
-_ISO_UTC_Z: Final[re.Pattern[str]] = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z"
-)
+from src.coevo.timefmt import is_iso_utc_z
 
 
 DEFAULT_MAX_SESSIONS: Final[int] = 64
@@ -73,7 +71,7 @@ class CockpitSessionManager:
     def create(self, now: str | None = None) -> str:
         """Issue a fresh raw bearer token; only its digest is retained."""
         now = now or now_utc_iso_z()
-        if not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise CockpitValidationError("now must be ISO-8601 UTC Z")
         token = secrets.token_urlsafe(32)
         self._sessions[self._digest(token)] = (now, now)
@@ -85,7 +83,7 @@ class CockpitSessionManager:
         if not isinstance(token, str) or not token:
             return False
         now = now or now_utc_iso_z()
-        if not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             return False
         digest = self._digest(token)
         entry = self._sessions.get(digest)
@@ -115,7 +113,7 @@ class CockpitSessionManager:
         if not isinstance(token, str) or not token:
             raise CockpitValidationError("token must be a non-empty string")
         now = now or now_utc_iso_z()
-        if not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise CockpitValidationError("now must be ISO-8601 UTC Z")
         if not self.revoke(token):
             raise CockpitValidationError("token is not a valid session")

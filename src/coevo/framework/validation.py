@@ -9,11 +9,10 @@ any injected exception is treated as a rejection (fail-closed).
 
 from __future__ import annotations
 
-import datetime as _datetime
-import re
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
+from src.coevo.timefmt import is_iso_utc_z
 from src.coevo.framework.lifecycle import (
     LifecycleState,
     validate_transition_path,
@@ -42,9 +41,6 @@ VALIDATION_PROJECTION_KEYS = frozenset(
         "failure_reason",
     }
 )
-
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z\Z")
-
 
 @runtime_checkable
 class ToolScopeChecker(Protocol):
@@ -187,21 +183,8 @@ def _validate_agent_capabilities(plan: Plan) -> None:
                 ) from None
 
 
-def is_iso_utc_z(value: str) -> bool:
-    """Shared L7 validator: strict ISO-8601 UTC with trailing Z (incl. calendar
-    validity and optional fractional seconds).  Used by a2a / memory /
-    orchestrator / integration to keep one canonical time check."""
-
-    if not isinstance(value, str):
-        return False
-    if not _ISO_UTC_Z.match(value):
-        return False
-    try:
-        base = value[:-1].split(".")[0] + "Z"
-        _datetime.datetime.strptime(base, "%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        return False
-    return True
+# ``is_iso_utc_z`` is imported from :mod:`src.coevo.timefmt` and re-exported so
+# framework callers (a2a / memory / orchestrator / integration) keep the API.
 
 
 def _validate_tool_scopes(

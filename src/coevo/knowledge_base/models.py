@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 
 _CLASSIFICATION_RANK: dict[str, int] = {
     "public": 0,
@@ -102,7 +102,7 @@ class ReusableTemplate:
             raise KnowledgeBaseValidationError("scope must be a non-empty string")
         if not isinstance(self.body, dict):
             raise KnowledgeBaseValidationError("body must be a dict")
-        if not isinstance(self.extracted_at, str) or not _ISO_UTC_Z.match(self.extracted_at):
+        if not is_iso_utc_z(self.extracted_at):
             raise KnowledgeBaseValidationError(
                 f"extracted_at must be ISO-8601 UTC 'Z'; got {self.extracted_at!r}"
             )
@@ -146,7 +146,7 @@ class KnowledgeEntry:
             raise KnowledgeBaseValidationError(
                 "requires_owner_approval must be bool"
             )
-        if not isinstance(self.recorded_at, str) or not _ISO_UTC_Z.match(self.recorded_at):
+        if not is_iso_utc_z(self.recorded_at):
             raise KnowledgeBaseValidationError(
                 f"recorded_at must be ISO-8601 UTC 'Z'; got {self.recorded_at!r}"
             )
@@ -181,7 +181,7 @@ class ReviewDecision:
             )
         if not isinstance(self.reason, str):
             raise KnowledgeBaseValidationError("reason must be a string")
-        if not isinstance(self.decided_at, str) or not _ISO_UTC_Z.match(self.decided_at):
+        if not is_iso_utc_z(self.decided_at):
             raise KnowledgeBaseValidationError(
                 f"decided_at must be ISO-8601 UTC 'Z'; got {self.decided_at!r}"
             )
@@ -221,7 +221,7 @@ class RetrospectiveDraft:
             raise KnowledgeBaseValidationError(
                 "sources must be a tuple of non-empty strings"
             )
-        if not isinstance(self.generated_at, str) or not _ISO_UTC_Z.match(self.generated_at):
+        if not is_iso_utc_z(self.generated_at):
             raise KnowledgeBaseValidationError(
                 f"generated_at must be ISO-8601 UTC 'Z'; got {self.generated_at!r}"
             )
@@ -323,7 +323,7 @@ def _check_safe_id(value: object, *, field: str) -> None:
         )
 
 def _check_iso_utc(value: object, *, field: str) -> None:
-    if not isinstance(value, str) or not _ISO_UTC_Z.match(value):
+    if not is_iso_utc_z(value):
         raise KnowledgeBaseValidationError(
             f"{field} must be ISO-8601 UTC 'Z'; got {value!r}"
         )

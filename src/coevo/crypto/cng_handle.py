@@ -55,9 +55,7 @@ _HELPER_PATH: Final[Path] = Path(__file__).resolve().parents[3] / "scripts" / "c
 _HELPER_SIZE: Final[int] = 6118
 _HELPER_SHA256: Final[str] = "f01e88716658e837c191ca15aa20c6a85423b557bb4efd0661ca350d3d1361ab"
 _MAX_INPUT_BYTES: Final[int] = 64 * 1024
-_ISO_RE: Final[re.Pattern[str]] = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z"
-)
+from src.coevo.timefmt import is_iso_utc_z
 
 
 class CngKekError(RuntimeError):
@@ -106,7 +104,7 @@ class CngKekReference:
             r"[0-9a-f]{64}", self.public_sha256
         ):
             raise CngKekValidationError("public_sha256 must be 64-char lowercase hex")
-        if not isinstance(self.created_at, str) or not _ISO_RE.fullmatch(self.created_at):
+        if not is_iso_utc_z(self.created_at):
             raise CngKekValidationError("created_at must be ISO-8601 UTC Z")
 
     def to_mapping(self) -> dict[str, str]:

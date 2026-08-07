@@ -49,9 +49,7 @@ from . import (
 )
 
 
-_ISO_UTC_Z: Final[re.Pattern[str]] = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z"
-)
+from src.coevo.timefmt import is_iso_utc_z
 _HEX_64: Final[re.Pattern[str]] = re.compile(r"^[0-9a-f]{64}$")
 
 DEFAULT_POLL_INTERVAL_SEC: float = 1.0
@@ -119,7 +117,7 @@ class FileChangeEvent:
             raise ProgressCaptureValidationError("digest_hex must be 64-hex or empty")
         if not isinstance(self.media_type, str) or not self.media_type:
             raise ProgressCaptureValidationError("media_type must be non-empty")
-        if not isinstance(self.ts, str) or not _ISO_UTC_Z.match(self.ts):
+        if not is_iso_utc_z(self.ts):
             raise ProgressCaptureValidationError("ts must be ISO-8601 UTC Z")
 
 
@@ -215,7 +213,7 @@ class WorkspaceWatcher:
     def scan(self, now: str | None = None) -> tuple[FileChangeEvent, ...]:
         """Compare the filesystem to the last snapshot and emit events."""
         now = now or _now_utc_iso_z()
-        if not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise ProgressCaptureValidationError("now must be ISO-8601 UTC Z")
         current = self._collect(self._snapshot)
         events: list[FileChangeEvent] = []

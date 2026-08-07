@@ -17,8 +17,9 @@ from __future__ import annotations
 import hashlib
 import json
 
+from src.coevo.timefmt import is_iso_utc_z
+
 from .models import (
-    _ISO_UTC_Z,
     _SAFE_ID,
     AuditEvent,
     AuditEventValidationError,
@@ -72,11 +73,11 @@ class SecurityAuditFacade:
                 raise AuditEventValidationError(
                     f"{field_name} must be a non-empty string"
                 )
-        if not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise AuditEventValidationError(
                 f"now must be ISO-8601 UTC 'Z'; got {now!r}"
             )
-        if expiration_ts and not _ISO_UTC_Z.match(expiration_ts):
+        if expiration_ts and not is_iso_utc_z(expiration_ts):
             raise AuditEventValidationError(
                 f"expiration_ts must be ISO-8601 UTC 'Z' or empty; got {expiration_ts!r}"
             )
@@ -194,7 +195,7 @@ class SecurityAuditFacade:
             raise AuditEventValidationError(
                 f"fmt must be AuditExportFormat; got {fmt!r}"
             )
-        if not _ISO_UTC_Z.match(now):
+        if not is_iso_utc_z(now):
             raise AuditEventValidationError(
                 f"now must be ISO-8601 UTC 'Z'; got {now!r}"
             )

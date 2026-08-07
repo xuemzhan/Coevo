@@ -55,7 +55,7 @@ from .models import (
 
 
 _SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.\-]{0,63}$")
-_ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z\Z")
+from src.coevo.timefmt import is_iso_utc_z
 _MAX_SUGGESTED_TASKS = 8
 _MAX_SUGGESTED_EDGES = 16
 _MAX_STRING_BYTES = 512
@@ -309,7 +309,7 @@ class TaskDecompositionAgent:
                     or len(value.encode("utf-8")) > _MAX_STRING_BYTES
                 ):
                     raise ModelValidationError(f"invalid {name}")
-            if not _ISO_Z.fullmatch(plan_start) or not _ISO_Z.fullmatch(plan_end):
+            if not is_iso_utc_z(plan_start) or not is_iso_utc_z(plan_end):
                 raise ModelValidationError("task window must be ISO-8601 Z")
             if plan_end < plan_start:
                 raise ModelValidationError("task window is inverted")
