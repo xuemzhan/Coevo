@@ -27,6 +27,49 @@ METADATA_KEYS = frozenset({"schema_version", "generated_at"})
 SPEC_KEYS = frozenset({"capabilities", "tools", "policies", "plans"})
 MAX_LISTING_BYTES = 64 * 1024
 MAX_LISTING_DEPTH = 64
+CAPABILITY_ITEM_KEYS = frozenset(
+    {"name", "kind", "agent_capability", "requires_approved_product"}
+)
+TOOL_ITEM_KEYS = frozenset(
+    {
+        "tool_id",
+        "tool_version",
+        "display_name",
+        "description",
+        "side_effects",
+        "requires_consent",
+        "timeout_sec",
+        "size_in_bytes_max",
+        "crypto_scope",
+        "audit_required",
+    }
+)
+POLICY_ITEM_KEYS = frozenset(
+    {
+        "policy_id",
+        "policy_version",
+        "profile",
+        "max_recover_attempts",
+        "dispatch_timeout_sec",
+        "plan_total_timeout_sec",
+    }
+)
+PLAN_ITEM_KEYS = frozenset(
+    {
+        "plan_id",
+        "plan_version",
+        "policy_profile",
+        "policy_version",
+        "node_count",
+        "edge_count",
+    }
+)
+ITEM_KEYS = {
+    "capabilities": CAPABILITY_ITEM_KEYS,
+    "tools": TOOL_ITEM_KEYS,
+    "policies": POLICY_ITEM_KEYS,
+    "plans": PLAN_ITEM_KEYS,
+}
 
 
 class ListingValidationError(Exception):
@@ -174,8 +217,15 @@ def validate_listing_bytes(data: bytes) -> dict[str, Any]:
         raise ListingValidationError("spec must be an object")
     _check_keys(spec, SPEC_KEYS, "spec")
     for section in ("capabilities", "tools", "policies", "plans"):
-        if not isinstance(spec.get(section), list):
+        items = spec.get(section)
+        if not isinstance(items, list):
             raise ListingValidationError(f"spec.{section} must be a list")
+        for index, item in enumerate(items):
+            if not isinstance(item, dict):
+                raise ListingValidationError(
+                    f"spec.{section}[{index}] must be an object"
+                )
+            _check_keys(item, ITEM_KEYS[section], f"{section} item")
     return parsed
 
 

@@ -48,6 +48,7 @@ from src.coevo.framework.capability import (
 )
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
+_SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 _HEX = frozenset("0123456789abcdefABCDEF")
 
 MAX_MANIFEST_BYTES = 64 * 1024  # parity with .agent envelope limit (§7.1)
@@ -327,6 +328,10 @@ def _validate(
     semantic_version = _require_str(
         metadata, "semantic_version", "metadata.semantic_version"
     )
+    if not _SEMVER.match(semantic_version):
+        raise _InvalidManifest(
+            f"semantic_version must be semver (L7): {semantic_version!r}"
+        )
 
     spec = parsed.get("spec")
     if not isinstance(spec, dict):

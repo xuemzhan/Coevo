@@ -1159,3 +1159,13 @@ items:
       - tests/unit/test_module_docs.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-GAPS-1（2026-08-08 用户指令继续开发；框架审查观察项收口） ----------
+  - id: FRAMEWORK-GAPS-1
+    story: ENG-BASE
+    title: 框架审查观察项收口：semver/ISO-8601 格式校验（manifest semantic_version / a2a created_at / memory occurred_at，L7）、Policy 超时上界（Info4）、Orchestrator 链 provider 异常收敛 + 审计投影补 validated_at（Low）、K8s 清单 spec 项内未知字段白名单（Low）、文档化取舍（trusted_anchor 委托 L2 / 审计脱敏接线 L4 / 宽捕获 Info5）；纯函数 stdlib + L17
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_framework_gaps.py
+    security_review: true
+    protocol_review: false

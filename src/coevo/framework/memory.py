@@ -26,6 +26,7 @@ from typing import Any, Protocol, runtime_checkable
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
+_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 REDACTION_PREFIX = "REDACTED:"
 MEMORY_PROJECTION_KEYS = frozenset(
@@ -148,8 +149,10 @@ def validate_record(record: MemoryRecord) -> None:
         raise MemoryValidationError("record_id does not match the record fingerprint")
     if not _SAFE_ID.match(record.project_id):
         raise MemoryValidationError("project_id must be a safe-id")
-    if not record.occurred_at:
-        raise MemoryValidationError("occurred_at is required")
+    if not _ISO_UTC_Z.match(record.occurred_at):
+        raise MemoryValidationError(
+            "occurred_at must be ISO-8601 UTC with trailing Z (L7)"
+        )
     if not isinstance(record.fields, tuple) or not all(
         isinstance(key, str) and isinstance(value, str)
         for key, value in record.fields

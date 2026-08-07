@@ -18,6 +18,11 @@ PROFILES = frozenset({"INTERACTIVE", "BATCH", "AUDIT_ONLY", "EMERGENCY"})
 MAX_RECOVER_ATTEMPTS_LIMIT = 3  # L16 / §8.3 "recover 计数 ≥ 3 → ESCALATED"
 EMERGENCY_PLAN_TOTAL_TIMEOUT_MAX_SEC = 60
 EMERGENCY_POST_HOC_CONFIRM_WINDOW_SEC = 30 * 60
+TIMEOUT_UPPER_BOUNDS = {
+    "dispatch_timeout_sec": 600,
+    "plan_total_timeout_sec": 7200,
+    "consent_timeout_sec": 7200,
+}
 
 
 class PolicyValidationError(Exception):
@@ -136,10 +141,25 @@ def validate_policy(policy: Policy) -> None:
     timeout = policy.timeout_profile
     if timeout.dispatch_timeout_sec <= 0:
         raise PolicyValidationError("dispatch_timeout_sec must be positive")
+    if timeout.dispatch_timeout_sec > TIMEOUT_UPPER_BOUNDS["dispatch_timeout_sec"]:
+        raise PolicyValidationError(
+            f"dispatch_timeout_sec exceeds "
+            f"{TIMEOUT_UPPER_BOUNDS['dispatch_timeout_sec']}s upper bound (Info4)"
+        )
     if timeout.plan_total_timeout_sec <= 0:
         raise PolicyValidationError("plan_total_timeout_sec must be positive")
+    if timeout.plan_total_timeout_sec > TIMEOUT_UPPER_BOUNDS["plan_total_timeout_sec"]:
+        raise PolicyValidationError(
+            f"plan_total_timeout_sec exceeds "
+            f"{TIMEOUT_UPPER_BOUNDS['plan_total_timeout_sec']}s upper bound (Info4)"
+        )
     if timeout.consent_timeout_sec < 0:
         raise PolicyValidationError("consent_timeout_sec must be non-negative")
+    if timeout.consent_timeout_sec > TIMEOUT_UPPER_BOUNDS["consent_timeout_sec"]:
+        raise PolicyValidationError(
+            f"consent_timeout_sec exceeds "
+            f"{TIMEOUT_UPPER_BOUNDS['consent_timeout_sec']}s upper bound (Info4)"
+        )
     retry = policy.retry_profile
     if not 1 <= retry.max_recover_attempts <= MAX_RECOVER_ATTEMPTS_LIMIT:
         raise PolicyValidationError(

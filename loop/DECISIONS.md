@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-1 登记并开始执行（框架审查观察项收口）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：框架层代码里程碑（M1..M9 除 M8 演练）已全部完成，本轮收敛 AC-2/AC-6/
+  AC-8/AC-9 各轮 security-review 留存的 Low/Info 观察项，登记
+  `FRAMEWORK-GAPS-1`（ENG-BASE，ready）；STATE 切换至 ENG-BASE /
+  FRAMEWORK-GAPS-1。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — US-16-AC-9 登记并开始执行（K8s CRD 纸面清单生成器，CTAF M9）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

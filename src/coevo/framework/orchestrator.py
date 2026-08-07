@@ -44,7 +44,7 @@ from src.coevo.framework.validation import (
 )
 
 ORCHESTRATION_PROJECTION_KEYS = frozenset(
-    {"accepted", "mode", "status", "plan_hash", "failure_reason"}
+    {"accepted", "mode", "status", "plan_hash", "validated_at", "failure_reason"}
 )
 
 
@@ -101,6 +101,7 @@ class OrchestrationOutcome:
     mode: OrchestrationMode
     status: OrchestrationStatus
     plan_hash: str
+    validated_at: str
     failure_reason: str | None
 
     def to_audit_record(self) -> dict[str, object]:
@@ -109,6 +110,7 @@ class OrchestrationOutcome:
             "mode": self.mode.value,
             "status": self.status.value,
             "plan_hash": self.plan_hash,
+            "validated_at": self.validated_at,
             "failure_reason": self.failure_reason,
         }
 
@@ -173,7 +175,13 @@ def plan_for(
 
     if not isinstance(mode, OrchestrationMode):
         raise OrchestrationError("mode must be an OrchestrationMode member")
-    fallback = chain_plan(task_id, static_chain_provider.chain_for(task_id), policy)
+    try:
+        chain_steps = static_chain_provider.chain_for(task_id)
+    except Exception as exc:  # noqa: BLE001 - injected chain fails closed
+        raise OrchestrationError(
+            f"static chain provider failed: {type(exc).__name__}"
+        ) from exc
+    fallback = chain_plan(task_id, chain_steps, policy)
     if mode is OrchestrationMode.STATE_MACHINE:
         return fallback
     if mode is OrchestrationMode.HYBRID and _has_hold(fallback):
@@ -235,6 +243,7 @@ def dispatch(
             mode=mode,
             status=OrchestrationStatus.REJECTED,
             plan_hash=validation.plan_hash,
+            validated_at=validated_at,
             failure_reason=validation.failure_reason,
         )
     if _has_hold(plan):
@@ -243,6 +252,7 @@ def dispatch(
             mode=mode,
             status=OrchestrationStatus.HELD,
             plan_hash=validation.plan_hash,
+            validated_at=validated_at,
             failure_reason=None,
         )
     try:
@@ -253,6 +263,7 @@ def dispatch(
             mode=mode,
             status=OrchestrationStatus.ESCALATED,
             plan_hash=validation.plan_hash,
+            validated_at=validated_at,
             failure_reason=f"execution failed: {type(exc).__name__}",
         )
     if not isinstance(result, ExecutionResult) or not result.ok:
@@ -261,6 +272,7 @@ def dispatch(
             mode=mode,
             status=OrchestrationStatus.ESCALATED,
             plan_hash=validation.plan_hash,
+            validated_at=validated_at,
             failure_reason="execution failed (audit RECOVER path)",
         )
     return OrchestrationOutcome(
@@ -268,6 +280,7 @@ def dispatch(
         mode=mode,
         status=OrchestrationStatus.COMPLETED,
         plan_hash=validation.plan_hash,
+        validated_at=validated_at,
         failure_reason=None,
     )
 
@@ -277,6 +290,7 @@ def transition(
     *,
     plan_hash: str,
     path: tuple[LifecycleState, ...],
+    validated_at: str = "",
 ) -> OrchestrationOutcome:
     """Validate an eight-state path (L19) and report the terminal status."""
 
@@ -287,6 +301,7 @@ def transition(
             mode=mode,
             status=OrchestrationStatus.REJECTED,
             plan_hash=plan_hash,
+            validated_at=validated_at,
             failure_reason=reason,
         )
     terminal = path[-1]
@@ -303,5 +318,6 @@ def transition(
         mode=mode,
         status=status,
         plan_hash=plan_hash,
+        validated_at=validated_at,
         failure_reason=None,
     )

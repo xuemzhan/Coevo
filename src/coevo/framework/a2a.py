@@ -24,6 +24,7 @@ from src.coevo.framework.manifest_checker import _InvalidManifest, manifest_spec
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _HEX = frozenset("0123456789abcdefABCDEF")
+_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 ENVELOPE_MAX_BYTES = 64 * 1024  # protocol §7.1 parity
 # SM2 signatures are 64 bytes (128 hex chars); 1024 hex chars leaves generous
@@ -129,8 +130,10 @@ def validate_a2a(message: A2aMessage) -> None:
         raise A2aValidationError("sequence_no must be a non-negative integer")
     if not isinstance(message.business_correlation_key, str) or not message.business_correlation_key:
         raise A2aValidationError("business_correlation_key is required")
-    if not message.created_at:
-        raise A2aValidationError("created_at is required")
+    if not _ISO_UTC_Z.match(message.created_at):
+        raise A2aValidationError(
+            "created_at must be ISO-8601 UTC with trailing Z (L7)"
+        )
     try:
         resolve_capability(message.purpose)
     except CapabilityValidationError as exc:
