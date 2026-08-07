@@ -16,6 +16,10 @@ from src.coevo.framework.lifecycle import (
     LifecycleState,
     validate_transition_path,
 )
+from src.coevo.framework.capability import (
+    CapabilityValidationError,
+    resolve_capability,
+)
 from src.coevo.framework.plan import (
     Plan,
     PlanNodeKind,
@@ -24,7 +28,6 @@ from src.coevo.framework.plan import (
     validate_plan_structure,
 )
 from src.coevo.framework.policy import Policy, PolicyValidationError
-from src.coevo.orchestrator.models import AgentCapability
 
 VALIDATION_PROJECTION_KEYS = frozenset(
     {
@@ -137,8 +140,8 @@ def _validate_agent_capabilities(plan: Plan) -> None:
     for node in plan.nodes:
         if node.kind is PlanNodeKind.AGENT:
             try:
-                AgentCapability(node.agent_capability)
-            except ValueError:
+                resolve_capability(node.agent_capability)
+            except CapabilityValidationError:
                 raise PlanValidationError(
                     f"AGENT node capability outside the closed set: "
                     f"{node.agent_capability!r}"

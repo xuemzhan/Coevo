@@ -1088,3 +1088,13 @@ items:
       - tests/unit/test_framework_lifecycle.py
     security_review: true
     protocol_review: false
+  # ---------- US-16-AC-3（CTAF v0.4.1 / M1b，2026-08-08 用户指令继续开发） ----------
+  - id: US-16-AC-3-framework-capability-closedset-v0.1
+    story: US-16
+    title: 框架层能力闭集收敛（CTAF §5.2 / M1b）：能力注册表（MVP 映射 AgentCapability / 框架抽象 PLANNER..HUMAN_GATE / CRYPTO_PROXY 限 APPROVED_PRODUCT）、双名解析、manifest-checker 校验切换、双向一致性测试、capability-closedset.md 文档
+    status: ready
+    dependencies: [US-16-AC-1-framework-manifest-checker-v0.1]
+    acceptance_tests:
+      - tests/unit/test_framework_capability.py
+    security_review: true
+    protocol_review: false

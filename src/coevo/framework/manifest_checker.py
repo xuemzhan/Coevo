@@ -40,7 +40,12 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
 from src.coevo.crypto.contract import ProviderScope
-from src.coevo.orchestrator.models import AgentCapability
+from src.coevo.framework.capability import (
+    CapabilityKind,
+    CapabilityValidationError,
+    manifest_capability_allowed,
+    resolve_capability,
+)
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX = frozenset("0123456789abcdefABCDEF")
@@ -75,7 +80,7 @@ class AgentManifest:
     agent_id: str
     display_name: str
     semantic_version: str
-    capability: AgentCapability
+    capability: str  # canonical CTAF §5.2 capability name (M1b)
     requires_human_confirmation: bool
     crypto_scope: ProviderScope
     redact_in_audit: tuple[str, ...]
@@ -316,11 +321,15 @@ def _validate(
         raise _InvalidManifest("spec must be an object")
     capability_raw = _require_str(spec, "capability", "spec.capability")
     try:
-        capability = AgentCapability(capability_raw)
-    except ValueError:
+        capability_entry = resolve_capability(capability_raw)
+    except CapabilityValidationError as exc:
+        raise _InvalidManifest(str(exc)) from exc
+    if not manifest_capability_allowed(capability_entry):
         raise _InvalidManifest(
-            f"capability outside AgentCapability closed set: {capability_raw!r}"
-        ) from None
+            f"MVP capability not mapped to AgentCapability: "
+            f"{capability_entry.canonical_name}"
+        )
+    capability = capability_entry.canonical_name
     rhc = spec.get("requires_human_confirmation", True)
     if not isinstance(rhc, bool):
         raise _InvalidManifest("spec.requires_human_confirmation must be a bool")
@@ -335,6 +344,13 @@ def _validate(
         raise _InvalidManifest(
             f"crypto_scope outside ProviderScope closed set: {scope_raw!r}"
         ) from None
+    if (
+        capability_entry.kind is CapabilityKind.CRYPTO_PROXY
+        and crypto_scope is not ProviderScope.APPROVED_PRODUCT
+    ):
+        raise _InvalidManifest(
+            "CRYPTO_PROXY requires crypto_scope approved-product"
+        )
 
     audit = parsed.get("audit", {})
     if audit is None:

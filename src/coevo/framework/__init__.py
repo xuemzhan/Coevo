@@ -15,6 +15,19 @@ from .manifest_checker import (
     ManifestValidationError,
     check,
 )
+from .capability import (
+    CAPABILITY_CLOSED_SET,
+    CapabilityEntry,
+    CapabilityKind,
+    CapabilityValidationError,
+    capability_entry,
+    check_consistency,
+    consistency_report,
+    manifest_capability_allowed,
+    orphan_agent_capabilities,
+    resolve_capability,
+    unmapped_mvp_capabilities,
+)
 from .lifecycle import LifecycleState, can_transition, validate_transition_path
 from .plan import (
     POLICY_OWNED_NUMERIC_KEYS,
@@ -41,6 +54,10 @@ from .validation import (
 __all__ = [
     "AUDIT_PROJECTION_KEYS",
     "AgentManifest",
+    "CAPABILITY_CLOSED_SET",
+    "CapabilityEntry",
+    "CapabilityKind",
+    "CapabilityValidationError",
     "LifecycleState",
     "ManifestCheckInput",
     "ManifestCheckResult",
@@ -57,10 +74,17 @@ __all__ = [
     "VALIDATION_PROJECTION_KEYS",
     "ValidationResult",
     "can_transition",
+    "capability_entry",
     "check",
+    "check_consistency",
+    "consistency_report",
     "default_profiles",
     "get_default_profile",
+    "manifest_capability_allowed",
+    "orphan_agent_capabilities",
     "plan_fingerprint",
+    "resolve_capability",
+    "unmapped_mvp_capabilities",
     "validate_plan",
     "validate_policy",
     "validate_transition_path",

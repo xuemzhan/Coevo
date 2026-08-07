@@ -5,7 +5,7 @@
 CTAF（Coevo Trusted Agent Framework）v0.4.1 框架层在 `src/coevo` 的落位。
 US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控的智能体才能
 注册进入编排；US-16-AC-2 交付 Policy 抽象、Plan/L18 白名单、八态生命周期（L19）
-与 validate_plan。
+与 validate_plan；US-16-AC-3 交付能力闭集收敛（M1b）。
 设计基线：`docs/plans/distributed-agent-framework/design-proposal.md` §5。
 
 ## 职责边界
@@ -23,6 +23,7 @@ US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控�
 
 | 文件 | 关键类型/函数 | 职责 |
 |---|---|---|
+| `capability.py` | `CAPABILITY_CLOSED_SET`、`CapabilityEntry`、`CapabilityKind`、`resolve_capability`、`check_consistency` | CTAF §5.2 能力闭集收敛：MVP 映射 AgentCapability、框架抽象、CRYPTO_PROXY 限 approved scope |
 | `manifest_checker.py` | `check`、`AgentManifest`、`ManifestCheckInput`、`ManifestCheckResult`、`ManifestRegistry`、`PolicyRegistry`/`CertificateResolver`/`SignatureVerifier`（注入协议） | 部署点强制校验（纯函数、fail-closed）+ 校验通过才注册 |
 | `policy.py` | `Policy`/`TimeoutProfile`/`RetryProfile`/`ConsentProfile`、`default_profiles`、`validate_policy`、`get_default_profile` | 策略数值边界（L16 / F7 / EMERGENCY fail-fast F1/F9） |
 | `plan.py` | `Plan`/`PlanNode`/`PlanEdge`/`PlanNodeKind`、`POLICY_OWNED_NUMERIC_KEYS`（L18 白名单）、`plan_fingerprint`、`validate_plan_structure` | Plan 纯结构模型与规范化哈希、L18 校验 |
@@ -47,7 +48,7 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 ## 安全与不变量
 
 - 能力闭集以 `orchestrator.models.AgentCapability` 为单一事实来源（CTAF §5.2
-  扩展名在 M1b 收敛）；
+  扩展名经 `capability.py` 注册表在 M1b 收敛，双名解析 + 双向一致性守卫）；
 - L16：所有 Profile `max_recover_attempts ≤ 3`；EMERGENCY 必须 fail-fast；
 - L18：Plan（含 tool_args）不得携带策略归属数值键，普通工具数值按 schema 允许；
 - L19：ESCALATED→ACTIVE 必须经 HELD，RETIRED 直退；
@@ -66,6 +67,7 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 - `tests/unit/test_framework_policy.py`（AC-2.1..2.3、2.8）；
 - `tests/unit/test_framework_plan_l18.py`（AC-2.4、2.5）；
 - `tests/unit/test_framework_validate_plan.py`（AC-2.6、2.7）。
+- `tests/unit/test_framework_capability.py`（AC-3.1..3.5，M1b 能力闭集收敛）。
 
 ## 依赖与下游
 

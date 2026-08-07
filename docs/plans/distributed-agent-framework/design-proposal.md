@@ -217,6 +217,10 @@ audit:
 
 ### 5.2 capability 闭集 (与 MVP AgentCapability 同步)
 
+> 实现落位：`src/coevo/framework/capability.py`（M1b / US-16-AC-3，
+> 2026-08-08）。MVP 名称映射 `AgentCapability`（新增 `knowledge_ingest`），
+> CRYPTO_PROXY 限 `approved-product`，PLANNER..HUMAN_GATE 为框架抽象能力。
+
 ```
 TASK_FLOW_UNDERSTANDING  TASK_DECOMPOSITION       TEAM_RECOMMENDATION
 TASK_PACKAGE_BUILD       RISK_ANALYSIS             DECISION_BRIEF

@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "US-16",
-  "current_item": "US-16-AC-2-framework-policy-abstractions-v0.1",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "US-16-AC-3-framework-capability-closedset-v0.1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "b23d85b",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T16:33:45.400838Z"
+  "updated_at": "2026-08-07T16:35:55.723900Z"
 }

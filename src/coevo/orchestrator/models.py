@@ -38,6 +38,7 @@ class AgentCapability(enum.Enum):
     TASK_FLOW_UNDERSTANDING = "task_flow_understanding"
     TASK_DECOMPOSITION = "task_decomposition"
     TEAM_RECOMMENDATION = "team_recommendation"
+    KNOWLEDGE_INGEST = "knowledge_ingest"  # M1b convergence: CTAF §5.2 / US-14 knowledge
     STATE_MERGE = "state_merge"
     TASK_PACKAGE_BUILD = "task_package_build"
     PROGRESS_CAPTURE = "progress_capture"

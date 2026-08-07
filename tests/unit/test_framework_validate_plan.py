@@ -142,6 +142,12 @@ class ValidatePlanTests(unittest.TestCase):
         plan = make_plan(capability="not_a_capability")
         self.assertFalse(run_validate(plan).accepted)
 
+    def test_framework_abstract_agent_node_accepted(self) -> None:
+        """AC-3.3: framework abstracts are valid Plan AGENT capabilities."""
+
+        plan = make_plan(capability="PLANNER")
+        self.assertTrue(run_validate(plan).accepted)
+
     def test_tool_scope_outside_rejected(self) -> None:
         result = run_validate(make_plan(), scope=_DenyScope())
         self.assertFalse(result.accepted)

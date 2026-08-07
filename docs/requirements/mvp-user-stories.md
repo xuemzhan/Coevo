@@ -364,6 +364,20 @@ MVP用于验证以下三类核心能力：
 8. Policy / Plan 校验逻辑必须为纯函数、可离线运行、零新增三方依赖，
    新增模块受 `test_module_docs.py` 文档守卫约束（L17）。
 
+**AC-3：能力闭集收敛（CTAF §5.2 / M1b）**
+
+1. 提供框架能力注册表，覆盖 CTAF §5.2 全部能力名称；MVP 能力映射到
+   `AgentCapability` 单一事实来源；
+2. 支持双名解析：`AgentCapability` 枚举值与 CTAF 规范名解析到同一规范条目；
+   闭集外 / 大小写变体一律拒绝；
+3. manifest-checker 的 capability 校验切换至框架注册表：MVP 能力必须可映射
+   （未登记/未映射的能力明确拒绝）、`CRYPTO_PROXY` 必须
+   `crypto_scope=approved-product`、框架抽象能力（PLANNER / ROUTER /
+   AGGREGATOR / EVALUATOR / OPTIMIZER / HUMAN_GATE）允许用于 Plan 层；
+4. 注册表与既有 `AgentCapability` 双向一致（无孤儿成员、无未映射 MVP 名），
+   不一致即测试失败；
+5. 纯函数、离线、stdlib、L17 文档守卫。
+
 ---
 
 # 二、MVP实施优先级

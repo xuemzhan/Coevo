@@ -77,7 +77,7 @@
 | 主题 | 负责模块 | 里程碑 | 测试要求 | 估算 |
 | --- | --- | --- | --- | --- |
 | `manifest-checker.md` | `src/coevo/framework/manifest/` | **M1a (2 周)** | T1..T6 | 2 周 |
-| `capability-closedset.md` | `src/coevo/framework/capability/` | **M1b (2 周)** | 与 `_real_chain.py` 对齐 | 2 周 |
+| `capability-closedset.md` | `src/coevo/framework/capability.py` | **M1b（已交付 2026-08-08，US-16-AC-3）** | 与 `AgentCapability` 双向一致 + CRYPTO_PROXY approved scope | 2 周 |
 | `policy-template.md` | `src/coevo/framework/policy/` | M2 (4 周) | 4 个 Profile 模板 + validate_plan | 4 周 |
 | `memory-interface.md` | `src/coevo/framework/memory/` | M3 (6 周) | bridge 与现有 `progress_capture/` 兼容 | 6 周 |
 | `tool-registry.md` | `src/coevo/framework/tools/` | M4 (8 周) | MCP 路径 A 一致性 ≥ 99% | 8 周 |

@@ -28,7 +28,7 @@ from src.coevo.framework import (
     check,
 )
 from src.coevo.framework.manifest_checker import MAX_MANIFEST_BYTES
-from src.coevo.orchestrator.models import AgentCapability
+from src.coevo.framework.capability import resolve_capability
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -164,7 +164,11 @@ class ManifestCheckerTests(unittest.TestCase):
         self.assertIsNotNone(manifest)
         assert manifest is not None
         self.assertEqual(manifest.agent_id, "task_decomposition.basic")
-        self.assertEqual(manifest.capability, AgentCapability.TASK_DECOMPOSITION)
+        self.assertEqual(manifest.capability, "TASK_DECOMPOSITION")
+        self.assertEqual(
+            resolve_capability(manifest.capability).agent_capability.name,
+            "TASK_DECOMPOSITION",
+        )
         registry = ManifestRegistry()
         registry.register(result)
         self.assertEqual(registry.get("task_decomposition.basic"), manifest)
@@ -194,6 +198,45 @@ class ManifestCheckerTests(unittest.TestCase):
         assert isinstance(spec, dict)
         spec["capability"] = "Task_Decomposition"
         self.assertFalse(run_check(finalize(manifest)).accepted)
+
+    def test_ctaf_name_and_enum_value_both_accepted(self) -> None:
+        manifest = make_manifest()
+        spec = manifest["spec"]
+        assert isinstance(spec, dict)
+        spec["capability"] = "TASK_DECOMPOSITION"
+        self.assertTrue(run_check(finalize(manifest)).accepted)
+
+        manifest = make_manifest()
+        spec = manifest["spec"]
+        assert isinstance(spec, dict)
+        spec["capability"] = "task_decomposition"
+        self.assertTrue(run_check(finalize(manifest)).accepted)
+
+    def test_framework_abstract_capability_accepted(self) -> None:
+        """AC-3.3: framework abstracts (e.g. PLANNER) are registrable."""
+
+        manifest = make_manifest()
+        spec = manifest["spec"]
+        assert isinstance(spec, dict)
+        spec["capability"] = "PLANNER"
+        self.assertTrue(run_check(finalize(manifest)).accepted)
+
+    def test_crypto_proxy_requires_approved_scope(self) -> None:
+        """AC-3.3: CRYPTO_PROXY must be approved-product scope."""
+
+        manifest = make_manifest()
+        spec = manifest["spec"]
+        assert isinstance(spec, dict)
+        spec["capability"] = "CRYPTO_PROXY"
+        security = manifest["security"]
+        assert isinstance(security, dict)
+        security["crypto_scope"] = "mvp-prototype"
+        result = run_check(finalize(manifest))
+        self.assertFalse(result.accepted)
+        self.assertIn("approved-product", result.failure_reason or "")
+
+        security["crypto_scope"] = "approved-product"
+        self.assertTrue(run_check(finalize(manifest)).accepted)
 
     def test_human_confirmation_defaults_true(self) -> None:
         """AC-1.3 (T3): absent flag defaults to True."""
