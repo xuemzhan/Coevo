@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-3 完成收尾（能力闭集收敛，CTAF M1b）
+
+- 工作项：`US-16-AC-3-framework-capability-closedset-v0.1`，提交 `b42d00c` 已含实现与测试。
+- 门禁：定向 75/75 + 相邻回归 38/38 + fmt/lint exit=0（audit fully-sealed）；按用户指示豁免全量
+  `make quality`，留待下次回归（与 OPTIMIZE-13..17 同口径）。
+- 安全审查：CRYPTO_PROXY 仅限 approved-product、能力闭集 fail-closed、双向一致性守卫均验证通过；
+  判定 PASS（Critical/High 0，Low 2 观察项）。
+- 治理偏差：子代理并发额度受限，security-reviewer 未能以子代理派发；由编排器在只读沙箱内按同一
+  只读契约执行并留痕，沙箱 check 零违规。下次全量回归建议由独立 security-reviewer 子代理复核。
+- 追溯矩阵新增 US-16 | AC-3 行；STATE phase=decide / status=done。
+
 ## 2026-08-08 — US-16-AC-3 登记并开始执行（能力闭集收敛，CTAF M1b）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

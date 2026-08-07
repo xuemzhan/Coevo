@@ -233,6 +233,47 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-07T16:47:52.215398Z — target=`test+security-review (incremental)` fingerprint=`manual-us16ac3`
+- exit_code: `0`
+```text
+US-16-AC-3（M1b，commit b42d00c）增量门禁与安全审查：
+
+[1] 定向单元测试（主工作树）：
+    python -m unittest tests.unit.test_framework_capability \
+      tests.unit.test_framework_manifest_checker \
+      tests.unit.test_framework_validate_plan \
+      tests.unit.test_framework_plan_l18 \
+      tests.unit.test_framework_lifecycle
+    Ran 75 tests; OK（含 AC-3.1..AC-3.5 全部断言）
+
+[2] 相邻回归（只读沙箱 us16ac3-sec，HEAD=b42d00c）：
+    python -m unittest tests.unit.test_orchestrator \
+      tests.unit.test_agent_wire_regression \
+      tests.integration.test_orchestrator_real_facade_chain
+    Ran 38 tests; OK（新增 KNOWLEDGE_INGEST 枚举成员未破坏编排器/wire/真实链路）
+    python -m unittest tests.unit.test_module_docs  -> Ran 4 tests; OK（L17 文档守卫）
+
+[3] 门禁：
+    --target fmt exit=0 fingerprint=`fe39766e2048d2bc`（2026-08-07T16:42:14Z）
+    --target lint exit=0 fingerprint=`252ad24e526f6728`（2026-08-07T16:42:23Z）
+    audit seal: fully-sealed（前后均由 quality_gate 封存）
+
+[4] 安全审查（security-reviewer 契约，只读沙箱内执行）：
+    - 沙箱 review_sandbox check: ok, violations=[]（零违规；未修改任何受保护路径）
+    - 能力闭集 fail-closed：未知/大小写变体/空串拒绝；19 条目 34 键无别名碰撞
+    - CRYPTO_PROXY 仅允许 approved-product scope（manifest 层强制；mvp-prototype 拒绝）
+    - 框架抽象 PLANNER..HUMAN_GATE 可注册且可用于 Plan AGENT 节点（AC-3.3）
+    - 双向一致性：orphan/unmapped 均为空（AC-3.4）
+    - 下游兼容：AgentManifest.capability 由枚举改为规范字符串，无 src 内消费方依赖旧枚举
+    - 判定：PASS；Critical=0 High=0；Low=2（观察项：未映射 MVP 分支无直接单测仅由一致性守卫覆盖；
+      枚举新增成员需在下次全量 quality 回归中复核全仓枚举假设）
+
+治理偏差说明：子代理并发额度受限（agent thread limit reached），独立 security-reviewer 未能以子代理形式
+派发；改由编排器在只读沙箱内按 security-reviewer 技能与只读契约实际执行（只读、不落盘、证据来自沙箱内命令），
+并在 DECISIONS.md 留痕。全量 `make quality` 按用户指示本轮豁免，留待下次回归。
+
+```
+
 
 ## 2026-08-04T01:16:05.002565Z — target=`quality` fingerprint=`e3a61c2f23c3031b`
 - exit_code: `0`
@@ -10191,6 +10232,817 @@ oolchain-lock.json",
         {
           "kind": "test",
           "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T16:37:59.882042Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "OPTIMIZE-10",
+      "title": "��ʮ�����ļ����������ĵ�ϸ����2026-08-07���û�ָ����� OPTIMIZE-9������ ����ͼ�����߽�̽�롪���Ի��ܾ���˫�ڵ㻷�����ڵ㻷��a��b��c��a��������ȷ���ԡ�δ֪���� ID �ܾ������в��ԣ������걸���貹���� ����ʣ�� 16 ��ģ��Ӣ��ȫ���ĵ���app/benchmarks/cockpit/decision_brief/knowledge_base/model/orchestrator/progress_capture/report/risk/root_modules/supervision/talent/task_decomposition/task_flow/workspace �� .en.md�������� 21/21 ģ����Ӣ���ĵ�ȫ���ǣ�README.en.md ������ȫ��",
+      "code": [
+        "docs/modules/",
+        "docs/modules/README.en.md"
+      ],
+      "tests": [
+        "tests/unit/test_task_decomposition.py",
+        "tests/unit/test_optimizations.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/modules/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/README.en.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_task_decomposition.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_optimizations.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "GO-MIGRATE",
+      "ac": "GO-ENV-1",
+      "title": "Go �����������뻷������������Դ `D:\\Go` go1.18.8��toolchain-lock �Ǽ� + ����֤�ļ���+ �׸�Ǩ����Ƭ��`task_flow` ��ģ����׶�ӳ�� Go ��ֲ��SourceKind / StandardStage / Traced / SourceMapping / ProcessFlow / WithOverrides / ApplyMapping / 27 ��Ĭ��ӳ�������Ϊ�� Python ���룩+ `go test ./...` ���������Ž���`GOPROXY=off` ǿ�����ߡ�stdlib-only��",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "docs/dependencies/licenses/go-BSD-3-Clause.txt",
+        "go/go.mod",
+        "go/taskflow/doc.go",
+        "go/taskflow/models.go",
+        "go/taskflow/mapping.go",
+        "scripts/quality_gate.py",
+        "scripts/tool-shims/make.cs",
+        "docs/dependencies/python-script-lock.tsv"
+      ],
+      "tests": [
+        "go/taskflow/models_test.go",
+        "go/taskflow/mapping_test.go"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/licenses/go-BSD-3-Clause.txt",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/go.mod",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/doc.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/models.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/mapping.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/models_test.go",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/mapping_test.go",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-1",
+      "title": "��ܲ� manifest-checker��CTAF ��5.3 / M1a����Agent Manifest ǿ��У�飨�����ռ� T2 / �˹�ȷ��ȱʡ true T3 / crypto_scope �ռ� T4 / ��������Ӽ� T5 / spec_hash �ų���ָ�ֶ� F5 / policy_ref ���ΰ��ҹ�Կȡ��֤���� F8 / policy_version �� F7 / ʧ�ܲ�ע�� / �������������������� L15��+ `.agent` v1.0 wire �ֽڼ��ع� T6",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_agent_wire_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-2",
+      "title": "��ܲ� Policy ������ validate_plan��CTAF ��6.5 / M2����Policy �ֶ��� policy_version ���F7����4 Ĭ�� Profile��max_recover_attempts �� 3 ���� L16����EMERGENCY fail-fast��1 ������ / 60s / �º� 30 ����ȷ�� / ���ظ澯��F1+F9����L18 ��������tool_args ��ֵ�� schema ������F6����validate_plan ������� + L18 + L19��A9/F4����L19 ״̬����ESCALATED��ACTIVE ���뾭 HELD��RETIRED ֱ�ˣ�������������������������L15��+ L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/lifecycle.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_policy.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py",
+        "tests/unit/test_framework_validate_plan.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_policy.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T16:40:58.727263Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T16:41:08.676007Z — target=`lint` fingerprint=`4800c1ade060c9f3`
+- exit_code: `0`
+```text
+rue
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "OPTIMIZE-10",
+      "title": "��ʮ�����ļ����������ĵ�ϸ����2026-08-07���û�ָ����� OPTIMIZE-9������ ����ͼ�����߽�̽�롪���Ի��ܾ���˫�ڵ㻷�����ڵ㻷��a��b��c��a��������ȷ���ԡ�δ֪���� ID �ܾ������в��ԣ������걸���貹���� ����ʣ�� 16 ��ģ��Ӣ��ȫ���ĵ���app/benchmarks/cockpit/decision_brief/knowledge_base/model/orchestrator/progress_capture/report/risk/root_modules/supervision/talent/task_decomposition/task_flow/workspace �� .en.md�������� 21/21 ģ����Ӣ���ĵ�ȫ���ǣ�README.en.md ������ȫ��",
+      "code": [
+        "docs/modules/",
+        "docs/modules/README.en.md"
+      ],
+      "tests": [
+        "tests/unit/test_task_decomposition.py",
+        "tests/unit/test_optimizations.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/modules/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/README.en.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_task_decomposition.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_optimizations.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "GO-MIGRATE",
+      "ac": "GO-ENV-1",
+      "title": "Go �����������뻷������������Դ `D:\\Go` go1.18.8��toolchain-lock �Ǽ� + ����֤�ļ���+ �׸�Ǩ����Ƭ��`task_flow` ��ģ����׶�ӳ�� Go ��ֲ��SourceKind / StandardStage / Traced / SourceMapping / ProcessFlow / WithOverrides / ApplyMapping / 27 ��Ĭ��ӳ�������Ϊ�� Python ���룩+ `go test ./...` ���������Ž���`GOPROXY=off` ǿ�����ߡ�stdlib-only��",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "docs/dependencies/licenses/go-BSD-3-Clause.txt",
+        "go/go.mod",
+        "go/taskflow/doc.go",
+        "go/taskflow/models.go",
+        "go/taskflow/mapping.go",
+        "scripts/quality_gate.py",
+        "scripts/tool-shims/make.cs",
+        "docs/dependencies/python-script-lock.tsv"
+      ],
+      "tests": [
+        "go/taskflow/models_test.go",
+        "go/taskflow/mapping_test.go"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/licenses/go-BSD-3-Clause.txt",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/go.mod",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/doc.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/models.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/mapping.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/models_test.go",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/mapping_test.go",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-1",
+      "title": "��ܲ� manifest-checker��CTAF ��5.3 / M1a����Agent Manifest ǿ��У�飨�����ռ� T2 / �˹�ȷ��ȱʡ true T3 / crypto_scope �ռ� T4 / ��������Ӽ� T5 / spec_hash �ų���ָ�ֶ� F5 / policy_ref ���ΰ��ҹ�Կȡ��֤���� F8 / policy_version �� F7 / ʧ�ܲ�ע�� / �������������������� L15��+ `.agent` v1.0 wire �ֽڼ��ع� T6",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_agent_wire_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-2",
+      "title": "��ܲ� Policy ������ validate_plan��CTAF ��6.5 / M2����Policy �ֶ��� policy_version ���F7����4 Ĭ�� Profile��max_recover_attempts �� 3 ���� L16����EMERGENCY fail-fast��1 ������ / 60s / �º� 30 ����ȷ�� / ���ظ澯��F1+F9����L18 ��������tool_args ��ֵ�� schema ������F6����validate_plan ������� + L18 + L19��A9/F4����L19 ״̬����ESCALATED��ACTIVE ���뾭 HELD��RETIRED ֱ�ˣ�������������������������L15��+ L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/lifecycle.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_policy.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py",
+        "tests/unit/test_framework_validate_plan.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_policy.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T16:42:14.128841Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T16:42:23.186872Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_ops_tooling.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "OPTIMIZE-10",
+      "title": "��ʮ�����ļ����������ĵ�ϸ����2026-08-07���û�ָ����� OPTIMIZE-9������ ����ͼ�����߽�̽�롪���Ի��ܾ���˫�ڵ㻷�����ڵ㻷��a��b��c��a��������ȷ���ԡ�δ֪���� ID �ܾ������в��ԣ������걸���貹���� ����ʣ�� 16 ��ģ��Ӣ��ȫ���ĵ���app/benchmarks/cockpit/decision_brief/knowledge_base/model/orchestrator/progress_capture/report/risk/root_modules/supervision/talent/task_decomposition/task_flow/workspace �� .en.md�������� 21/21 ģ����Ӣ���ĵ�ȫ���ǣ�README.en.md ������ȫ��",
+      "code": [
+        "docs/modules/",
+        "docs/modules/README.en.md"
+      ],
+      "tests": [
+        "tests/unit/test_task_decomposition.py",
+        "tests/unit/test_optimizations.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/modules/",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/README.en.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_task_decomposition.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_optimizations.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "GO-MIGRATE",
+      "ac": "GO-ENV-1",
+      "title": "Go �����������뻷������������Դ `D:\\Go` go1.18.8��toolchain-lock �Ǽ� + ����֤�ļ���+ �׸�Ǩ����Ƭ��`task_flow` ��ģ����׶�ӳ�� Go ��ֲ��SourceKind / StandardStage / Traced / SourceMapping / ProcessFlow / WithOverrides / ApplyMapping / 27 ��Ĭ��ӳ�������Ϊ�� Python ���룩+ `go test ./...` ���������Ž���`GOPROXY=off` ǿ�����ߡ�stdlib-only��",
+      "code": [
+        "docs/dependencies/toolchain-lock.json",
+        "docs/dependencies/licenses/go-BSD-3-Clause.txt",
+        "go/go.mod",
+        "go/taskflow/doc.go",
+        "go/taskflow/models.go",
+        "go/taskflow/mapping.go",
+        "scripts/quality_gate.py",
+        "scripts/tool-shims/make.cs",
+        "docs/dependencies/python-script-lock.tsv"
+      ],
+      "tests": [
+        "go/taskflow/models_test.go",
+        "go/taskflow/mapping_test.go"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/licenses/go-BSD-3-Clause.txt",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/go.mod",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/doc.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/models.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/mapping.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/models_test.go",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/mapping_test.go",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-1",
+      "title": "��ܲ� manifest-checker��CTAF ��5.3 / M1a����Agent Manifest ǿ��У�飨�����ռ� T2 / �˹�ȷ��ȱʡ true T3 / crypto_scope �ռ� T4 / ��������Ӽ� T5 / spec_hash �ų���ָ�ֶ� F5 / policy_ref ���ΰ��ҹ�Կȡ��֤���� F8 / policy_version �� F7 / ʧ�ܲ�ע�� / �������������������� L15��+ `.agent` v1.0 wire �ֽڼ��ع� T6",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_agent_wire_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-2",
+      "title": "��ܲ� Policy ������ validate_plan��CTAF ��6.5 / M2����Policy �ֶ��� policy_version ���F7����4 Ĭ�� Profile��max_recover_attempts �� 3 ���� L16����EMERGENCY fail-fast��1 ������ / 60s / �º� 30 ����ȷ�� / ���ظ澯��F1+F9����L18 ��������tool_args ��ֵ�� schema ������F6����validate_plan ������� + L18 + L19��A9/F4����L19 ״̬����ESCALATED��ACTIVE ���뾭 HELD��RETIRED ֱ�ˣ�������������������������L15��+ L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/lifecycle.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_policy.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py",
+        "tests/unit/test_framework_validate_plan.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_policy.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
           "exists": true
         }
       ],
