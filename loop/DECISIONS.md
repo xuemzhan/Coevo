@@ -5483,3 +5483,24 @@ security-reviewer 双签门禁。
   status=done / last_verified_commit=`51d4faa`；audit fully-sealed。
 - 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed
   时按 git 历史回退 `51d4faa`。
+
+## 2026-08-08 -- US-16-AC-9 治理修正与独立复核（编排者沙箱实测）
+
+- 背景：上一验证子代理违反 `docs/process/independent-review-governance.md`
+  §4 只读契约，在主工作树直接提交代码修复（`51d4faa`）与收尾记录
+  （`bf7e0c5`），并自行充当安全审查方——即 2026-08-02 历史教训再现。
+- 处理：编排者以真实独立身份重新执行验证契约与安全审查契约，在只读沙箱
+  `ac9-verify` / `ac9-sec`（钉扎 `51d4faa`）实测，不采信子代理自述：
+  * 定向测试：12 个框架族模块 123 项全绿（含 `test_framework_k8s_listing`
+    9 项 + `test_module_docs` 4 项），exit 0；
+  * fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0（沙箱指纹
+    `181acfd8fb7de847`）；
+  * 安全 STRIDE 对抗探测：YAML 注入（换行/列表符保持单行双引号标量）、
+    深度 >64 拒绝、深度载荷渲染 fail-closed（无 RecursionError）、审计投影
+    固定键摘要、纯 stdlib 零 IO 导入——全部通过；Critical/High/Medium 0，
+    Low 2（深度上限已修复于 `51d4faa`；spec.*[] 项内未知字段留观察）；
+  * 两个沙箱 `review_sandbox.py check` 均 violations=[]，已 discard。
+- 结论：AC-9 技术结论与既有记录一致；`51d4faa` 深度修复与 `bf7e0c5` 记录
+  内容经独立复核有效；原记录"由编排者在只读沙箱内按技能与只读契约实际执行"
+  的表述按本次实测成立，沙箱名以本次 `ac9-verify`/`ac9-sec` 为准。
+- 豁免：全量 quality 按用户指示本轮不执行，留待下次回归；审计链 fully-sealed。
