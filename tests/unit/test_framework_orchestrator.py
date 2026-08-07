@@ -358,6 +358,7 @@ class OrchestratorTests(unittest.TestCase):
             OrchestrationMode.STATE_MACHINE,
             plan_hash=plan.plan_id,
             path=(LifecycleState.ESCALATED, LifecycleState.ACTIVE),
+            validated_at="2026-08-08T08:00:00Z",
         )
         self.assertEqual(outcome.status, OrchestrationStatus.REJECTED)
         self.assertIn("L19", outcome.failure_reason or "")
@@ -365,6 +366,7 @@ class OrchestratorTests(unittest.TestCase):
             OrchestrationMode.STATE_MACHINE,
             plan_hash=plan.plan_id,
             path=(LifecycleState.ESCALATED, LifecycleState.HELD, LifecycleState.ACTIVE),
+            validated_at="2026-08-08T08:00:00Z",
         )
         self.assertTrue(outcome.accepted)
         self.assertEqual(outcome.status, OrchestrationStatus.ACTIVE)

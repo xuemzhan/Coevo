@@ -17,6 +17,7 @@ are treated as rejections.  L15: standard library only.
 
 from __future__ import annotations
 
+import datetime as _datetime
 import hashlib
 import json
 import re
@@ -136,6 +137,18 @@ def _is_redaction_digest(value: str) -> bool:
     return value.startswith(REDACTION_PREFIX) and bool(_HEX64.match(value[len(REDACTION_PREFIX) :]))
 
 
+def _is_iso_utc_z(value: str) -> bool:
+    """Strict ISO-8601 UTC with trailing Z, including calendar validity."""
+
+    if not _ISO_UTC_Z.match(value):
+        return False
+    try:
+        _datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return False
+    return True
+
+
 def validate_record(record: MemoryRecord) -> None:
     """Structural validation (pure, fail-closed)."""
 
@@ -149,7 +162,7 @@ def validate_record(record: MemoryRecord) -> None:
         raise MemoryValidationError("record_id does not match the record fingerprint")
     if not _SAFE_ID.match(record.project_id):
         raise MemoryValidationError("project_id must be a safe-id")
-    if not _ISO_UTC_Z.match(record.occurred_at):
+    if not _is_iso_utc_z(record.occurred_at):
         raise MemoryValidationError(
             "occurred_at must be ISO-8601 UTC with trailing Z (L7)"
         )

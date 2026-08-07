@@ -13,6 +13,7 @@ L15: standard library only, no third-party runtime dependency.
 
 from __future__ import annotations
 
+import datetime as _datetime
 import hashlib
 import re
 from dataclasses import dataclass
@@ -130,7 +131,7 @@ def validate_a2a(message: A2aMessage) -> None:
         raise A2aValidationError("sequence_no must be a non-negative integer")
     if not isinstance(message.business_correlation_key, str) or not message.business_correlation_key:
         raise A2aValidationError("business_correlation_key is required")
-    if not _ISO_UTC_Z.match(message.created_at):
+    if not _is_iso_utc_z(message.created_at):
         raise A2aValidationError(
             "created_at must be ISO-8601 UTC with trailing Z (L7)"
         )
@@ -158,6 +159,18 @@ def _validate_policy_ref(ref: PolicyRef) -> None:
         )
     if not all(c in _HEX for c in ref.signature):
         raise A2aValidationError("policy_ref.signature must be hex-encoded")
+
+
+def _is_iso_utc_z(value: str) -> bool:
+    """Strict ISO-8601 UTC with trailing Z, including calendar validity."""
+
+    if not _ISO_UTC_Z.match(value):
+        return False
+    try:
+        _datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return False
+    return True
 
 
 def verify_policy_ref(

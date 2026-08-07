@@ -139,6 +139,9 @@ def validate_policy(policy: Policy) -> None:
             f"profile outside the closed set {sorted(PROFILES)}: {policy.profile!r}"
         )
     timeout = policy.timeout_profile
+    _require_strict_int(timeout.dispatch_timeout_sec, "dispatch_timeout_sec")
+    _require_strict_int(timeout.plan_total_timeout_sec, "plan_total_timeout_sec")
+    _require_strict_int(timeout.consent_timeout_sec, "consent_timeout_sec")
     if timeout.dispatch_timeout_sec <= 0:
         raise PolicyValidationError("dispatch_timeout_sec must be positive")
     if timeout.dispatch_timeout_sec > TIMEOUT_UPPER_BOUNDS["dispatch_timeout_sec"]:
@@ -161,6 +164,8 @@ def validate_policy(policy: Policy) -> None:
             f"{TIMEOUT_UPPER_BOUNDS['consent_timeout_sec']}s upper bound (Info4)"
         )
     retry = policy.retry_profile
+    _require_strict_int(retry.max_recover_attempts, "max_recover_attempts")
+    _require_strict_int(retry.max_router_retries, "max_router_retries")
     if not 1 <= retry.max_recover_attempts <= MAX_RECOVER_ATTEMPTS_LIMIT:
         raise PolicyValidationError(
             f"max_recover_attempts must be within "
@@ -172,10 +177,16 @@ def validate_policy(policy: Policy) -> None:
         value <= 0 for value in retry.recover_backoff_sec
     ):
         raise PolicyValidationError("recover_backoff_sec must be non-empty positive ints")
+    for value in retry.recover_backoff_sec:
+        _require_strict_int(value, "recover_backoff_sec entry")
     if not isinstance(policy.consent.requires_human_confirmation, bool):
         raise PolicyValidationError("requires_human_confirmation must be bool")
     if not policy.consent.default_role:
         raise PolicyValidationError("consent.default_role must be non-empty")
+    _require_strict_int(
+        policy.consent.post_hoc_confirm_window_sec,
+        "post_hoc_confirm_window_sec",
+    )
     if policy.consent.post_hoc_confirm_window_sec < 0:
         raise PolicyValidationError("post_hoc_confirm_window_sec must be non-negative")
     if not isinstance(policy.audit_redaction, tuple) or not all(
@@ -204,6 +215,13 @@ def validate_policy(policy: Policy) -> None:
             raise PolicyValidationError(
                 "EMERGENCY requires a 30-minute post-hoc confirmation window (F9)"
             )
+
+
+def _require_strict_int(value: object, label: str) -> None:
+    """Reject bool and non-int values with a controlled error (GAPS-2)."""
+
+    if type(value) is not int:
+        raise PolicyValidationError(f"{label} must be an integer (bool rejected)")
 
 
 def get_default_profile(profile: str) -> Policy:

@@ -9,6 +9,8 @@ any injected exception is treated as a rejection (fail-closed).
 
 from __future__ import annotations
 
+import datetime as _datetime
+import re
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
@@ -40,6 +42,8 @@ VALIDATION_PROJECTION_KEYS = frozenset(
         "failure_reason",
     }
 )
+
+_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 
 @runtime_checkable
@@ -100,8 +104,8 @@ def validate_plan(
             failure_reason=reason,
         )
 
-    if not validated_at:
-        return reject("validated_at is required for audit metadata")
+    if not _is_iso_utc_z(validated_at):
+        return reject("validated_at must be ISO-8601 UTC with trailing Z (L7)")
     try:
         validate_plan_structure(plan)
         if plan.policy_profile != policy.profile:
@@ -181,6 +185,18 @@ def _validate_agent_capabilities(plan: Plan) -> None:
                     f"AGENT node capability outside the closed set: "
                     f"{node.agent_capability!r}"
                 ) from None
+
+
+def _is_iso_utc_z(value: str) -> bool:
+    """Strict ISO-8601 UTC with trailing Z, including calendar validity."""
+
+    if not _ISO_UTC_Z.match(value):
+        return False
+    try:
+        _datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return False
+    return True
 
 
 def _validate_tool_scopes(

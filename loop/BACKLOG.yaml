@@ -1169,3 +1169,13 @@ items:
       - tests/unit/test_framework_gaps.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-GAPS-2（2026-08-08 用户指令继续开发；GAPS-1 新观察项收口） ----------
+  - id: FRAMEWORK-GAPS-2
+    story: ENG-BASE
+    title: GAPS-1 新观察项收口：Policy TimeoutProfile/RetryProfile/ConsentProfile 严格整数类型（bool/非 int 一律 PolicyValidationError）、semver 严格规则（禁前导零）与 ISO-8601 日历范围校验（datetime 解析）、validated_at 入审计投影前统一 L7 ISO 校验（validate_plan / transition）；纯函数 stdlib + L17
+    status: ready
+    dependencies: [FRAMEWORK-GAPS-1]
+    acceptance_tests:
+      - tests/unit/test_framework_gaps2.py
+    security_review: true
+    protocol_review: false

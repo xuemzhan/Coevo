@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-2 登记并开始执行（GAPS-1 新观察项收口）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：登记 `FRAMEWORK-GAPS-2`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-GAPS-1]），收敛 GAPS-1 审查提出的 3 项新 Low/Info 观察
+  （Policy 严格整数类型、semver/ISO 严格校验、validated_at 入投影前校验）；
+  STATE 切换至 ENG-BASE / FRAMEWORK-GAPS-2。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-1 完成收尾（增量门禁 + 沙箱审查，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-GAPS-1`（ENG-BASE，框架审查观察项收口）。实现提交：
