@@ -47,6 +47,7 @@ from .lifecycle import LifecycleState, can_transition, validate_transition_path
 from .k8s_listing import (
     LISTING_KEYS,
     MAX_LISTING_BYTES,
+    MAX_LISTING_DEPTH,
     SPEC_KEYS,
     ListingInput,
     ListingValidationError,
@@ -147,6 +148,7 @@ __all__ = [
     "ORCHESTRATION_PROJECTION_KEYS",
     "MAX_PLAN_JSON_BYTES",
     "MAX_LISTING_BYTES",
+    "MAX_LISTING_DEPTH",
     "ManifestCheckInput",
     "ManifestCheckResult",
     "ManifestRegistry",

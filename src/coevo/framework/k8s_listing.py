@@ -26,6 +26,7 @@ LISTING_KEYS = frozenset({"apiVersion", "kind", "metadata", "spec"})
 METADATA_KEYS = frozenset({"schema_version", "generated_at"})
 SPEC_KEYS = frozenset({"capabilities", "tools", "policies", "plans"})
 MAX_LISTING_BYTES = 64 * 1024
+MAX_LISTING_DEPTH = 64
 
 
 class ListingValidationError(Exception):
@@ -163,6 +164,7 @@ def validate_listing_bytes(data: bytes) -> dict[str, Any]:
     if not isinstance(parsed, dict):
         raise ListingValidationError("listing must be a JSON object")
     _check_keys(parsed, LISTING_KEYS, "listing")
+    _check_depth(parsed)
     metadata = parsed.get("metadata")
     if not isinstance(metadata, dict):
         raise ListingValidationError("metadata must be an object")
@@ -175,6 +177,27 @@ def validate_listing_bytes(data: bytes) -> dict[str, Any]:
         if not isinstance(spec.get(section), list):
             raise ListingValidationError(f"spec.{section} must be a list")
     return parsed
+
+
+def _check_depth(root: Any) -> None:
+    """Iterative nesting-depth guard (AC-9.4 over-limit fail-closed).
+
+    Uses an explicit stack so the guard itself cannot blow the interpreter
+    stack on adversarial deep input; the walk is bounded by the 64 KiB
+    size cap already enforced above.
+    """
+
+    stack: list[tuple[Any, int]] = [(root, 1)]
+    while stack:
+        node, depth = stack.pop()
+        if depth > MAX_LISTING_DEPTH:
+            raise ListingValidationError(
+                f"listing nesting exceeds depth limit {MAX_LISTING_DEPTH}"
+            )
+        if isinstance(node, dict):
+            stack.extend((value, depth + 1) for value in node.values())
+        elif isinstance(node, list):
+            stack.extend((value, depth + 1) for value in node)
 
 
 def _check_keys(mapping: dict[str, Any], allowed: frozenset[str], label: str) -> None:

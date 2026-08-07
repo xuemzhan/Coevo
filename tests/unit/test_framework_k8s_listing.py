@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -11,6 +12,7 @@ from src.coevo.crypto.contract import ProviderScope
 from src.coevo.framework.capability import CAPABILITY_CLOSED_SET
 from src.coevo.framework.k8s_listing import (
     MAX_LISTING_BYTES,
+    MAX_LISTING_DEPTH,
     ListingInput,
     ListingValidationError,
     generate_listing,
@@ -141,6 +143,25 @@ class K8sListingTests(unittest.TestCase):
             validate_listing_bytes(b" " * (MAX_LISTING_BYTES + 1))
         with self.assertRaises(ListingValidationError):
             validate_listing_bytes(b"not json")
+
+    def test_listing_deep_nesting_rejected(self) -> None:
+        """AC-9.4: over-depth nesting fails closed instead of crashing render."""
+
+        base = {
+            "apiVersion": "a",
+            "kind": "b",
+            "metadata": {"schema_version": "1.0", "generated_at": "x"},
+            "spec": {"capabilities": [0], "tools": [], "policies": [], "plans": []},
+        }
+        deep = 0
+        for _ in range(MAX_LISTING_DEPTH + 50):
+            deep = {"x": deep}
+        payload = json.dumps(base, separators=(",", ":")).replace(
+            "[0]", "[" + json.dumps(deep, separators=(",", ":")) + "]"
+        ).encode("utf-8")
+        self.assertLess(len(payload), MAX_LISTING_BYTES)
+        with self.assertRaises(ListingValidationError):
+            validate_listing_bytes(payload)
 
     def test_yaml_quotes_safely(self) -> None:
         """Strings with special characters stay safely quoted in YAML."""
