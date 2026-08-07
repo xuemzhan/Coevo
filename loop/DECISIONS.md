@@ -1,5 +1,28 @@
 # Loop 决策记录
 
+## 2026-08-07 — US-16-AC-1 manifest-checker 完成（mvp-verifier + security-reviewer 双签放行）
+
+- 工作项：`US-16-AC-1-framework-manifest-checker-v0.1`（CTAF §5.3 / M1a）。
+- 实现：`src/coevo/framework/{__init__,manifest_checker}.py`（纯函数 `check` +
+  ManifestCheckInput/Result + "校验通过才注册"）、`tests/unit/test_framework_manifest_checker.py`
+  （31 项）、`tests/unit/test_agent_wire_regression.py`（T6）、`docs/modules/framework.md`（L17）。
+- 验证：主仓库 `make quality` exit=0 fingerprint=`34d637f035600903`（11:59:49Z，audit
+  fully-sealed）；mvp-verifier PASS（10/10 AC）；security-reviewer PASS（无 Critical/High）。
+- 审查修复：M1（输入大小/嵌套上限、RecursionError/MemoryError/ValueError 收敛）与
+  L3（failure_reason 截断）、L5（NaN/Infinity 拒绝）、L6（注入依赖异常收敛）已就地修复于
+  `9fcc906`；L2（trusted_anchor 语义，信任委托已文档化）、L4（审计脱敏接线）、
+  L7（semver/时间格式校验）留痕后续轮次。
+- 环境/治理发现（与 US-16 无关，需后续治理）：① `test_force_remove_safety` 将清理脚本
+  路径钉死为主机器 `E:\Workspace\Coevo\loop\runtime`，克隆沙箱内必然失败，"沙箱内
+  `make quality` exit 0" 对当前仓库状态不可达成，建议改为相对仓库根断言；② 沙箱 `.tools`
+  不能用 junction（安全守卫拒绝 reparse point），需实体复制；③ gmssl helper 在代码页
+  65001 下因 stdin 自动加 UTF-8 BOM 报 `GMH-E-MAGIC`，`chcp 936` 通过。
+- 口径说明：实现阶段由编排者直接完成（子代理消息投递在本环境不稳定且出现自派生递归），
+  验证与安全审查保持独立子代理（各自在钉扎沙箱内实测并文本交付报告）。
+- 提交：`5536c92`（feat）、`9fcc906`（fix hardening）、records 收尾提交。
+- 决策者：用户（批准 US-16 并指示执行）；执行：Codex。
+- 下一项：`US-16-AC-2`（Policy 抽象 + validate_plan，M2），待业务负责人指示或下一轮登记。
+
 ## 2026-08-07 — US-16 草案获批并开始执行（US-16-AC-1 manifest-checker）
 
 - 用户指令：批准 US-16 草案，开始执行。

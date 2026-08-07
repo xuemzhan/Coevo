@@ -3,11 +3,11 @@
   "iteration": 30,
   "current_story": "US-16",
   "current_item": "US-16-AC-1-framework-manifest-checker-v0.1",
-  "phase": "plan",
-  "status": "in-progress",
+  "phase": "decide",
+  "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "780ab6d",
+  "last_verified_commit": "9fcc906",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T09:30:31.088426Z"
+  "updated_at": "2026-08-07T14:23:37.044961Z"
 }

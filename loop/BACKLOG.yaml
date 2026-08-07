@@ -1069,7 +1069,7 @@ items:
   - id: US-16-AC-1-framework-manifest-checker-v0.1
     story: US-16
     title: 框架层 manifest-checker（CTAF §5.3 / M1a）：Agent Manifest 强制校验——能力闭集（T2）/人工确认默认 true（T3）/crypto_scope 闭集（T4）/审计脱敏子集（T5）/spec_hash 排除自指字段（F5）/policy_ref 三段绑定且公钥取自证书链（F8）/policy_version 绑定（F7）/失败不注册/纯函数离线零三方依赖（L15）/.agent v1.0 wire 字节级回归（T6）
-    status: ready
+    status: done
     dependencies: []
     acceptance_tests:
       - tests/unit/test_framework_manifest_checker.py
