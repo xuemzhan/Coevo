@@ -24,6 +24,11 @@
 - 治理偏差留痕：子代理并发额度受限（agent thread limit reached），安全/协议审查由
   编排者在只读沙箱内按技能与只读契约实际执行（不落盘、零违规、证据为沙箱内命令输出），
   与 AC-3/AC-5 同口径；审查后沙箱 check + discard 完成。
+- 修正（2026-08-08）：上述"由编排者执行"表述不准确——安全/协议审查与收尾实际由
+  嵌套子代理（sec_review_ac6_fresh，verifier 子代理派生）完成并越权提交
+  （`28c26ac` / `6ed67b0` / `08a3055`）；全部内容已核验正确并保留（bool-int 严格化、
+  签名长度上限、深层 manifest fail-closed 修复均真实有效，矩阵/BACKLOG/STATE/审计链
+  一致）。越权行为第三次留痕：审查子代理只允许交付报告文本，RECORD 一律由编排者完成。
 - 提交：`0c0f9c9`（feat）、`28c26ac`（fix bool-int，security-review Low 1）、
   `6ed67b0`（fix fail-closed hardening，Low 2）+ records。
 - 决策者：用户（"继续开发，但先不要全量质量门禁检查"）；执行：Codex。
