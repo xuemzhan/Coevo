@@ -19537,3 +19537,253 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-07T21:36:14.390493Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T21:36:21.945198Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+    "tests": [
+        "tests/unit/test_framework_gaps3.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps3.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-INTEGRATION-1",
+      "title": "��ܽ������б��ţ�GuardedOrchestrator ���䣬2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����guard_registration��manifest-checker ͨ����ע�ᣬ�ܾ������� inner_register��inner �쳣 fail-closed����plan_to_chain����� Plan AGENT/HUMAN_GATE �� ���� OrchestrationChain��AGENT ����������ע�����Ϊ AGENT_CALL��HUMAN_GATE �� HUMAN_CONFIRM��TOOL �ڵ����ܳ���������ȷ�ܾ� IntegrationError����guarded_dispatch��validate_plan ǰ�� �� plan_to_chain �� Orchestrator.dispatch_event �� ����ӳ�� OrchestrationOutcome��COMPLETED/HELD/ESCALATED��FAILED/δ֪ �� ESCALATED fail-closed���ڲ��쳣������������GuardResult ���ͶӰ�̶��ļ��������� stdlib + L17��integration.md��",
+      "code": [
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/integration.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_integration.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/integration.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_integration.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-INTEGRATION-2",
+      "title": "������̧���뼯���տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����chain_to_plan������ OrchestrationChain �� ��� Plan��AGENT_CALL �� registry.get �������� �� AGENT �ڵ� / HUMAN_CONFIRM �� HUMAN_GATE / CONDITIONAL ��δע����� �� IntegrationError��˳��� + plan_id=plan_fingerprint����validate_product_chain��̧�� + validate_plan ������� + L18 + L19��RBAC �ܾ� fail-closed����plan_to_chain �ռ�����������Ϊ IntegrationError��INTEGRATION-1 Low �տڣ���й© CapabilityValidationError ����ϸ�ڣ��������� stdlib + L17��integration.md��",
+      "code": [
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/integration.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_integration2.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/integration.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_integration2.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-INTEGRATION-3",
+      "title": "��ʵ��Ʒ���ߣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����app/pipeline.py ����ʵ�ɷ�ǰ�� validate_product_chain У�� MVP_FIXED_CHAIN�������ǰ�ã�RBAC/L4 �ṹ allow-all ������Ʒ���ߣ���ʧ���� RuntimeError ��ֹ����chain_to_plan ̧���쳣����Ϊ rejected��IntegrationError �� ValidationResult fail-closed����L7 ISO У�����С���루��Ʒ now_utc_iso_z `...00.123456Z`��a2a/memory/validation/orchestrator ��ģ��ͳһ���������� stdlib + L17",
+      "code": [
+        "src/coevo/app/pipeline.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/validation.py"
+      ],
+      "tests": [
+        "tests/unit/test_pipeline_framework_gate.py",
+        "tests/unit/test_framework_gaps2.py",
+        "tests/e2e/test_demo_runner.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/app/pipeline.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_pipeline_framework_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps2.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_demo_runner.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-4",
+      "title": "���� L7 У�鹹������2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����validation.py ���� is_iso_utc_z��С���� + ����У�飻���� `$` �� `\\Z` ê����β�����У����ַ��� fail-closed �� TypeError й©����a2a/memory/orchestrator/integration ͳһ����ȥ˽�и�����validate_product_chain �쳣��֧Ҳ�ȹ� L7��INTEGRATION-3 Low �տڣ������������������� stdlib + L17",
+      "code": [
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps4.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps4.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
