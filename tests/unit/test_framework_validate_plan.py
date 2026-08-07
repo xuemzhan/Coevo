@@ -113,6 +113,13 @@ class ValidatePlanTests(unittest.TestCase):
         self.assertEqual(result.policy_profile, "INTERACTIVE")
         self.assertEqual(result.policy_version, "1.0")
 
+    def test_validated_at_required(self) -> None:
+        """security-review Info: audit metadata timestamp must be present."""
+
+        result = run_validate(make_plan(), validated_at="")
+        self.assertFalse(result.accepted)
+        self.assertIn("validated_at", result.failure_reason or "")
+
     def test_cycle_rejected(self) -> None:
         plan = make_plan(edges=(PlanEdge("n1", "n2"), PlanEdge("n2", "n1")))
         result = run_validate(plan)

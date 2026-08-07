@@ -97,6 +97,32 @@ class PlanL18Tests(unittest.TestCase):
         validate_plan_structure(make_plan(tool_args=(("max_nodes", 100),)))
         validate_plan_structure(make_plan(tool_args=(("top_k", 3), ("verbose", True))))
 
+    def test_tool_args_duplicate_key_rejected(self) -> None:
+        """security-review Low: duplicate keys break hash/execution consistency."""
+
+        plan = make_plan(
+            tool_args=(("max_nodes", 100), ("max_nodes", 200))
+        )
+        with self.assertRaises(PlanValidationError):
+            validate_plan_structure(plan)
+
+    def test_node_count_limit_rejected(self) -> None:
+        nodes = tuple(
+            PlanNode(
+                node_id=f"n{i}",
+                kind=PlanNodeKind.TOOL,
+                tool_ref=f"coevo.tools.t{i}",
+            )
+            for i in range(65)
+        )
+        with self.assertRaises(PlanValidationError):
+            validate_plan_structure(make_plan(nodes=nodes, edges=()))
+
+    def test_tool_args_count_limit_rejected(self) -> None:
+        args = tuple((f"k{i}", i) for i in range(33))
+        with self.assertRaises(PlanValidationError):
+            validate_plan_structure(make_plan(tool_args=args))
+
     def test_plan_id_must_match_fingerprint(self) -> None:
         with self.assertRaises(PlanValidationError):
             validate_plan_structure(make_plan(plan_id="a" * 64))

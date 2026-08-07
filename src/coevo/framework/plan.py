@@ -19,6 +19,11 @@ from enum import Enum
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 
+MAX_PLAN_NODES = 64
+MAX_PLAN_EDGES = 128
+MAX_TOOL_ARGS = 32
+MAX_TEXT_LENGTH = 256
+
 # L18 white-list: policy-owned numeric/consent keys never appear in a Plan.
 POLICY_OWNED_NUMERIC_KEYS = frozenset(
     {
@@ -119,6 +124,14 @@ def validate_plan_structure(plan: Plan) -> None:
         )
     if not plan.nodes:
         raise PlanValidationError("plan must contain at least one node")
+    if len(plan.nodes) > MAX_PLAN_NODES:
+        raise PlanValidationError(
+            f"plan exceeds the {MAX_PLAN_NODES}-node limit"
+        )
+    if len(plan.edges) > MAX_PLAN_EDGES:
+        raise PlanValidationError(
+            f"plan exceeds the {MAX_PLAN_EDGES}-edge limit"
+        )
     node_ids = [node.node_id for node in plan.nodes]
     if len(set(node_ids)) != len(node_ids):
         raise PlanValidationError("duplicate node_id in plan")
@@ -142,6 +155,14 @@ def _validate_node(node: PlanNode) -> None:
         raise PlanValidationError("node kind must be a PlanNodeKind member")
     if not _SAFE_ID.match(node.node_id):
         raise PlanValidationError(f"node_id must be a safe-id: {node.node_id!r}")
+    for label, value in (
+        ("agent_capability", node.agent_capability),
+        ("tool_ref", node.tool_ref),
+        ("human_gate_reason", node.human_gate_reason),
+        ("confirmation_role", node.confirmation_role),
+    ):
+        if len(value) > MAX_TEXT_LENGTH:
+            raise PlanValidationError(f"{label} exceeds {MAX_TEXT_LENGTH} chars")
     if node.kind is PlanNodeKind.AGENT:
         if not node.agent_capability:
             raise PlanValidationError("AGENT node requires agent_capability")
@@ -160,11 +181,21 @@ def _validate_node(node: PlanNode) -> None:
 def _validate_l18_keys(node: PlanNode) -> None:
     """L18: policy-owned numeric keys must not appear anywhere in the Plan."""
 
+    if len(node.tool_args) > MAX_TOOL_ARGS:
+        raise PlanValidationError(
+            f"node {node.node_id!r} exceeds the {MAX_TOOL_ARGS}-entry tool_args limit"
+        )
+    seen: set[str] = set()
     for key, _value in node.tool_args:
         if key in POLICY_OWNED_NUMERIC_KEYS:
             raise PlanValidationError(
                 f"L18: policy-owned key {key!r} is not allowed inside tool_args"
             )
+        if key in seen:
+            raise PlanValidationError(
+                f"duplicate tool_args key {key!r} on node {node.node_id!r}"
+            )
+        seen.add(key)
 
 
 def tool_args_mapping(node: PlanNode) -> dict[str, object]:

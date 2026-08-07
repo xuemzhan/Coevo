@@ -96,6 +96,8 @@ def validate_plan(
             failure_reason=reason,
         )
 
+    if not validated_at:
+        return reject("validated_at is required for audit metadata")
     try:
         validate_plan_structure(plan)
         if plan.policy_profile != policy.profile:
