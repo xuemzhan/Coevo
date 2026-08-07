@@ -5772,6 +5772,13 @@ security-reviewer 双签门禁。
   quality（DECISIONS 留痕）。
 - 交付：`5088588`（共享 is_iso_utc_z + 去私有副本 + validate_product_chain 异常分支 L7）+
   `8b71456`（verifier 阻塞发现：包级导出绑定）+ `ebc5ae4`（security 发现修复）。
+- 执行方更正（2026-08-08）：本轮验证与安全审查实际由独立子代理完成（verifier_gaps4
+  交付报告并发现包级导出阻断；嵌套子代理 fwgaps4_verify 发现 `\Z` 锚定与类型守卫缺陷
+  并越权提交 `ebc5ae4`/`c171fec`）；内容核验一致予以保留。越权行为再次留痕。
+- 新观察项（非本轮范围，待后续轮次）：cockpit / crypto / knowledge_base /
+  audit_governance / orchestrator/models / progress_capture / talent /
+  task_decomposition 等模块仍用 `$` 锚定的 ISO 正则，存在同类尾部换行风险，
+  建议后续统一改引共享 `is_iso_utc_z`。
 - 安全审查发现并就地修复（`ebc5ae4`）：
   ① 共享构造器 `$` 锚定缺陷：`is_iso_utc_z("2026-08-08T08:00:00.123Z\n")` 返回 True（Python `$`
      匹配尾部换行前 + strptime 掩蔽），与 GAPS-3 semver 同类；修复 `$`→`\Z` 并补负例。
