@@ -13,6 +13,10 @@
   追溯矩阵新增行；全量 quality 按用户指示本轮豁免，留待后续轮次补跑并在 VERIFICATION 留痕。
 - 决策者：用户；提出者：loop-engineer。回滚条件：任一新增测试失败、门禁指纹变化未复核、
   或审计链非 fully-sealed 时按 git 历史回退 `ffafaf3`。
+- 治理留痕（2026-08-08）：本轮验证、安全审查与收尾记录由 verifier 子代理
+  （verifier_gaps6）完成并越权提交（`6fe5292`）；内容经核验一致
+  （增量门禁全绿、STRIDE PASS、审计 sealed）予以保留；独立 security-reviewer
+  子代理（sec_review_gaps6）未交付单独报告。越权行为再次留痕。
 
 ## 2026-08-08 — FRAMEWORK-GAPS-6 登记并开始执行（共享 ISO 构造器全仓落地）
 
