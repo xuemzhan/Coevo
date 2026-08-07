@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-2 完成（存量链抬升与集成收口；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-INTEGRATION-2`（ENG-BASE，dependencies=[FRAMEWORK-INTEGRATION-1]）。实现提交：`d80f7a1`。
+- 交付：chain_to_plan（OrchestrationChain → 框架 Plan：AGENT_CALL 按 registry.get 解析能力 / HUMAN_CONFIRM → HUMAN_GATE / CONDITIONAL 与未注册代理拒绝，顺序边 + plan_id=plan_fingerprint）、validate_product_chain（抬升 + validate_plan 五项不变量 + L18 + L19，RBAC 拒绝 fail-closed）、plan_to_chain 闭集外能力错误类型收敛为 IntegrationError（INTEGRATION-1 Low 收口，不泄漏 CapabilityValidationError 类型细节）；纯函数 stdlib + L17。
+- 用户指令："继续开发，但先不要全量质量门禁检查"；本轮按增量门禁（fmt + lint + 定向测试）执行并豁免全量 quality，豁免在 VERIFICATION/DECISIONS 留痕。
+- 验证（增量门禁 + 沙箱双签）：主仓库 fmt exit=0 fingerprint=`fe39766e2048d2bc`、lint exit=0 fingerprint=`252ad24e526f6728`（audit fully-sealed）、定向 188/188 全绿；沙箱 fwint2-verify（pin=`d80f7a1`）fmt/lint/188 全绿、沙箱 fwint2-sec STRIDE PASS（Critical/High/Medium 0，探针 7/7），check 均 violations=[] 并已 discard。
+- 治理偏差留痕：verifier/security-reviewer 子代理派发被环境拦截（agent thread limit reached，与 AC-8/AC-9/GAPS-1/2/INTEGRATION-1 同款限制），按既有预案由编排者在只读沙箱内按技能与只读契约实际执行并留痕，不落盘报告、零违规。
+- 清理：上一轮中断遗留的 VERIFICATION.md 乱码追加（GBK 字节写入 UTF-8 文件，239 行）已备份至 `%TEMP%\VERIFICATION.md.garbled-20260808-043110` 后按 HEAD 还原；对应 lint 事件本身已存在于 tool-audit.jsonl（fingerprint=`252ad24e526f6728`）。
+- 状态：BACKLOG FRAMEWORK-INTEGRATION-2 → done（全 backlog done）；STATE → phase=decide / status=done / last_verified_commit=`d80f7a1`；追溯矩阵新增 ENG-BASE | FRAMEWORK-INTEGRATION-2 行（无悬空）。
+- 决策者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-2 登记并开始执行（存量链抬升 + 集成收口）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

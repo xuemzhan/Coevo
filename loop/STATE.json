@@ -3,11 +3,11 @@
   "iteration": 30,
   "current_story": "ENG-BASE",
   "current_item": "FRAMEWORK-INTEGRATION-2",
-  "phase": "plan",
-  "status": "in-progress",
+  "phase": "decide",
+  "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "def380e",
+  "last_verified_commit": "d80f7a1",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T20:27:59.678602Z"
+  "updated_at": "2026-08-07T20:35:40.095466Z"
 }

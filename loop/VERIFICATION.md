@@ -17968,3 +17968,502 @@ audit seal: fully-sealed
   secret scan ok。
 - 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git
   历史回退 `def380e`。
+
+## 2026-08-07T20:32:45.293810Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T20:32:55.566275Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+嵥���淶 JSON + YAML ��ȫ��Ⱦ�Ӽ�����ֽ�治��ŵ reconcile loop���� K8s ����� IO����listing_fingerprint SHA-256 �ɹ�ϣ��opt-in ɳ�䴿�������� IO �����ã����嵥�ṹУ�� fail-closed���ֶΰ����� / �ظ��� / δ֪�ֶ� / BOM / 64KiB ���� / 64 ����ȣ������ͶӰ�̶���ժҪ������ spec ��ϸ����stdlib-only + L17 �ĵ�������k8s-crd-listing.md��",
+      "code": [
+        "src/coevo/framework/k8s_listing.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/k8s-crd-listing.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_k8s_listing.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/k8s-crd-listing.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-1",
+      "title": "������۲����տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����semver/ISO-8601 ��ʽУ�飨manifest semantic_version / a2a created_at / memory occurred_at��L7����Policy ��ʱ�Ͻ� dispatch��600s / plan_total��7200s / consent��7200s��Info4����Orchestrator �� provider �쳣����Ϊ OrchestrationError + ���ͶӰ�� validated_at��Low����K8s �嵥 spec ���ڰ� capability/tool/policy/plan ������У��δ֪����Low�����ĵ���ȡ�ᣨtrusted_anchor ί�� L2 / ����������� L4 / ������ Info5���������� stdlib + L17",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/k8s_listing.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-2",
+      "title": "GAPS-1 �¹۲����տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����Policy TimeoutProfile/RetryProfile/ConsentProfile �ϸ��������ͣ�bool/str/float/int ����һ�� PolicyValidationError��`type(...) is int`����semver �ϸ���򣨽�ǰ�����㣩��ISO-8601 ������ΧУ�飨datetime.strptime��a2a created_at / memory occurred_at / validate_plan validated_at / transition validated_at����validated_at �����ͶӰǰͳһ L7 ISO У�飻������ stdlib + L17",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/orchestrator.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps2.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps2.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-3",
+      "title": "GAPS-2 �¹۲����տڣ�2026-08-08���û�ָ��\"��������\"����semver ���� $ ��Ϊ \\Z �ܾ�β�����У�1.0.0\\n ���ٱ����ܣ���ISO ·������ strptime ��ס������ 2 �test_framework_gaps3.py��",
+      "code": [
+        "src/coevo/framework/manifest_checker.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps3.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps3.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-INTEGRATION-1",
+      "title": "��ܽ������б��ţ�GuardedOrchestrator ���䣬2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����guard_registration��manifest-checker ͨ����ע�ᣬ�ܾ������� inner_register��inner �쳣 fail-closed����plan_to_chain����� Plan AGENT/HUMAN_GATE �� ���� OrchestrationChain��AGENT ����������ע�����Ϊ AGENT_CALL��HUMAN_GATE �� HUMAN_CONFIRM��TOOL �ڵ����ܳ���������ȷ�ܾ� IntegrationError����guarded_dispatch��validate_plan ǰ�� �� plan_to_chain �� Orchestrator.dispatch_event �� ����ӳ�� OrchestrationOutcome��COMPLETED/HELD/ESCALATED��FAILED/δ֪ �� ESCALATED fail-closed���ڲ��쳣������������GuardResult ���ͶӰ�̶��ļ��������� stdlib + L17��integration.md��",
+      "code": [
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/integration.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_integration.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/integration.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_integration.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08 — FRAMEWORK-INTEGRATION-2 完成收尾（存量链抬升与集成收口；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-INTEGRATION-2`（ENG-BASE）。实现提交：`d80f7a1`（chain_to_plan / validate_product_chain / plan_to_chain 闭集外错误类型收敛为 IntegrationError；`tests/unit/test_framework_integration2.py` 6 项）。
+- 用户指令：继续开发，先不要全量质量门禁；本轮按增量门禁（fmt + lint + 定向测试）执行并豁免留痕（与 2026-08-03 起门禁策略一致）。
+- 主仓库增量门禁：
+  * fmt exit=0 fingerprint=`fe39766e2048d2bc`
+  * lint exit=0 fingerprint=`252ad24e526f6728`（audit fully-sealed）
+  * 定向 188/188 全绿（全部框架层 17 模块 + integration + integration2 + agent_wire_regression + module_docs）
+- 独立验证（mvp-verifier 契约，只读沙箱 fwint2-verify，pin=`d80f7a1`）：
+  * fmt exit=0 fingerprint=`0bacb90b65ad81b1`（沙箱路径指纹与维护机基线不同属预期，CI 同款）
+  * lint exit=0 fingerprint=`6cc74b4c8b369ff4`
+  * 定向 188/188 全绿；review_sandbox check violations=[]，已 discard。
+- 独立安全审查（security-reviewer 契约，只读沙箱 fwint2-sec，pin=`d80f7a1`）：
+  STRIDE 探针 7/7 PASS，Critical/High/Medium 0：未注册代理 / CONDITIONAL 抬升拒绝；plan_to_chain 闭集外（未知 / FRAMEWORK_ABSTRACT / TOOL）统一 IntegrationError 且消息无 CapabilityValidationError 类型名与敏感信息泄漏；validate_product_chain 合法链 accepted、RBAC 拒绝 fail-closed；lint（含 audit seal + secret scan）exit=0 fingerprint=`f7d23834681cfafb`；check violations=[]，已 discard。
+- 治理偏差留痕：verifier/security-reviewer 子代理派发被环境拦截（agent thread limit reached，与 AC-8/AC-9/GAPS-1/2/INTEGRATION-1 同款限制），按既有预案由编排者在只读沙箱内按技能与只读契约实际执行并留痕，不落盘报告、零违规。
+- 清理：上一轮中断遗留的 VERIFICATION.md 乱码追加（GBK 字节写入 UTF-8 文件，239 行）已备份至 `%TEMP%\VERIFICATION.md.garbled-20260808-043110` 后按 HEAD 还原；对应 lint 事件本身已存在于 tool-audit.jsonl（fingerprint=`252ad24e526f6728`）。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-INTEGRATION-2 行（无悬空）；BACKLOG FRAMEWORK-INTEGRATION-2 置 done（全 backlog done）；STATE 置 phase=decide / status=done / last_verified_commit=`d80f7a1`；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git 历史回退 `d80f7a1`。
+## 2026-08-07T20:36:29.779221Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+�Ž�\"����semver/ISO-8601 ��ʽУ�飨manifest semantic_version / a2a created_at / memory occurred_at��L7����Policy ��ʱ�Ͻ� dispatch��600s / plan_total��7200s / consent��7200s��Info4����Orchestrator �� provider �쳣����Ϊ OrchestrationError + ���ͶӰ�� validated_at��Low����K8s �嵥 spec ���ڰ� capability/tool/policy/plan ������У��δ֪����Low�����ĵ���ȡ�ᣨtrusted_anchor ί�� L2 / ����������� L4 / ������ Info5���������� stdlib + L17",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/k8s_listing.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-2",
+      "title": "GAPS-1 �¹۲����տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����Policy TimeoutProfile/RetryProfile/ConsentProfile �ϸ��������ͣ�bool/str/float/int ����һ�� PolicyValidationError��`type(...) is int`����semver �ϸ���򣨽�ǰ�����㣩��ISO-8601 ������ΧУ�飨datetime.strptime��a2a created_at / memory occurred_at / validate_plan validated_at / transition validated_at����validated_at �����ͶӰǰͳһ L7 ISO У�飻������ stdlib + L17",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/orchestrator.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps2.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps2.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-3",
+      "title": "GAPS-2 �¹۲����տڣ�2026-08-08���û�ָ��\"��������\"����semver ���� $ ��Ϊ \\Z �ܾ�β�����У�1.0.0\\n ���ٱ����ܣ���ISO ·������ strptime ��ס������ 2 �test_framework_gaps3.py��",
+      "code": [
+        "src/coevo/framework/manifest_checker.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps3.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps3.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-INTEGRATION-1",
+      "title": "��ܽ������б��ţ�GuardedOrchestrator ���䣬2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����guard_registration��manifest-checker ͨ����ע�ᣬ�ܾ������� inner_register��inner �쳣 fail-closed����plan_to_chain����� Plan AGENT/HUMAN_GATE �� ���� OrchestrationChain��AGENT ����������ע�����Ϊ AGENT_CALL��HUMAN_GATE �� HUMAN_CONFIRM��TOOL �ڵ����ܳ���������ȷ�ܾ� IntegrationError����guarded_dispatch��validate_plan ǰ�� �� plan_to_chain �� Orchestrator.dispatch_event �� ����ӳ�� OrchestrationOutcome��COMPLETED/HELD/ESCALATED��FAILED/δ֪ �� ESCALATED fail-closed���ڲ��쳣������������GuardResult ���ͶӰ�̶��ļ��������� stdlib + L17��integration.md��",
+      "code": [
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/integration.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_integration.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/integration.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_integration.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-INTEGRATION-2",
+      "title": "������̧���뼯���տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����chain_to_plan������ OrchestrationChain �� ��� Plan��AGENT_CALL �� registry.get �������� �� AGENT �ڵ� / HUMAN_CONFIRM �� HUMAN_GATE / CONDITIONAL ��δע����� �� IntegrationError��˳��� + plan_id=plan_fingerprint����validate_product_chain��̧�� + validate_plan ������� + L18 + L19��RBAC �ܾ� fail-closed����plan_to_chain �ռ�����������Ϊ IntegrationError��INTEGRATION-1 Low �տڣ���й© CapabilityValidationError ����ϸ�ڣ��������� stdlib + L17��integration.md��",
+      "code": [
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/integration.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_integration2.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/integration.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_integration2.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```

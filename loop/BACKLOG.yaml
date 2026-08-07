@@ -1203,7 +1203,7 @@ items:
   - id: FRAMEWORK-INTEGRATION-2
     story: ENG-BASE
     title: 存量链抬升与集成收口：chain_to_plan（现有 OrchestrationChain → 框架 Plan，AGENT_CALL 按 registry.get 解析能力 / HUMAN_CONFIRM → HUMAN_GATE / CONDITIONAL 拒绝）、validate_product_chain（抬升 + validate_plan 五项不变量 + L18 + L19）、plan_to_chain 闭集外能力收敛为 IntegrationError（INTEGRATION-1 Low 收口）；纯函数 stdlib + L17（integration.md）
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-INTEGRATION-1]
     acceptance_tests:
       - tests/unit/test_framework_integration2.py
