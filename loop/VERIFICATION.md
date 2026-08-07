@@ -9975,6 +9975,24 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — US-16-AC-4 双签记录（mvp-verifier + security-reviewer）
+
+- 工作项：`US-16-AC-4-framework-memory-interface-v0.1`（Memory 抽象，CTAF §6.2 / M3）。
+- 提交：`c988cd9`（实现）+ `727e739`（security-review Low 硬化修复）。
+- **验证（增量门禁口径，用户指示豁免全量 quality）**：主仓库定向 104/104 全绿 +
+  `--target lint` exit=0 fingerprint=`252ad24e526f6728`（audit fully-sealed）；
+  security-reviewer 在钉扎沙箱内实测 memory 13 项 + 模块文档守卫 4 项全绿；
+  mvp-verifier 子代理本轮被中断未交付文本报告，验证证据以主仓库增量门禁 +
+  沙箱审查实测为准（已记录偏差）。
+- **security-reviewer**：PASS。STRIDE 逐项通过，无 Critical/High、无阻断项；
+  Low 3 观察项：① 畸形 kind 下审计投影防御取值（已就地修复 `727e739`）；
+  ② Semantic 审批检查器接收脱敏前明文（信任边界已写入 memory-interface.md）；
+  ③ 拒绝写入审计含 record_id 指纹（设计使然，生产 Redactor 须加盐/密钥化）。
+- 环境发现：沙箱副本缺 `.tools/control/control.pyz`，沙箱内 gate 无法启动
+  （exit 2，环境问题与实现无关）；主仓库增量门禁作为本轮证据。
+- 追溯矩阵新增 US-16 | AC-4 行（无悬空）；BACKLOG `US-16-AC-4-*` 置 done；
+  STATE 置 US-16 / US-16-AC-4 / phase=decide / status=done。
+
 ## 2026-08-07 — US-16-AC-2 双签记录（mvp-verifier + security-reviewer 独立放行）
 
 - 工作项：`US-16-AC-2-framework-policy-abstractions-v0.1`（Policy 抽象 +
@@ -11043,6 +11061,807 @@ audit seal: fully-sealed
         {
           "kind": "test",
           "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T16:53:30.508637Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+SD-3-Clause.txt",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/go.mod",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/doc.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/models.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/mapping.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/models_test.go",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/mapping_test.go",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-1",
+      "title": "��ܲ� manifest-checker��CTAF ��5.3 / M1a����Agent Manifest ǿ��У�飨�����ռ� T2 / �˹�ȷ��ȱʡ true T3 / crypto_scope �ռ� T4 / ��������Ӽ� T5 / spec_hash �ų���ָ�ֶ� F5 / policy_ref ���ΰ��ҹ�Կȡ��֤���� F8 / policy_version �� F7 / ʧ�ܲ�ע�� / �������������������� L15��+ `.agent` v1.0 wire �ֽڼ��ع� T6",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_agent_wire_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-2",
+      "title": "��ܲ� Policy ������ validate_plan��CTAF ��6.5 / M2����Policy �ֶ��� policy_version ���F7����4 Ĭ�� Profile��max_recover_attempts �� 3 ���� L16����EMERGENCY fail-fast��1 ������ / 60s / �º� 30 ����ȷ�� / ���ظ澯��F1+F9����L18 ��������tool_args ��ֵ�� schema ������F6����validate_plan ������� + L18 + L19��A9/F4����L19 ״̬����ESCALATED��ACTIVE ���뾭 HELD��RETIRED ֱ�ˣ�������������������������L15��+ L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/lifecycle.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_policy.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py",
+        "tests/unit/test_framework_validate_plan.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_policy.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-3",
+      "title": "��ܲ������ռ�������CTAF ��5.2 / M1b��������ע��� 19 �12 MVP ӳ�� AgentCapability / CRYPTO_PROXY �� approved-product / 6 ��ܳ��� PLANNER..HUMAN_GATE����˫��������ö��ֵ / CTAF �淶�� / ��Ա��ͬ��Ŀ���ռ������Сд���� fail-closed����manifest-checker У���л���MVP δӳ��ܾ���CRYPTO_PROXY approved scope����ܳ�����ã���˫��һ�����������޹¶� / ��δӳ�� MVP����capability-closedset.md �ĵ� + L15 stdlib / L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/capability.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "src/coevo/orchestrator/models.py",
+        "docs/framework/capability-closedset.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_capability.py",
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_framework_validate_plan.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/capability.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/capability-closedset.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_capability.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T16:53:50.484355Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+SD-3-Clause.txt",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/go.mod",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/doc.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/models.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/mapping.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/models_test.go",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/mapping_test.go",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-1",
+      "title": "��ܲ� manifest-checker��CTAF ��5.3 / M1a����Agent Manifest ǿ��У�飨�����ռ� T2 / �˹�ȷ��ȱʡ true T3 / crypto_scope �ռ� T4 / ��������Ӽ� T5 / spec_hash �ų���ָ�ֶ� F5 / policy_ref ���ΰ��ҹ�Կȡ��֤���� F8 / policy_version �� F7 / ʧ�ܲ�ע�� / �������������������� L15��+ `.agent` v1.0 wire �ֽڼ��ع� T6",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_agent_wire_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-2",
+      "title": "��ܲ� Policy ������ validate_plan��CTAF ��6.5 / M2����Policy �ֶ��� policy_version ���F7����4 Ĭ�� Profile��max_recover_attempts �� 3 ���� L16����EMERGENCY fail-fast��1 ������ / 60s / �º� 30 ����ȷ�� / ���ظ澯��F1+F9����L18 ��������tool_args ��ֵ�� schema ������F6����validate_plan ������� + L18 + L19��A9/F4����L19 ״̬����ESCALATED��ACTIVE ���뾭 HELD��RETIRED ֱ�ˣ�������������������������L15��+ L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/lifecycle.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_policy.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py",
+        "tests/unit/test_framework_validate_plan.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_policy.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-3",
+      "title": "��ܲ������ռ�������CTAF ��5.2 / M1b��������ע��� 19 �12 MVP ӳ�� AgentCapability / CRYPTO_PROXY �� approved-product / 6 ��ܳ��� PLANNER..HUMAN_GATE����˫��������ö��ֵ / CTAF �淶�� / ��Ա��ͬ��Ŀ���ռ������Сд���� fail-closed����manifest-checker У���л���MVP δӳ��ܾ���CRYPTO_PROXY approved scope����ܳ�����ã���˫��һ�����������޹¶� / ��δӳ�� MVP����capability-closedset.md �ĵ� + L15 stdlib / L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/capability.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "src/coevo/orchestrator/models.py",
+        "docs/framework/capability-closedset.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_capability.py",
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_framework_validate_plan.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/capability.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/capability-closedset.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_capability.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T17:00:42.403342Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+SD-3-Clause.txt",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/go.mod",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/doc.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/models.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "go/taskflow/mapping.go",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/models_test.go",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "go/taskflow/mapping_test.go",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-1",
+      "title": "��ܲ� manifest-checker��CTAF ��5.3 / M1a����Agent Manifest ǿ��У�飨�����ռ� T2 / �˹�ȷ��ȱʡ true T3 / crypto_scope �ռ� T4 / ��������Ӽ� T5 / spec_hash �ų���ָ�ֶ� F5 / policy_ref ���ΰ��ҹ�Կȡ��֤���� F8 / policy_version �� F7 / ʧ�ܲ�ע�� / �������������������� L15��+ `.agent` v1.0 wire �ֽڼ��ع� T6",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_agent_wire_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-2",
+      "title": "��ܲ� Policy ������ validate_plan��CTAF ��6.5 / M2����Policy �ֶ��� policy_version ���F7����4 Ĭ�� Profile��max_recover_attempts �� 3 ���� L16����EMERGENCY fail-fast��1 ������ / 60s / �º� 30 ����ȷ�� / ���ظ澯��F1+F9����L18 ��������tool_args ��ֵ�� schema ������F6����validate_plan ������� + L18 + L19��A9/F4����L19 ״̬����ESCALATED��ACTIVE ���뾭 HELD��RETIRED ֱ�ˣ�������������������������L15��+ L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/lifecycle.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_policy.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py",
+        "tests/unit/test_framework_validate_plan.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_policy.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-3",
+      "title": "��ܲ������ռ�������CTAF ��5.2 / M1b��������ע��� 19 �12 MVP ӳ�� AgentCapability / CRYPTO_PROXY �� approved-product / 6 ��ܳ��� PLANNER..HUMAN_GATE����˫��������ö��ֵ / CTAF �淶�� / ��Ա��ͬ��Ŀ���ռ������Сд���� fail-closed����manifest-checker У���л���MVP δӳ��ܾ���CRYPTO_PROXY approved scope����ܳ�����ã���˫��һ�����������޹¶� / ��δӳ�� MVP����capability-closedset.md �ĵ� + L15 stdlib / L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/capability.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "src/coevo/orchestrator/models.py",
+        "docs/framework/capability-closedset.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_capability.py",
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_framework_validate_plan.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_framework_lifecycle.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/capability.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/capability-closedset.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_capability.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
           "exists": true
         }
       ],

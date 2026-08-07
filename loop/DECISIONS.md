@@ -1,5 +1,25 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-4 Memory 抽象完成（双签放行，增量门禁口径）
+
+- 工作项：`US-16-AC-4-framework-memory-interface-v0.1`（CTAF §6.2 / M3）。
+- 实现：`src/coevo/framework/memory.py`（MemoryRecord 统一模型 + 规范化指纹、
+  `write_memory` 校验→脱敏→审批→持久化、注入 store/审批/Redactor 协议、
+  MemoryWriteResult 审计投影）；`docs/framework/memory-interface.md`（M3 文档，
+  含 progress_capture / knowledge_base 适配映射与信任边界说明）；测试 14 项。
+- 验证（增量门禁）：主仓库定向 104/104 全绿；lint exit=0 fingerprint=
+  `252ad24e526f6728`（audit fully-sealed）；按用户指示豁免全量 quality。
+- 审查：security-reviewer PASS（Critical/High 0，Low 3：① 审计投影畸形 kind
+  防御取值已修复于 `727e739`；② Semantic 审批明文信任边界已文档化；③ record_id
+  指纹低熵恢复风险，生产 Redactor 须加盐/密钥化，留痕后续）。
+- 环境留痕：沙箱副本缺 `.tools/control/control.pyz`，沙箱内 gate exit 2
+  （与实现无关）；mvp-verifier 子代理本轮被中断未交付报告，验证证据以主仓库
+  增量门禁 + 沙箱审查实测为准。
+- 提交：`c988cd9`（feat）、`727e739`（fix）、records 收尾提交。
+- 决策者：用户（"继续开发，不跑全量门禁"）；执行：Codex。
+- 下一项：M4（MCP schema 路径 A）或 M5（A2A wire，需 protocol-reviewer），
+  待业务负责人指示。
+
 ## 2026-08-08 — US-16-AC-4 登记并开始执行（Memory 抽象，CTAF M3）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

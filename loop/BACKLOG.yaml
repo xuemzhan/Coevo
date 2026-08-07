@@ -1102,7 +1102,7 @@ items:
   - id: US-16-AC-4-framework-memory-interface-v0.1
     story: US-16
     title: 框架层 Memory 抽象（CTAF §6.2 / M3）：MemoryRecord 统一模型（EPISODIC/SEMANTIC + 规范化指纹）、Episodic 审计投影必填、Semantic 审批（映射 knowledge_base ReviewDecisionKind.APPROVE）、L12 敏感字段经注入 Redactor 转不可恢复摘要、注入 store/审批/Redactor 协议 fail-closed、纯函数离线 stdlib + L17（memory-interface.md）
-    status: ready
+    status: done
     dependencies: [US-16-AC-1-framework-manifest-checker-v0.1]
     acceptance_tests:
       - tests/unit/test_framework_memory.py
