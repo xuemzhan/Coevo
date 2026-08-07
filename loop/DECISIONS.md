@@ -1,5 +1,24 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-13 第十三轮逐文件深度审查与优化（用户指令）done
+
+- 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
+  细化每一个模块的README文档"，并明确"不用做全量质量门"。
+- 审查结论（第十三轮，剩余纯函数边界探针）：
+  - 任务流 `apply_mapping` 自定义规则：优先级数值小者胜、同优先级按 rule_id
+    字典序决胜——此前仅覆盖默认规则与未知 hint，补自定义规则优先级与并列测试；
+  - 督办升级时间边界：`due_at == now` 恰好到期时 `delta >= 0` 生效
+    （SEVERE_COORDINATION_NEEDED → EMERGENCY、LONG_SILENCE → WATCH）；
+  - 知识包密级：AC-5 取全部条目最高密级，INTERNAL 基线 + RESTRICTED 简报
+    → RESTRICTED。
+- 修复：3 项边界测试补强，无生产代码行为变更。
+- 验证：定向 `python -m unittest tests.unit.test_task_flow_models
+  tests.unit.test_supervision_meeting tests.unit.test_knowledge_base` 59 项全绿；
+  **按用户指示未跑全量质量门**（豁免原因：用户明确"不用做全量质量门"；
+  待下次全量门禁回归）。
+- 安全审查：纯测试增补，不涉及生产代码/协议/密码，静态评估无安全影响。
+- 决策者：用户；提出者：loop-engineer。回滚条件：定向测试失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-12 第十二轮逐文件深度审查与优化（用户指令）done
 
 - 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…

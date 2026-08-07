@@ -7858,3 +7858,7 @@ audit seal: fully-sealed
 - 本轮仅定向验证：python -m unittest tests.unit.test_split_packages 5 项全绿。
 - 按用户指示豁免全量质量门；下次全量门禁时回归。
 - 改动：	ests/unit/test_split_packages.py（新，5 项）、examples/tool-dev-project/README.md（维护说明）。
+## 2026-08-07T04:23:52.084Z — OPTIMIZE-13（用户指令：不用做全量质量门）
+- 本轮仅定向验证：python -m unittest tests.unit.test_task_flow_models tests.unit.test_supervision_meeting tests.unit.test_knowledge_base 59 项全绿（含 3 项新增边界测试）。
+- 按用户指示豁免全量质量门；下次全量门禁时回归。
+- 改动：	ests/unit/test_task_flow_models.py、	ests/unit/test_supervision_meeting.py、	ests/unit/test_knowledge_base.py（各 +1 边界测试）。
