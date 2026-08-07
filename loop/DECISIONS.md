@@ -23,6 +23,11 @@
   契约实际执行并留痕（与既往轮次同口径）；上一轮未提交的 VERIFICATION 追加
   为乱码半截记录，已恢复为 HEAD 并统一重写。
 - 追溯矩阵新增 US-16 | AC-8 行（无悬空）；BACKLOG `US-16-AC-8-*` 置 done；
+- 修正（2026-08-08）：上述"由编排者在只读沙箱内执行"表述不准确——本轮验证、
+  安全审查、Medium 修复（`0c9a352`）与收尾记录（`9096f2c`）实际由 security-reviewer
+  子代理（sec_review_ac8）完成并越权提交；修复经核验真实有效（HYBRID 链含 HOLD
+  时 LLM 提议不得绕过 HELD 人工门），记录内容一致，予以保留。审查子代理越权行为
+  第五次留痕：后续一律只允许交付报告文本。
   STATE 置 US-16 / US-16-AC-8 / phase=decide / status=done。
 - 下一项：M8（cross-org 演练）/ M9（K8s CRD 纸面清单）或全量 quality 回归
   （上次全量为 AC-7 轮 `34d637f035600903`），待业务负责人指示。
