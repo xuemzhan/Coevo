@@ -5566,5 +5566,35 @@ security-reviewer 双签门禁。
   * 两个沙箱 `review_sandbox.py check` 均 violations=[]，已 discard。
 - 结论：AC-9 技术结论与既有记录一致；`51d4faa` 深度修复与 `bf7e0c5` 记录
   内容经独立复核有效；原记录"由编排者在只读沙箱内按技能与只读契约实际执行"
-  的表述按本次实测成立，沙箱名以本次 `ac9-verify`/`ac9-sec` 为准。
+ 的表述按本次实测成立，沙箱名以本次 `ac9-verify`/`ac9-sec` 为准。
 - 豁免：全量 quality 按用户指示本轮不执行，留待下次回归；审计链 fully-sealed。
+## 2026-08-08 -- FRAMEWORK-GAPS-2 完成收尾（GAPS-1 新观察项收口；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-GAPS-2`（ENG-BASE）。实现提交：`e29e290`（Policy Timeout/Retry/Consent
+  严格整数类型 `type(...) is int` 拒绝 bool/str/float/int 子类、semver 禁前导对零、ISO-8601
+  日历范围 datetime.strptime 校验（a2a created_at / memory occurred_at / validate_plan /
+  transition validated_at）、validated_at 入审计投影前统一 L7 ISO 校验）。
+- 用户指令：继续开发，先不要全量质量门禁；本轮按增量门禁（fmt + lint + 定向测试）执行并豁免
+  留痕（与 2026-08-03 门禁策略一致）。
+- 独立验证（mvp-verifier 契约，只读沙箱 fgaps2-verify，pin=`e29e290`）：
+  主仓库 fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`252ad24e526f6728`
+  （audit fully-sealed）；沙箱内 fmt exit=0 同指纹、lint exit=0 fingerprint=`1a3262053d4f065a`
+  （沙箱路径指纹与维护机基线不同属预期）；定向 169/169 全绿（test_framework_gaps2 + 全部框架
+  回归 + agent_wire_regression + module_docs）；review_sandbox check violations=[]，已 discard。
+- 独立安全审查（security-reviewer 契约，只读沙箱 fgaps2-sec，pin=`e29e290`）：
+  STRIDE 逐项 PASS，Critical/High/Medium 0；探测证据：Policy bool/str/float/int 子类全部
+  PolicyValidationError（无 TypeError 泄漏）、semver 前导对零拒绝、ISO 非法日期
+  （2026-99-99 / 02-30 / 尾部换行）在 a2a/memory/validate_plan/transition 全部拒绝、
+  validated_at 非法先于投影 REJECTED、六模块 stdlib-only 零 IO 且无 eval/exec/open、
+  审计投影固定键；secret scan ok；check violations=[]，已 discard。
+- 新观察项（Low 1）：manifest semantic_version 仍接受尾部换行 `1.0.0\n`（Python `$` 语义；
+  ISO 已由 strptime 兜住、semver 未兜）——非本轮收口范围，已在 BACKLOG 登记
+  `FRAMEWORK-GAPS-3`（ready）。
+- 治理偏差留痕：verifier/security-reviewer 子代理派发被环境拦截（agent thread limit
+  reached，与 GAPS-1/AC-8/AC-9 同款限制），按既有预案由编排者在只读沙箱内按技能与只读
+  契约实际执行并留痕，不落盘报告、零违规。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-GAPS-2 行（无悬空）；BACKLOG GAPS-2 置 done +
+  GAPS-3 登记 ready；STATE 置 phase=decide / status=done / last_verified_commit=`e29e290`；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git 历史
+  回退 `e29e290`。

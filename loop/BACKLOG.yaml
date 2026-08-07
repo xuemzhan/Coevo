@@ -1173,9 +1173,19 @@ items:
   - id: FRAMEWORK-GAPS-2
     story: ENG-BASE
     title: GAPS-1 新观察项收口：Policy TimeoutProfile/RetryProfile/ConsentProfile 严格整数类型（bool/非 int 一律 PolicyValidationError）、semver 严格规则（禁前导零）与 ISO-8601 日历范围校验（datetime 解析）、validated_at 入审计投影前统一 L7 ISO 校验（validate_plan / transition）；纯函数 stdlib + L17
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-GAPS-1]
     acceptance_tests:
       - tests/unit/test_framework_gaps2.py
+    security_review: true
+    protocol_review: false
+  # ---------- FRAMEWORK-GAPS-3（2026-08-08 新观察项登记：GAPS-2 安全审查发现 semver 尾部换行仍被接受） ----------
+  - id: FRAMEWORK-GAPS-3
+    story: ENG-BASE
+    title: semver 形态校验补齐：manifest semantic_version 仍接受尾部换行（Python `$` 语义，`1.0.0\n` 通过；ISO 已由 datetime.strptime 兜住、semver 未兜），需与 ISO 一致以二次解析/锚定收紧；纯函数 stdlib + L17
+    status: ready
+    dependencies: [FRAMEWORK-GAPS-2]
+    acceptance_tests:
+      - tests/unit/test_framework_gaps3.py
     security_review: true
     protocol_review: false
