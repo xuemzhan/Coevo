@@ -27,6 +27,7 @@ from src.coevo.framework import (
     ManifestValidationError,
     check,
 )
+from src.coevo.framework.manifest_checker import MAX_MANIFEST_BYTES
 from src.coevo.orchestrator.models import AgentCapability
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -384,6 +385,60 @@ class ManifestCheckerTests(unittest.TestCase):
             signature_verifier=_FakeSignatureVerifier(),
         )
         self.assertFalse(result.accepted)
+
+    def test_oversize_manifest_rejected(self) -> None:
+        """Fail closed on inputs beyond the size limit (security-review M1)."""
+
+        payload = canonical_bytes(make_manifest()) + b" " * MAX_MANIFEST_BYTES
+        result = check(
+            ManifestCheckInput(manifest_bytes=payload),
+            policy_registry=_FakePolicyRegistry(),
+            cert_resolver=_FakeCertResolver(),
+            signature_verifier=_FakeSignatureVerifier(),
+        )
+        self.assertFalse(result.accepted)
+        self.assertIn("size limit", result.failure_reason or "")
+
+    def test_deeply_nested_json_fails_closed(self) -> None:
+        """RecursionError from pathological nesting becomes a failure_reason."""
+
+        payload = b"[" * 20000 + b"]" * 20000
+        result = check(
+            ManifestCheckInput(manifest_bytes=payload),
+            policy_registry=_FakePolicyRegistry(),
+            cert_resolver=_FakeCertResolver(),
+            signature_verifier=_FakeSignatureVerifier(),
+        )
+        self.assertFalse(result.accepted)
+        self.assertIn("processing failed", result.failure_reason or "")
+
+    def test_non_standard_json_constant_rejected(self) -> None:
+        """NaN / Infinity literals are not canonical JSON (security-review L5)."""
+
+        payload = (
+            b'{"metadata":{"agent_id":"a","spec_hash":"00"},'
+            b'"spec":{},"policy_profile":"p","policy_version":"1",'
+            b'"policy_ref":{},"security":{},"audit":{},"x":NaN}'
+        )
+        result = check(
+            ManifestCheckInput(manifest_bytes=payload),
+            policy_registry=_FakePolicyRegistry(),
+            cert_resolver=_FakeCertResolver(),
+            signature_verifier=_FakeSignatureVerifier(),
+        )
+        self.assertFalse(result.accepted)
+        self.assertIn("non-standard JSON constant", result.failure_reason or "")
+
+    def test_injected_resolver_exception_fails_closed(self) -> None:
+        """Exceptions from injected dependencies become failure_reason."""
+
+        class _BoomResolver:
+            def resolve_by_fingerprint(self, fingerprint_hex: str) -> bytes | None:
+                raise RuntimeError("chain unreachable")
+
+        result = run_check(make_manifest(), cert_resolver=_BoomResolver())  # type: ignore[arg-type]
+        self.assertFalse(result.accepted)
+        self.assertIn("certificate resolution failed", result.failure_reason or "")
 
     def test_failure_does_not_register(self) -> None:
         """AC-1.9: failed validation never reaches the registry."""

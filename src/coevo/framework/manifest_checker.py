@@ -45,6 +45,9 @@ from src.coevo.orchestrator.models import AgentCapability
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX = frozenset("0123456789abcdefABCDEF")
 
+MAX_MANIFEST_BYTES = 64 * 1024  # parity with .agent envelope limit (§7.1)
+MAX_REASON_LENGTH = 200
+
 AUDIT_PROJECTION_KEYS = frozenset(
     {
         "accepted",
@@ -184,7 +187,17 @@ def check(
             validated_manifest=None,
             spec_hash=declared,
             signed_at=inp.now,
-            failure_reason=str(exc),
+            failure_reason=_sanitize_reason(str(exc)),
+        )
+    except (RecursionError, MemoryError, ValueError) as exc:
+        # Fail closed on pathological inputs (deep nesting, oversized ints)
+        # instead of leaking an exception out of the checker contract.
+        return ManifestCheckResult(
+            accepted=False,
+            validated_manifest=None,
+            spec_hash=_declared_spec_hash(parsed) if parsed is not None else "",
+            signed_at=inp.now,
+            failure_reason=f"manifest processing failed: {type(exc).__name__}",
         )
     return ManifestCheckResult(
         accepted=True,
@@ -198,6 +211,10 @@ def check(
 def _parse_manifest(data: bytes) -> dict[str, Any]:
     if not isinstance(data, bytes):
         raise _InvalidManifest("manifest_bytes must be bytes")
+    if len(data) > MAX_MANIFEST_BYTES:
+        raise _InvalidManifest(
+            f"manifest exceeds the {MAX_MANIFEST_BYTES}-byte size limit"
+        )
     if data.startswith(b"\xef\xbb\xbf"):
         raise _InvalidManifest("BOM is not allowed in canonical manifest bytes")
     try:
@@ -205,7 +222,11 @@ def _parse_manifest(data: bytes) -> dict[str, Any]:
     except UnicodeDecodeError as exc:
         raise _InvalidManifest(f"manifest is not valid UTF-8: {exc}") from exc
     try:
-        parsed = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
+        parsed = json.loads(
+            text,
+            object_pairs_hook=_reject_duplicate_keys,
+            parse_constant=_reject_non_standard_constant,
+        )
     except json.JSONDecodeError as exc:
         raise _InvalidManifest(f"manifest is not valid JSON: {exc}") from exc
     if not isinstance(parsed, dict):
@@ -220,6 +241,15 @@ def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
             raise _InvalidManifest(f"duplicate key in manifest: {key!r}")
         out[key] = value
     return out
+
+
+def _reject_non_standard_constant(name: str) -> Any:
+    raise _InvalidManifest(f"non-standard JSON constant {name} is not allowed")
+
+
+def _sanitize_reason(reason: str) -> str:
+    cleaned = "".join(ch for ch in reason if ch >= " " or ch == "\t")
+    return cleaned[:MAX_REASON_LENGTH]
 
 
 def _canonical_bytes(obj: Any) -> bytes:
@@ -326,7 +356,11 @@ def _validate(
 
     profile = _require_str(parsed, "policy_profile", "policy_profile")
     version = _require_str(parsed, "policy_version", "policy_version")
-    if not policy_registry.has_policy_version(profile, version):
+    try:
+        policy_present = policy_registry.has_policy_version(profile, version)
+    except Exception as exc:  # noqa: BLE001 - injected registry must fail closed
+        raise _InvalidManifest(f"policy registry lookup failed: {exc}") from exc
+    if not policy_present:
         raise _InvalidManifest(
             f"policy_profile {profile!r} version {version!r} "
             "not present in the deployment policy registry"
@@ -357,7 +391,10 @@ def _validate(
     if not _is_hex(signature_hex):
         raise _InvalidManifest("policy_ref.signature must be hex-encoded")
 
-    cert_der = cert_resolver.resolve_by_fingerprint(cert_fp)
+    try:
+        cert_der = cert_resolver.resolve_by_fingerprint(cert_fp)
+    except Exception as exc:  # noqa: BLE001 - injected resolver must fail closed
+        raise _InvalidManifest(f"certificate resolution failed: {exc}") from exc
     if cert_der is None:
         raise _InvalidManifest("signer certificate not found in the certificate chain")
     if not isinstance(cert_der, bytes) or not cert_der:
@@ -368,7 +405,11 @@ def _validate(
         )
     binding = (ref_spec_hash + cert_fp).encode("ascii")
     signature = bytes.fromhex(signature_hex)
-    if not signature_verifier.verify(cert_der, binding, signature):
+    try:
+        signature_ok = signature_verifier.verify(cert_der, binding, signature)
+    except Exception as exc:  # noqa: BLE001 - injected verifier must fail closed
+        raise _InvalidManifest(f"signature verification failed: {exc}") from exc
+    if not signature_ok:
         raise _InvalidManifest("policy_ref signature verification failed")
 
     if not isinstance(inp.trusted_anchor_pubkey, bytes) or not inp.trusted_anchor_pubkey:
