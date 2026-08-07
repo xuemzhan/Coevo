@@ -109,6 +109,22 @@ class K8sListingTests(unittest.TestCase):
         parsed = validate_listing_bytes(listing)
         self.assertEqual(parsed["spec"]["capabilities"], [])
 
+    def test_audit_projection(self) -> None:
+        """AC-9.5: audit projection is fixed-key and excludes spec details."""
+
+        inp = make_input()
+        rec = inp.to_audit_record()
+        self.assertEqual(rec["kind"], "DeclarativeListing")
+        self.assertEqual(rec["schema_version"], "1.0")
+        self.assertEqual(rec["generated_at"], "2026-08-08T08:00:00Z")
+        self.assertEqual(rec["capability_count"], 3)
+        self.assertEqual(rec["tool_count"], 1)
+        self.assertEqual(rec["policy_count"], 1)
+        self.assertEqual(rec["plan_count"], 1)
+        self.assertEqual(rec["listing_fingerprint"], listing_fingerprint(inp))
+        for section in ("capabilities", "tools", "policies", "plans"):
+            self.assertNotIn(section, rec)
+
     def test_listing_validation(self) -> None:
         """AC-9.4: duplicate keys / unknown fields / BOM / size cap rejected."""
 

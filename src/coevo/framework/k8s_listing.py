@@ -42,6 +42,20 @@ class ListingInput:
     plans: tuple[Plan, ...] = ()
     generated_at: str = ""
 
+    def to_audit_record(self) -> dict[str, object]:
+        """Audit projection (AC-9.5): fixed-key summary, no spec details."""
+
+        return {
+            "kind": "DeclarativeListing",
+            "schema_version": "1.0",
+            "generated_at": self.generated_at,
+            "capability_count": len(self.capabilities),
+            "tool_count": len(self.tools),
+            "policy_count": len(self.policies),
+            "plan_count": len(self.plans),
+            "listing_fingerprint": listing_fingerprint(self),
+        }
+
 
 def generate_listing_json(inp: ListingInput) -> dict[str, Any]:
     """Build the canonical listing structure (pure, deterministic)."""

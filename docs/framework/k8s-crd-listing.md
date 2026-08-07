@@ -18,7 +18,9 @@
 - `render_yaml(bytes)`：安全 YAML 子集渲染（字符串双引号、布尔/数字原样、
   嵌套确定性缩进）；
 - `validate_listing_bytes(bytes)`：严格解析（BOM / 重复键 / 未知字段 / 64 KiB
-  上限全部拒绝）。
+  上限全部拒绝）；
+- `ListingInput.to_audit_record()`：审计投影（固定键摘要 + listing_fingerprint，
+  不含 spec 明细）。
 
 ## 结构
 
