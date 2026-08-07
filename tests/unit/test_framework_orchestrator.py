@@ -322,6 +322,34 @@ class OrchestratorTests(unittest.TestCase):
         self.assertEqual(outcome.status, OrchestrationStatus.HELD)
         self.assertEqual(executor.calls, [])
 
+    def test_hybrid_chain_hold_not_bypassed_by_llm(self) -> None:
+        """security-review: chain-mandated HOLD cannot be bypassed by a valid
+        non-HOLD LLM proposal in HYBRID mode (AC-8.4 HELD gate is mandatory)."""
+
+        hold_chain = _Chain(
+            (
+                ChainStep("h1", "task_flow_understanding", requires_human_confirmation=True),
+                ChainStep("h2", "task_decomposition"),
+            )
+        )
+        expected = chain_plan("task-0001", hold_chain.steps, policy())
+        plan = plan_for(
+            OrchestrationMode.HYBRID,
+            "task-0001",
+            policy(),
+            static_chain_provider=hold_chain,
+            llm_provider=_Llm(proposal=proposal_plan(with_hold=False)),
+            scope_checker=_AllowAll(),
+            rbac_checker=_AllowAll(),
+            actor="owner",
+            validated_at="2026-08-08T08:00:00Z",
+        )
+        self.assertEqual(plan, expected)
+        executor = _Executor()
+        outcome = run_dispatch(OrchestrationMode.HYBRID, plan=plan, executor=executor)
+        self.assertEqual(outcome.status, OrchestrationStatus.HELD)
+        self.assertEqual(executor.calls, [])
+
     def test_lifecycle_integration(self) -> None:
         """AC-8.5: L19 paths enforced via transition()."""
 

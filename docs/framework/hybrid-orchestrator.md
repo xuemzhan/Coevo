@@ -16,13 +16,15 @@
 | --- | --- | --- |
 | STATE_MACHINE | 注入 `StaticChainProvider` 编译为规范 Plan | 执行失败/异常 → ESCALATED + audit RECOVER |
 | DYNAMIC_LLM | 注入 `LlmPlanProvider` 提议，经完整 `validate_plan` | 提议缺失/异常/无效 → 回退链 Plan |
-| HYBRID | LLM 提议仅覆盖非 HOLD 节点 | 提议含 HOLD → 回退链 Plan；链含 HOLD → HELD（执行器不调用） |
+| HYBRID | LLM 提议仅覆盖非 HOLD 节点；链含 HOLD → 回退链 Plan | 提议含 HOLD → 回退链 Plan；链含 HOLD → HELD（执行器不调用，LLM 不得绕过） |
 
 ## 硬门
 
 - **AC-8.1**：`dispatch` 先 `validate_plan`（五项不变量 + L18 + L19），失败返回
   REJECTED，执行器不被调用；
 - **AC-8.4**：HELD 人工确认门强制，确认前不执行后续步骤；
+  - 静态链是 HOLD 需求的 ground truth：链含 HOLD 时 LLM 提议一律回退链 Plan
+    （security-review Medium 修复，2026-08-08）；
 - **AC-8.5**：`transition` 复用 `lifecycle.validate_transition_path`，
   ESCALATED→ACTIVE 必须经 HELD，RETIRED 直退；
 - 注入执行器/LLM/链异常一律收敛为 ESCALATED 或回退，不泄漏异常。

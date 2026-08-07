@@ -176,6 +176,11 @@ def plan_for(
     fallback = chain_plan(task_id, static_chain_provider.chain_for(task_id), policy)
     if mode is OrchestrationMode.STATE_MACHINE:
         return fallback
+    if mode is OrchestrationMode.HYBRID and _has_hold(fallback):
+        # AC-8.4: the static chain is the ground truth for HOLD requirements.
+        # When the chain mandates a human confirmation gate, the LLM proposal
+        # must not bypass it -- fall back to the chain plan (dispatch -> HELD).
+        return fallback
     try:
         proposal = llm_provider.propose_plan(task_id, policy)
     except Exception:  # noqa: BLE001 - injected LLM fails closed into fallback
