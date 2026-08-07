@@ -26,6 +26,9 @@ _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _HEX = frozenset("0123456789abcdefABCDEF")
 
 ENVELOPE_MAX_BYTES = 64 * 1024  # protocol §7.1 parity
+# SM2 signatures are 64 bytes (128 hex chars); 1024 hex chars leaves generous
+# headroom for future algorithms while keeping envelopes bounded (AC-6.1).
+SIGNATURE_MAX_HEX_LEN = 1024
 A2A_PROJECTION_KEYS = frozenset(
     {
         "accepted",
@@ -144,9 +147,13 @@ def _validate_policy_ref(ref: PolicyRef) -> None:
         raise A2aValidationError(
             "policy_ref.signer_cert_fingerprint must be a 64-hex string"
         )
-    if not ref.signature or len(ref.signature) % 2 != 0 or not all(
-        c in _HEX for c in ref.signature
-    ):
+    if not ref.signature or len(ref.signature) % 2 != 0:
+        raise A2aValidationError("policy_ref.signature must be hex-encoded")
+    if len(ref.signature) > SIGNATURE_MAX_HEX_LEN:
+        raise A2aValidationError(
+            f"policy_ref.signature exceeds {SIGNATURE_MAX_HEX_LEN} hex chars"
+        )
+    if not all(c in _HEX for c in ref.signature):
         raise A2aValidationError("policy_ref.signature must be hex-encoded")
 
 
@@ -189,6 +196,12 @@ def verify_policy_ref(
             computed = manifest_spec_hash(manifest_bytes)
         except _InvalidManifest as exc:
             return reject(f"manifest canonicalization failed: {exc}")
+        except (RecursionError, MemoryError, ValueError) as exc:
+            # Fail closed on pathological manifests (deep nesting / huge
+            # integers) instead of leaking an exception out of the contract.
+            return reject(
+                f"manifest canonicalization failed: {type(exc).__name__}"
+            )
         if computed != ref.spec_hash:
             return reject("policy_ref.spec_hash does not match the sender manifest")
         # Step 4: SM2 signature over (spec_hash | fingerprint) with the

@@ -210,6 +210,27 @@ class A2aTests(unittest.TestCase):
         self.assertFalse(result.accepted)
         self.assertIn("signature", result.failure_reason or "")
 
+    def test_policy_ref_oversized_signature_rejected(self) -> None:
+        """AC-6.1: policy_ref.signature is length-bounded fail-closed."""
+
+        oversized = PolicyRef(
+            spec_hash="0" * 64,
+            signer_cert_fingerprint="0" * 64,
+            signature="ab" * 513,  # 1026 hex chars > 1024 cap
+        )
+        with self.assertRaises(A2aValidationError):
+            validate_a2a(make_message(policy_ref=oversized))
+
+    def test_policy_ref_deep_manifest_fail_closed(self) -> None:
+        """AC-6.2: pathological manifest depth must reject, not raise."""
+
+        deep = b'{"k": 1}'
+        for _ in range(4000):
+            deep = b'{"k":' + deep + b'}'
+        result = run_verify(make_message(), manifest_bytes=deep)
+        self.assertFalse(result.accepted)
+        self.assertIn("manifest", result.failure_reason or "")
+
     def test_policy_ref_injected_exceptions_fail_closed(self) -> None:
         result = run_verify(make_message(), cert_resolver=_BoomResolver())
         self.assertFalse(result.accepted)

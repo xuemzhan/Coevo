@@ -43,6 +43,8 @@
 
 - 验签公钥只来自证书链，绝不取自消息自身（防公钥自包）；
 - 能力闭集（purpose）复用框架注册表；审计投影键集固定；
+- `policy_ref.signature` 上限 1024 hex（SM2 64 字节签名留余量）；manifest 解析
+  深度异常（RecursionError/MemoryError）fail-closed 拒绝，不外泄异常；
 - 纯函数、仅标准库、可离线运行（L15）；文档守卫（L17）。
 
 ## 测试覆盖
