@@ -1079,7 +1079,7 @@ items:
   - id: US-16-AC-2-framework-policy-abstractions-v0.1
     story: US-16
     title: 框架层 Policy 抽象与 validate_plan（CTAF §6.5 / M2）：Policy 字段与 policy_version 必填（F7）、4 个默认 Profile（max_recover_attempts ≤ 3 对齐 L16）、EMERGENCY fail-fast（1 次重试 / 60s / 事后 30 分钟确认 / 本地告警，F1+F9）、L18 白名单口径（tool_args 数值按 schema 允许）、validate_plan 前置校验五项不变量 + L18 + L19（A9/F4）、L19 状态机语义（ESCALATED→ACTIVE 必须经 HELD）、纯函数离线零三方依赖 + test_module_docs 守卫（L17）
-    status: ready
+    status: done
     dependencies: [US-16-AC-1-framework-manifest-checker-v0.1]
     acceptance_tests:
       - tests/unit/test_framework_policy.py

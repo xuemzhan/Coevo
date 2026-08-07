@@ -1,5 +1,27 @@
 # Loop 决策记录
 
+## 2026-08-07 — US-16-AC-2 Policy 抽象 + validate_plan 完成（双签放行）
+
+- 工作项：`US-16-AC-2-framework-policy-abstractions-v0.1`（CTAF §6.5 / M2）。
+- 实现：`src/coevo/framework/policy.py`（Policy + 4 默认 Profile + validate_policy）、
+  `plan.py`（Plan/PlanNode/PlanEdge + L18 白名单 + 规范化指纹）、`lifecycle.py`
+  （八态 + L19 路径校验）、`validation.py`（validate_plan 五项不变量 + L18 + L19）；
+  配套 4 个测试文件（74 项）与 `docs/modules/framework.md`（L17）。
+- 验证：主仓库 `make quality` exit=0 fingerprint=`34d637f035600903`
+  （2026-08-07T16:32:24Z，audit fully-sealed）；mvp-verifier PASS（10/10 AC）；
+  security-reviewer PASS（无 Critical/High）。
+- 审查修复：Low1（Plan/tool_args 规模上限）、Low2（tool_args 重复键拒绝）、
+  Info3（validated_at 必填）修复于 `b23d85b`；Info4（非 EMERGENCY 超时上界）与
+  Info5（宽捕获设计取舍）留痕后续轮次。
+- 环境/治理留痕：① 主库全量门禁首次因 `test_benchmark_http` 延迟抖动失败
+  （p95=2.10s/max=8.79s > 1.0s SLA，机器负载），重跑 exit 0，属历史偶发模式；
+  ② 沙箱内 `.tools` 重解析点与 SM2 辅助工具 ACL 环境导致门禁 exit 1（与实现无关）；
+  ③ 子代理在本环境反复自派生，验证/审查报告最终由多层子代理交付，编排者按
+  独立治理口径采信（沙箱钉扎 + check 零违规 + 报告文本）。
+- 提交：`7a3ed8b`（feat）、`b23d85b`（fix hardening）、records 收尾提交。
+- 决策者：用户（"继续"）；执行：Codex。
+- 下一项：M1b（capability 闭集收敛）或 M3..M9 任一里程碑，待业务负责人指示。
+
 ## 2026-08-07 — US-16-AC-2 登记并开始执行（Policy 抽象 + validate_plan，M2）
 
 - 用户指令："继续"（US-16 草案此前已整体批准，AC-2 为已批准内容）。
