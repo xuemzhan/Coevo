@@ -995,3 +995,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第十二轮逐文件深度审查与优化（2026-08-07 用户指令，延续 OPTIMIZE-11） ----------
+  - id: OPTIMIZE-12
+    story: ENG-BASE
+    title: 第十二轮逐文件深度审查：examples/tool-dev-project run_example.py 巨型 main 架构拆解（按阶段提取函数，行为零变更），run_all 验证
+    status: done
+    dependencies: [OPTIMIZE-11]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false

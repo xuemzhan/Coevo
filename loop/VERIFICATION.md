@@ -7854,3 +7854,7 @@ OK
 audit seal: fully-sealed
 
 ```
+## 2026-08-07T04:19:58.587Z — OPTIMIZE-12（用户指令：不用做全量质量门）
+- 本轮仅定向验证：python -m unittest tests.unit.test_split_packages 5 项全绿。
+- 按用户指示豁免全量质量门；下次全量门禁时回归。
+- 改动：	ests/unit/test_split_packages.py（新，5 项）、examples/tool-dev-project/README.md（维护说明）。
