@@ -210,6 +210,47 @@ class PlanLspTests(unittest.TestCase):
         with self.assertRaises(PlanValidationError):
             json_to_plan(mapping)
 
+    def test_deeply_nested_tool_args_fails_closed(self) -> None:
+        """security-review: pathological nesting rejects, never raises."""
+
+        payload = (
+            b'{"plan_id":"'
+            + b"a" * 64
+            + b'","plan_version":"1.0","policy_profile":"INTERACTIVE",'
+            b'"policy_version":"1.0","nodes":[{"node_id":"n1","kind":"TOOL",'
+            b'"tool_ref":"coevo.tools.cycle_check","tool_args":[["k",'
+            + b"[" * 20000
+            + b"1"
+            + b"]" * 20000
+            + b']]}],"edges":[]}'
+        )
+        self.assertLess(len(payload), MAX_PLAN_JSON_BYTES)
+        with self.assertRaises(PlanValidationError):
+            parse_plan_json_bytes(payload)
+        result = validate_plan_json(
+            payload,
+            get_default_profile("INTERACTIVE"),
+            scope_checker=_AllowAll(),
+            rbac_checker=_AllowAll(),
+            actor="owner",
+            validated_at="2026-08-08T08:00:00Z",
+        )
+        self.assertFalse(result.accepted)
+
+    def test_nonstandard_json_constants_rejected(self) -> None:
+        """security-review: NaN/Infinity literals are not canonical JSON."""
+
+        for value in (float("nan"), float("inf"), float("-inf")):
+            mapping = plan_to_json(make_plan())
+            nodes = mapping["nodes"]
+            assert isinstance(nodes, list)
+            nodes[1]["tool_args"] = [["k", value]]
+            payload = json.dumps(
+                mapping, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+            ).encode("utf-8")
+            with self.assertRaises(PlanValidationError):
+                parse_plan_json_bytes(payload)
+
     def test_module_imports_stdlib_only(self) -> None:
         for name in ("plan.py", "validation.py"):
             source = (ROOT / "src" / "coevo" / "framework" / name).read_text(

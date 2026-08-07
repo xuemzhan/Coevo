@@ -211,9 +211,21 @@ def parse_plan_json_bytes(data: bytes) -> Plan:
     except UnicodeDecodeError as exc:
         raise PlanValidationError(f"plan JSON is not valid UTF-8: {exc}") from exc
     try:
-        mapping = json.loads(text, object_pairs_hook=_reject_duplicate_pairs)
-    except json.JSONDecodeError as exc:
-        raise PlanValidationError(f"plan JSON is not valid JSON: {exc}") from exc
+        mapping = json.loads(
+            text,
+            object_pairs_hook=_reject_duplicate_pairs,
+            parse_constant=_reject_nonstandard_constant,
+        )
+    except PlanValidationError:
+        raise
+    except (json.JSONDecodeError, RecursionError, MemoryError, ValueError) as exc:
+        # Fail closed on pathological inputs (deep nesting, non-canonical
+        # constants, oversized numbers) instead of leaking an exception out of
+        # the serialization contract (security-review parity with
+        # manifest_checker M1/L5 hardening).
+        raise PlanValidationError(
+            f"plan JSON is not valid canonical JSON: {exc}"
+        ) from exc
     return json_to_plan(mapping)
 
 
@@ -224,6 +236,12 @@ def _reject_duplicate_pairs(pairs: list[tuple[str, object]]) -> dict[str, object
             raise PlanValidationError(f"duplicate key in plan JSON: {key!r}")
         out[key] = value
     return out
+
+
+def _reject_nonstandard_constant(name: str) -> object:
+    """Reject NaN / Infinity literals (non-standard, non-portable JSON)."""
+
+    raise PlanValidationError(f"non-standard JSON constant {name!r} is not allowed")
 
 
 def _node_from_json(item: object) -> PlanNode:

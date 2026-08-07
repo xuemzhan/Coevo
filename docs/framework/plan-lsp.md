@@ -17,7 +17,7 @@
 - `json_to_plan(mapping)`：严格解析（未知顶层/节点/边字段、类型错误、非法 kind、
   tool_args 形状错误全部拒绝）；
 - `parse_plan_json_bytes(data)`：字节级严格解析（BOM、重复键、UTF-8、64 KiB
-  上限）；
+  上限、非标准 JSON 常量 NaN/Infinity 拒绝、病态嵌套异常收束）；
 - `validate_plan_json(...)`：序列化入口 → Plan → `validate_plan`
   （五项不变量 + L18 + L19），失败返回 REJECTED 而非抛异常。
 
@@ -30,6 +30,8 @@
 ## 安全边界
 
 - 序列化入口是信任边界：未知字段/重复键显式拒绝，不静默忽略；
+- 非标准 JSON 常量（NaN / Infinity / -Infinity）解析时显式拒绝，保持规范化 JSON 可移植；
+- 病态嵌套（RecursionError / MemoryError / ValueError）统一收束为校验失败，不向调用者抛异常；
 - 与 `plan_fingerprint` 同一规范化规则，防指纹分叉；
 - 纯函数、仅标准库、可离线运行（L15）；文档守卫（L17）。
 
@@ -37,4 +39,4 @@
 
 `tests/unit/test_framework_plan_lsp.py`（AC-7.1..7.5，含往返一致、指纹一致、
 重复键/未知字段/坏 kind/坏 tool_args/BOM/超限、validate_plan_json 环与坏 JSON、
-L18 序列化负例、stdlib 断言）。
+L18 序列化负例、病态嵌套变异常收束、非标准常量拒绝、stdlib 断言）。
