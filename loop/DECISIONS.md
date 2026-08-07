@@ -1,5 +1,14 @@
 # Loop 决策记录
 
+## 2026-08-07 — US-16-AC-2 登记并开始执行（Policy 抽象 + validate_plan，M2）
+
+- 用户指令："继续"（US-16 草案此前已整体批准，AC-2 为已批准内容）。
+- 决策：BACKLOG 登记 `US-16-AC-2-framework-policy-abstractions-v0.1`（ready，
+  dependencies=[US-16-AC-1-*]）；STATE 切换至 US-16 / US-16-AC-2；
+  切片计划落盘 `docs/plans/US-16-AC-2-slice.md`。
+- 执行方式：同 AC-1——实现由编排者直接完成，验证与安全审查保持独立子代理。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-07 — US-16-AC-1 manifest-checker 完成（mvp-verifier + security-reviewer 双签放行）
 
 - 工作项：`US-16-AC-1-framework-manifest-checker-v0.1`（CTAF §5.3 / M1a）。

@@ -4,15 +4,18 @@
 
 CTAF（Coevo Trusted Agent Framework）v0.4.1 框架层在 `src/coevo` 的落位。
 US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控的智能体才能
-注册进入编排；US-16-AC-2（Policy 抽象 + validate_plan）在下一轮落地。
+注册进入编排；US-16-AC-2 交付 Policy 抽象、Plan/L18 白名单、八态生命周期（L19）
+与 validate_plan。
 设计基线：`docs/plans/distributed-agent-framework/design-proposal.md` §5。
 
 ## 职责边界
 
 - **in scope**：Agent Manifest 强制校验（能力闭集 / 人工确认默认 / crypto_scope
   闭集 / 审计脱敏子集 / spec_hash 排除自指字段 / policy_ref 三段绑定 /
-  policy_version 绑定）、"校验通过才注册"的薄封装、T6 wire 回归；
-- **out of scope**：Policy 抽象与 validate_plan（US-16-AC-2）、A2A 实现、
+  policy_version 绑定）、"校验通过才注册"的薄封装、T6 wire 回归；Policy 抽象
+  （4 个默认 Profile / L16 / EMERGENCY fail-fast）、Plan 模型与 L18 白名单、
+  八态生命周期 L19、validate_plan 五项不变量；
+- **out of scope**：A2A 实现、
   MCP、Plan-LSP、Hybrid Orchestrator、跨组织 PKI 联邦；不修改 `.agent` v1.0
   wire 与既有编排代码。
 
@@ -21,6 +24,10 @@ US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控�
 | 文件 | 关键类型/函数 | 职责 |
 |---|---|---|
 | `manifest_checker.py` | `check`、`AgentManifest`、`ManifestCheckInput`、`ManifestCheckResult`、`ManifestRegistry`、`PolicyRegistry`/`CertificateResolver`/`SignatureVerifier`（注入协议） | 部署点强制校验（纯函数、fail-closed）+ 校验通过才注册 |
+| `policy.py` | `Policy`/`TimeoutProfile`/`RetryProfile`/`ConsentProfile`、`default_profiles`、`validate_policy`、`get_default_profile` | 策略数值边界（L16 / F7 / EMERGENCY fail-fast F1/F9） |
+| `plan.py` | `Plan`/`PlanNode`/`PlanEdge`/`PlanNodeKind`、`POLICY_OWNED_NUMERIC_KEYS`（L18 白名单）、`plan_fingerprint`、`validate_plan_structure` | Plan 纯结构模型与规范化哈希、L18 校验 |
+| `lifecycle.py` | `LifecycleState`、`can_transition`、`validate_transition_path` | 八态生命周期与 L19 路径规则 |
+| `validation.py` | `ValidationResult`、`validate_plan`、`ToolScopeChecker`/`RbacChecker`（注入协议） | dispatch 前置校验：五项不变量 + L18 + L19 |
 
 ## 关键入口与数据流
 
@@ -41,6 +48,10 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 
 - 能力闭集以 `orchestrator.models.AgentCapability` 为单一事实来源（CTAF §5.2
   扩展名在 M1b 收敛）；
+- L16：所有 Profile `max_recover_attempts ≤ 3`；EMERGENCY 必须 fail-fast；
+- L18：Plan（含 tool_args）不得携带策略归属数值键，普通工具数值按 schema 允许；
+- L19：ESCALATED→ACTIVE 必须经 HELD，RETIRED 直退；
+- L4 Scope 与四层 RBAC 经注入协议委托，异常一律视为拒绝（fail-closed）；
 - fail-closed：未知能力、闭集外 scope、投影外脱敏、自指哈希、签名/指纹不匹配、
   缺失版本、坏 JSON/BOM/重复键一律拒绝并返回 `failure_reason`；
 - 校验为纯函数（证书/验签/策略注册表全部注入）；注册副作用拒绝失败结果；
@@ -52,6 +63,9 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
   L15 stdlib 断言，覆盖 US-16 AC-1.1..AC-1.9）；
 - `tests/unit/test_agent_wire_regression.py`（T6：Fixed Header /
   Envelope canonical 字节级回归，覆盖 AC-1.10）。
+- `tests/unit/test_framework_policy.py`（AC-2.1..2.3、2.8）；
+- `tests/unit/test_framework_plan_l18.py`（AC-2.4、2.5）；
+- `tests/unit/test_framework_validate_plan.py`（AC-2.6、2.7）。
 
 ## 依赖与下游
 

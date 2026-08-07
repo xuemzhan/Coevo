@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "US-16",
-  "current_item": "US-16-AC-1-framework-manifest-checker-v0.1",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "US-16-AC-2-framework-policy-abstractions-v0.1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "9fcc906",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T14:23:37.044961Z"
+  "updated_at": "2026-08-07T14:26:15.933636Z"
 }
