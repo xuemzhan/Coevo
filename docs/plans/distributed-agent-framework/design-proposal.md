@@ -356,6 +356,9 @@ security:
 
 ### 6.4 抽象 D: Plan (v0.4 重写, A1 落地)
 
+> 序列化落位：`src/coevo/framework/plan.py`（Plan-LSP / US-16-AC-7 / M6，
+> 2026-08-08）。适配映射见 `docs/framework/plan-lsp.md`。
+
 > v0.3 误把数值字段塞进 Plan。v0.4 修正: Plan 只描述"DAG 结构 + 引用哪个 Policy 模板",所有数值从 Policy 拿。
 
 ```text

@@ -24,6 +24,7 @@ from src.coevo.framework.plan import (
     Plan,
     PlanNodeKind,
     PlanValidationError,
+    parse_plan_json_bytes,
     plan_fingerprint,
     validate_plan_structure,
 )
@@ -133,6 +134,40 @@ def validate_plan(
         policy_version=policy.policy_version,
         validated_at=validated_at,
         failure_reason=None,
+    )
+
+
+def validate_plan_json(
+    plan_json: bytes,
+    policy: Policy,
+    *,
+    scope_checker: ToolScopeChecker,
+    rbac_checker: RbacChecker,
+    actor: str,
+    transition_path: tuple[LifecycleState, ...] | None = None,
+    validated_at: str = "",
+) -> ValidationResult:
+    """Serialized entry point: canonical Plan JSON → validate_plan (AC-7.3)."""
+
+    try:
+        plan = parse_plan_json_bytes(plan_json)
+    except PlanValidationError as exc:
+        return ValidationResult(
+            accepted=False,
+            plan_hash="",
+            policy_profile=policy.profile,
+            policy_version=policy.policy_version,
+            validated_at=validated_at,
+            failure_reason=str(exc),
+        )
+    return validate_plan(
+        plan,
+        policy,
+        scope_checker=scope_checker,
+        rbac_checker=rbac_checker,
+        actor=actor,
+        transition_path=transition_path,
+        validated_at=validated_at,
     )
 
 

@@ -1,5 +1,15 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-7 登记并开始执行（Plan-LSP 序列化，CTAF M6）
+
+- 用户指令："继续开发，全量门禁检查"。
+- 决策：推进 CTAF 路线图下一里程碑 M6（Plan 规范化序列化 / Plan-LSP），登记
+  `US-16-AC-7-plan-lsp-v0.1`（ready，dependencies=[US-16-AC-2-*]）；US-16 故事
+  新增 AC-7（5 项验收标准）；STATE 切换至 US-16 / US-16-AC-7。
+- 门禁口径：本轮按用户指示跑**全量 `make quality`**（恢复全量回归），另跑
+  定向测试与增量门禁。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — US-16-AC-6 A2A wire 0.1 + policy_ref 三段绑定完成（增量门禁 + 安全/协议审查，豁免全量 quality）
 
 - 工作项：`US-16-AC-6-a2a-wire-v0.1`（CTAF §7.3 / M5）。

@@ -82,7 +82,7 @@
 | `memory-interface.md` | `src/coevo/framework/memory.py` | **M3（已交付 2026-08-08，US-16-AC-4）** | bridge 与 `progress_capture/` / `knowledge_base/` 兼容 + L12 脱敏 | 6 周 |
 | `tool-registry.md` | `src/coevo/framework/tools.py` | **M4（已交付 2026-08-08，US-16-AC-5）** | MCP 路径 A 子集往返字节级一致 + 未知关键字显式拒绝 | 8 周 |
 | `a2a-protocol.md` | `src/coevo/framework/a2a.py` | **M5（已交付 2026-08-08，US-16-AC-6）** | protocol-reviewer 审批 + policy_ref 五步验证 + 大小边界 | 6 周 |
-| `plan-lsp.md` | `src/coevo/framework/plan/` | M6 (10 周) | 五项不变量 + L18 字段检查 | 10 周 |
+| `plan-lsp.md` | `src/coevo/framework/plan.py` | **M6（已交付 2026-08-08，US-16-AC-7）** | 五项不变量 + L18 + 序列化与指纹同规则 | 10 周 |
 | `hybrid-orchestrator.md` | `src/coevo/framework/orchestrator/` | M7 (12 周) | e2e 闭环 | 12 周 |
 | `cross-org-validation.md` | 演练手册 | M8 (14 周) | 跨网 + 跨组织 | 14 周 |
 | `k8s-crd-listing.md` | 纸面清单生成器 | M9 (8 周) opt-in 沙箱 | 与 K8s 解耦 | 8 周 |

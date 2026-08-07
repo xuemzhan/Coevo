@@ -416,6 +416,16 @@ MVP用于验证以下三类核心能力：
    A2A 信封内联载荷越界拒绝；放宽上限须主版本升级；
 5. 纯函数、离线、stdlib、审计投影、L17 文档守卫（a2a-protocol.md）。
 
+**AC-7：Plan 规范化序列化（Plan-LSP，CTAF §14.2 / M6）**
+
+1. Plan ↔ 规范 JSON 双向序列化（plan_to_json / json_to_plan），往返字节级一致；
+   未知字段、重复键、畸形结构拒绝；
+2. 序列化规范 JSON 与 AC-2 的 plan_fingerprint 一致（同一规范化规则）；
+3. validate_plan_json 提供序列化入口：JSON → Plan → 五项不变量 + L18 + L19，
+   失败返回 REJECTED；
+4. 大小 / 深度 / 节点 / 边 / tool_args 上限（防序列化 DoS）；
+5. 纯函数、离线、stdlib、审计投影、L17 文档守卫（plan-lsp.md）。
+
 ---
 
 # 二、MVP实施优先级
