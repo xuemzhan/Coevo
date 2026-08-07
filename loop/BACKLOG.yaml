@@ -1045,3 +1045,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第十七轮逐文件深度审查与优化（2026-08-07 用户指令"继续"，延续 OPTIMIZE-16，不做全量质量门） ----------
+  - id: OPTIMIZE-17
+    story: ENG-BASE
+    title: 第十七轮逐文件深度审查：清理工具 force-remove-loop-runtime*.ps1 路径安全核查（只删 loop/runtime 内），补安全测试
+    status: done
+    dependencies: [OPTIMIZE-16]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false

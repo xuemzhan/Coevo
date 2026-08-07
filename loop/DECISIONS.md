@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-07 — OPTIMIZE-17 第十七轮逐文件深度审查与优化（用户指令"继续"）done
+
+- 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
+  细化每一个模块的README文档"，延续"不做全量质量门"。
+- 审查结论（第十七轮）：
+  - 破坏性清理脚本 `force-remove-loop-runtime*.ps1` 永久删除 loop/runtime，
+    此前零测试；审查确认主变体有硬编码期望路径精确匹配、reparse-point 拒绝、
+    robocopy /XJ 防穿越、DELETE 确认、删后验证；win32 变体有 reparse 处理、
+    确认与删后验证；
+  - 新增 `tests/security/test_force_remove_safety.py` 2 项静态守卫：删除目标
+    必须等于仓库 loop/runtime 字面量且保留护栏（防误删/防未来编辑静默改路径）。
+- 修复：纯安全守卫测试增补，无生产代码行为变更。
+- 验证：定向 `python -m unittest tests.security.test_force_remove_safety`
+  2 项全绿；**按用户指示未跑全量质量门**。
+- 安全审查：本测试即安全守卫（破坏性工具路径与护栏钉死）；无其他安全影响。
+- 决策者：用户；提出者：loop-engineer。回滚条件：定向测试失败（当前全绿）。
+
 ## 2026-08-07 — OPTIMIZE-16 第十六轮逐文件深度审查与优化（用户指令"继续"）done
 
 - 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
