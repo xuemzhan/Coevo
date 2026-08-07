@@ -82,7 +82,14 @@ class SharedIsoTests(unittest.TestCase):
             "2026-02-30T00:00:00Z",
             "2026-08-08T08:00:00",
             "2026-08-08T08:00:00Z\n",
+            "2026-08-08T08:00:00.123Z\n",
         ):
+            self.assertFalse(is_iso_utc_z(bad), bad)
+
+    def test_is_iso_utc_z_non_string_fail_closed(self) -> None:
+        """Non-string input must be rejected without leaking TypeError."""
+
+        for bad in (None, 123, 1.5, b"2026-08-08T08:00:00Z", ["2026-08-08T08:00:00Z"]):
             self.assertFalse(is_iso_utc_z(bad), bad)
 
     def test_validate_product_chain_non_iso_rejected_everywhere(self) -> None:

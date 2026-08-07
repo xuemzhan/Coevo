@@ -43,7 +43,7 @@ VALIDATION_PROJECTION_KEYS = frozenset(
     }
 )
 
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
+_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z\Z")
 
 
 @runtime_checkable
@@ -192,6 +192,8 @@ def is_iso_utc_z(value: str) -> bool:
     validity and optional fractional seconds).  Used by a2a / memory /
     orchestrator / integration to keep one canonical time check."""
 
+    if not isinstance(value, str):
+        return False
     if not _ISO_UTC_Z.match(value):
         return False
     try:
