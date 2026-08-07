@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-3 完成（semver 尾部换行收口）
+
+- 工作项：`FRAMEWORK-GAPS-3`（ENG-BASE，dependencies=[FRAMEWORK-GAPS-2]）。
+- 起因：GAPS-2 审查观察——manifest `semantic_version` 正则用 Python `$`
+  （可在末尾换行前匹配），`"1.0.0\n"` 被接受；ISO 路径已由 strptime 兜住。
+- 修复：`manifest_checker._SEMVER` 的 `$` → `\Z`；新增
+  `tests/unit/test_framework_gaps3.py`（尾部换行拒绝 + 干净 semver 通过）。
+- 一致性修复：GAPS-2 收尾代理登记 GAPS-3 ready 时未同步 STATE，导致三源
+  不变量失败；编排者已用 loop_state 切换 STATE 至 FRAMEWORK-GAPS-3 并完成本轮。
+- 验证（增量门禁）：定向 171/171 全绿；fmt exit=0 fingerprint=`fe39766e2048d2bc`；
+  lint exit=0 fingerprint=`252ad24e526f6728`；audit fully-sealed；按用户指示豁免
+  全量 quality（留痕）。
+- 审查：security-reviewer 契约 PASS（Critical/High/Medium 0，正则边界核验）。
+- 提交：`7607e88`（feat）+ records。
+- 决策者：用户指令（"继续开发，先不要全量门禁"）；执行：Codex。
+- 状态：BACKLOG 无 ready 项；框架层审查观察项已全部收口。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-2 登记并开始执行（GAPS-1 新观察项收口）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。
