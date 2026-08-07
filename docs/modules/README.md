@@ -35,6 +35,8 @@ tests.unit.test_merge_engine`），全量门禁用 `make quality`（串行）。
 ```mermaid
 flowchart TD
   APP[app/ 组合根] --> ORC[orchestrator/ 运行中枢]
+  FW[framework/ US-16 框架层] --> ORC
+  FW --> CRY[crypto/ 国密]
   ORC --> TF[task_flow/ US-1]
   ORC --> TD[task_decomposition/ US-2]
   ORC --> TL[talent/ US-3]
