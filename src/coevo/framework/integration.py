@@ -265,7 +265,17 @@ def validate_product_chain(
 ) -> ValidationResult:
     """Lift a product chain and run validate_plan (five invariants + L18 + L19)."""
 
-    plan = chain_to_plan(chain, registry, policy)
+    try:
+        plan = chain_to_plan(chain, registry, policy)
+    except IntegrationError as exc:
+        return ValidationResult(
+            accepted=False,
+            plan_hash="",
+            policy_profile=policy.profile,
+            policy_version=policy.policy_version,
+            validated_at=validated_at,
+            failure_reason=str(exc),
+        )
     return validate_plan(
         plan,
         policy,

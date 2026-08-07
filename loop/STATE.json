@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-INTEGRATION-2",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "FRAMEWORK-INTEGRATION-3",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "d80f7a1",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T20:35:40.095466Z"
+  "updated_at": "2026-08-07T20:43:18.533306Z"
 }

@@ -211,6 +211,20 @@ class FrameworkGaps2Tests(unittest.TestCase):
         self.assertTrue(outcome.accepted)
         self.assertEqual(outcome.status, OrchestrationStatus.COMPLETED)
 
+    def test_fractional_iso_seconds_accepted(self) -> None:
+        """ISO-8601 fractional seconds (product now_utc_iso_z format) pass."""
+
+        plan = valid_plan()
+        result = validate_plan(
+            plan,
+            get_default_profile("INTERACTIVE"),
+            scope_checker=_AllowAll(),
+            rbac_checker=_AllowAll(),
+            actor="owner",
+            validated_at="2026-08-08T08:00:00.123456Z",
+        )
+        self.assertTrue(result.accepted, result.failure_reason)
+
 
 class _FakePolicyRegistry:
     def has_policy_version(self, profile: str, version: str) -> bool:

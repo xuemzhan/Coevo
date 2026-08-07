@@ -1,5 +1,17 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-3 登记并开始执行（真实产品接线）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：登记 `FRAMEWORK-INTEGRATION-3`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-INTEGRATION-2]）：app/pipeline.py 在真实派发前用
+  validate_product_chain 校验 MVP_FIXED_CHAIN（框架门前置，失败中止）；
+  L7 ISO 校验兼容小数秒（产品 now_utc_iso_z 格式）；STATE 切换至
+  ENG-BASE / FRAMEWORK-INTEGRATION-3。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试 + demo 管线
+  e2e 回归），不跑全量 quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-2 完成（存量链抬升与集成收口；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-INTEGRATION-2`（ENG-BASE，dependencies=[FRAMEWORK-INTEGRATION-1]）。实现提交：`d80f7a1`。

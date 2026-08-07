@@ -25,7 +25,7 @@ from src.coevo.framework.manifest_checker import _InvalidManifest, manifest_spec
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _HEX = frozenset("0123456789abcdefABCDEF")
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 
 ENVELOPE_MAX_BYTES = 64 * 1024  # protocol §7.1 parity
 # SM2 signatures are 64 bytes (128 hex chars); 1024 hex chars leaves generous
@@ -167,7 +167,8 @@ def _is_iso_utc_z(value: str) -> bool:
     if not _ISO_UTC_Z.match(value):
         return False
     try:
-        _datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+        base = value[:-1].split(".")[0] + "Z"
+        _datetime.datetime.strptime(base, "%Y-%m-%dT%H:%M:%SZ")
     except ValueError:
         return False
     return True

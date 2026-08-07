@@ -174,7 +174,36 @@ def run_demo_pipeline(
     )
     workspace = WorkspaceEntry("PRJ001", "a.pm", "pkg.input", DEMO_REVISION)
 
-    # 3. Run the guarded five-step chain.
+    # 3. Framework gate (FRAMEWORK-INTEGRATION-3): validate the fixed chain
+    #    with the framework plan gate before the real dispatch.  RBAC / L4
+    #    scope checkers are structural allow-all for the demo; the product
+    #    wiring plugs real authorizers here later.
+    from src.coevo.framework.integration import validate_product_chain
+    from src.coevo.framework.policy import get_default_profile
+
+    class _FrameworkGateAll:
+        def within_scope(self, tool_ref: str, policy_profile: str) -> bool:
+            return True
+
+        def authorized(self, plan: object, actor: str) -> bool:
+            return True
+
+    gate = validate_product_chain(
+        MVP_FIXED_CHAIN,
+        registry,
+        get_default_profile("INTERACTIVE"),
+        scope_checker=_FrameworkGateAll(),
+        rbac_checker=_FrameworkGateAll(),
+        actor=DEMO_ACTOR,
+        validated_at=now,
+    )
+    if not gate.accepted:
+        raise RuntimeError(
+            "framework plan gate rejected the MVP fixed chain: "
+            + (gate.failure_reason or "unknown")
+        )
+
+    # 4. Run the guarded five-step chain.
     held = Orchestrator.dispatch_event_with_real_facades(
         registry,
         MVP_FIXED_CHAIN,

@@ -48,7 +48,7 @@ from src.coevo.framework.validation import (
 ORCHESTRATION_PROJECTION_KEYS = frozenset(
     {"accepted", "mode", "status", "plan_hash", "validated_at", "failure_reason"}
 )
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 
 
 class OrchestrationMode(Enum):
@@ -341,7 +341,8 @@ def _is_iso_utc_z(value: str) -> bool:
     if not _ISO_UTC_Z.match(value):
         return False
     try:
-        _datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+        base = value[:-1].split(".")[0] + "Z"
+        _datetime.datetime.strptime(base, "%Y-%m-%dT%H:%M:%SZ")
     except ValueError:
         return False
     return True
