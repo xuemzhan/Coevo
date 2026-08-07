@@ -1025,3 +1025,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第十五轮逐文件深度审查与优化（2026-08-07 用户指令"继续"，延续 OPTIMIZE-14，不做全量质量门） ----------
+  - id: OPTIMIZE-15
+    story: ENG-BASE
+    title: 第十五轮逐文件深度审查：锁定入口 control_main.py 分派器测试覆盖核查，缺则补测试
+    status: done
+    dependencies: [OPTIMIZE-14]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false

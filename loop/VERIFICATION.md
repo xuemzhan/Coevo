@@ -7866,3 +7866,7 @@ audit seal: fully-sealed
 - 本轮仅定向验证：E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m unittest tests.unit.test_run_validation 4 项全绿。
 - 按用户指示豁免全量质量门；下次全量门禁时回归。
 - 改动：	ests/unit/test_run_validation.py（新，4 项：JSONC 剥离/字符串斜杠保留/指标采集/文本渲染）。
+## 2026-08-07T04:28:43.808Z — OPTIMIZE-15（用户指令：不做全量质量门）
+- 本轮仅定向验证：python -m unittest tests.unit.test_control_main 4 项全绿。
+- 按用户指示豁免全量质量门；下次全量门禁时回归。
+- 改动：	ests/unit/test_control_main.py（新，4 项：缺参/未知模块退出、runpy 分派、模块清单）。
