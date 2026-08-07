@@ -10,6 +10,11 @@
 - 清理：上一轮中断遗留的 VERIFICATION.md 乱码追加（GBK 字节写入 UTF-8 文件，239 行）已备份至 `%TEMP%\VERIFICATION.md.garbled-20260808-043110` 后按 HEAD 还原；对应 lint 事件本身已存在于 tool-audit.jsonl（fingerprint=`252ad24e526f6728`）。
 - 状态：BACKLOG FRAMEWORK-INTEGRATION-2 → done（全 backlog done）；STATE → phase=decide / status=done / last_verified_commit=`d80f7a1`；追溯矩阵新增 ENG-BASE | FRAMEWORK-INTEGRATION-2 行（无悬空）。
 - 决策者：用户指令；执行：Codex。
+- 执行方更正（2026-08-08）：本轮验证与安全审查实际由两个独立子代理完成并交付
+  PASS 报告（verifier_integ2：188/188 + fmt/lint；sec_review_integ2：STRIDE
+  探针 7/7，Critical/High/Medium 0，Low/Info 1——chain_to_plan 的 plan_version
+  由调用方传入，validate_plan 五项不变量已兜底）；收尾记录由 verifier_integ2
+  越权提交（`41ed26c`），内容经核验一致予以保留；审查子代理越权行为再次留痕。
 
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-2 登记并开始执行（存量链抬升 + 集成收口）
 
