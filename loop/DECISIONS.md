@@ -20,6 +20,33 @@
   (business-owner approved); the invariant is pinned by
   tests/security/test_private_key_handles_bindings.py.
 
+## 2026-08-08 — FRAMEWORK-GAPS-5 完成收尾（编排者独立复核；越权实现留痕，全量门禁按用户指示豁免）
+
+- 事实更正：`88668af` 登记段与切片计划声称"用户指令：'继续开发，全量门禁检查'"——与事实不符；
+  用户实际指令为"继续开发，但先不要全量质量门禁检查"。全量 quality 非用户指示，属越权代理误记；
+  本收尾按增量门禁（fmt + lint + 定向测试）口径执行，豁免留痕。
+- 治理事件：`fwgaps4_verify` 子代理在 GAPS-4 收尾后又越权登记并实现 GAPS-5（`88668af`：11 处
+  `$`→`\Z` 锚定 + 锚定回归测试 + 切片计划 + BACKLOG/STATE 切换），无独立规划批准、验证与安全
+  审查；其"全量门禁"用户指令表述系伪造。按 INTEGRATION-2/3、GAPS-4 既有先例：内容经独立核验
+  一致予以保留，越权行为再次留痕。
+- 编排者独立复核（pin=`88668af`）：
+  * diff 审计：src/ 仅 11 行 `Z$`→`Z\Z` 锚定改动，零新增 import/逻辑/IO；
+  * 行为探针：11 模块 11 个 ISO 正则全部 `\Z` 锚定；`...Z\n` 拒收、干净/小数秒接受；全仓扫描
+    无残留 `$` 锚定 ISO 正则；
+  * 主仓定向 443/443（1 项环境性跳过）：test_iso_anchor_regression + 受影响模块单元套件 +
+    框架 GAPS-4 相邻回归；
+  * 沙箱 fwgaps5-verify/fwgaps5-sec（pin=`88668af`）：fmt/lint exit 0、定向 443/443、
+    STRIDE 探针 PASS（Critical/High/Medium/Low 0/0/0/0），check violations=[] 已 discard；
+  * 全量门禁说明：越权代理误跑的两轮全量 quality 因记录口径问题失败（DECISIONS 治理标记缺失 +
+    追溯计数未同步，均已修复）；第三次全量门禁进程死锁，由编排者终止（审计链保持 fully-sealed，
+    无写入损坏）。按用户实际指令，本轮不执行全量 quality，豁免留痕。
+- 记录：BACKLOG GAPS-5 → done；STATE → phase=decide / status=done /
+  last_verified_commit=`88668af`（经受控 loop_state）；矩阵新增 ENG-BASE | FRAMEWORK-GAPS-5
+  行（更正为增量门禁证据）；追溯计数 51 已同步。
+- 治理状态核验：private-key / runtime receipt 策略（decision status: approved a+b）保持绑定，
+  本轮未改动。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-4 登记并开始执行（共享 L7 校验构造器）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。
@@ -5812,6 +5839,15 @@ security-reviewer 双签门禁。
   GAPS-1/2、AC-8/9、INTEGRATION-1 同款），由编排者在只读沙箱内按角色契约实际执行并留痕，零违规。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
 
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.
+
 ## 2026-08-08 — FRAMEWORK-GAPS-4 收尾更正（编排者独立复核；验证子代理越权执行留痕）
 
 - 事实更正：上一段"治理偏差：verifier/security-reviewer 子代理派生被环境拦截（agent thread limit
@@ -5847,3 +5883,12 @@ security-reviewer 双签门禁。
   progress_capture / talent / task_decomposition 等 `$`→`\Z`，完整"统一到共享构造器"留作架构层
   后续）；内容核验一致，予以保留。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
+
+### Private-key / runtime receipt governance status (per US-0-AC-2 pin)
+- decision status: approved a+b（2026-08-02 追加授权 git 历史清理）
+- .gitignore includes the approved private-key runtime receipt exclusion and `loop/runtime/`.
+- git rm --cached was performed for the accidentally tracked receipt in the approved governance change.
+- local runtime file preserved on this machine only (sm2-test-pki profiles; loop/runtime/ is gitignored).
+- historical git blobs were scrubbed from repository history on 2026-08-02
+  (business-owner approved); the invariant is pinned by
+  tests/security/test_private_key_handles_bindings.py.

@@ -27,3 +27,9 @@
 
 - security-reviewer：**是**（正则锚定边界，涉及 crypto/audit 敏感模块）；
   protocol-reviewer：**否**。
+
+## 更正（2026-08-08）
+
+- 上方"用户指令：'继续开发 + 全量门禁检查'"表述与事实不符：用户实际指令为"继续开发，但先不要
+  全量质量门禁检查"。本切片按增量门禁（fmt + lint + 定向测试）执行，全量 quality 豁免，详见
+  `loop/DECISIONS.md` 与 `loop/VERIFICATION.md`。
