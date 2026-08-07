@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-5 登记并开始执行（全仓 ISO 锚定收口 + 全量门禁）
+
+- 用户指令："继续开发，全量门禁检查"。
+- 决策：登记 `FRAMEWORK-GAPS-5`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-GAPS-4]）：全仓 11 处 ISO 正则 `$` → `\Z`（消除尾部换行前匹配）；
+  完整"统一到共享构造器"需依赖无关叶模块（如 src/coevo/timefmt.py + root_modules
+  登记）另行设计，本轮不做架构迁移；STATE 切换至 ENG-BASE / FRAMEWORK-GAPS-5。
+- 门禁口径：按用户指示本轮跑**全量 `make quality`**（恢复全量回归），另跑
+  定向测试与锚定回归。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-4 登记并开始执行（共享 L7 校验构造器）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

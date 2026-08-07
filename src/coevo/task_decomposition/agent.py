@@ -55,7 +55,7 @@ from .models import (
 
 
 _SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.\-]{0,63}$")
-_ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
+_ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z\Z")
 _MAX_SUGGESTED_TASKS = 8
 _MAX_SUGGESTED_EDGES = 16
 _MAX_STRING_BYTES = 512

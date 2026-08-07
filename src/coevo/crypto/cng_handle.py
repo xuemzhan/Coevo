@@ -56,7 +56,7 @@ _HELPER_SIZE: Final[int] = 6118
 _HELPER_SHA256: Final[str] = "f01e88716658e837c191ca15aa20c6a85423b557bb4efd0661ca350d3d1361ab"
 _MAX_INPUT_BYTES: Final[int] = 64 * 1024
 _ISO_RE: Final[re.Pattern[str]] = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$"
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z"
 )
 
 

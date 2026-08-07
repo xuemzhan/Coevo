@@ -1229,3 +1229,13 @@ items:
       - tests/unit/test_framework_gaps4.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-GAPS-5（2026-08-08 用户指令继续开发 + 全量门禁；全仓 ISO 锚定收口） ----------
+  - id: FRAMEWORK-GAPS-5
+    story: ENG-BASE
+    title: 全仓 ISO 正则尾部换行收口：cockpit / crypto / knowledge_base / audit_governance / orchestrator / progress_capture / talent / task_decomposition 共 11 处 ISO 正则 `$` → `\Z`（消除 Python 末尾换行前匹配），锚定回归测试；完整"统一到共享构造器"留作架构层后续（需依赖无关叶模块设计）
+    status: ready
+    dependencies: [FRAMEWORK-GAPS-4]
+    acceptance_tests:
+      - tests/unit/test_iso_anchor_regression.py
+    security_review: true
+    protocol_review: false
