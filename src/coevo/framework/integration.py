@@ -49,6 +49,7 @@ from src.coevo.framework.validation import (
     RbacChecker,
     ToolScopeChecker,
     ValidationResult,
+    is_iso_utc_z,
     validate_plan,
 )
 from src.coevo.orchestrator.models import (
@@ -265,6 +266,15 @@ def validate_product_chain(
 ) -> ValidationResult:
     """Lift a product chain and run validate_plan (five invariants + L18 + L19)."""
 
+    if not is_iso_utc_z(validated_at):
+        return ValidationResult(
+            accepted=False,
+            plan_hash="",
+            policy_profile=policy.profile,
+            policy_version=policy.policy_version,
+            validated_at=validated_at,
+            failure_reason="validated_at must be ISO-8601 UTC with trailing Z (L7)",
+        )
     try:
         plan = chain_to_plan(chain, registry, policy)
     except IntegrationError as exc:

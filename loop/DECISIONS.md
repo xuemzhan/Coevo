@@ -1,5 +1,17 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-4 登记并开始执行（共享 L7 校验构造器）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：登记 `FRAMEWORK-GAPS-4`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-INTEGRATION-3]）：validation.py 公开 is_iso_utc_z，
+  a2a/memory/orchestrator/integration 统一引用；validate_product_chain
+  异常分支 validated_at 也过 L7（INTEGRATION-3 Low 收口）；STATE 切换至
+  ENG-BASE / FRAMEWORK-GAPS-4。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-3 完成收尾（真实产品接线；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-INTEGRATION-3`（ENG-BASE，dependencies=[FRAMEWORK-INTEGRATION-2]）。实现提交：`e2c4cb1`

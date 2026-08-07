@@ -17,7 +17,6 @@ are treated as rejections.  L15: standard library only.
 
 from __future__ import annotations
 
-import datetime as _datetime
 import hashlib
 import json
 import re
@@ -25,9 +24,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Protocol, runtime_checkable
 
+from src.coevo.framework.validation import is_iso_utc_z
+
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 
 REDACTION_PREFIX = "REDACTED:"
 MEMORY_PROJECTION_KEYS = frozenset(
@@ -137,19 +137,6 @@ def _is_redaction_digest(value: str) -> bool:
     return value.startswith(REDACTION_PREFIX) and bool(_HEX64.match(value[len(REDACTION_PREFIX) :]))
 
 
-def _is_iso_utc_z(value: str) -> bool:
-    """Strict ISO-8601 UTC with trailing Z, including calendar validity."""
-
-    if not _ISO_UTC_Z.match(value):
-        return False
-    try:
-        base = value[:-1].split(".")[0] + "Z"
-        _datetime.datetime.strptime(base, "%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        return False
-    return True
-
-
 def validate_record(record: MemoryRecord) -> None:
     """Structural validation (pure, fail-closed)."""
 
@@ -163,7 +150,7 @@ def validate_record(record: MemoryRecord) -> None:
         raise MemoryValidationError("record_id does not match the record fingerprint")
     if not _SAFE_ID.match(record.project_id):
         raise MemoryValidationError("project_id must be a safe-id")
-    if not _is_iso_utc_z(record.occurred_at):
+    if not is_iso_utc_z(record.occurred_at):
         raise MemoryValidationError(
             "occurred_at must be ISO-8601 UTC with trailing Z (L7)"
         )

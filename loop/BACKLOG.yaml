@@ -1219,3 +1219,13 @@ items:
       - tests/unit/test_pipeline_framework_gate.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-GAPS-4（2026-08-08 用户指令继续开发；共享 L7 校验构造器） ----------
+  - id: FRAMEWORK-GAPS-4
+    story: ENG-BASE
+    title: 共享 L7 校验构造器：validation.py 公开 is_iso_utc_z，a2a/memory/orchestrator/integration 统一引用（去私有副本）；validate_product_chain 异常分支也先过 L7（INTEGRATION-3 Low 收口）；纯函数 stdlib + L17
+    status: ready
+    dependencies: [FRAMEWORK-INTEGRATION-3]
+    acceptance_tests:
+      - tests/unit/test_framework_gaps4.py
+    security_review: true
+    protocol_review: false

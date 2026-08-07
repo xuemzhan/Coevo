@@ -104,7 +104,7 @@ def validate_plan(
             failure_reason=reason,
         )
 
-    if not _is_iso_utc_z(validated_at):
+    if not is_iso_utc_z(validated_at):
         return reject("validated_at must be ISO-8601 UTC with trailing Z (L7)")
     try:
         validate_plan_structure(plan)
@@ -187,8 +187,10 @@ def _validate_agent_capabilities(plan: Plan) -> None:
                 ) from None
 
 
-def _is_iso_utc_z(value: str) -> bool:
-    """Strict ISO-8601 UTC with trailing Z, including calendar validity."""
+def is_iso_utc_z(value: str) -> bool:
+    """Shared L7 validator: strict ISO-8601 UTC with trailing Z (incl. calendar
+    validity and optional fractional seconds).  Used by a2a / memory /
+    orchestrator / integration to keep one canonical time check."""
 
     if not _ISO_UTC_Z.match(value):
         return False

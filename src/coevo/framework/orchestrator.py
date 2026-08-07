@@ -21,8 +21,6 @@ the module is pure, stdlib-only and fully offline-testable.
 
 from __future__ import annotations
 
-import datetime as _datetime
-import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Protocol, runtime_checkable
@@ -42,13 +40,13 @@ from src.coevo.framework.policy import Policy
 from src.coevo.framework.validation import (
     RbacChecker,
     ToolScopeChecker,
+    is_iso_utc_z,
     validate_plan,
 )
 
 ORCHESTRATION_PROJECTION_KEYS = frozenset(
     {"accepted", "mode", "status", "plan_hash", "validated_at", "failure_reason"}
 )
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 
 
 class OrchestrationMode(Enum):
@@ -297,7 +295,7 @@ def transition(
 ) -> OrchestrationOutcome:
     """Validate an eight-state path (L19) and report the terminal status."""
 
-    if not _is_iso_utc_z(validated_at):
+    if not is_iso_utc_z(validated_at):
         return OrchestrationOutcome(
             accepted=False,
             mode=mode,
@@ -333,16 +331,3 @@ def transition(
         validated_at=validated_at,
         failure_reason=None,
     )
-
-
-def _is_iso_utc_z(value: str) -> bool:
-    """Strict ISO-8601 UTC with trailing Z, including calendar validity."""
-
-    if not _ISO_UTC_Z.match(value):
-        return False
-    try:
-        base = value[:-1].split(".")[0] + "Z"
-        _datetime.datetime.strptime(base, "%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        return False
-    return True

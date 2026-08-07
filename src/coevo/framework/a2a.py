@@ -13,7 +13,6 @@ L15: standard library only, no third-party runtime dependency.
 
 from __future__ import annotations
 
-import datetime as _datetime
 import hashlib
 import re
 from dataclasses import dataclass
@@ -21,11 +20,11 @@ from typing import Protocol, runtime_checkable
 
 from src.coevo.framework.capability import CapabilityValidationError, resolve_capability
 from src.coevo.framework.manifest_checker import _InvalidManifest, manifest_spec_hash
+from src.coevo.framework.validation import is_iso_utc_z
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _HEX = frozenset("0123456789abcdefABCDEF")
-_ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 
 ENVELOPE_MAX_BYTES = 64 * 1024  # protocol §7.1 parity
 # SM2 signatures are 64 bytes (128 hex chars); 1024 hex chars leaves generous
@@ -131,7 +130,7 @@ def validate_a2a(message: A2aMessage) -> None:
         raise A2aValidationError("sequence_no must be a non-negative integer")
     if not isinstance(message.business_correlation_key, str) or not message.business_correlation_key:
         raise A2aValidationError("business_correlation_key is required")
-    if not _is_iso_utc_z(message.created_at):
+    if not is_iso_utc_z(message.created_at):
         raise A2aValidationError(
             "created_at must be ISO-8601 UTC with trailing Z (L7)"
         )
@@ -159,19 +158,6 @@ def _validate_policy_ref(ref: PolicyRef) -> None:
         )
     if not all(c in _HEX for c in ref.signature):
         raise A2aValidationError("policy_ref.signature must be hex-encoded")
-
-
-def _is_iso_utc_z(value: str) -> bool:
-    """Strict ISO-8601 UTC with trailing Z, including calendar validity."""
-
-    if not _ISO_UTC_Z.match(value):
-        return False
-    try:
-        base = value[:-1].split(".")[0] + "Z"
-        _datetime.datetime.strptime(base, "%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        return False
-    return True
 
 
 def verify_policy_ref(
