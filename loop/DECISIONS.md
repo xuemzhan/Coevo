@@ -17,6 +17,16 @@
   generate→validate 往返一致；check violations=[]、已 discard。
 - 本轮新观察项（Low/Info，均非收口清单目标，登记待后续轮次处理）：
   ① policy TimeoutProfile 未严格类型校验，bool(True) 被接受为 1s 超时
+  （待 FRAMEWORK-GAPS-2：type(...) is int 严格化）；
+  ② semver/ISO-8601 仅形状校验（前导零/不可能日期可过，待 FRAMEWORK-GAPS-2：
+  标准日期解析/严格 semver）；
+  ③ transition()/plan_for() 的 validated_at 未校验即入审计投影（待
+  FRAMEWORK-GAPS-2：入投影前统一 L7 ISO 校验）。
+- 执行方更正（2026-08-08）：上述"安全审查在 fgaps1-sec 沙箱由 verifier 执行"
+  表述不准确——本轮存在独立 security-reviewer 子代理（sec_review_gaps1），
+  在 `gaps1_security` 沙箱（pin=`04b8a5c`）完成 STRIDE 审查并给出 PASS；
+  结论与记录一致（Critical/High/Medium 0，Low/Info 3 项相同），沙箱名以
+  `gaps1_security` 为准。
   （与 AC-5 tools 同类，建议按 `type(...) is int` 收紧）；
   ② semver/ISO-8601 正则仅校验形状，接受尾部换行（Python `$` 语义）与非历法
   日期（如 2026-99-99T99:99:99Z），建议补 `\Z` 锚定与日历范围校验；
