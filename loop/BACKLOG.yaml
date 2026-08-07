@@ -1193,7 +1193,7 @@ items:
   - id: FRAMEWORK-INTEGRATION-1
     story: ENG-BASE
     title: 框架接入现有编排（GuardedOrchestrator 适配）：guard_registration（manifest-checker 通过才注册）、plan_to_chain（框架 Plan AGENT/HUMAN_GATE 节点 → 现有 OrchestrationChain，TOOL/框架抽象能力明确拒绝）、guarded_dispatch（validate_plan 前置 → Orchestrator.dispatch_event → 报告映射 OrchestrationOutcome）、审计投影；纯函数 stdlib + L17（integration.md）
-    status: ready
+    status: done
     dependencies: [US-16-AC-1-framework-manifest-checker-v0.1, US-16-AC-8-hybrid-orchestrator-v0.1]
     acceptance_tests:
       - tests/unit/test_framework_integration.py

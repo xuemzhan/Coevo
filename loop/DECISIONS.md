@@ -5626,3 +5626,42 @@ security-reviewer 双签门禁。
   audit fully-sealed。
 - 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git 历史
   回退 `e29e290`。
+
+## 2026-08-08 — FRAMEWORK-INTEGRATION-1 完成（框架接入现有编排；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-INTEGRATION-1`（ENG-BASE）。实现提交：`def380e`（GuardedOrchestrator
+  适配：guard_registration / plan_to_chain / guarded_dispatch / report_to_outcome /
+  GuardResult 审计投影；docs/framework/integration.md + docs/modules/framework.md +
+  docs/plans/FRAMEWORK-INTEGRATION-1-slice.md；tests/unit/test_framework_integration.py
+  11 项）。
+- 用户指令：继续开发，先不要全量质量门禁检查；本轮按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality（与 2026-08-03 起门禁策略一致）。
+- 独立验证（mvp-verifier 契约，只读沙箱 `fwint1-verify`，pin=`def380e`）：主仓库 fmt
+  exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`252ad24e526f6728`
+  （audit fully-sealed）；沙箱内 fmt exit=0 同指纹、lint exit=0 fingerprint=
+  `e7d6dd71bdf8beb8`（沙箱路径指令专属，与维护机基线不同属预期，CI 同款；首次 lint
+  失败为环境装配——沙箱缺 `.tools` 目录链接，已按治理文档补 junction 后通过）；
+  定向测试 182/182 全绿（integration + module_docs + capability/manifest_checker/
+  plan_lsp/validate_plan/orchestrator/a2a/policy/tools/agent_wire/memory/lifecycle/
+  plan_l18/k8s_listing/gaps1-3）；review_sandbox check violations=[]，已 discard。
+- 独立安全审查（security-reviewer 契约，只读沙箱 `fwint1-sec`，pin=`def380e`）：
+  STRIDE 逐项 PASS，Critical/High/Medium 0；探针证据：未知 ProductOutcome fail-closed
+  → ESCALATED；TOOL 节点 → IntegrationError；未知能力 validate_plan 前置 REJECTED
+  （不触达内部分派）；有效 Plan + 内部 dispatch 异常 → ESCALATED 且仅类型名（无路径/
+  密钥泄露）；拒绝 manifest → inner_register 零调用；GuardResult 投影固定四键；
+  stdlib-only AST 通过。
+  - Low/Info 观察项（非本轮收口范围）：① plan_to_chain 对闭集外能力抛
+    `CapabilityValidationError` 而非 `IntegrationError`（错误类型不一致但 fail-closed，
+    guarded_dispatch 已统一收拢）；② failure_reason 回显调用方提供的计划值（能力名），
+    与既有校验模式一致、无敏感信息。
+- 清理：上一会话遗留的 `loop/VERIFICATION.md` 乱码追加（GBK 字节写入 UTF-8 文件，含
+  2026-08-07T20:16:54 lint 记录残片）已备份至 TEMP 后移除，本轮以规范记录重新落盘
+  （该 lint 事件本身已存在于 tool-audit.jsonl，fingerprint=`252ad24e526f6728`）。
+- 治理偏差留痕：verifier/security-reviewer 子代理派发被环境拦截（agent thread limit
+  reached，与 AC-8/AC-9/GAPS-1/2 同款限制），按既有预案由编排者在只读沙箱内按技能与
+  只读契约实际执行并留痕，不落盘报告、零违规。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-INTEGRATION-1 行（无悬空）；BACKLOG
+  FRAMEWORK-INTEGRATION-1 置 done；STATE 置 phase=decide / status=done /
+  last_verified_commit=`def380e`；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git
+  历史回退 `def380e`。
