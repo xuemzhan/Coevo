@@ -1035,3 +1035,13 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- 第十六轮逐文件深度审查与优化（2026-08-07 用户指令"继续"，延续 OPTIMIZE-15，不做全量质量门） ----------
+  - id: OPTIMIZE-16
+    story: ENG-BASE
+    title: 第十六轮逐文件深度审查：模块文档治理测试（每个包必须有文档且文件清单与代码一致），缺则补强制测试
+    status: done
+    dependencies: [OPTIMIZE-15]
+    acceptance_tests:
+      - tests/unit/test_optimizations.py
+    security_review: true
+    protocol_review: false

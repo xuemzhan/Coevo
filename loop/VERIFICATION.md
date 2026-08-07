@@ -7870,3 +7870,7 @@ audit seal: fully-sealed
 - 本轮仅定向验证：python -m unittest tests.unit.test_control_main 4 项全绿。
 - 按用户指示豁免全量质量门；下次全量门禁时回归。
 - 改动：	ests/unit/test_control_main.py（新，4 项：缺参/未知模块退出、runpy 分派、模块清单）。
+## 2026-08-07T04:30:49.282Z — OPTIMIZE-16（用户指令：不做全量质量门）
+- 本轮仅定向验证：python -m unittest tests.unit.test_module_docs 4 项全绿。
+- 按用户指示豁免全量质量门；下次全量门禁时回归。
+- 改动：	ests/unit/test_module_docs.py（新，4 项文档治理守卫）。
