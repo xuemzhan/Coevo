@@ -1112,7 +1112,7 @@ items:
   - id: US-16-AC-5-framework-tool-registry-v0.1
     story: US-16
     title: 框架层 Tool 抽象与 MCP schema 路径 A（CTAF §6.3 / §7.2 / M4）：Tool 统一模型（P2 版本必填）、工具注册表（重复拒绝、校验注册分离）、Tool↔MCP 描述双向转换（支持子集往返字节级一致，未知关键字显式拒绝）、JSON Schema 子集校验（白名单 + 深度/大小/枚举数上限）、纯函数离线 stdlib（零 MCP SDK，L15）+ L17（tool-registry.md）
-    status: ready
+    status: done
     dependencies: [US-16-AC-1-framework-manifest-checker-v0.1]
     acceptance_tests:
       - tests/unit/test_framework_tools.py
