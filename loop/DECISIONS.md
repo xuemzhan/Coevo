@@ -1,5 +1,33 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-5 Tool 抽象与 MCP schema 路径 A 完成（增量门禁 + 契约沙箱安全审查）
+
+- 工作项：`US-16-AC-5-framework-tool-registry-v0.1`（CTAF §6.3 / §7.2 / M4）。
+- 实现：`src/coevo/framework/tools.py`（frozen Tool 模型：tool_id safe-id /
+  tool_version semver P2 必填 / side_effects 闭集 / requires_consent /
+  timeout_sec 严格正整数 / size_in_bytes_max 严格非负整数 / crypto_scope
+  ProviderScope 闭集 / audit_required / input/output schema；ToolRegistry
+  校验注册分离 + 重复拒绝 + 容量 128；validate_schema 白名单子集
+  （type/properties/required/items/enum/description，未知关键字/深度>16/
+  大小>16KiB/enum>64/结构越界 fail-closed）；tool_to_mcp/mcp_to_tool
+  双向转换，x-coevo 扩展块承载框架字段，缺失/未知键拒绝，往返规范字节一致）；
+  `__init__.py` 导出；`docs/framework/tool-registry.md`；
+  `docs/modules/framework.md` L17；`tests/unit/test_framework_tools.py` 9 项。
+- 验证（增量门禁，按用户指示豁免全量 quality，留痕）：主仓库定向 111/111 全绿
+  （AC-5 13 项 + framework 相邻回归 98 项）；fmt exit=0
+  fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`252ad24e526f6728`；
+  audit fully-sealed。
+- 安全审查（security-reviewer 技能，只读沙箱 ac5-sec pin=`d2f4046`）：
+  check violations=[]（零违规）、沙箱内 13 项定向测试全绿、已 discard；
+  判定 PASS：Critical/High 0，Low 1——`timeout_sec`/`size_in_bytes_max` 用
+  `isinstance(int)` 校验导致 Python bool（int 子类）被接受为 1；已就地修复为
+  `type(...) is int` 并补 2 项负例测试（commit `65dfb1e`）。
+- 治理偏差留痕：子代理并发额度已达上限（agent thread limit reached），独立
+  security-reviewer 未能以子代理形式派发；改由编排器在只读沙箱内按
+  security-reviewer 技能与只读契约实际执行（只读、不落盘、证据来自沙箱内命令），
+  与 AC-3 轮同款偏差。
+- 提出者：用户指令（"继续开发，但先不要全量质量门禁检查"）；执行：Codex。
+
 ## 2026-08-08 — US-16-AC-5 登记并开始执行（Tool 抽象 + MCP schema 路径 A，CTAF M4）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。
