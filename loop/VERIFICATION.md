@@ -17434,3 +17434,247 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-07T20:11:57.193145Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+s/unit/test_framework_plan_lsp.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-8",
+      "title": "��ܲ� Hybrid Orchestrator��CTAF ��6.6 / ��8 / M7����OrchestrationEngine ��Լ + validate_plan Ϊ dispatch ǰ�ñص���δУ��/У��ʧ�ܲ��� dispatch����StateMachine ��̬����ע�� provider������ Plan ��ִ�У�ʧ��/�쳣 fail-closed ת ESCALATED + audit RECOVER����DynamicLLM ���龭������� + L18 + L19 ͨ����ִ�У�������Ч/�쳣���� StateMachine����Hybrid ���� HOLD �ڵ���� LLM ���ǣ����� HOLD �����麬 HOLD �� ������ Plan��HELD �˹���ǿ�ơ�ִ���������ã���L19 ��̬�νӣ�ESCALATED��ACTIVE ���뾭 HELD��+ ���ͶӰ + ע��ִ����/LLM/�������������� stdlib��+ L17��hybrid-orchestrator.md��",
+      "code": [
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/hybrid-orchestrator.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_orchestrator.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/hybrid-orchestrator.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-9",
+      "title": "��ܲ� K8s CRD ֽ���嵥��������CTAF ��14.2 / ��16.4 / M9����������/Tool/Policy/Plan ��������ȷ����ֽ���嵥���淶 JSON + YAML ��ȫ��Ⱦ�Ӽ�����ֽ�治��ŵ reconcile loop���� K8s ����� IO����listing_fingerprint SHA-256 �ɹ�ϣ��opt-in ɳ�䴿�������� IO �����ã����嵥�ṹУ�� fail-closed���ֶΰ����� / �ظ��� / δ֪�ֶ� / BOM / 64KiB ���� / 64 ����ȣ������ͶӰ�̶���ժҪ������ spec ��ϸ����stdlib-only + L17 �ĵ�������k8s-crd-listing.md��",
+      "code": [
+        "src/coevo/framework/k8s_listing.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/k8s-crd-listing.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_k8s_listing.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/k8s-crd-listing.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-1",
+      "title": "������۲����տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����semver/ISO-8601 ��ʽУ�飨manifest semantic_version / a2a created_at / memory occurred_at��L7����Policy ��ʱ�Ͻ� dispatch��600s / plan_total��7200s / consent��7200s��Info4����Orchestrator �� provider �쳣����Ϊ OrchestrationError + ���ͶӰ�� validated_at��Low����K8s �嵥 spec ���ڰ� capability/tool/policy/plan ������У��δ֪����Low�����ĵ���ȡ�ᣨtrusted_anchor ί�� L2 / ����������� L4 / ������ Info5���������� stdlib + L17",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/k8s_listing.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-2",
+      "title": "GAPS-1 �¹۲����տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����Policy TimeoutProfile/RetryProfile/ConsentProfile �ϸ��������ͣ�bool/str/float/int ����һ�� PolicyValidationError��`type(...) is int`����semver �ϸ���򣨽�ǰ�����㣩��ISO-8601 ������ΧУ�飨datetime.strptime��a2a created_at / memory occurred_at / validate_plan validated_at / transition validated_at����validated_at �����ͶӰǰͳһ L7 ISO У�飻������ stdlib + L17",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/orchestrator.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps2.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps2.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
