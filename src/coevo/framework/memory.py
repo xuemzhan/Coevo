@@ -103,7 +103,9 @@ class MemoryWriteResult:
         return {
             "accepted": self.accepted,
             "record_id": self.record_id,
-            "kind": self.kind.value,
+            "kind": self.kind.value
+            if isinstance(self.kind, MemoryKind)
+            else str(self.kind),
             "occurred_at": self.occurred_at,
             "failure_reason": self.failure_reason,
         }

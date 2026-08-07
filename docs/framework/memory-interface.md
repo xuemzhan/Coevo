@@ -30,6 +30,15 @@
 任何注入异常一律转为 `MemoryWriteResult(accepted=False, failure_reason)`，
 绝不静默放行。
 
+## 信任边界与设计说明（security-review 观察项留痕）
+
+- **Semantic 审批检查器接收脱敏前的明文 record**（L12 只约束 store 边界）：
+  生产适配器（knowledge_base 侧）不得将审批入参落盘、记日志或外传；
+- **拒绝写入的审计投影含 `record_id`（明文内容指纹）**：由 AC-4.1/4.2 共同决定，
+  属设计使然；生产 `Redactor` 应采用加盐/密钥化摘要构造，抬高低熵值的字典
+  恢复成本，不得使用裸 SHA-256；
+- 审计投影对畸形 kind 做防御性取值（不抛异常）。
+
 ## 安全边界
 
 - L12 是红线：明文 PII 不得到达 store；未声明为敏感字段却带 `REDACTED:` 值

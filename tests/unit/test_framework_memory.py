@@ -13,6 +13,7 @@ from src.coevo.framework.memory import (
     MemoryKind,
     MemoryRecord,
     MemoryValidationError,
+    MemoryWriteResult,
     REDACTION_PREFIX,
     record_fingerprint,
     redact_record,
@@ -289,6 +290,20 @@ class MemoryTests(unittest.TestCase):
                 if node.module and node.module.split(".")[0] not in allowed:
                     bad.append(node.module)
         self.assertEqual([], bad, "third-party imports found in memory.py")
+
+    def test_audit_projection_defensive_on_malformed_kind(self) -> None:
+        """security-review Low: audit projection must not raise on bad kind."""
+
+        result = MemoryWriteResult(
+            accepted=False,
+            record_id="0" * 64,
+            kind="EPISODIC",  # type: ignore[arg-type]
+            occurred_at="2026-08-08T08:00:00Z",
+            failure_reason="test",
+        )
+        record = result.to_audit_record()
+        self.assertFalse(record["accepted"])
+        self.assertEqual(record["kind"], "EPISODIC")
 
 
 if __name__ == "__main__":
