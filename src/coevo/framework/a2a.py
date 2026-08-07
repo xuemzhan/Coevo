@@ -122,7 +122,7 @@ def validate_a2a(message: A2aMessage) -> None:
             raise A2aValidationError(f"{label} must be a safe-id")
     if not _HEX64.match(message.trace_id):
         raise A2aValidationError("trace_id must be a 64-hex string")
-    if not isinstance(message.sequence_no, int) or message.sequence_no < 0:
+    if type(message.sequence_no) is not int or message.sequence_no < 0:
         raise A2aValidationError("sequence_no must be a non-negative integer")
     if not isinstance(message.business_correlation_key, str) or not message.business_correlation_key:
         raise A2aValidationError("business_correlation_key is required")
@@ -290,7 +290,7 @@ def from_agent_fields(mapping: dict[str, object]) -> A2aMessage:
 def validate_payload_size(payload_len: int, *, payload_ref: str) -> None:
     """AC-6.4: business payload > 64 KiB must use RESULT_SUBMISSION split."""
 
-    if not isinstance(payload_len, int) or payload_len < 0:
+    if type(payload_len) is not int or payload_len < 0:
         raise A2aValidationError("payload_len must be a non-negative integer")
     if payload_len > ENVELOPE_MAX_BYTES:
         if not isinstance(payload_ref, str) or not _SAFE_ID.match(payload_ref):

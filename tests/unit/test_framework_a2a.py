@@ -160,6 +160,8 @@ class A2aTests(unittest.TestCase):
         with self.assertRaises(A2aValidationError):
             validate_a2a(make_message(sequence_no=-1))
         with self.assertRaises(A2aValidationError):
+            validate_a2a(make_message(sequence_no=True))
+        with self.assertRaises(A2aValidationError):
             validate_a2a(make_message(business_correlation_key=""))
         with self.assertRaises(A2aValidationError):
             validate_a2a(make_message(purpose="not_a_capability"))
@@ -236,6 +238,8 @@ class A2aTests(unittest.TestCase):
         """AC-6.4: >64 KiB business payloads must use payload_ref split."""
 
         validate_payload_size(ENVELOPE_MAX_BYTES, payload_ref="")
+        with self.assertRaises(A2aValidationError):
+            validate_payload_size(True, payload_ref="")
         with self.assertRaises(A2aValidationError):
             validate_payload_size(ENVELOPE_MAX_BYTES + 1, payload_ref="")
         validate_payload_size(ENVELOPE_MAX_BYTES + 1, payload_ref="pkg-0001")
