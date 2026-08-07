@@ -166,6 +166,47 @@ class K8sListingTests(unittest.TestCase):
                     bad.append(node.module)
         self.assertEqual([], bad, "third-party imports found in k8s_listing.py")
 
+    def test_listing_no_io_side_effects(self) -> None:
+        """AC-9.3: generator has zero IO imports (pure function, offline)."""
+
+        source = (ROOT / "src" / "coevo" / "framework" / "k8s_listing.py").read_text(
+            encoding="utf-8"
+        )
+        tree = ast.parse(source)
+        io_modules = {
+            "os",
+            "io",
+            "sys",
+            "subprocess",
+            "socket",
+            "urllib",
+            "http",
+            "shutil",
+            "tempfile",
+            "pathlib",
+            "ctypes",
+            "select",
+            "signal",
+            "threading",
+            "multiprocessing",
+            "mmap",
+        }
+        imported: set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    imported.add(alias.name.split(".")[0])
+            elif isinstance(node, ast.ImportFrom):
+                if node.level > 0:
+                    continue
+                if node.module:
+                    imported.add(node.module.split(".")[0])
+        self.assertEqual(
+            set(),
+            imported & io_modules,
+            "IO-capable imports found in k8s_listing.py",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
