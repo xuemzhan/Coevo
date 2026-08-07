@@ -1,5 +1,37 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-1 完成收尾（增量门禁 + 沙箱审查，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-GAPS-1`（ENG-BASE，框架审查观察项收口）。实现提交：
+  `04b8a5c`（semver/ISO-8601 格式校验、Policy 超时上界 600/7200/7200s、链
+  provider 异常收敛为 OrchestrationError、审计投影补 validated_at、K8s 清单
+  spec 项内四类白名单校验 + `tests/unit/test_framework_gaps.py` 302 行负例）。
+- 用户指令："继续开发，但先不要全量质量门禁检查"；本轮按增量门禁（fmt + lint +
+  定向测试）执行并豁免留痕（与 2026-08-03 门禁策略一致）。
+- 验证（mvp-verifier 契约，只读沙箱 fgaps1-verify，pin=`04b8a5c`）：主仓库
+  fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=
+  `252ad24e526f6728`（audit fully-sealed）；沙箱内 fmt/lint 双 0，定向测试
+  164/164 全绿；check violations=[]、已 discard。
+- 安全审查（security-reviewer 契约，只读沙箱 fgaps1-sec，pin=`04b8a5c`）：
+  STRIDE PASS，Critical/High/Medium 0；探针证据：链异常仅暴露类型名、清单
+  generate→validate 往返一致；check violations=[]、已 discard。
+- 本轮新观察项（Low/Info，均非收口清单目标，登记待后续轮次处理）：
+  ① policy TimeoutProfile 未严格类型校验，bool(True) 被接受为 1s 超时
+  （与 AC-5 tools 同类，建议按 `type(...) is int` 收紧）；
+  ② semver/ISO-8601 正则仅校验形状，接受尾部换行（Python `$` 语义）与非历法
+  日期（如 2026-99-99T99:99:99Z），建议补 `\Z` 锚定与日历范围校验；
+  ③ orchestrator `validated_at` 调用方传入未校验即入审计投影（默认 ""），
+  审计数据质量观察项。
+- 治理偏差留痕：security-reviewer 子代理两次派发均被 "agent thread limit
+  reached" 拦截（AC-8/AC-9 同款环境限制），按既有预案由编排者在只读沙箱内按
+  技能与只读契约实际执行并留痕；审查只交付报告文本、不落盘、零违规。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-GAPS-1 行（无悬空）；BACKLOG 置
+  done；STATE 置 phase=decide / status=done / last_verified_commit=`04b8a5c`；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时
+  按 git 历史回退 `04b8a5c`。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-1 登记并开始执行（框架审查观察项收口）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。

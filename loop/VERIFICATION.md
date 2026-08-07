@@ -233,6 +233,43 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-GAPS-1 完成收尾（框架审查观察项收口；增量门禁 + 沙箱审查，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-GAPS-1`（ENG-BASE）。实现提交：`04b8a5c`（semver/ISO-8601
+  格式校验、Policy 超时上界、链 provider 异常收敛、审计投影补 validated_at、
+  K8s 清单项白名单 + 302 行负例测试 `tests/unit/test_framework_gaps.py`）。
+- 用户指令：继续开发，先不要全量质量门禁检查；本轮按增量门禁（fmt + lint + 定向测试）
+  执行并豁免留痕（与 2026-08-03 门禁策略一致）。
+- 独立验证（mvp-verifier 契约，只读沙箱 fgaps1-verify，pin=`04b8a5c`）：
+  * 主仓库增量门禁：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+    fingerprint=`252ad24e526f6728`（audit fully-sealed）；
+  * 沙箱内实跑：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+    fingerprint=`61460f9f30b20af3`（沙箱路径指纹与维护机基线不同属预期，CI 同款）；
+    定向测试 164/164 全绿（test_framework_gaps + manifest_checker/a2a/k8s_listing/
+    memory/orchestrator/policy/validate_plan/plan_l18/lifecycle/plan_lsp/capability/
+    tools + agent_wire_regression + module_docs）；
+  * review_sandbox check violations=[]，已 discard。
+- 独立安全审查（security-reviewer 契约，只读沙箱 fgaps1-sec，pin=`04b8a5c`）：
+  STRIDE 逐项 PASS；Critical/High/Medium 0；探针证据：链 provider 抛 ValueError →
+  OrchestrationError（仅类型名，无内部细节泄露）；清单 generate→validate 往返一致
+  （白名单与生成器输出键完全匹配）；无阻断项。
+  * Low 1：policy TimeoutProfile 未做严格类型校验，bool(True) 被接受为 1s 超时
+    （与 AC-5 tools 同类问题，建议后续按 `type(...) is int` 就地收紧）；
+  * Low 2：semver/ISO-8601 正则仅校验形状，接受尾部换行（Python `$` 语义）与
+    非历法日期（如 2026-99-99T99:99:99Z），建议后续补 \Z 锚定与日历范围校验；
+  * Info：orchestrator validated_at 为调用方传入且未校验格式即入审计投影
+    （默认 ""），审计数据质量观察项。
+  * 以上 Low/Info 均非本轮收口清单目标，已在 DECISIONS 登记为后续观察项。
+  * review_sandbox check violations=[]，已 discard。
+- 治理偏差留痕：security-reviewer 子代理两次派发均被 "agent thread limit reached"
+  拦截（与 AC-8/AC-9 同款环境限制），按既有预案由编排者在只读沙箱内按技能与只读
+  契约实际执行并留痕，不落盘报告、零违规。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-GAPS-1 行（无悬空）；BACKLOG 置 done；
+  STATE 置 phase=decide / status=done / last_verified_commit=`04b8a5c`；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `04b8a5c`。
+
 ## 2026-08-08 -- US-16-AC-9 独立复核：编排者沙箱实测（治理修正）
 
 - exit_code: `0`
@@ -15835,6 +15872,507 @@ audit seal: fully-sealed
         {
           "kind": "test",
           "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T19:43:00.790020Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T19:43:08.222739Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+: true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-6",
+      "title": "��ܲ� A2A wire 0.1 �� policy_ref ���ΰ󶨣�CTAF ��7.3 / M5����A2A ��Ϣģ��ȫ�ֶ�У�� fail-closed��AC-6.1���� signature �������� 1024 hex����policy_ref ���ΰ󶨣�spec_hash �ų���ָ�ֶ� / ֤���� DER ָ�� / SM2 ��ǩ��Կȡ��֤�������� ��7.3.3 �岽ʱ����֤��ע���쳣����� manifest ��Ⱦ� fail-closed��AC-6.2����A2A<->`.agent` �ֶ�ӳ������һ���� `.agent` v1.0 wire �ֽڲ��䣨T6 �ػ���AC-6.3����ҵ���غ� >64KiB ���� RESULT_SUBMISSION+payload_ref ��֣�AC-6.4�������������� stdlib + ���ͶӰ + L17 �ĵ�������AC-6.5��a2a-protocol.md��",
+      "code": [
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/a2a-protocol.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_a2a.py",
+        "tests/unit/test_agent_wire_regression.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/a2a-protocol.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-7",
+      "title": "��ܲ� Plan �淶�����л���Plan-LSP��CTAF ��14.2 / M6����Plan<->�淶 JSON ˫�����л���plan_to_json / json_to_plan / parse_plan_json_bytes�������ֽڼ�һ�¡��ظ���/δ֪�ֶ�/BOM/�Ǳ�׼����/���Ƕ��/����ȫ�� fail-closed������ plan_fingerprint ͬһ�淶�����򣨷�ָ�Ʒֲ棩��validate_plan_json ���л���ڣ�������� + L18 + L19��ʧ�ܷ��� REJECTED������С/�ڵ�/��/tool_args ���ޡ����������� stdlib + L17��plan-lsp.md��",
+      "code": [
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/plan-lsp.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_plan_lsp.py",
+        "tests/unit/test_framework_validate_plan.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/plan-lsp.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_lsp.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-8",
+      "title": "��ܲ� Hybrid Orchestrator��CTAF ��6.6 / ��8 / M7����OrchestrationEngine ��Լ + validate_plan Ϊ dispatch ǰ�ñص���δУ��/У��ʧ�ܲ��� dispatch����StateMachine ��̬����ע�� provider������ Plan ��ִ�У�ʧ��/�쳣 fail-closed ת ESCALATED + audit RECOVER����DynamicLLM ���龭������� + L18 + L19 ͨ����ִ�У�������Ч/�쳣���� StateMachine����Hybrid ���� HOLD �ڵ���� LLM ���ǣ����� HOLD �����麬 HOLD �� ������ Plan��HELD �˹���ǿ�ơ�ִ���������ã���L19 ��̬�νӣ�ESCALATED��ACTIVE ���뾭 HELD��+ ���ͶӰ + ע��ִ����/LLM/�������������� stdlib��+ L17��hybrid-orchestrator.md��",
+      "code": [
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/hybrid-orchestrator.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_orchestrator.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/hybrid-orchestrator.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-9",
+      "title": "��ܲ� K8s CRD ֽ���嵥��������CTAF ��14.2 / ��16.4 / M9����������/Tool/Policy/Plan ��������ȷ����ֽ���嵥���淶 JSON + YAML ��ȫ��Ⱦ�Ӽ�����ֽ�治��ŵ reconcile loop���� K8s ����� IO����listing_fingerprint SHA-256 �ɹ�ϣ��opt-in ɳ�䴿�������� IO �����ã����嵥�ṹУ�� fail-closed���ֶΰ����� / �ظ��� / δ֪�ֶ� / BOM / 64KiB ���� / 64 ����ȣ������ͶӰ�̶���ժҪ������ spec ��ϸ����stdlib-only + L17 �ĵ�������k8s-crd-listing.md��",
+      "code": [
+        "src/coevo/framework/k8s_listing.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/k8s-crd-listing.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_k8s_listing.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/k8s-crd-listing.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T19:47:31.932629Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+e_regression.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-7",
+      "title": "��ܲ� Plan �淶�����л���Plan-LSP��CTAF ��14.2 / M6����Plan<->�淶 JSON ˫�����л���plan_to_json / json_to_plan / parse_plan_json_bytes�������ֽڼ�һ�¡��ظ���/δ֪�ֶ�/BOM/�Ǳ�׼����/���Ƕ��/����ȫ�� fail-closed������ plan_fingerprint ͬһ�淶�����򣨷�ָ�Ʒֲ棩��validate_plan_json ���л���ڣ�������� + L18 + L19��ʧ�ܷ��� REJECTED������С/�ڵ�/��/tool_args ���ޡ����������� stdlib + L17��plan-lsp.md��",
+      "code": [
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/plan-lsp.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_plan_lsp.py",
+        "tests/unit/test_framework_validate_plan.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/plan-lsp.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_lsp.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-8",
+      "title": "��ܲ� Hybrid Orchestrator��CTAF ��6.6 / ��8 / M7����OrchestrationEngine ��Լ + validate_plan Ϊ dispatch ǰ�ñص���δУ��/У��ʧ�ܲ��� dispatch����StateMachine ��̬����ע�� provider������ Plan ��ִ�У�ʧ��/�쳣 fail-closed ת ESCALATED + audit RECOVER����DynamicLLM ���龭������� + L18 + L19 ͨ����ִ�У�������Ч/�쳣���� StateMachine����Hybrid ���� HOLD �ڵ���� LLM ���ǣ����� HOLD �����麬 HOLD �� ������ Plan��HELD �˹���ǿ�ơ�ִ���������ã���L19 ��̬�νӣ�ESCALATED��ACTIVE ���뾭 HELD��+ ���ͶӰ + ע��ִ����/LLM/�������������� stdlib��+ L17��hybrid-orchestrator.md��",
+      "code": [
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/hybrid-orchestrator.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_orchestrator.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/hybrid-orchestrator.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-9",
+      "title": "��ܲ� K8s CRD ֽ���嵥��������CTAF ��14.2 / ��16.4 / M9����������/Tool/Policy/Plan ��������ȷ����ֽ���嵥���淶 JSON + YAML ��ȫ��Ⱦ�Ӽ�����ֽ�治��ŵ reconcile loop���� K8s ����� IO����listing_fingerprint SHA-256 �ɹ�ϣ��opt-in ɳ�䴿�������� IO �����ã����嵥�ṹУ�� fail-closed���ֶΰ����� / �ظ��� / δ֪�ֶ� / BOM / 64KiB ���� / 64 ����ȣ������ͶӰ�̶���ժҪ������ spec ��ϸ����stdlib-only + L17 �ĵ�������k8s-crd-listing.md��",
+      "code": [
+        "src/coevo/framework/k8s_listing.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/k8s-crd-listing.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_k8s_listing.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/k8s-crd-listing.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-1",
+      "title": "������۲����տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����semver/ISO-8601 ��ʽУ�飨manifest semantic_version / a2a created_at / memory occurred_at��L7����Policy ��ʱ�Ͻ� dispatch��600s / plan_total��7200s / consent��7200s��Info4����Orchestrator �� provider �쳣����Ϊ OrchestrationError + ���ͶӰ�� validated_at��Low����K8s �嵥 spec ���ڰ� capability/tool/policy/plan ������У��δ֪����Low�����ĵ���ȡ�ᣨtrusted_anchor ί�� L2 / ����������� L4 / ������ Info5���������� stdlib + L17",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/policy.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/k8s_listing.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/k8s_listing.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps.py",
           "exists": true
         }
       ],
