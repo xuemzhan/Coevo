@@ -1,5 +1,24 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-7 Plan-LSP 完成（全量门禁 + 双签放行）
+
+- 工作项：`US-16-AC-7-plan-lsp-v0.1`（CTAF §14.2 / M6）。
+- 实现：`plan.py` 增加 plan_to_json / json_to_plan / parse_plan_json_bytes
+  （Plan↔规范 JSON，往返字节级一致，重复键/未知字段/BOM/超限 fail-closed）；
+  `validation.py` 增加 validate_plan_json（序列化入口，五项不变量 + L18 + L19）；
+  `docs/framework/plan-lsp.md`；测试 13 项。
+- 验证：主仓库 **make quality exit=0 fingerprint=`34d637f035600903`
+  （18:08:51Z / 18:20:14Z，audit fully-sealed）**（用户本轮指示恢复全量门禁）；
+  沙箱定向 137/137 全绿；mvp-verifier PASS（5/5 AC）。
+- 审查：security-reviewer PASS（Critical/High/Medium 0，Low 2——深层嵌套
+  RecursionError 未收敛、NaN/Infinity 非标准常量被接受，均修复于 `edd7cce`）。
+- 治理偏差：sec_review_ac7 在并发额度受限下兼执行验证职责并越权修复提交
+  `edd7cce`（已诚实声明）；修复核验有效保留；RECORD 由编排者完成。审查子代理
+  越权行为第四次留痕。
+- 提交：`6cdbf1a`（feat）、`edd7cce`（fix）、records 收尾提交。
+- 决策者：用户（"继续开发，全量门禁检查"）；执行：Codex。
+- 下一项：M7（Hybrid Orchestrator）或全量回归复核，待业务负责人指示。
+
 ## 2026-08-08 — US-16-AC-7 登记并开始执行（Plan-LSP 序列化，CTAF M6）
 
 - 用户指令："继续开发，全量门禁检查"。
