@@ -1,7 +1,7 @@
-# 分布式具身智能体框架设计方案（v0.4）
+# 分布式具身智能体框架设计方案（v0.4.1）
 
-> **版本**: v0.4 (2026-08-07)
-> **状态**: 产品级草案。在 v0.3 基础上吸收第三轮审查（架构师 + 分析师 + 产品经理）的 **A 类 12 条主要问题** + **B 类 7 条高价值润色**;累计 **v0.1→v0.4** 共 38 条审查结论全部落地。
+> **版本**: v0.4.1 (2026-08-07)
+> **状态**: 产品级草案。在 v0.4 基础上以业务负责人 + 产品经理视角批判性吸收审查结论（P0 硬伤 5 项 + P1 设计补强 5 项 + P2 落地增强 5 项，见 §19.6）；自评待独立复核后定稿。
 > **变更追踪**: §19 修订说明;v0.3 保留为 `design-proposal-v0.3.md`。
 > **vs v0.3 本质差异**: v0.3 是"技术 + 产品"二维;v0.4 加上"工程内部一致性"第三维度,重点消除 v0.3 评审中发现的 12 处内部不一致。
 
@@ -123,7 +123,7 @@
 
 | # | 原则 | 与 MVP 不变量的对应 |
 | --- | --- | --- |
-| **P1** | **失败关闭 + 显式错误码**(状态变更须人工确认) | AGENTS.md 强制边界 + §8.3 ESCALATED 三出口 经 HELD 中转(§3.2 P1 落地点) |
+| **P1** | **失败关闭 + 显式错误码**(状态变更须人工确认) | AGENTS.md 强制边界 + §8.3 ESCALATED 回到 ACTIVE 的出口必须经 HELD 中转(§3.2 P1 落地点) |
 | **P2** | 版本优先于时间戳 | `src/coevo/version.py` 0.2.0 |
 | **P3** | 状态变更须人工确认 | 编排 HOLD/合并 HOLD/知识入库人工审核 + §8.3 出口 3 经 HELD |
 | **P4** | 全程审计 + 哈希链 | `loop/audit-head.json` + `tool-audit.jsonl` + manifest-checker(M1)在 P4 闭集内 |
@@ -167,7 +167,7 @@
 
 ## 5. Agent Manifest
 
-### 5.1 Manifest 草案 (v0.4 增量)
+### 5.1 Manifest 草案 (v0.4.1 增量)
 
 ```yaml
 apiVersion: coevo.framework/v1
@@ -176,7 +176,7 @@ metadata:
   agent_id: "task_decomposition.basic"
   display_name: "任务分解智能体(基础版)"
   semantic_version: "0.2.0"
-  spec_hash: "<sha256(规范化字节)>"
+  spec_hash: "<sha256(规范化字节, 排除 spec_hash/signature 自指字段)>"  # 规范化规则见 §7.3.2
 spec:
   capability: "TASK_DECOMPOSITION"      # §5.2 闭集单值
   triggers:
@@ -193,8 +193,9 @@ spec:
   requires_human_confirmation: true
   confirmation_role: "project_owner"
 policy_profile: "INTERACTIVE"             # v0.4 新增: 仅引用名
+policy_version: "1.0"                     # v0.4.1 新增: 绑定 Profile 语义版本,防跨部署点漂移
 policy_ref:                               # §7.3.2 三段绑定
-  spec_hash: "<sha256(spec.canonical_bytes)>"
+  spec_hash: "<sha256(规范化 manifest 字节, 排除自指字段)>"
   signer_cert_fingerprint: "<sha256(证书 DER)>"
 security:
   crypto_scope: "TASK_AGENT"
@@ -208,6 +209,11 @@ audit:
 - Manifest 内**不**包含任何时间/重试/Plan 深度等数值字段(统一去 §6.5 Policy 取)
 - `policy_profile` 升级为 Manifest 顶层字段
 - `policy_ref` 移出 spec,作为顶层锚定(对应 §7.3.2 三段)
+
+**v0.4.1 修复**:
+- `spec_hash` 规范化排除自指字段（`spec_hash` / `policy_ref.signature`），避免"哈希包含自身"（F5，见 §19.6）
+- 新增 `policy_version`，把 Profile 名称绑定到语义版本，防止跨部署点同名 Profile 漂移（F7）
+- 其余 P0/P1/P2 修复清单见 §19.6
 
 ### 5.2 capability 闭集 (与 MVP AgentCapability 同步)
 
@@ -253,7 +259,7 @@ class ManifestCheckResult:
                   → 失败: 返回 failure_reason, 不注册
 ```
 
-**M1a 5 项向后兼容测试**(v0.2 起固化,这里显式列出):
+**M1a 6 项向后兼容测试**(v0.2 起固化 5 项,v0.4.1 新增 T6):
 
 | 序号 | 测试 | 作用 |
 | --- | --- | --- |
@@ -262,10 +268,11 @@ class ManifestCheckResult:
 | T3 | test_manifest_requires_human_confirmation_default | 默认 true 与 OrchestrationStep 对齐 |
 | T4 | test_manifest_crypto_scope_enum | crypto_scope 必须 ProviderScope 闭集 |
 | T5 | test_manifest_redact_in_audit_subset_of_to_audit | Manifest redact ⊆ to_audit_record |
+| T6 | test_agent_wire_v1_unchanged | .agent v1.0 wire 字节级回归（承诺"wire 不动"必须有测试钉住） |
 
 #### 5.3.4 manifest-checker 与 P4 / L17 关系
 
-- T1..T5 形成 M1a 验收
+- T1..T6 形成 M1a 验收
 - 新文件 `src/coevo/framework/manifest_checker.py` 必须经 §12.2 L17 `test_module_docs.py` 守卫
 - 任何 manifest-checker 改动必须同步更新 §5.3
 
@@ -386,7 +393,7 @@ PlanNode = {
 | requires_human_confirmation | PlanNode (节点语义) | plan writer |
 | audit_redaction 列表 | Policy (实例) | agent owner |
 
-> Plan 内**不**允许出现任何数值字段 (v0.4 红线, 见 §12.2 L18);如出现, manifest-checker + validate_plan 双闸拒收。
+> Plan 内**不**允许出现策略归属数值键（timeout / retry / depth / attempts 等，v0.4.1 起按白名单口径执行，见 §12.2 L18）；`PlanNode.tool_args` 等数据字段按 schema 允许；违规字段由 manifest-checker + validate_plan 双闸拒收。
 
 ### 6.5 抽象 E: Policy
 
@@ -422,8 +429,12 @@ Policy = {
 | --- | --- | --- | --- | --- |
 | INTERACTIVE | 30s | 600s | 3 | true |
 | BATCH | 120s | 3600s | 2 | false (仅关键节点) |
-| AUDIT_ONLY | 60s | 900s | 5 | true (每个节点都要) |
-| EMERGENCY | 15s | 300s | 5 | true (触发 PagerDuty) |
+| AUDIT_ONLY | 60s | 900s | 3 | true (每个节点都要) |
+| EMERGENCY | 15s | 60s | 1 | false (强制审计 + 事后 30 分钟内人工确认; 本地告警) |
+
+**v0.4.1 修正（业务负责人 + 产品经理决策）**:
+- 所有 Profile 的 `max_recover_attempts` ≤ 3，对齐 L16 与 §8.3 "recover 计数 ≥ 3 → ESCALATED"（AUDIT_ONLY 由 5 改 3）。
+- EMERGENCY 重定义为 fail-fast：1 次重试、总时限 60s、不在线等待人工（消除 300s 总时限 < consent 600s 的时序矛盾），改为强制审计 + 事后 30 分钟内人工确认；移除 PagerDuty 外部依赖（离线优先，外部通知网关如需接入须另行依赖审批）。
 
 ### 6.6 抽象 F: Orchestrator (v0.4 修订, A9 落地)
 
@@ -500,7 +511,7 @@ class OrchestrationEngine(Protocol):
 ```json
 {
   "policy_ref": {
-    "spec_hash": "<sha256(manifest.canonical_bytes)>",
+    "spec_hash": "<sha256(规范化 manifest 字节; 排除 spec_hash/signature 自指字段, 规则同 .agent envelope)>",
     "signer_cert_fingerprint": "<sha256(证书 DER)>",
     "signature": "<SM2 sig over (spec_hash | signer_cert_fingerprint)>"
   }
@@ -518,7 +529,7 @@ class OrchestrationEngine(Protocol):
 [3] 从 envelope 内 payload 取 manifest_bytes,计算 sha256(manifest_bytes)
     与 policy_ref.spec_hash 比较
     不等 → reject(manifest 被替换)
-[4] 验 SM2 signature 过 policy_ref.public key
+[4] 用第 1 步证书链查得的 sender 证书公钥验 SM2 signature（policy_ref 不含公钥字段, 公钥来源 = 证书链）
     失败 → reject(签名伪造)
 [5] 通过 → record 是合法 policy_ref,继续 A2A 业务校验
 ```
@@ -528,6 +539,7 @@ class OrchestrationEngine(Protocol):
 1. A2A 消息必须由 .agent v1.0 加密包承载
 2. envelope > 64 KiB 时: 业务数据 → RESULT_SUBMISSION 包; 元数据 → A2A envelope
 3. 放宽 envelope 上限必须主版本号升级 (v1.1+)
+4. 跨组织证书引导/吊销（v0.4.1 补充）：信任采用显式信任列表（预置证书指纹）建立;吊销通过离线包交换的吊销清单处理;不引入 PKI 联邦（§17 保留）。
 
 ### 7.4 审计事件格式 (沿用 MVP)
 
@@ -569,7 +581,7 @@ DISPATCH → EVAL (auto) → CONFIRM (human, optional)
 | ACTIVE | dispatch | confirm / timeout / recover |
 | HELD | requires_human_confirmation=true | confirm / reject (**§3.2 P1 落地点**) |
 | RECOVERED | recover() 调用; 最多 3 次 | 完成 / 升级 ESCALATED |
-| ESCALATED | recover 计数 ≥ 3 | **三种人工确认出口 (见下; v0.4 全部经 HELD)** |
+| ESCALATED | recover 计数 ≥ 3 | **三种人工确认出口 (见下; 回到 ACTIVE 必须经 HELD)** |
 | RETIRED | retire() | 留 tombstone |
 | REVOKED | revoke() | 仅保留审计 |
 
@@ -699,11 +711,11 @@ MVP 等价: `RiskAnalyzer.analyze_after_merge` + `DecisionBriefService`。
 | **L12** | Memory 写入必须经 RedactedIdentity | §6.2 |
 | **L13** | 跨域 Plan/Task 必须四层 RBAC 全通过 | §6.4.1 L5、§9 |
 | **L14** | 审计链不得任意格式扩展, 只能追加 | audit_governance/stream_store.py |
-| **L15** | 禁止新增 mcp/asyncio/httpx/aiohttp/openai 等三方运行期依赖 | §7.2 |
+| **L15** | 禁止新增 mcp/httpx/aiohttp/openai 等三方运行期依赖（标准库如 asyncio 不在此列） | §7.2 |
 | **L16** | max_recover_attempts ≤ 3, 超出强制 ESCALATE_HUMAN | §8.2 |
 | **L17** | src/coevo/framework/ 与 docs/framework/ 覆盖度必须经 test_module_docs.py | §5.3.4、§14 |
-| **L18 (v0.4 新)** | Plan 内**不允许**出现任何数值字段 (max_plan_depth 等);数值统一从 Policy 取 | manifest-checker + validate_plan |
-| **L19 (v0.4 新)** | ESCALATED 三种出口**必须经 HELD 中转**;不可直跳 ACTIVE | §8.3 |
+| **L18 (v0.4 新, v0.4.1 白名单口径)** | Plan 内**不允许**出现策略归属数值键 (max_plan_depth / max_runtime_sec / max_recover_attempts / timeout 等);数值统一从 Policy 取;PlanNode.tool_args 等数据字段按 schema 允许 | manifest-checker + validate_plan |
+| **L19 (v0.4 新, v0.4.1 语义修正)** | ESCALATED 出口中**回到 ACTIVE 的任何路径必须经 HELD 中转**;RETIRED 可直接退出;不可直跳 ACTIVE | §8.3 |
 
 ### 12.3 与 mandatory-technical-constraints 等价关系
 
@@ -713,7 +725,7 @@ MVP 等价: `RiskAnalyzer.analyze_after_merge` + `DecisionBriefService`。
 
 ## 13. 威胁 × 防御矩阵
 
-> v0.3 13 行;v0.4 加 2 行 (政策 ref 冒名细化 + Plan 数值错位 + ESCALATED 直跳)
+> v0.3 13 行;v0.4 新增/加强 4 行（policy_ref 冒名、Plan 节点越 L4 Scope、Plan 数值错位、ESCALATED 直跳），共 16 行
 
 | 威胁 / 防御层 | L1 Subject | L2 Role | L3 Capability | L4 Scope | Trust Surface | Audit Surface |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -743,7 +755,7 @@ MVP 等价: `RiskAnalyzer.analyze_after_merge` + `DecisionBriefService`。
 | 阶段 | 目标 | 验收口径 | 不破坏现状 |
 | --- | --- | --- | --- |
 | F0 (基线) | MVP 验收通过 | 强基线绿 + 弱基线 ≥95% | — |
-| F1 (声明) | manifest-checker + Policy + AgentSpec 抽象 | T1..T5 + 3 项 Policy test | wire 不动 |
+| F1 (声明) | manifest-checker + Policy + AgentSpec 抽象 | T1..T6 + 3 项 Policy test | wire 不动 |
 | F2 (适配) | MCP 路径 A + A2A wire 0.1 | 三个 mock agent 走通 | 仅新增模块 |
 | F3 (闭环) | Plan-as-a-Service + Hybrid Orchestrator | e2e 闭环 | 仅扩展 orchestrator |
 
@@ -752,7 +764,7 @@ MVP 等价: `RiskAnalyzer.analyze_after_merge` + `DecisionBriefService`。
 | 节点 | 内容 | 时间盒 | 进度锚 | 风险点 | 延长一倍触发 |
 | --- | --- | --- | --- | --- | --- |
 | **M0** | 框架宣言 (v0.4 获批) | T+0 | — | 业务负责人拍板 | > 2 周未批 |
-| **M1a** | manifest-checker + 5 项测试 | **2 周** | 第 1 周末 T1/T2 通过; 第 2 周末 T3..T5 | Manifest schema 漂移 | 受影响字段 > 5 个 |
+| **M1a** | manifest-checker + 6 项测试（含 T6 wire 回归） | **2 周** | 第 1 周末 T1/T2 通过; 第 2 周末 T3..T6 | Manifest schema 漂移 | 受影响字段 > 5 个 |
 | **M1b** | Capability 闭集收敛 + 文档 | **2 周** | 第 1 周末 PR; 第 2 周末测试 | 与 _real_chain.py 不一致 | 闭集冲突 > 3 处 |
 | **M2** | Policy 抽象 + 4 profile + 三层 scope | **4 周** | 第 2 周末 INTERACTIVE/BATCH; 第 3 周末 闭集测试; 第 4 周末 validate_plan | 与 manifest-checker 协调 | 需重写 PolicyLoader |
 | **M3** | EpisodicMemory / SemanticMemory | **6 周** | 第 4 周接口 PR; 第 5 周 demo; 第 6 周长寿命回归 | 与 progress_capture 桥接 | adapter > 3 处 |
@@ -786,6 +798,19 @@ flowchart TB
 ```
 
 每条边均为硬依赖;不允许跨阶段跳进。
+
+### 14.4 审查门与回滚条件 (v0.4.1 新增)
+
+| 里程碑 | 独立验证 | 审查门 | 回滚条件 |
+| --- | --- | --- | --- |
+| M1a / M1b | mvp-verifier 实跑质量门 | security-reviewer（manifest 解析 / 信任边界） | manifest-checker 测试失败或 schema 漂移 → 回退提交 |
+| M2 | mvp-verifier | security-reviewer（Policy 数值 / RBAC 取值） | validate_plan 或闭集测试失败 → 回退提交 |
+| M5 | mvp-verifier | protocol-reviewer + security-reviewer（A2A wire / policy_ref） | 五步验证时序或 wire 回归失败 → 回退提交 |
+| M6 / M7 | mvp-verifier | security-reviewer（状态机 / ESCALATED 路径） | L18 / L19 测试失败 → 回退提交 |
+| M8 | mvp-verifier | 跨组织安全演练 + security-reviewer | 演练未过 → 不进入商业化 |
+| M9 | mvp-verifier | 业务负责人商业化决策 | 清单生成器与 K8s 实际不兼容 → 冻结 M9 |
+
+每个里程碑的决策与回滚提交在 `loop/DECISIONS.md` 留痕。
 
 ---
 
@@ -889,7 +914,7 @@ flowchart TB
 | MCP | L9..L19 红线 + scope 治理更严 | 缺 ecosystem; 缺现成 tools 库 | v0.5 MCP 路径 B 可引入 SDK; v0.4 保持 schema 对齐 |
 | Kubernetes CRD | discrete-execute + fail-up 适合合规 | 无 reconcile loop; 不自动恢复 | §16.4 限定范围; 长期共生而非互替 |
 
-### 16.6 术语表 + 业务触点映射 (v0.4 加强, B12 落地)
+### 16.6 术语表 + 业务触点映射 (v0.4 加强)
 
 | 内部术语 | 对外话术 | 客户最常问 → 推荐话术 |
 | --- | --- | --- |
@@ -921,7 +946,7 @@ flowchart TB
 | 商业模式不确定 | §15.3 ROI 区间 + 付费节点绑到 M2/M5/M7 |
 | 客户认知门槛 | §2.4 反方 FAQ + §16.5 双向比较 |
 | 国密模块采购 | TBD 业务负责人 KPI |
-| **Plan 数值错位 (A18 新)** | manifest-checker + validate_plan 双闸拒收 |
+| **Plan 数值错位 (L18 新)** | manifest-checker + validate_plan 双闸拒收 |
 
 ---
 
@@ -943,26 +968,26 @@ flowchart TB
 | **内部一致性** | **3.5 (v0.3 隐藏)** | **+ A1..A12 全部修** | **5.0** |
 | **综合** | **4.7** | — | **4.95** |
 
-### 18.2 v0.4 自评分 (独立维度)
+### 18.2 v0.4.1 自评分 (独立维度, 待独立复核)
 
 | 维度 | 评分 | 备注 |
 | --- | --- | --- |
 | 与 MVP 不变量对齐 | **5.0** | 全保留 + 红线 L9..L19 |
 | 行业参考吸收 | **4.5** | Anthropic / MCP / A2A / K8s 双向比较 |
 | 抽象完整性 | **5.0** | 六抽象 + Plan/Policy 边界清晰 + 4 个 Profile 模板 |
-| 安全/合规覆盖 | **5.0** | §12 红线 + §13 矩阵 (15 行威胁) |
+| 安全/合规覆盖 | **5.0** | §12 红线 + §13 矩阵 (16 行威胁) |
 | 架构演进路径 | **5.0** | 时间盒 + 风险点 + 进度锚 + 延长触发器 |
 | 与业界差异化 | **5.0** | §16.5 双向比较 + §16.4 discrete-execute 术语 |
 | 产品/场景适配 | **5.0** | §2.4 反方 FAQ + §2.1 数字 KPI |
 | 实施预算/TCO | **5.0** | §15.3 量化 ROI + 付费节点到 M2/M5/M7 |
 | 文档可读性 | **5.0** | §0 阅读路径表 + §19 修订追踪 + 累计口径统一 |
 | 内部一致性 | **5.0** | A 类 12 条全部修, §3.2 ↔ §8.3 ↔ §12.2 ↔ §13 全对齐 |
-| **综合** | **4.95 / 5** | **较 v0.3 自评 +0.25; 产品级蓝图 + 工程级一致性 双达标** |
+| **综合** | **4.95 / 5** | **较 v0.3 自评 +0.25; 产品级蓝图 + 工程级一致性 双达标（自评,待独立复核）** |
 
 ### 18.3 下一轮
 
-1. **v0.4 进入产品评审 + BACKLOG 切片** (业务负责人批准)
-2. 同步更新 BACKLOG 槽位候选:
+1. **v0.4.1 进入产品评审 + BACKLOG 切片** (业务负责人批准)
+2. 同步更新 BACKLOG 槽位候选（US-16 需先经业务负责人批准,补充用户故事与 AC 至 `docs/requirements/mvp-user-stories.md`）:
    - `US-16-AC-1-framework-manifest-checker-v0.1` (M1a)
    - `US-16-AC-2-framework-policy-abstractions-v0.1` (M2)
 3. **v0.5 预留项**:
@@ -974,7 +999,7 @@ flowchart TB
 
 ---
 
-## 19. 修订说明 (v0.1 → v0.2 → v0.3 → v0.4)
+## 19. 修订说明 (v0.1 → v0.2 → v0.3 → v0.4 → v0.4.1)
 
 ### 19.1 v0.3 → v0.4 增量 (第三轮审查 A 类 12 条 + B 类高价值 7 条)
 
@@ -1021,7 +1046,8 @@ flowchart TB
 | v0.1 → v0.2 | v0.2 | 自评+第一轮 | **+17 条** (M/S/O/ST) |
 | v0.2 → v0.3 | v0.3 | 架构师+分析师 | **+9 条** (A1..A6+A11+IN4+IN5) |
 | v0.3 → v0.4 | v0.4 | 架构师+分析师+产品 | **+12 A + 7 B = 19 条** (A1..A12 + B1/B4/B6/B7/B8/B10/B11) |
-| **累计** | — | — | **45 条**（含迭代交叉）/ **38 条 net new** |
+| v0.4 → v0.4.1 | v0.4.1 | 业务负责人+产品经理批判性吸收 | **+15 项修复/补强** (P0 5 + P1 5 + P2 5, 详见 §19.6) |
+| **累计** | — | — | **60 条**（含迭代交叉）/ **53 条 net new** |
 
 ### 19.4 累计口径统一表 (A8 落地)
 
@@ -1048,9 +1074,38 @@ flowchart TB
 - 商业模式执行计划 (基于 §15.3 ROI 数据)
 - 第三方生态合作 (与 LangGraph/AutoGen/CrewAI/MCP 的"下游合作"层)
 
+### 19.6 v0.4 → v0.4.1 审查修复清单（业务负责人 + 产品经理批判性吸收）
+
+**已吸收（15 项）**:
+
+| 编号 | 类别 | 结论 | 落点 |
+| --- | --- | --- | --- |
+| F1 | P0 | Profile 与 L16 冲突：AUDIT_ONLY 5→3；EMERGENCY 重构（1 次重试 / 60s / 事后确认 / 本地告警） | §6.5 |
+| F2 | P0 | 幽灵编号修正：§16.6 "B12"、§17 "A18" 清除 | §16.6 / §17 |
+| F3 | P0 | §13 行数口径统一：13 + 4 = 16 行 | §13 / §18.2 |
+| F4 | P0 | L19 语义修正：仅"回到 ACTIVE"必须经 HELD；RETIRED 直退 | §12.2 / §8.3 / §3.2 |
+| F5 | P0 | spec_hash 自指哈希：规范化排除自指字段 | §5.1 / §7.3.2 / §7.3.3 |
+| F6 | P1 | L18 白名单口径：策略归属数值键禁入 Plan；tool_args 按 schema 允许 | §12.2 / §6.4.2 |
+| F7 | P1 | policy_profile 增加 policy_version 版本绑定 | §5.1 |
+| F8 | P1 | 五步验证公钥来源明确为证书链；补跨组织证书引导/吊销说明 | §7.3.3 / §7.3.4 |
+| F9 | P1 | L15 移除 asyncio（标准库非三方依赖） | §12.2 |
+| F10 | P1 | US-16 需先补用户故事与 AC 再进 BACKLOG | §18.3 |
+| F11 | P2 | M1a 新增 T6 wire 回归测试（钉住 .agent v1.0 wire） | §5.3.3 / §14.2 |
+| F12 | P2 | 每里程碑审查门与回滚条件 | §14.4 |
+| F13 | P2 | 自评分标注"待独立复核" | §18.2 |
+| F14 | P2 | 版本推进 v0.4.1，修订追踪与累计表同步 | §19 |
+| F15 | P2 | README 索引 / 测试要求 / 结论同步 | README |
+
+**批判性吸收——暂缓/拒绝（业务负责人 + 产品经理判断）**:
+
+- §18.1 / §18.2 两张自评表合并：低业务价值、改动面大，暂缓到 v0.5 前整理（两份表定位不同：§18.1 为版本增量对比，§18.2 为独立维度记分卡）。
+- A2A gossip / MCP 路径 B / K8s CRD 清单：维持 v0.5 预约，不进 v0.4.1。
+- PKI 联邦：明确不做（§17 保留"显式信任列表"路线）。
+- 外部安全公司逐里程碑审查：成本高，先以仓库既有 security-reviewer / protocol-reviewer 门禁为准，M8 跨组织阶段再引入外部演练。
+
 ---
 
-> 本稿 (v0.4) 是设计层面的**产品级 + 工程级双一致**蓝图。任一条目落地仍需:
+> 本稿 (v0.4.1) 是设计层面的**产品级 + 工程级双一致**蓝图。任一条目落地仍需:
 > 1. 业务负责人批准的切片计划 (`docs/plans/US-N-AC-y-slice.md`)
 > 2. `mvp-planner` 出最小可交付任务
 > 3. `mvp-builder` 实现 + 测试

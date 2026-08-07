@@ -1055,3 +1055,23 @@ items:
       - tests/unit/test_optimizations.py
     security_review: true
     protocol_review: false
+  # ---------- Go 迁移启动（2026-08-07 用户指令：配置 Go 语言环境并开始 Go 实现；Python 验证成熟后迁移） ----------
+  - id: GO-ENV-1
+    story: GO-MIGRATE
+    title: Go 工具链锁定与环境就绪（离线源 D:\Go go1.18.8，toolchain-lock 登记）+ 首个迁移切片（task_flow 纯模型与阶段映射移植，行为与 Python 对齐）+ 质量门禁接入
+    status: done
+    dependencies: []
+    acceptance_tests:
+      - go/taskflow/*_test.go
+    security_review: true
+    protocol_review: false
+  # ---------- US-16 框架层（CTAF v0.4.1，2026-08-07 业务负责人批准草案） ----------
+  - id: US-16-AC-1-framework-manifest-checker-v0.1
+    story: US-16
+    title: 框架层 manifest-checker（CTAF §5.3 / M1a）：Agent Manifest 强制校验——能力闭集（T2）/人工确认默认 true（T3）/crypto_scope 闭集（T4）/审计脱敏子集（T5）/spec_hash 排除自指字段（F5）/policy_ref 三段绑定且公钥取自证书链（F8）/policy_version 绑定（F7）/失败不注册/纯函数离线零三方依赖（L15）/.agent v1.0 wire 字节级回归（T6）
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_framework_manifest_checker.py
+    security_review: true
+    protocol_review: false

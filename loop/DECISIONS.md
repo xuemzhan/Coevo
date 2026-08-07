@@ -1,5 +1,93 @@
 # Loop 决策记录
 
+## 2026-08-07 — US-16 草案获批并开始执行（US-16-AC-1 manifest-checker）
+
+- 用户指令：批准 US-16 草案，开始执行。
+- 决策：US-16 用户故事与 AC 正式并入 `docs/requirements/mvp-user-stories.md`
+  （第四优先级：框架层扩展，CTAF 落地）；BACKLOG 登记
+  `US-16-AC-1-framework-manifest-checker-v0.1`（ready，security_review=true，
+  protocol_review=false）；STATE 切换至 US-16 / US-16-AC-1（phase=ready,
+  status=ready）；AC-2 在 AC-1 完成后下一轮登记（BACKLOG 单条非 done 不变量）。
+- 执行方式：按 loop-engineer 七阶段推进 US-16-AC-1（PLAN → IMPLEMENT → VERIFY →
+  REVIEW → RECORD → DECIDE），子代理链路 mvp-planner / mvp-builder /
+  mvp-verifier / security-reviewer。
+- 提出者：用户指令；执行：Codex。
+
+## 2026-08-07 — US-16 用户故事与 AC 草案（CTAF 框架层，待业务负责人审批）
+
+- 用户指令：继续下一步（起草 US-16 用户故事与 AC，供审批后再进 BACKLOG）。
+- 决策：起草 US-16【框架层】受控智能体声明校验与策略抽象，含 AC-1（manifest-checker，
+  对应 M1a / CTAF §5.3，10 项）与 AC-2（Policy 抽象 + validate_plan，对应 M2 /
+  CTAF §6.5，8 项），并给出 AC ↔ 落点 ↔ 测试映射、范围边界与完成定义。
+- 落盘：`docs/plans/US-16-framework-stories-draft.md`（草案，未并入需求文档）。
+- 前置：审批通过后，将 US-16 并入 `docs/requirements/mvp-user-stories.md`、
+  `loop/BACKLOG.yaml`（US-16-AC-1 / US-16-AC-2 两条 ready 项）与追溯矩阵；
+  AC-1/AC-2 均需 security-reviewer 独立审查。
+- 提出者：用户指令；执行：Codex（依据 mvp-requirements 技能与 CTAF v0.4.1）。
+
+## 2026-08-07 — CTAF 设计文档 v0.4 → v0.4.1 审查修复（业务负责人 + 产品经理批判性吸收）
+
+- 用户指令：以业务负责人 + 产品经理视角批判性吸收审查结论并优化设计文档。
+- 决策：升级 `docs/plans/distributed-agent-framework/design-proposal.md` 至 v0.4.1，
+  吸收 15 项修复/补强（P0 5：Profile 与 L16 冲突、幽灵编号、§13 行数口径、L19 语义、
+  spec_hash 自指；P1 5：L18 白名单口径、policy_version 绑定、五步验证公钥来源与跨组织
+  信任、L15 asyncio、US-16 前置用户故事；P2 5：T6 wire 回归、里程碑审查门与回滚、
+  自评待独立复核、版本与修订追踪、README 同步），并明确暂缓/拒绝项（§18.1/18.2 合并、
+  A2A gossip/MCP-B/K8s CRD 清单维持 v0.5、不做 PKI 联邦、外部安全公司审查延后至 M8）。
+  完整清单见 design-proposal §19.6。
+- 改动文件：`docs/plans/distributed-agent-framework/design-proposal.md`（v0.4 → v0.4.1）、
+  `docs/plans/distributed-agent-framework/README.md`（索引/测试要求/结论同步）。
+- 边界：纯文档修订，不触碰 `.agent` 协议 wire、不改代码与测试、不新增依赖；
+  `loop/STATE.json` 维持 Go 迁移暂定状态不变。
+- 提出者：用户指令；执行：Codex。回滚条件：git 历史回退本批次文档改动即可。
+
+## 2026-08-07 — Go 迁移任务暂定（用户指示暂停 GO-MIGRATE）
+
+- 用户指令（2026-08-07）：`docs/plans` 下的 CTAF 设计文档是正常输出，恢复完整快照；
+  Go 迁移任务暂定。
+- 决策：GO-MIGRATE 故事暂停，停在已完成的 GO-ENV-1（commit `780ab6d`）；GO-PARSER-1
+  及后续切片不再推进，恢复时机由业务负责人决定。
+- 状态记录：STATE.json 经 `loop_state` 脚本置 `phase=decide`、`status=decision-required`、
+  `current_item=GO-ENV-1`，`blocking_issue` 注明暂定原因。
+- 说明：此前 STATE 曾记录 GO-PARSER-1 done，但其实现文件（parser.go / service.go /
+  parser_test.go / service_test.go）实际不存在，且 BACKLOG/追溯矩阵均无对应条目，
+  不作为已完成项。
+- 提出者：用户指令；执行：Codex。
+
+## 2026-08-07 — GO-ENV-1 Go 工具链锁定与首个迁移切片 done
+
+- 用户指令：配置 Go 语言环境，使用 Go 语言实现；初始想法已在 Python MVP 验证，
+  成熟后迁移到 Go（BACKLOG GO-MIGRATE 故事）。
+- 提议：执行 GO-ENV-1 —— ① 锁定离线 Go 工具链（D:\Go go1.18.8，toolchain-lock
+  登记 + 许可证）；② 移植首个切片 `task_flow` 纯模型与阶段映射（保持 Python
+  语义）；③ Go 单元测试接入质量门禁。
+- 审查结论：
+  - Go 工具链为机器离线预装 `D:\Go`（go1.18.8，无联网下载），go.exe SHA-256
+    （23871414…c67984）与 BSD-3-Clause 许可证已登记 `toolchain-lock.json`
+    （新增 `tools.go` 条目 + `licenses/go-BSD-3-Clause.txt`）；
+  - `go/` 模块（`module coevo/go`，`go 1.18`）首个切片移植
+    `src/coevo/task_flow/models.py` + `mapping.py`：SourceKind / StandardStage /
+    Traced（confidence ∈ [0,1]，NaN/越界拒绝）/ SourceMapping（重复键保留首个，
+    与原 setdefault 语义一致）/ ProcessFlow.WithOverrides（空覆盖拒绝、版本 +1）/
+    ApplyMapping（优先级小者胜、rule_id 字典序决胜、未知 hint / 重复节点键 /
+    空规则表 / mapping_rules_version ≠ 1 失败关闭）+ 27 条默认映射规则；
+  - 质量门禁 `test` 目标接入 `go test ./...`（在 `go/` 模块内执行，
+    `GOPROXY=off` 强制离线、仅标准库），并同步锁链：quality_gate.py 哈希 →
+    python-script-lock.tsv → toolchain-lock（make shim script_inventory /
+    source_sha256）→ make.cs ScriptInventorySha256。
+- 落地：新增 `go/go.mod`、`go/taskflow/{doc,models,mapping}.go`、
+  `go/taskflow/models_test.go`、`go/taskflow/mapping_test.go`、
+  `docs/dependencies/licenses/go-BSD-3-Clause.txt`；修改
+  `toolchain-lock.json`、`quality_gate.py`、`python-script-lock.tsv`、
+  `make.cs`、`docs/development-environment.md`（commit `780ab6d`）。
+- 验证：`go test ./...` 13 项全绿（gofmt / go vet 干净）；`make quality`
+  exit=0（见 VERIFICATION 最新条目，含 Go 步骤）；audit fully-sealed。
+- 安全审查：Go 工具链为离线预装、stdlib-only、`GOPROXY=off`；go1.18.8 已 EOL，
+  仅作迁移期工具链（升级到受支持版本须新依赖审批，已在 toolchain-lock
+  risk_note 与开发环境文档登记）；无第三方 Go 模块、无新信任边界。
+- 决策者：用户；提出者：Codex。回滚条件：go test 失败、锁链不一致、或门禁
+  指纹变化未复核时按 git 历史回退 `780ab6d`。
+
 ## 2026-08-07 — OPTIMIZE-17 第十七轮逐文件深度审查与优化（用户指令"继续"）done
 
 - 提议：延续用户指令"逐个文件的检查语法、数据结构、算法及架构…修复和优化…
