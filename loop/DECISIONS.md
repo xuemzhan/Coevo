@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-6 登记并开始执行（A2A wire 0.1 + policy_ref，CTAF M5）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：推进 CTAF 路线图下一里程碑 M5（A2A wire + policy_ref 三段绑定），登记
+  `US-16-AC-6-a2a-wire-v0.1`（ready，dependencies=[US-16-AC-1-*]，
+  protocol_review=true）；US-16 故事新增 AC-6（5 项验收标准）；STATE 切换至
+  US-16 / US-16-AC-6。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — US-16-AC-5 Tool 抽象与 MCP schema 路径 A 完成（增量门禁 + 契约沙箱安全审查）
 
 - 工作项：`US-16-AC-5-framework-tool-registry-v0.1`（CTAF §6.3 / §7.2 / M4）。

@@ -403,6 +403,19 @@ MVP用于验证以下三类核心能力：
    description 白名单，未知关键字、越界结构、超限（深度 / 大小 / 枚举数）拒绝；
 5. 纯函数、离线、stdlib（不引入 MCP SDK，L15）、L17 文档守卫（tool-registry.md）。
 
+**AC-6：A2A wire 0.1 与 policy_ref 三段绑定（CTAF §7.3 / M5）**
+
+1. A2A 消息模型（task_id / trace_id / sender_cert_id / recipient_cert_id /
+   sequence_no / business_correlation_key / purpose / policy_ref /
+   payload_ref / created_at），全部字段校验 fail-closed；
+2. policy_ref 三段绑定：spec_hash（排除自指字段的 manifest 规范哈希）+
+   signer_cert_fingerprint（证书链 DER 指纹）+ SM2 签名（公钥来自证书链），
+   按 §7.3.3 五步验证时序校验；
+3. A2A ↔ `.agent` 字段映射（§7.3.1），`.agent` v1.0 wire 字节不变（T6 守护）；
+4. 大小边界：业务载荷 > 64 KiB 必须走 RESULT_SUBMISSION + payload_ref 拆分，
+   A2A 信封内联载荷越界拒绝；放宽上限须主版本升级；
+5. 纯函数、离线、stdlib、审计投影、L17 文档守卫（a2a-protocol.md）。
+
 ---
 
 # 二、MVP实施优先级

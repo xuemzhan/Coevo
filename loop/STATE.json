@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "US-16",
-  "current_item": "US-16-AC-5-framework-tool-registry-v0.1",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "US-16-AC-6-a2a-wire-v0.1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "65dfb1e",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T17:11:10.331365Z"
+  "updated_at": "2026-08-07T17:18:09.760170Z"
 }

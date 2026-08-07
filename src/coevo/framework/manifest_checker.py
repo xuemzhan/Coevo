@@ -213,6 +213,18 @@ def check(
     )
 
 
+def manifest_spec_hash(manifest_bytes: bytes) -> str:
+    """Public helper: SHA-256 of canonical manifest bytes excluding the
+    self-referential fields (``metadata.spec_hash`` / ``policy_ref.spec_hash``
+    / ``policy_ref.signature``).  Used by A2A policy_ref verification
+    (CTAF §7.3.3 step 3).  Raises ``_InvalidManifest`` on malformed input."""
+
+    parsed = _parse_manifest(manifest_bytes)
+    return hashlib.sha256(
+        _canonical_bytes(_strip_self_referential(parsed))
+    ).hexdigest()
+
+
 def _parse_manifest(data: bytes) -> dict[str, Any]:
     if not isinstance(data, bytes):
         raise _InvalidManifest("manifest_bytes must be bytes")

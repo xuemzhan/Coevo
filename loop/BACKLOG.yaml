@@ -1118,3 +1118,13 @@ items:
       - tests/unit/test_framework_tools.py
     security_review: true
     protocol_review: false
+  # ---------- US-16-AC-6（CTAF v0.4.1 / M5，2026-08-08 用户指令继续开发） ----------
+  - id: US-16-AC-6-a2a-wire-v0.1
+    story: US-16
+    title: 框架层 A2A wire 0.1 与 policy_ref 三段绑定（CTAF §7.3 / M5）：A2A 消息模型（全部字段 fail-closed）、policy_ref 三段绑定五步验证时序（证书链公钥）、A2A<->.agent 字段映射（wire 字节不变，T6 守护）、大小边界（>64KiB 业务载荷必须 RESULT_SUBMISSION+payload_ref 拆分）、纯函数离线 stdlib + 审计投影 + L17（a2a-protocol.md）
+    status: ready
+    dependencies: [US-16-AC-1-framework-manifest-checker-v0.1]
+    acceptance_tests:
+      - tests/unit/test_framework_a2a.py
+    security_review: true
+    protocol_review: true

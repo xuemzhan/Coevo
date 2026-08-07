@@ -502,6 +502,9 @@ class OrchestrationEngine(Protocol):
 
 ### 7.3 A2A (Agent-to-Agent)
 
+> 实现落位：`src/coevo/framework/a2a.py`（M5 / US-16-AC-6，2026-08-08）。
+> 适配映射见 `docs/framework/a2a-protocol.md`。
+
 #### 7.3.1 A2A 字段映射
 
 | A2A 字段 | 复用 .agent 字段 | 说明 |
