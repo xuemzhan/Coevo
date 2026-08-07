@@ -6,7 +6,7 @@ CTAF（Coevo Trusted Agent Framework）v0.4.1 框架层在 `src/coevo` 的落位
 US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控的智能体才能
 注册进入编排；US-16-AC-2 交付 Policy 抽象、Plan/L18 白名单、八态生命周期（L19）
 与 validate_plan；US-16-AC-3 交付能力闭集收敛（M1b）；US-16-AC-4 交付 Memory
-抽象（M3）。
+抽象（M3）；US-16-AC-5 交付 Tool 抽象与 MCP schema 路径 A（M4）。
 设计基线：`docs/plans/distributed-agent-framework/design-proposal.md` §5。
 
 ## 职责边界
@@ -31,6 +31,7 @@ US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控�
 | `lifecycle.py` | `LifecycleState`、`can_transition`、`validate_transition_path` | 八态生命周期与 L19 路径规则 |
 | `memory.py` | `MemoryRecord`、`MemoryKind`、`write_memory`、`redact_record`、`Redactor`/`EpisodicMemoryStore`/`SemanticApprovalChecker`/`SemanticMemoryStore`（注入协议） | Memory 统一模型：审计投影 + Semantic 审批 + L12 脱敏 |
 | `validation.py` | `ValidationResult`、`validate_plan`、`ToolScopeChecker`/`RbacChecker`（注入协议） | dispatch 前置校验：五项不变量 + L18 + L19 |
+| `tools.py` | `Tool`、`ToolRegistry`、`ToolSideEffect`、`validate_schema`、`tool_to_mcp`/`mcp_to_tool`、`canonical_schema_bytes` | Tool 统一模型 + MCP 路径 A 双向转换（零三方依赖） |
 
 ## 关键入口与数据流
 
@@ -55,6 +56,7 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 - L18：Plan（含 tool_args）不得携带策略归属数值键，普通工具数值按 schema 允许；
 - L19：ESCALATED→ACTIVE 必须经 HELD，RETIRED 直退；
 - L12：Memory 写入敏感字段必须经注入 Redactor 转不可恢复摘要，明文不得到达 store；
+- MCP 路径 A：schema 白名单子集，未知关键字显式拒绝；x-coevo 扩展块缺失拒绝；
 - L4 Scope 与四层 RBAC 经注入协议委托，异常一律视为拒绝（fail-closed）；
 - fail-closed：未知能力、闭集外 scope、投影外脱敏、自指哈希、签名/指纹不匹配、
   缺失版本、坏 JSON/BOM/重复键一律拒绝并返回 `failure_reason`；
@@ -72,6 +74,7 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 - `tests/unit/test_framework_validate_plan.py`（AC-2.6、2.7）。
 - `tests/unit/test_framework_capability.py`（AC-3.1..3.5，M1b 能力闭集收敛）。
 - `tests/unit/test_framework_memory.py`（AC-4.1..4.5，M3 Memory 抽象）。
+- `tests/unit/test_framework_tools.py`（AC-5.1..5.5，M4 Tool/MCP 路径 A）。
 
 ## 依赖与下游
 

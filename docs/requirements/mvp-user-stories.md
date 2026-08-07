@@ -390,6 +390,19 @@ MVP用于验证以下三类核心能力：
    （`REDACTED:<sha256>`），明文不得到达 store；
 5. 纯函数、离线、stdlib、L17 文档守卫（memory-interface.md）。
 
+**AC-5：Tool 抽象与 MCP schema 路径 A（CTAF §6.3 / §7.2 / M4）**
+
+1. Tool 统一模型（tool_id / tool_version（P2 必填）/ side_effects /
+   requires_consent / timeout_sec / size_in_bytes_max / crypto_scope /
+   audit_required / input/output schema）；
+2. 工具注册表：重复 tool_id 拒绝，校验与注册分离（校验失败不注册）；
+3. MCP 路径 A：框架 Tool ↔ MCP 工具描述（name / description / inputSchema /
+   outputSchema + x-coevo 扩展块）双向转换，支持子集往返字节级一致；不支持的
+   关键字显式拒绝（不静默丢失）；
+4. JSON Schema 子集校验：type / properties / required / items / enum /
+   description 白名单，未知关键字、越界结构、超限（深度 / 大小 / 枚举数）拒绝；
+5. 纯函数、离线、stdlib（不引入 MCP SDK，L15）、L17 文档守卫（tool-registry.md）。
+
 ---
 
 # 二、MVP实施优先级

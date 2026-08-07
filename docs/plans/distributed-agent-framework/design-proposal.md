@@ -333,6 +333,9 @@ Task = {
 
 ### 6.3 抽象 C: Tool
 
+> 实现落位：`src/coevo/framework/tools.py`（M4 / US-16-AC-5，2026-08-08）。
+> 适配映射见 `docs/framework/tool-registry.md`。
+
 ```yaml
 kind: Tool
 metadata:

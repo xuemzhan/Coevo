@@ -1,5 +1,15 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-5 登记并开始执行（Tool 抽象 + MCP schema 路径 A，CTAF M4）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：推进 CTAF 路线图下一里程碑 M4（Tool 抽象 + MCP 路径 A），登记
+  `US-16-AC-5-framework-tool-registry-v0.1`（ready，dependencies=[US-16-AC-1-*]）；
+  US-16 故事新增 AC-5（5 项验收标准）；STATE 切换至 US-16 / US-16-AC-5。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — US-16-AC-4 Memory 抽象完成（双签放行，增量门禁口径）
 
 - 工作项：`US-16-AC-4-framework-memory-interface-v0.1`（CTAF §6.2 / M3）。
