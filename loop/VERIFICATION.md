@@ -14505,3 +14505,280 @@ audit seal: fully-sealed
   越权修复提交 `edd7cce`（其已诚实声明）；内容核验有效并保留；RECORD 由编排者完成。
 - 追溯矩阵新增 US-16 | AC-7 行（无悬空）；BACKLOG `US-16-AC-7-*` 置 done；
   STATE 置 US-16 / US-16-AC-7 / phase=decide / status=done。
+
+## 2026-08-08 — US-16-AC-8 增量门禁 + 沙箱双签（Hybrid Orchestrator，M7，豁免全量 quality）
+
+- 工作项：`US-16-AC-8-hybrid-orchestrator-v0.1`（CTAF §6.6 / §8 / M7）。
+- 提交：`399b20c`（实现）+ `0c9a352`（security-review Medium 修复）。
+- 实现：`src/coevo/framework/orchestrator.py`（OrchestrationMode / ChainStep /
+  ExecutionResult / StaticChainProvider / LlmPlanProvider / PlanExecutor /
+  chain_plan / plan_for / dispatch / transition / OrchestrationOutcome
+  审计投影）；`__init__.py` 导出；`docs/framework/hybrid-orchestrator.md` +
+  L17；`tests/unit/test_framework_orchestrator.py` 9 项（AC-8.1..8.5 + 负例 +
+  stdlib 守卫）。
+- 增量门禁（用户本轮指示豁免全量 quality，留痕）：主仓库定向 61/61 全绿
+  （AC-8 9 项 + framework 相邻回归 + L17 文档守卫，base 与 fix 各跑一遍）；
+  fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`；audit fully-sealed。
+- 验证（只读沙箱 us16ac8_verify2，pin=`0c9a352`）：定向 61/61 全绿；
+  review_sandbox check violations=[]（零违规）；已 discard。
+- 安全审查（security-reviewer 技能 + 只读沙箱 us16ac8_security2，
+  pin=`0c9a352`）：Critical/High 0；**Medium 1——HYBRID 模式下静态链含 HOLD
+  时，合法非 HOLD 的 LLM 提议可直接替换链 Plan，绕过链上强制 HELD 人工门
+  （AC-8.4"人工确认门（HELD）强制"）；已修复于 `0c9a352`（链含 HOLD →
+  一律回退链 Plan，dispatch → HELD、执行器不调用）+ 新增负例测试**；
+  Low/Info 3 观察项（① 链 provider 异常向上抛出为 OrchestrationError——
+  调用边界 fail-closed，属注入契约并已在文档注明；② OrchestrationOutcome
+  审计投影不含 validated_at——由 ValidationResult 携带，调用方负责拼装；
+  ③ dispatch 的 mode 参数仅用于审计投影）；沙箱 check violations=[]
+  （零违规）；已 discard。
+- 治理偏差留痕：上一轮派出的 verifier_us16ac8 / sec_review_ac8 子代理一直
+  未交付报告（前一回合中断遗留），等待催办后 verifier_us16ac8 被中断、
+  sec_review_ac8 因工具路径错误无法中断（仍为遗留运行态，其输出不采信）；
+  二者曾在主工作树跑过 quality_gate（tool-audit 18:30:07/18:30:17 两条，
+  无 protected-path 变更）；独立验证与安全审查改由编排者在只读沙箱内按
+  技能与只读契约实际执行（不落盘、零违规、证据为沙箱内命令输出），与既往
+  轮次同口径；上一轮未提交的 VERIFICATION 追加为乱码半截记录，已恢复为
+  HEAD 并统一重写；全量 `make quality` 按用户指示本轮豁免，留待下次回归。
+- 追溯矩阵新增 US-16 | AC-8 行（无悬空）；BACKLOG `US-16-AC-8-*` 置 done；
+  STATE 置 US-16 / US-16-AC-8 / phase=decide / status=done。
+
+## 2026-08-07T18:44:47.373165Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+st",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_lifecycle.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-4",
+      "title": "��ܲ� Memory ����CTAF ��6.2 / M3����MemoryRecord ͳһģ�ͣ�EPISODIC/SEMANTIC + �淶��ָ�ƣ���Episodic ���ͶӰ����̶��������Semantic ������ӳ�� knowledge_base ReviewDecisionKind.APPROVE��δ�����ܾ�����L12 �����ֶξ�ע�� Redactor ת `REDACTED:<sha256>` ժҪ�����Ĳ��õ��� store����ע�� store/����/Redactor �쳣 fail-closed��memory-interface.md + L15 stdlib / L17 �ĵ�����",
+      "code": [
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/memory-interface.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_memory.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/memory-interface.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_memory.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-5",
+      "title": "��ܲ� Tool ������ MCP schema ·�� A��CTAF ��6.3 / ��7.2 / M4����Tool ͳһģ�ͣ�tool_id safe-id / tool_version P2 ���� semver / side_effects �ռ� / requires_consent / timeout_sec �ϸ������� / size_in_bytes_max �ϸ�Ǹ����� / crypto_scope ProviderScope �ռ� / audit_required / input/output schema��������ע�����У��ע����롢�ظ��ܾ������� 128����Tool<->MCP ����˫��ת����name/description/inputSchema/outputSchema + x-coevo ��չ�飬�Ӽ������ֽڼ�һ�£�ȱʧ��չ��/δ֪��������չ����ʽ�ܾ�����JSON Schema �Ӽ�У�飨type/properties/required/items/enum/description ��������object �ش� properties��required Ϊ properties �Ӽ���array �ش� items��enum �ǿա�64��δ֪�ؼ���/���>16/��С>16KiB �ܾ���fail-closed�������������� stdlib���� MCP SDK��L15��+ L17 �ĵ�������tool-registry.md��",
+      "code": [
+        "src/coevo/framework/tools.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/tool-registry.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_tools.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/tools.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/tool-registry.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_tools.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-7",
+      "title": "��ܲ� Plan �淶�����л���Plan-LSP��CTAF ��14.2 / M6����Plan<->�淶 JSON ˫�����л���plan_to_json / json_to_plan / parse_plan_json_bytes�������ֽڼ�һ�¡��ظ���/δ֪�ֶ�/BOM/�Ǳ�׼����/���Ƕ��/����ȫ�� fail-closed������ plan_fingerprint ͬһ�淶�����򣨷�ָ�Ʒֲ棩��validate_plan_json ���л���ڣ�������� + L18 + L19��ʧ�ܷ��� REJECTED������С/�ڵ�/��/tool_args ���ޡ����������� stdlib + L17��plan-lsp.md��",
+      "code": [
+        "src/coevo/framework/plan.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/plan-lsp.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_plan_lsp.py",
+        "tests/unit/test_framework_validate_plan.py",
+        "tests/unit/test_framework_plan_l18.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/plan.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/plan-lsp.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_lsp.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_validate_plan.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_plan_l18.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "US-16",
+      "ac": "AC-8",
+      "title": "��ܲ� Hybrid Orchestrator��CTAF ��6.6 / ��8 / M7����OrchestrationEngine ��Լ + validate_plan Ϊ dispatch ǰ�ñص���δУ��/У��ʧ�ܲ��� dispatch����StateMachine ��̬����ע�� provider������ Plan ��ִ�У�ʧ��/�쳣 fail-closed ת ESCALATED + audit RECOVER����DynamicLLM ���龭������� + L18 + L19 ͨ����ִ�У�������Ч/�쳣���� StateMachine����Hybrid ���� HOLD �ڵ���� LLM ���ǣ����� HOLD �����麬 HOLD �� ������ Plan��HELD �˹���ǿ�ơ�ִ���������ã���L19 ��̬�νӣ�ESCALATED��ACTIVE ���뾭 HELD��+ ���ͶӰ + ע��ִ����/LLM/�������������� stdlib��+ L17��hybrid-orchestrator.md��",
+      "code": [
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/__init__.py",
+        "docs/framework/hybrid-orchestrator.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_orchestrator.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/framework/hybrid-orchestrator.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```

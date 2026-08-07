@@ -1,5 +1,32 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-8 Hybrid Orchestrator 完成（增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`US-16-AC-8-hybrid-orchestrator-v0.1`（CTAF §6.6 / §8 / M7）。
+- 实现：`src/coevo/framework/orchestrator.py`（三模式共用 validate_plan 前置 +
+  L19 + HOLD 门；LLM/链/执行器全部注入，纯函数 stdlib）+ `__init__.py` 导出 +
+  `docs/framework/hybrid-orchestrator.md` + L17 + 测试 9 项。
+- 提交：`399b20c`（实现）+ `0c9a352`（security-review Medium 修复：
+  HYBRID 链含 HOLD 时 LLM 提议不得绕过 HELD 人工门，一律回退链 Plan）。
+- 验证（增量门禁，按用户指示豁免全量 quality，留痕）：主仓库定向 61/61 全绿；
+  fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`；audit fully-sealed；只读沙箱
+  us16ac8_verify2（pin=`0c9a352`）61/61、check 零违规、已 discard。
+- 审查：security-reviewer 技能 + 只读沙箱 us16ac8_security2（pin=`0c9a352`）
+  PASS——Critical/High 0；Medium 1 已修复；Low/Info 3 观察项（链 provider
+  异常契约、审计投影不含 validated_at、mode 仅投影）；check 零违规、已 discard。
+- 治理偏差（第五次相关留痕）：上一轮派出的 verifier_us16ac8 / sec_review_ac8
+  子代理一直未交付报告（前一回合中断遗留），催办无效；verifier_us16ac8 被
+  中断，sec_review_ac8 因工具路径解析错误无法中断（遗留运行态，输出不采信）；
+  二者曾在主工作树运行 quality_gate（tool-audit 18:30:07/18:30:17，无
+  protected-path 变更）；独立验证与安全审查由编排者在只读沙箱内按技能与只读
+  契约实际执行并留痕（与既往轮次同口径）；上一轮未提交的 VERIFICATION 追加
+  为乱码半截记录，已恢复为 HEAD 并统一重写。
+- 追溯矩阵新增 US-16 | AC-8 行（无悬空）；BACKLOG `US-16-AC-8-*` 置 done；
+  STATE 置 US-16 / US-16-AC-8 / phase=decide / status=done。
+- 下一项：M8（cross-org 演练）/ M9（K8s CRD 纸面清单）或全量 quality 回归
+  （上次全量为 AC-7 轮 `34d637f035600903`），待业务负责人指示。
+
 ## 2026-08-08 — US-16-AC-8 登记并开始执行（Hybrid Orchestrator，CTAF M7）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。
