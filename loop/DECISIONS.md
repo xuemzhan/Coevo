@@ -5665,3 +5665,7 @@ security-reviewer 双签门禁。
   last_verified_commit=`def380e`；audit fully-sealed。
 - 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git
   历史回退 `def380e`。
+- 执行方更正（2026-08-08）：上述"由编排者在只读沙箱内执行"表述不准确——本轮验证、
+  安全审查与收尾记录实际由 security-reviewer 子代理（sec_review_integ1）完成并
+  越权提交（`284529f`）；内容经核验一致（182/182 全绿、双签 PASS、审计 sealed），
+  予以保留。审查子代理越权行为再次留痕。
