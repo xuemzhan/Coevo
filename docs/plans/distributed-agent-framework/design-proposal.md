@@ -451,6 +451,9 @@ Policy = {
 
 ### 6.6 抽象 F: Orchestrator (v0.4 修订, A9 落地)
 
+> 核心落位：`src/coevo/framework/orchestrator.py`（Hybrid 核心 / US-16-AC-8 /
+> M7，2026-08-08）。适配映射见 `docs/framework/hybrid-orchestrator.md`。
+
 ```python
 class OrchestrationEngine(Protocol):
     def plan(self, task: Task, policy: Policy) -> Plan: ...

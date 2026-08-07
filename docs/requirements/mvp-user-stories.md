@@ -426,6 +426,20 @@ MVP用于验证以下三类核心能力：
 4. 大小 / 深度 / 节点 / 边 / tool_args 上限（防序列化 DoS）；
 5. 纯函数、离线、stdlib、审计投影、L17 文档守卫（plan-lsp.md）。
 
+**AC-8：Hybrid Orchestrator（CTAF §6.6 / §8 / M7）**
+
+1. OrchestrationEngine 契约（plan / dispatch / confirm / recover），
+   validate_plan 为 dispatch 前置必调（未校验或校验失败不得 dispatch）；
+2. StateMachine 模式：静态链（注入 provider）构建 Plan 并执行，失败 /
+   异常 fail-closed 转 ESCALATED + audit RECOVER；
+3. DynamicLLM 模式：注入 LLM Plan 提议 → validate_plan（五项不变量 + L18 +
+   L19）→ 通过才执行；提议无效 / 异常回退 StateMachine；
+4. Hybrid 模式：LLM 提议只能覆盖非 HOLD 节点，涉及 HOLD 或提议失败回退
+   StateMachine；人工确认门（HELD）强制；
+5. 八态生命周期衔接（L19：ESCALATED→ACTIVE 必须经 HELD）+ 审计投影 +
+   纯函数离线 stdlib（LLM / 链 / 执行器全部注入）+ L17 文档守卫
+   （hybrid-orchestrator.md）。
+
 ---
 
 # 二、MVP实施优先级

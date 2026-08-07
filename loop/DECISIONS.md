@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — US-16-AC-8 登记并开始执行（Hybrid Orchestrator，CTAF M7）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：推进 CTAF 路线图下一里程碑 M7（Hybrid Orchestrator 核心），登记
+  `US-16-AC-8-hybrid-orchestrator-v0.1`（ready，dependencies=[US-16-AC-2-*,
+  US-16-AC-7-*]）；US-16 故事新增 AC-8（5 项验收标准）；STATE 切换至
+  US-16 / US-16-AC-8。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — US-16-AC-7 Plan-LSP 完成（全量门禁 + 双签放行）
 
 - 工作项：`US-16-AC-7-plan-lsp-v0.1`（CTAF §14.2 / M6）。

@@ -1138,3 +1138,13 @@ items:
       - tests/unit/test_framework_plan_lsp.py
     security_review: true
     protocol_review: false
+  # ---------- US-16-AC-8（CTAF v0.4.1 / M7，2026-08-08 用户指令继续开发） ----------
+  - id: US-16-AC-8-hybrid-orchestrator-v0.1
+    story: US-16
+    title: 框架层 Hybrid Orchestrator（CTAF §6.6 / §8 / M7）：OrchestrationEngine 契约 + validate_plan 前置必调、StateMachine 静态链（注入 provider）fail-closed 转 ESCALATED、DynamicLLM 提议经五项不变量 + L18 + L19 且失败回退 StateMachine、Hybrid 仅非 HOLD 节点可由 LLM 覆盖（HOLD/失败回退 + HELD 人工门强制）、L19 八态衔接 + 审计投影 + 注入执行器/LLM/链（纯函数离线 stdlib）+ L17（hybrid-orchestrator.md）
+    status: ready
+    dependencies: [US-16-AC-2-framework-policy-abstractions-v0.1, US-16-AC-7-plan-lsp-v0.1]
+    acceptance_tests:
+      - tests/unit/test_framework_orchestrator.py
+    security_review: true
+    protocol_review: false
