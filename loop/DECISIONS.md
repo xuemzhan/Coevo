@@ -1,5 +1,16 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-1 登记并开始执行（框架接入现有编排）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：框架层与审查观察项已全部收口，本轮把框架门禁接入现有编排
+  （GuardedOrchestrator 适配：注册过 manifest-checker、派发过 validate_plan
+  并走真实 Orchestrator.dispatch_event），登记 `FRAMEWORK-INTEGRATION-1`
+  （ENG-BASE，ready）；STATE 切换至 ENG-BASE / FRAMEWORK-INTEGRATION-1。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-3 完成（semver 尾部换行收口）
 
 - 工作项：`FRAMEWORK-GAPS-3`（ENG-BASE，dependencies=[FRAMEWORK-GAPS-2]）。

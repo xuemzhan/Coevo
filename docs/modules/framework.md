@@ -10,6 +10,7 @@ US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控�
 交付 A2A wire 0.1 与 policy_ref 三段绑定（M5）；US-16-AC-7 交付 Plan 规范化
 序列化（Plan-LSP，M6）；US-16-AC-8 交付 Hybrid Orchestrator 核心（M7）。
 US-16-AC-9 交付 K8s CRD 纸面清单生成器（M9）。
+FRAMEWORK-INTEGRATION-1 交付框架接入现有编排（GuardedOrchestrator 适配）。
 设计基线：`docs/plans/distributed-agent-framework/design-proposal.md` §5。
 
 ## 职责边界
@@ -39,6 +40,7 @@ US-16-AC-9 交付 K8s CRD 纸面清单生成器（M9）。
 | `a2a.py` | `A2aMessage`、`PolicyRef`、`verify_policy_ref`、`to_agent_fields`/`from_agent_fields`、`validate_payload_size` | A2A 信封 + policy_ref 五步验证 + `.agent` 字段映射 + 大小边界 |
 | `orchestrator.py` | `plan_for`、`dispatch`、`transition`、`chain_plan`、`StaticChainProvider`/`LlmPlanProvider`/`PlanExecutor`（注入协议）、`OrchestrationOutcome` | Hybrid Orchestrator：validate_plan 前置 + 三种模式 + L19 + HOLD 门 |
 | `k8s_listing.py` | `generate_listing`、`listing_fingerprint`、`render_yaml`、`validate_listing_bytes`、`ListingInput` | 声明式纸面清单生成（JSON + YAML 子集），确定性可哈希、零 IO |
+| `integration.py` | `guard_registration`、`plan_to_chain`、`guarded_dispatch`、`report_to_outcome`、`GuardResult` | 框架门禁接入现有编排：注册过 manifest、派发过 validate_plan、Plan→OrchestrationChain 适配 |
 
 ## 关键入口与数据流
 
@@ -68,6 +70,7 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 - Plan-LSP：序列化与 plan_fingerprint 同一规范化规则，未知字段/重复键拒绝；
 - Hybrid：validate_plan 前置必调；LLM 提议仅覆盖非 HOLD 节点；注入异常收敛；
 - K8s 纸面清单：仅声明导出（无 reconcile loop），YAML 安全引号 + 字段白名单；
+- 集成适配：TOOL 节点/框架抽象能力暂不可由产品编排器执行（IntegrationError）；
 - L4 Scope 与四层 RBAC 经注入协议委托，异常一律视为拒绝（fail-closed）；
 - fail-closed：未知能力、闭集外 scope、投影外脱敏、自指哈希、签名/指纹不匹配、
   缺失版本、坏 JSON/BOM/重复键一律拒绝并返回 `failure_reason`；
@@ -90,6 +93,7 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 - `tests/unit/test_framework_plan_lsp.py`（AC-7.1..7.5，M6 Plan-LSP）。
 - `tests/unit/test_framework_orchestrator.py`（AC-8.1..8.5，M7 Hybrid 核心）。
 - `tests/unit/test_framework_k8s_listing.py`（AC-9.1..9.5，M9 纸面清单）。
+- `tests/unit/test_framework_integration.py`（FRAMEWORK-INTEGRATION-1）。
 
 ## 依赖与下游
 
