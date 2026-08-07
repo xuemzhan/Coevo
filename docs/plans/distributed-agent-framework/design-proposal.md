@@ -321,6 +321,9 @@ Task = {
 
 ### 6.2 抽象 B: Memory
 
+> 实现落位：`src/coevo/framework/memory.py`（M3 / US-16-AC-4，2026-08-08）。
+> 适配映射见 `docs/framework/memory-interface.md`。
+
 | 类别 | MVP 落位 | 写入约束 |
 | --- | --- | --- |
 | **Episodic** | progress_capture/ | to_audit_record 必填 |

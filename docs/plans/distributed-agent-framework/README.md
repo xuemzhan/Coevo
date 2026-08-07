@@ -79,7 +79,7 @@
 | `manifest-checker.md` | `src/coevo/framework/manifest/` | **M1a (2 周)** | T1..T6 | 2 周 |
 | `capability-closedset.md` | `src/coevo/framework/capability.py` | **M1b（已交付 2026-08-08，US-16-AC-3）** | 与 `AgentCapability` 双向一致 + CRYPTO_PROXY approved scope | 2 周 |
 | `policy-template.md` | `src/coevo/framework/policy/` | M2 (4 周) | 4 个 Profile 模板 + validate_plan | 4 周 |
-| `memory-interface.md` | `src/coevo/framework/memory/` | M3 (6 周) | bridge 与现有 `progress_capture/` 兼容 | 6 周 |
+| `memory-interface.md` | `src/coevo/framework/memory.py` | **M3（已交付 2026-08-08，US-16-AC-4）** | bridge 与 `progress_capture/` / `knowledge_base/` 兼容 + L12 脱敏 | 6 周 |
 | `tool-registry.md` | `src/coevo/framework/tools/` | M4 (8 周) | MCP 路径 A 一致性 ≥ 99% | 8 周 |
 | `a2a-protocol.md` | `src/coevo/a2a/` | M5 (6 周) | protocol-reviewer 审批 | 6 周 |
 | `plan-lsp.md` | `src/coevo/framework/plan/` | M6 (10 周) | 五项不变量 + L18 字段检查 | 10 周 |

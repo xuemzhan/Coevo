@@ -378,6 +378,18 @@ MVP用于验证以下三类核心能力：
    不一致即测试失败；
 5. 纯函数、离线、stdlib、L17 文档守卫。
 
+**AC-4：Memory 抽象（CTAF §6.2 / M3）**
+
+1. 提供 MemoryRecord 统一模型（EPISODIC / SEMANTIC 两类），record_id 为规范化
+   指纹（可哈希）；
+2. Episodic 写入：每条记录必产生审计投影（to_audit_record），经注入 store
+   持久化，注入异常一律失败关闭；
+3. Semantic 写入：必须经注入审批（映射既有 knowledge_base
+   `ReviewDecisionKind.APPROVE` 语义），未审批拒绝；
+4. L12：敏感字段落盘前必须经注入 Redactor 转为不可恢复摘要
+   （`REDACTED:<sha256>`），明文不得到达 store；
+5. 纯函数、离线、stdlib、L17 文档守卫（memory-interface.md）。
+
 ---
 
 # 二、MVP实施优先级
