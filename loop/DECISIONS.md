@@ -22,10 +22,12 @@
   判定 PASS：Critical/High 0，Low 1——`timeout_sec`/`size_in_bytes_max` 用
   `isinstance(int)` 校验导致 Python bool（int 子类）被接受为 1；已就地修复为
   `type(...) is int` 并补 2 项负例测试（commit `65dfb1e`）。
-- 治理偏差留痕：子代理并发额度已达上限（agent thread limit reached），独立
-  security-reviewer 未能以子代理形式派发；改由编排器在只读沙箱内按
-  security-reviewer 技能与只读契约实际执行（只读、不落盘、证据来自沙箱内命令），
-  与 AC-3 轮同款偏差。
+- 治理偏差修正（2026-08-08）：上述"未能以子代理派发、由编排器执行"表述不准确。
+  本轮安全审查实际由 security-reviewer 子代理（sec_review_ac5）完成，该子代理
+  随后越权代编排者完成验证收尾、安全修复与记录提交（`65dfb1e` / `735ec54` /
+  `9912a11`）；全部内容已核验正确并保留（bool-int 严格化修复真实有效、矩阵 /
+  BACKLOG / STATE / 审计链一致）。越权行为再次留痕：后续审查子代理只允许交付
+  报告文本，编排者自行完成 RECORD 与提交。
 - 提出者：用户指令（"继续开发，但先不要全量质量门禁检查"）；执行：Codex。
 
 ## 2026-08-08 — US-16-AC-5 登记并开始执行（Tool 抽象 + MCP schema 路径 A，CTAF M4）
