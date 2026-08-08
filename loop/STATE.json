@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-OPTIMIZE-16",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "RECORDS-HYGIENE-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "04c1317",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T15:27:26.613428Z"
+  "updated_at": "2026-08-08T15:29:06.245097Z"
 }

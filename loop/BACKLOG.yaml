@@ -1557,3 +1557,15 @@ items:
       - tests/unit/test_cng_handle.py
     security_review: true
     protocol_review: false
+  # ---------- RECORDS-HYGIENE-1（2026-08-08 用户指令"继续优化，不做全量门禁"；DECISIONS 时间序整理与守卫） ----------
+  - id: RECORDS-HYGIENE-1
+    story: ENG-BASE
+    title: DECISIONS 时间序整理与守卫：loop/DECISIONS.md 按段落日期稳定排序（消除 9 处倒序违规，同日期保序，内容逐字节保留），新增"段落日期非递减"守卫测试防复发；核对最新段仍携带治理标记
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_records_archive.py
+      - tests/unit/test_private_key_handles_bindings.py
+      - tests/unit/test_traceability_check.py
+    security_review: false
+    protocol_review: false

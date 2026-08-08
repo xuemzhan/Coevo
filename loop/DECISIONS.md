@@ -5458,3 +5458,9 @@ security-reviewer 双签门禁。
 - Security: PowerShell path resolution is identity/key/cert security-critical; the locked-hash and fail-closed semantics are preserved byte-for-byte; no protocol/key changes.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-08 - RECORDS-HYGIENE-1 registration (DECISIONS chronological guard; incremental gate)
+- User instruction: continue optimizing, no full gate.
+- Decision: register `RECORDS-HYGIENE-1` (ENG-BASE, ready): DECISIONS.md has 9 date-descending section violations (historical + early apply_patch ambiguous-context inserts); stable-sort sections by header date (same-date order preserved, content byte-preserved), add a chronological guard test, and verify the latest section still carries the governance markers.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
