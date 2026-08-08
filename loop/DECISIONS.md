@@ -5531,3 +5531,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-20 closure (decision_brief domain helpers -> _build.py; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-20` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-19]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: models.py (was ~930 lines) no longer defines the 13 non-__post_init__ domain helpers; they moved to decision_brief/_build.py with per-function lazy `from .models import ...` (no module-level .models import, so no dataclass <-> helper cycle); models.py re-exports them at the bottom, keeping the import surface unchanged for repositories.py/service.py; unused zipfile import removed from models.py; module doc registers _build.py; 4 guard tests added (tests/unit/test_framework_optimize21.py).
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 118 tests green (test_decision_brief 33 + guard 4 + module-docs 4 + knowledge_base/orchestrator/traceability 77); full quality waived per user instruction.
+- Security: pure structural move; validation semantics unchanged; security tests untouched.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
+
