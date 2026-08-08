@@ -1632,7 +1632,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-21
     story: ENG-BASE
     title: 死导入清理（10 文件 11 处，含 _build.py RiskKind/SourceKind）+ BACKLOG 卫生（OPTIMIZE-20 ready→done）+ 全仓未使用导入静态守卫（test_framework_optimize22.py，允许清单覆盖再导出语义）
-    status: ready
+    status: done
     dependencies: []
     acceptance_tests:
       - tests/unit/test_framework_optimize22.py
