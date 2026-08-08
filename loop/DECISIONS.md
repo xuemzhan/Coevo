@@ -5206,6 +5206,28 @@ security-reviewer 双签门禁。
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — PERF-HELPER-1 完成收口（GmSSL 助手编译缓存；增量门禁豁免全量）
+
+- 工作项：`PERF-HELPER-1`（ENG-BASE，dependencies=[]）。
+- 用户指令：继续进行优化，不用做全量门禁；按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality（豁免留痕）。
+- 交付：`invoke-gmssl-crypto.ps1` 增加编译缓存——按锁定 source_sha256 键缓存
+  （`.tools/runtime/gmssl-crypto-helper/cache/helper-<sha>.exe`）+ 旁路 `.sha256`
+  哈希校验；命中直接复用（Open-CoevoLockedFile 按旁路哈希锁定），损坏/缺失自愈
+  重编译，未命中现场编译且当前调用行为不变（finally 不清缓存条目）；缓存安装
+  尽力而为且原子（tmp→校验→rename→写旁路），失败不影响当前调用；同步
+  toolchain-lock launcher size/sha256；安全取舍记录于 approved-crypto-provider-path
+  §9（单份持久化可写二进制 + 旁路校验，本地信任模型一致；算法/密钥/协议语义不变）。
+- 验证（增量门禁）：fmt exit=0 fingerprint=`8d456a2ce09245c7`；lint exit=0
+  fingerprint=`5103146e112f2dd1`（audit fully-sealed）；crypto 回归 38 项全绿
+  （provider 全量 + retry 静态 10 项 + cng_handle 单/集 + crypto_sm3，52s）；
+  缓存行为实测：命中复用（无重编译）、旁路篡改后自愈重编译、sidecar 重记；
+  launcher 锁与 Python 构造校验一致。全量 quality 按用户指示豁免。
+- 安全结论：无 Critical/High；"持久化可写二进制"取舍已文档化并经 security-review
+  口径评估（增量模式）；算法/密钥管理/协议语义未变；sm2-test-pki 测试助手保持
+  现场编译（其无残留行为被测试钉住，不受本轮影响）。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — RECORDS-ARCHIVE-4 完成收口（门禁自维护 VERIFICATION 归档；增量门禁豁免全量）
 
 - 工作项：`RECORDS-ARCHIVE-4`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-3]）。
