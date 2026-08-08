@@ -55,6 +55,7 @@ _HELPER_SIZE: Final[int] = 6118
 _HELPER_SHA256: Final[str] = "f01e88716658e837c191ca15aa20c6a85423b557bb4efd0661ca350d3d1361ab"
 _MAX_INPUT_BYTES: Final[int] = 64 * 1024
 from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
+from src.coevo.canon import canonical_json_bytes
 
 
 class CngKekError(RuntimeError):
@@ -391,7 +392,9 @@ class CngWrappedKeyRegistry:
         self._verify_chain(data["entries"])
         previous = data["entries"][-1]["entry_hash"] if data["entries"] else "0" * 64
         entry["prev_hash"] = previous
-        entry["entry_hash"] = _sha256_bytes(_canonical(entry))
+        entry["entry_hash"] = _sha256_bytes(
+            canonical_json_bytes(entry, ensure_ascii=False)
+        )
         data["entries"].append(entry)
         self._write(data)
         return entry["entry_hash"]
@@ -412,9 +415,7 @@ class CngWrappedKeyRegistry:
         return data
 
     def _write(self, data: dict[str, Any]) -> None:
-        body = json.dumps(
-            data, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        ).encode("utf-8")
+        body = canonical_json_bytes(data, ensure_ascii=False)
         self._path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self._path.with_name(f"{self._path.name}.{uuid.uuid4().hex}.tmp")
         try:
@@ -436,16 +437,12 @@ class CngWrappedKeyRegistry:
             if not isinstance(entry, dict) or set(entry) != self._ALLOWED_ENTRY_FIELDS:
                 raise CngKekValidationError("registry entry fields are invalid")
             probe = {key: value for key, value in entry.items() if key != "entry_hash"}
-            entry_hash = _sha256_bytes(_canonical(probe))
+            entry_hash = _sha256_bytes(
+                canonical_json_bytes(probe, ensure_ascii=False)
+            )
             if entry["prev_hash"] != previous or entry["entry_hash"] != entry_hash:
                 raise CngKekValidationError("registry hash chain is invalid (tampered?)")
             previous = entry["entry_hash"]
-
-
-def _canonical(mapping: dict[str, Any]) -> bytes:
-    return json.dumps(
-        mapping, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-    ).encode("utf-8")
 
 
 def _unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:

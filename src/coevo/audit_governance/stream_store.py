@@ -23,6 +23,7 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any, Final
+from src.coevo.canon import canonical_json_str
 from src.coevo.timefmt import now_utc_iso_z
 
 from . import AuditEvent, AuditEventSource
@@ -145,9 +146,7 @@ class AuditStreamStore:
         return self._append_record(mapping, action="publish")
 
     def _append_record(self, payload: dict[str, Any], *, action: str) -> str:
-        canonical = json.dumps(
-            payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        )
+        canonical = canonical_json_str(payload, ensure_ascii=False)
         if self._size + len(canonical.encode("utf-8")) > self._max_bytes:
             raise AuditStreamStoreError("audit stream store exceeds size limit")
         record = {
@@ -158,9 +157,7 @@ class AuditStreamStore:
             "prev_hash": self._last_hash,
         }
         record["record_hash"] = _chain_hash(record)
-        line = json.dumps(
-            record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        ) + "\n"
+        line = canonical_json_str(record, ensure_ascii=False) + "\n"
         self._stream.write(line)
         self._stream.flush()
         # 文本模式写入时换行会被翻译为 os.linesep（Windows 上 \r\n），
@@ -210,7 +207,7 @@ class AuditStreamStore:
 
 
 def _chain_hash(record: dict[str, Any]) -> str:
-    payload = json.dumps(
+    payload = canonical_json_str(
         {
             "schema_version": record["schema_version"],
             "ts": record["ts"],
@@ -219,7 +216,5 @@ def _chain_hash(record: dict[str, Any]) -> str:
             "prev_hash": record["prev_hash"],
         },
         ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()

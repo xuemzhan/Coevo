@@ -44,6 +44,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Final, Iterator
+from src.coevo.canon import canonical_json_str
 from src.coevo.timefmt import now_utc_iso_z
 
 from .models import (
@@ -223,16 +224,8 @@ def _record_hash(
             prev_hash,
             str(seq),
             talent.talent_code,
-            json.dumps(
-                [tag.value for tag in talent.skill_tags],
-                separators=(",", ":"),
-                sort_keys=True,
-            ),
-            json.dumps(
-                list(talent.credentials),
-                separators=(",", ":"),
-                sort_keys=True,
-            ),
+            canonical_json_str([tag.value for tag in talent.skill_tags]),
+            canonical_json_str(list(talent.credentials)),
             str(talent.current_task_count),
             str(talent.max_parallel_tasks),
             talent.availability.start,
@@ -457,16 +450,10 @@ class TalentStore:
                 (
                     seq,
                     talent.talent_code,
-                    json.dumps(
-                        [tag.value for tag in talent.skill_tags],
-                        separators=(",", ":"),
-                        sort_keys=True,
-                    ),
-                    json.dumps(
-                        list(talent.credentials),
-                        separators=(",", ":"),
-                        sort_keys=True,
-                    ),
+                        canonical_json_str(
+                            [tag.value for tag in talent.skill_tags]
+                        ),
+                        canonical_json_str(list(talent.credentials)),
                     talent.current_task_count,
                     talent.max_parallel_tasks,
                     talent.availability.start,

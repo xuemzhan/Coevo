@@ -25,13 +25,28 @@ def canonical_json_bytes(
     (FRAMEWORK-OPTIMIZE-5).
     """
 
+    return canonical_json_str(
+        value, ensure_ascii=ensure_ascii, allow_nan=allow_nan
+    ).encode("utf-8")
+
+
+def canonical_json_str(
+    value: Any, *, ensure_ascii: bool = True, allow_nan: bool = False
+) -> str:
+    """Serialize ``value`` to canonical JSON text (sorted keys, compact).
+
+    String variant of :func:`canonical_json_bytes` (FRAMEWORK-OPTIMIZE-9) for
+    product modules that store canonical JSON as ``str``; byte semantics are
+    identical after UTF-8 encoding.
+    """
+
     return json.dumps(
         value,
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=ensure_ascii,
         allow_nan=allow_nan,
-    ).encode("utf-8")
+    )
 
 
 def canonical_digest(

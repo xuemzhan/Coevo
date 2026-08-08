@@ -21,6 +21,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from src.coevo.canon import canonical_json_bytes
 from . import (
     ArtifactSummary,
     CockpitValidationError,
@@ -262,9 +263,7 @@ class CockpitStateStore:
     ) -> None:
         """Atomically persist the current server state snapshot."""
         payload = serialize_views(workspace_views, role_views)
-        body = json.dumps(
-            payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        ).encode("utf-8")
+        body = canonical_json_bytes(payload, ensure_ascii=False)
         if len(body) > STATE_MAX_BYTES:
             raise CockpitValidationError("serialized cockpit state exceeds size limit")
         self._path.parent.mkdir(parents=True, exist_ok=True)

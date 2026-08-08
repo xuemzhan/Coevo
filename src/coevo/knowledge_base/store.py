@@ -30,6 +30,7 @@ import sqlite3
 import uuid
 from pathlib import Path
 from typing import Any, Final
+from src.coevo.canon import canonical_json_str
 from src.coevo.timefmt import now_utc_iso_z
 
 from . import (
@@ -179,14 +180,12 @@ def bundle_to_payload(bundle: KnowledgeBundle) -> str:
     """Canonical JSON payload for a bundle (schema_version + encoded bundle)."""
     if not isinstance(bundle, KnowledgeBundle):
         raise KnowledgeBaseValidationError("bundle must be a KnowledgeBundle")
-    return json.dumps(
+    return canonical_json_str(
         {
             "schema_version": SCHEMA_VERSION,
             "bundle": _encode(bundle),
         },
         ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
     )
 
 
