@@ -125,6 +125,17 @@ lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability 
 追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-16 行，traceability checked=126 missing=0（ENG-BASE 79）。
 ```
 
+## 2026-08-08T15:50:00Z — RECORDS-HYGIENE-1 增量门禁记录（全量 quality 按用户指示豁免）
+
+```text
+用户指令：继续优化，不做全量门禁。
+fmt：exit=0 fingerprint=`8d456a2ce09245c7`（compileall scripts src tests）。
+lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability + audit_log verify + audit_seal verify --allow-tail + archive_records --check + secret_scan；audit fully-sealed）。
+定向测试：54 项全绿——tests/unit/test_records_archive.py（新增 5 项：record_preamble 标题保留/无前导空/非字符串拒绝、DECISIONS 段落日期非递减守卫、DECISIONS 标题钉住）+ tests/unit/test_private_key_handles_bindings.py（最新段治理标记）+ tests/unit/test_traceability_check.py。
+整理结果：DECISIONS 174 段按日期稳定排序（9 处倒序清零，内容逐字节保留，标题 `# Loop 决策记录` 恢复）；archive_records --apply 重写现保留 record_preamble。
+追溯矩阵新增 ENG-BASE | RECORDS-HYGIENE-1 行，traceability checked=126 missing=0（ENG-BASE 80）。
+```
+
 
 
 
@@ -10389,6 +10400,515 @@ control.pyz"
         {
           "kind": "test",
           "path": "tests/unit/test_package_store_persistence.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T15:32:08.913950Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T15:32:35.503121Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+-crypto-provider-path.md"
+      ],
+      "tests": [
+        "tests/unit/test_gmssl_provider_retry.py",
+        "tests/integration/test_gmssl_prototype_provider.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/invoke-gmssl-crypto.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/approved-crypto-provider-path.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_gmssl_provider_retry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_gmssl_prototype_provider.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-15",
+      "title": "共享 safe-relative-path 校验叶子（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：新增 src/coevo/relpath.py（is_safe_relative_path fail-closed：非空、无前导 /、无 \\、无 NUL、无空/./.. 段），progress_capture/watcher、cockpit/static、cockpit/wps 三处本地副本统一引用（static 保留扩展名/大小/containment 检查，wps 保留 DENIED 语义，watcher 保留异常类与消息）；NUL 拒绝为严格化统一（static 原有，watcher/wps 不拒绝任何合法输入）；workspace/_has_parent_traversal 与 model/config prompts_file 语义差异保留独立；root_modules.md 登记",
+      "code": [
+        "src/coevo/relpath.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/cockpit/static.py",
+        "src/coevo/cockpit/wps.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize15.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/relpath.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/static.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/wps.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize15.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-VERIFY-1",
+      "title": "集成套件回归复测与性能基线（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"；量化 PERF-HELPER-1 收益）：完整集成套件（20 文件 / 262 项）复测 exit=0（skipped=1），**总耗时 288.6s（约 4.8 分钟）**，对比缓存前基线约 1021s（约 17 分钟）——**约 3.5 倍提速，无回归**；crypto 缓存命中路径在全部集成用例（installer/dev_environment/merge/package_store/orchestrator/sm2-test-pki 等）下稳定；性能基线记录于 VERIFICATION/DECISIONS；sm2-test-pki 测试助手仍现场编译，未成为阻塞项",
+      "code": [
+        "tests/integration/"
+      ],
+      "tests": [
+        "tests/integration/test_gmssl_prototype_provider.py",
+        "tests/integration/test_cng_handle.py",
+        "tests/integration/test_sm2_test_pki_generation.py",
+        "tests/integration/test_installer.py",
+        "tests/integration/test_dev_environment_entry.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "tests/integration/",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_gmssl_prototype_provider.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_sm2_test_pki_generation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_installer.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-REPLAY-1",
+      "title": "check_replay 单趟作用域扫描（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：`replay_detector.check_replay` 将同作用域三趟 O(k) 扫描（package_id 命中 / package_digest 命中 / max sequence_no）合并为单趟，同时跟踪三者；决策顺序与结果逐位不变（id→digest→sequence 优先级保留；id 命中优先于 digest 即使 digest 早命中，单趟全扫不提前 break）；每作用域扫描降为 1 趟（常数 3×）",
+      "code": [
+        "src/coevo/protocol/replay_detector.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize16.py",
+        "tests/unit/test_agent_wire_regression.py",
+        "tests/integration/test_agent_package_atomic_import.py",
+        "tests/unit/test_package_store_persistence.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/replay_detector.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize16.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_agent_package_atomic_import.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_package_store_persistence.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-16",
+      "title": "共享 PowerShell 解析叶子（2026-08-08，用户指令\"继续优化，不做全量门禁\"）：新增 src/coevo/powershell.py（powershell_executable 简单变体 + locked_powershell_executable 锁哈希校验变体，error_factory 保留各模块异常语义，fail-closed），identity/certificates、identity/audit_anchor（简单变体）与 identity/private_keys、crypto/cng_handle（锁校验变体）四处重复副本收敛为薄包装；行为逐位不变（COEVO_POWERSHELL_PATH 绝对路径优先、SystemRoot fallback、锁 size/sha256 完整性校验）；root_modules.md 登记",
+      "code": [
+        "src/coevo/powershell.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/private_keys.py",
+        "src/coevo/crypto/cng_handle.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize17.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/powershell.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize17.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T15:36:01.219897Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+ress_capture/watcher、cockpit/static、cockpit/wps 三处本地副本统一引用（static 保留扩展名/大小/containment 检查，wps 保留 DENIED 语义，watcher 保留异常类与消息）；NUL 拒绝为严格化统一（static 原有，watcher/wps 不拒绝任何合法输入）；workspace/_has_parent_traversal 与 model/config prompts_file 语义差异保留独立；root_modules.md 登记",
+      "code": [
+        "src/coevo/relpath.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/cockpit/static.py",
+        "src/coevo/cockpit/wps.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize15.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/relpath.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/static.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/wps.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize15.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-VERIFY-1",
+      "title": "集成套件回归复测与性能基线（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"；量化 PERF-HELPER-1 收益）：完整集成套件（20 文件 / 262 项）复测 exit=0（skipped=1），**总耗时 288.6s（约 4.8 分钟）**，对比缓存前基线约 1021s（约 17 分钟）——**约 3.5 倍提速，无回归**；crypto 缓存命中路径在全部集成用例（installer/dev_environment/merge/package_store/orchestrator/sm2-test-pki 等）下稳定；性能基线记录于 VERIFICATION/DECISIONS；sm2-test-pki 测试助手仍现场编译，未成为阻塞项",
+      "code": [
+        "tests/integration/"
+      ],
+      "tests": [
+        "tests/integration/test_gmssl_prototype_provider.py",
+        "tests/integration/test_cng_handle.py",
+        "tests/integration/test_sm2_test_pki_generation.py",
+        "tests/integration/test_installer.py",
+        "tests/integration/test_dev_environment_entry.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "tests/integration/",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_gmssl_prototype_provider.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_sm2_test_pki_generation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_installer.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-REPLAY-1",
+      "title": "check_replay 单趟作用域扫描（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：`replay_detector.check_replay` 将同作用域三趟 O(k) 扫描（package_id 命中 / package_digest 命中 / max sequence_no）合并为单趟，同时跟踪三者；决策顺序与结果逐位不变（id→digest→sequence 优先级保留；id 命中优先于 digest 即使 digest 早命中，单趟全扫不提前 break）；每作用域扫描降为 1 趟（常数 3×）",
+      "code": [
+        "src/coevo/protocol/replay_detector.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize16.py",
+        "tests/unit/test_agent_wire_regression.py",
+        "tests/integration/test_agent_package_atomic_import.py",
+        "tests/unit/test_package_store_persistence.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/replay_detector.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize16.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_agent_package_atomic_import.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_package_store_persistence.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-16",
+      "title": "共享 PowerShell 解析叶子（2026-08-08，用户指令\"继续优化，不做全量门禁\"）：新增 src/coevo/powershell.py（powershell_executable 简单变体 + locked_powershell_executable 锁哈希校验变体，error_factory 保留各模块异常语义，fail-closed），identity/certificates、identity/audit_anchor（简单变体）与 identity/private_keys、crypto/cng_handle（锁校验变体）四处重复副本收敛为薄包装；行为逐位不变（COEVO_POWERSHELL_PATH 绝对路径优先、SystemRoot fallback、锁 size/sha256 完整性校验）；root_modules.md 登记",
+      "code": [
+        "src/coevo/powershell.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/private_keys.py",
+        "src/coevo/crypto/cng_handle.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize17.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/powershell.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize17.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "RECORDS-HYGIENE-1",
+      "title": "DECISIONS 时间序整理与守卫 + 归档前导保留修复（2026-08-08，用户指令\"继续优化，不做全量门禁\"）：① loop/DECISIONS.md 按段落日期稳定排序（消除 9 处日期倒序违规，同日期保序，内容逐字节保留，段落数 174 不变）；② 修复归档重写丢文件头 bug——archive_records --apply 用 `record_preamble(text) + keep` 重写，DECISIONS 标题 `# Loop 决策记录` 恢复且未来归档不再丢失（VERIFICATION 无前导不受影响）；③ 新增守卫：record_preamble 正反例 + DECISIONS 段落日期非递减 + 标题钉住",
+      "code": [
+        "src/coevo/records_archive.py",
+        "scripts/archive_records.py",
+        "loop/DECISIONS.md"
+      ],
+      "tests": [
+        "tests/unit/test_records_archive.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/records_archive.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/archive_records.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "loop/DECISIONS.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_records_archive.py",
           "exists": true
         }
       ],
