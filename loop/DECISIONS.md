@@ -5505,3 +5505,10 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-08 - FRAMEWORK-OPTIMIZE-19 closure (decision_brief util extraction; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-19` (ENG-BASE). User instruction: continue optimizing, no full gate; incremental gates (fmt + lint + targeted) with the full-quality waiver recorded.
+- Delivery: new decision_brief/_util.py holds 7 dependency-free pure utilities (_ZERO_DIGEST, _safe_string, _digest, _encode_json, _stat_is_reparse, _is_link_or_reparse, _parse_utc) with error_factory; models.py removed local copies and re-exports via thin wrappers (signatures and import surface unchanged); root_modules.md registers _util.py; establishes the pure-util -> domain layer pattern for later split slices.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 33 tests green (optimize20 8 tests + test_decision_brief 25 tests); compileall exit=0; full quality waived per user instruction.
+- Security: pure extraction with byte-exact behavior; import surface unchanged; no protocol changes.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
