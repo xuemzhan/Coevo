@@ -12,6 +12,7 @@
 | `jsonutil.py` | `reject_duplicate_pairs` | 共享 JSON 重复键拒绝守卫（object_pairs_hook，error_factory 可注入保持各模块异常语义，重复键 fail-closed；依赖无关叶模块，协议/清单/存储/清单解析统一引用） |
 | `relpath.py` | `is_safe_relative_path` | 共享安全相对路径谓词（非空、无前导 `/`、无 `\`、无 NUL、无空/`.`/`..` 段，fail-closed；依赖无关叶模块，progress_capture.watcher / cockpit.static / cockpit.wps 统一引用；workspace._has_parent_traversal 与 model.config prompts_file 语义差异保留独立） |
 | `powershell.py` | `powershell_executable` / `locked_powershell_executable` | 共享 Windows PowerShell 可执行文件解析（简单变体 + 锁哈希校验变体，error_factory 保留各模块异常语义，fail-closed；依赖无关叶模块，identity/certificates、identity/audit_anchor、identity/private_keys、crypto/cng_handle 统一引用） |
+| `validate.py` | `non_empty_string` | 共享模型输入校验助手（非空字符串，error_factory 保留各模块异常类与消息，fail-closed；依赖无关叶模块，risk/supervision 的 _non_empty 统一引用） |
 | `logging_setup.py` | `setup_logging()` | 日志引导（stdlib logging，轮转 5MB×5，绝不吞审计链） |
 | `records_archive.py` | `archive_plan()` / `over_policy_size()` / `POLICY` | 记录归档策略唯一事实源（纯函数：VERIFICATION/DECISIONS/tool-audit 分节、按容量+期限裁剪、容量判定与策略常量） |
 

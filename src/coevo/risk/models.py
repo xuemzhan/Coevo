@@ -145,8 +145,9 @@ class MergeAndAnalyzeOutcome:
             raise ValueError("risk report must exist exactly for a committed merge")
 
 def _non_empty(value: object, *, field: str) -> None:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{field} must be a non-empty string")
+    from src.coevo.validate import non_empty_string
+
+    non_empty_string(value, error_factory=ValueError, field=field)
 
 def _parse_utc(value: object, *, field: str) -> dt.datetime:
     from src.coevo.timefmt import parse_iso_utc
