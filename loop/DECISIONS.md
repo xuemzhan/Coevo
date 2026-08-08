@@ -5234,6 +5234,21 @@ security-reviewer 双签门禁。
   若后续追求更激进提速可评估 PERF-HELPER-2（测试助手缓存，需调整"无残留"测试）。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — PERF-REPLAY-1 登记并开始执行（check_replay 单趟扫描；增量门禁口径）
+
+- 用户指令：继续进行优化，不用做全量门禁。
+- 决策：登记 `PERF-REPLAY-1`（ENG-BASE，ready，dependencies=[]）：
+  `check_replay` 对同作用域做三趟 O(k) 扫描（id / digest / max sequence），
+  合并为单趟同时跟踪三者，决策顺序与结果逐位不变（id→digest→sequence 优先级
+  保留；关键正确性：id 命中优先级高于 digest，即使 digest 早命中也不提前返回）。
+  另：PERF-HELPER-2（sm2-test-pki 测试助手缓存）经评估与其文档化/test 钉住的
+  "never trust or retain a precompiled helper binary" 策略冲突，属策略变更，
+  暂不纳入（收益约 60s/次，不值得改安全姿态）。
+  切片计划：`docs/plans/PERF-REPLAY-1-slice.md`。
+- 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-15 完成收口（共享 safe-relative-path 校验叶子；增量门禁豁免全量）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-15`（ENG-BASE，dependencies=[]）。

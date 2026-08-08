@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "PERF-VERIFY-1",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "PERF-REPLAY-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "8be8143",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T14:48:08.519508Z"
+  "updated_at": "2026-08-08T14:52:21.347598Z"
 }
