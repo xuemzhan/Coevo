@@ -5422,3 +5422,18 @@ security-reviewer 双签门禁。
 - 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
+
+## 2026-08-08 — 增量优化批量收口快照（PERF-VERIFY-1 / PERF-REPLAY-1 等；最新段治理标记）
+
+- 说明：本轮用户指令"继续进行优化，不用做全量门禁"期间批量完成 PERF-VERIFY-1
+  （集成套件复测：262 项全绿、288.6s，基线 1021.8s → -72%）与 PERF-REPLAY-1
+  （check_replay 单趟扫描）等；随后用户指令"做全量门禁，然后 push 到 GitHub"。
+  本段同时承担"最新 DECISIONS 段须承认私钥/收据治理基线"的测试钉住要求。
+- 治理标记核验：decision status: approved a+b；.gitignore 排除 runtime 收据；
+  git rm --cached 已执行；local runtime file preserved；historical git blobs were scrubbed
+  （详见历史段与 `loop/archive/20260808/decisions-20260808.txt`）。
+- 记录卫生提示：本会话早期若干 DECISIONS 追加因 apply_patch 歧义上下文插入位置
+  偏离时间序（段落 170 段非严格时间序），后续新增段必须追加到文件末尾并在段内
+  携带上述治理标记（测试 `test_decisions_records_the_audit_corpus_status` 钉住
+  最新段）。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
