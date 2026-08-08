@@ -1263,7 +1263,7 @@ items:
   - id: FRAMEWORK-INTEGRATION-4
     story: ENG-BASE
     title: 注册门接入与 Manifest 构建器：framework/integration.py 新增 build_registration_manifest（纯函数生成规范 Agent Manifest，spec_hash 排除自指字段，可选注入签名器）；app/pipeline.py 用 guard_registration 对 4 个 demo 智能体做注册门（demo 适配器显式非生产：DemoRegistrationVerifier/Resolver/PolicyRegistry + 文档化）；注册门验证 Manifest 结构与绑定格式，生产须注入真实 SM2 验签
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-INTEGRATION-3]
     acceptance_tests:
       - tests/unit/test_framework_integration4.py

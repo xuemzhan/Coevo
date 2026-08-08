@@ -1,5 +1,50 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-4 完成收尾（注册门 + Manifest 构建器；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-INTEGRATION-4`（ENG-BASE）。实现提交：`41f56a8`
+  （build_registration_manifest 纯函数 + DemoRegistration* 适配器 + pipeline
+  注册门接线 + 测试 test_framework_integration4.py 7 项）；记录提交 `4b1e5a2`
+  （fmt/lint 主仓运行，审计 sealed）；文档提交 `3d03490`
+  （integration.md / modules / code-guide）。
+- 用户指令：继续开发，先不要全量质量门禁检查；按已批准切片计划执行增量门禁
+  （fmt + lint + 定向测试）并豁免全量 quality。
+- 验证（增量门禁，主仓）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint
+  exit=0 fingerprint=`252ad24e526f6728`（validate_opencode / traceability_check /
+  audit_log verify / audit_seal verify / secret_scan 全过，audit fully-sealed）；
+  定向测试 61/61 全绿（test_framework_integration4 + integration1/2 +
+  manifest_checker + pipeline_framework_gate + module_docs）；demo e2e 3/3
+  （128.8s，覆盖注册门真实接线）。
+- 独立复核（沙箱，pin=`3d03490`：fwint4-verify / fwint4-sec）：
+  * verifier 契约：沙箱内 fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint
+    exit=0 fingerprint=`118f94235b0357cf`（沙箱根解析差异，与主仓指纹不同属
+    预期）；定向测试 61/61 全绿；追溯矩阵缺 FRAMEWORK-INTEGRATION-4 行
+    （本轮已补）；review_sandbox check violations=[]（loop/ 门禁证据输出为
+    合法 delta），已 discard。
+  * security-reviewer 契约：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/2；行为级探针：空签名拒绝（fail-closed，比切片计划"空签名仍可结构
+    校验"更严格，方向安全）、非法 crypto_scope 拒绝、非法 policy_version 拒绝、
+    篡改 capability 拒绝（均无 TypeError 泄漏）；demo 验签器接受任意非空签名
+    仅 demo 路径可达（rg 全仓确认 DemoRegistration* 仅 pipeline demo 组合根
+    与测试引用）；tests/security 相对基线零改动；review_sandbox check
+    violations=[]，已 discard。
+- 治理偏差留痕：verifier/security-reviewer 子代理派生再次被环境拦截
+  （agent thread limit reached，与 GAPS-1/2/4/6、INTEGRATION-1/2/3 同款
+  限制），按既有预案由编排者在只读沙箱内按角色契约实际执行并留痕；报告不落盘；
+  沙箱零违规。
+- 安全观察项（Low 2，非本轮收口目标，登记后续观察）：
+  * Low 1：DemoRegistrationVerifier.verify 对任意非空签名返回 True
+    （demo-only 设计），生产路径必须注入真实 SM2 验签；已通过类名/模块文档/
+    仅 demo 组合根引用三重显式约束，建议后续增加生产入口导入守卫（可选加固）。
+  * Low 2：build_registration_manifest(signer=None) 生成的空签名 manifest
+    会被 guard_registration 拒绝（manifest-checker 要求非空签名），比切片计划
+    "空但仍可结构校验"的表述更严格；fail-closed 方向安全，无需代码变更。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-INTEGRATION-4 行（无悬空）；BACKLOG
+  INTEGRATION-4 置 done；STATE 置 phase=decide / status=done /
+  last_verified_commit=`3d03490`（loop_state 事务）；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `3d03490`。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-4 登记并开始执行（注册门接入 + Manifest 构建器）
 
 - 用户指令："继续开发，但先不要全量质量门禁检查"。
