@@ -1,5 +1,20 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-10 登记并开始执行（audit_anchor canonical 统一到 canon）
+
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-10`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-9]）：`canon.py` 的 canonical_json_bytes /
+  canonical_json_str / canonical_digest 新增 `trailing_newline=False` 参数
+  （默认不变）；`identity/audit_anchor.py::canonical` 改用共享实现
+  （ensure_ascii=False + trailing_newline=True，字节逐位不变，函数签名保留）。
+  切片计划：`docs/plans/FRAMEWORK-OPTIMIZE-10-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-10。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-9 完成收尾（剩余 canonical 序列化变体统一；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-9`（ENG-BASE）。实现提交：`b029eb0`；
