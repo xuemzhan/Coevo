@@ -1583,3 +1583,16 @@ items:
       - tests/unit/test_supervision_meeting.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-18（2026-08-08 用户指令"继续优化，不做全量门禁"；OPTIMIZE-11 补漏 + 共享 non-empty 校验） ----------
+  - id: FRAMEWORK-OPTIMIZE-18
+    story: ENG-BASE
+    title: OPTIMIZE-11 补漏 + 共享 non-empty 校验：knowledge_base/models 本地 _SAFE_ID 正则（与 ids.SAFE_ID 逐字节相同）统一到共享叶子；risk/supervision 的 _non_empty 同构重复收敛到 validate.non_empty_string（error_factory 保留异常类，消息逐字节不变）；root_modules.md 登记 validate.py
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_framework_optimize19.py
+      - tests/unit/test_knowledge_base.py
+      - tests/unit/test_risk_analyzer.py
+      - tests/unit/test_supervision_meeting.py
+    security_review: true
+    protocol_review: false

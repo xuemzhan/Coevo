@@ -5486,3 +5486,9 @@ security-reviewer 双签门禁。
 - Security: ISO-UTC parsing is protocol/audit security-critical; error classes and messages preserved byte-for-byte via error_factory + message params; no protocol changes.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-08 - FRAMEWORK-OPTIMIZE-18 registration (OPTIMIZE-11 leftover + shared non-empty validator; incremental gate)
+- User instruction: continue optimizing, no full gate.
+- Decision: register `FRAMEWORK-OPTIMIZE-18` (ENG-BASE, ready): 1) knowledge_base/models.py still carries a local `_SAFE_ID` regex byte-identical to ids.SAFE_ID (missed by OPTIMIZE-11) - unify to the shared leaf; 2) risk/models and supervision/models duplicate `_non_empty` (same message, different exception classes) - unify to validate.non_empty_string via error_factory; root_modules.md registers validate.py.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
