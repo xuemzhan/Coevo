@@ -233,6 +233,33 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-GAPS-7 完成收尾（生产验签入口守卫；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-GAPS-7`（ENG-BASE，dependencies=[FRAMEWORK-INTEGRATION-4]）。
+  实现提交：`b69517b`（guard_registration 新增 require_production_verifier；
+  DemoRegistrationVerifier 补 is_production=False；INTEGRATION-4 Low 1 收口）；
+  登记提交：`a6c73f7`（切片计划、BACKLOG ready、DECISIONS、STATE 事务）。
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1219 项 OK
+  （skipped=3，含新增 5 项）；安全套件 99/99 全绿。
+- 沙箱独立复核（pin=`b69517b`）：
+  * verifier（fwgaps7-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `b9f9395e97213ba3`（沙箱根解析差异属预期）；定向 11/11 全绿（gaps7 +
+    integration4）；review_sandbox check violations=[]，已 discard。
+  * security-reviewer（fwgaps7-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：require_production_verifier=True 时 demo 验签器 fail-closed
+    拒绝（零注册）、生产协议验签器放行、demo 显式 is_production=False、无
+    eval/exec、tests/security 零改动；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-GAPS-7 行（无悬空）；追溯断言 64→65；
+  BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-GAPS-7 / last_verified_commit=`b69517b`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `b69517b`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-10 完成收尾（audit_anchor canonical 统一到 canon；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-10`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-9]）。

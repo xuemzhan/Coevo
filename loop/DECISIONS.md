@@ -1,5 +1,25 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-7 完成收尾（生产验签入口守卫；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-GAPS-7`（ENG-BASE）。实现提交：`b69517b`；
+  登记提交：`a6c73f7`。
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 验证（增量门禁，主仓）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1219 项 +
+  安全套件 99/99 全绿。
+- 独立复核（沙箱，pin=`b69517b`）：fwgaps7-verify（fmt/lint/定向 11 全绿，
+  violations=[]）+ fwgaps7-sec（STRIDE PASS，Critical/High/Medium/Low 0/0/0/0；
+  fail-closed 与 demo 隔离语义确认、tests/security 零改动），已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-GAPS-7 行（无悬空）；追溯断言 64→65；
+  BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-GAPS-7 / last_verified_commit=`b69517b`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `b69517b`。
+
 ## 2026-08-08 — FRAMEWORK-GAPS-7 登记并开始执行（生产验签入口守卫；INTEGRATION-4 Low 1 收口）
 
 - 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
