@@ -5206,6 +5206,24 @@ security-reviewer 双签门禁。
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-15 完成收口（共享 safe-relative-path 校验叶子；增量门禁豁免全量）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-15`（ENG-BASE，dependencies=[]）。
+- 用户指令：继续进行优化，不用做全量门禁；按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality（豁免留痕）。
+- 交付：新增 `src/coevo/relpath.py`（`is_safe_relative_path`，fail-closed）作为
+  安全相对路径校验单一事实源；progress_capture/watcher、cockpit/static、
+  cockpit/wps 三处本地副本统一引用（各调用点保留自身异常/拒绝/扩展名/containment
+  语义）；NUL 拒绝为严格化统一（不拒绝任何合法输入）；workspace/_has_parent_traversal
+  与 model/config prompts_file 语义差异保留独立；root_modules.md 登记。
+- 验证（增量门禁）：fmt exit=0 fingerprint=`8d456a2ce09245c7`；lint exit=0
+  fingerprint=`5103146e112f2dd1`（audit fully-sealed）；定向 59 项全绿
+  （optimize15 10 项 + progress_watcher + cockpit + wps_launcher）。全量 quality
+  按用户指示豁免。
+- 安全结论：路径拒绝语义不降（fail-closed 保留，含驱动器形式由调用方 containment
+  兜底的契约钉住）；不涉及协议/密钥路径。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — PERF-HELPER-1 完成收口（GmSSL 助手编译缓存；增量门禁豁免全量）
 
 - 工作项：`PERF-HELPER-1`（ENG-BASE，dependencies=[]）。

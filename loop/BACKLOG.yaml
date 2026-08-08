@@ -1511,7 +1511,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-15
     story: ENG-BASE
     title: 共享 safe-relative-path 校验叶子：新增 src/coevo/relpath.py（is_safe_relative_path fail-closed：非空/无前导斜杠/无反斜杠/无 NUL/无空与./..段），progress_capture/watcher、cockpit/static、cockpit/wps 三处本地副本统一引用；workspace/_has_parent_traversal 与 model/config prompts_file 语义差异保留独立；root_modules.md 登记
-    status: ready
+    status: done
     dependencies: []
     acceptance_tests:
       - tests/unit/test_framework_optimize15.py

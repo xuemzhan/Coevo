@@ -1256,6 +1256,16 @@ crypto 回归：38 项全绿（tests/integration/test_gmssl_prototype_provider.p
 追溯矩阵新增 ENG-BASE | PERF-HELPER-1 行，traceability checked=126 missing=0（ENG-BASE 75）。
 ```
 
+## 2026-08-08T15:30:00Z — FRAMEWORK-OPTIMIZE-15 增量门禁记录（全量 quality 按用户指示豁免）
+
+```text
+用户指令：继续进行优化，不用做全量门禁。
+fmt：exit=0 fingerprint=`8d456a2ce09245c7`（compileall scripts src tests）。
+lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability + audit_log verify + audit_seal verify --allow-tail + archive_records --check + secret_scan；audit fully-sealed）。
+定向测试：59 项全绿——tests/unit/test_framework_optimize15.py（新增 10 项：正反例含绝对/反斜杠/NUL/穿越/空/类型边界、驱动器形式留给 containment 契约、3 模块统一引用守卫、无本地 part 段副本守卫）+ tests/unit/test_progress_watcher.py + tests/unit/test_cockpit.py + tests/unit/test_wps_launcher.py（skipped=2 为符号链接权限）。
+追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-15 行，traceability checked=126 missing=0（ENG-BASE 76）。
+```
+
 
 
 
@@ -10542,6 +10552,249 @@ audit seal: fully-sealed
         {
           "kind": "test",
           "path": "tests/unit/test_quality_gate_lock.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T14:38:45.980859Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T14:39:12.221928Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+-archiving-policy.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_records_archive.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_quality_gate_lock.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_run_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "RECORDS-ARCHIVE-3",
+      "title": "审计链归档安全（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"；关闭 RECORDS-ARCHIVE-2 安全审查 Medium 1）：`records_archive.py` 新增 `ARCHIVABLE_KINDS=(\"verification\",\"decisions\")` + `archivable()` 单一事实源（audit 不在可归档范围）；`archive_records.py --check/--apply` 只处理可归档种类，audit（tool-audit.jsonl）超策略时打印\"需专用重锚定流程（未实现）\"并失败关闭拒绝触碰（--apply 非零退出），循环内防御性 assert 防未来误加 audit；`over_policy_size(\"audit\", ...)` 保留为纯监控指标；策略文档明确 audit 归档不在通用工具范围；全链哈希同步（python-script-lock.tsv / make.cs ScriptInventorySha256 / toolchain-lock script_inventory+source_sha256，control.pyz 不涉及）",
+      "code": [
+        "src/coevo/records_archive.py",
+        "scripts/archive_records.py",
+        "docs/process/records-archiving-policy.md",
+        "docs/dependencies/python-script-lock.tsv",
+        "scripts/tool-shims/make.cs",
+        "docs/dependencies/toolchain-lock.json"
+      ],
+      "tests": [
+        "tests/unit/test_records_archive.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/records_archive.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/archive_records.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/process/records-archiving-policy.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_records_archive.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "REVIEW-SANDBOX-2",
+      "title": "独立审查沙箱治理修订（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"；消除 RECORDS-ARCHIVE-2 独立复核发现的治理漂移）：`independent-review-governance.md` §2/§7 重写验证口径——完整质量门禁（含 GmSSL/opencode 依赖真实工具链的用例）在**主工作树**钉扎提交上执行并作为权威放行证据，沙箱承担守卫校验（violations=[]）+ 静态审阅 + fmt/lint/单元/定向复核；文档明确 junction 挂载 .tools 被\"拒绝 reparse point\"加固拦截、复制 .tools 无法复现 GmSSL 助手/DLL 交互（GMH-E-MAGIC）与 opencode 配置解析，沙箱内 crypto 用例失败按环境差异记录不当作缺陷；`review_sandbox.py` 模块 docstring 同步口径",
+      "code": [
+        "docs/process/independent-review-governance.md",
+        "scripts/review_sandbox.py"
+      ],
+      "tests": [
+        "tests/unit/test_review_sandbox.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/process/independent-review-governance.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/review_sandbox.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_review_sandbox.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "RECORDS-ARCHIVE-4",
+      "title": "门禁自维护 VERIFICATION 归档（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：`quality_gate.py` 新增 `_trim_records_to_policy()`——VERIFICATION 追加后复用 `archive_records.py --apply` 就地裁剪 verification/decisions（audit 仍被 RECORDS-ARCHIVE-3 排除），记录始终 ≤ 策略容量且无需人工 --apply；trim 失败隔离（不使门禁失败）由下一次 lint --check 兜底；trim 摘要追加到 VERIFICATION 留痕；重建 control.pyz（内嵌 quality_gate 同步）并全链哈希同步（python-script-lock.tsv / make.cs ScriptInventorySha256+ControlArchiveSha256 / toolchain-lock control_archive+script_inventory+source_sha256）；策略文档补充自维护说明",
+      "code": [
+        "scripts/quality_gate.py",
+        "docs/process/records-archiving-policy.md",
+        "docs/dependencies/python-script-lock.tsv",
+        "scripts/tool-shims/make.cs",
+        "docs/dependencies/toolchain-lock.json",
+        ".tools/control/control.pyz"
+      ],
+      "tests": [
+        "tests/unit/test_quality_gate_lock.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/process/records-archiving-policy.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".tools/control/control.pyz",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_quality_gate_lock.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-HELPER-1",
+      "title": "GmSSL crypto-provider 助手编译缓存（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：`invoke-gmssl-crypto.ps1` 按锁定 source_sha256 缓存编译产物（`.tools/runtime/gmssl-crypto-helper/cache/helper-<sha>.exe`）+ 旁路 `.sha256` 哈希校验——命中直接复用（Open-CoevoLockedFile 按旁路哈希锁定）、损坏/缺失自愈重编译、未命中现场编译且当前调用行为不变（唯一命名助手 + finally 清理）；缓存安装尽力而为且原子（tmp→校验→rename→写旁路），失败不影响当前调用；同步 toolchain-lock `gmssl_prototype_provider.helper.launcher` size/sha256（Python 侧 gmssl_provider 按 lock 校验启动器）；安全取舍（单份持久化可写二进制 + 旁路校验，本地信任模型一致）记录于 approved-crypto-provider-path.md §9",
+      "code": [
+        "scripts/invoke-gmssl-crypto.ps1",
+        "docs/dependencies/toolchain-lock.json",
+        "docs/dependencies/approved-crypto-provider-path.md"
+      ],
+      "tests": [
+        "tests/unit/test_gmssl_provider_retry.py",
+        "tests/integration/test_gmssl_prototype_provider.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/invoke-gmssl-crypto.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/approved-crypto-provider-path.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_gmssl_provider_retry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_gmssl_prototype_provider.py",
           "exists": true
         }
       ],
