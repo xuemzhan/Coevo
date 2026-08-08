@@ -1,5 +1,20 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-13 登记并开始执行（共享 64-hex 正则叶子）
+
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-13`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-12]）：64-hex 正则 `^[0-9a-f]{64}$` 在 7 个模块重复
+  （cockpit / progress_capture models+watcher / report / framework a2a+plan+
+  memory），`src/coevo/ids.py` 扩展 `HEX_64` + `is_hex_64`（fail-closed）统一
+  引用（与 OPTIMIZE-11 safe-id 同模式）；清理未使用 re/Final 注解；
+  root_modules.md 更新。切片计划：`docs/plans/FRAMEWORK-OPTIMIZE-13-slice.md`。
+  STATE 切换至 ENG-BASE / FRAMEWORK-OPTIMIZE-13。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-12 完成收尾（framework 内部 canonical 收敛；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-12`（ENG-BASE）。实现提交：`acb39a4`；
