@@ -3,11 +3,11 @@
   "iteration": 30,
   "current_story": "ENG-BASE",
   "current_item": "FRAMEWORK-DOCS-1",
-  "phase": "plan",
-  "status": "in-progress",
+  "phase": "decide",
+  "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "ffafaf35bb87b1ce867a6a702d5f42823631e393",
+  "last_verified_commit": "398b6e95ef12d1029cad0d5cffd3f8d15d4e1df5",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T23:51:21.418470Z"
+  "updated_at": "2026-08-07T23:58:32.297481Z"
 }

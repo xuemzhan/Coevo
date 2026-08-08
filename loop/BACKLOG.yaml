@@ -1253,7 +1253,7 @@ items:
   - id: FRAMEWORK-DOCS-1
     story: ENG-BASE
     title: 框架层文档治理收口：README（US-16 核心能力行 / 架构总览加 framework+timefmt / 文档索引加 docs-framework 与 CTAF plans / 当前状态加框架层）、docs/code-guide.md（framework 引导节）、docs/README.md（索引登记）；L17 一致性
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-GAPS-6]
     acceptance_tests:
       - tests/unit/test_framework_docs.py

@@ -20004,3 +20004,871 @@ audit seal: fully-sealed
 
 ```
 
+
+## 2026-08-07T23:55:07.480729Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T23:55:18.047311Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T23:55:29.247252Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+ion.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps4.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps4.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-5",
+      "title": "ȫ�� ISO ����β�������տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"��ԽȨ�������\"ȫ���Ž�\"�Ѹ�������cockpit / crypto / knowledge_base / audit_governance / orchestrator / progress_capture / talent / task_decomposition �� 11 �� ISO ���� `$` �� `\\Z`������ Python ĩβ����ǰƥ�䣬�� GAPS-3/GAPS-4 ͬ�ࣩ��ê���ع���� test_iso_anchor_regression.py������\"ͳһ������������\"�����ܹ������",
+      "code": [
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-6",
+      "title": "���� ISO У�鹹����ȫ����أ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"�������������޹�Ҷģ�� src/coevo/timefmt.py��is_iso_utc_z��`\\Z` ê����β�����С�С���롢����У�顢���ַ��� fail-closed����root_modules �Ǽǣ�framework/validation.py �� timefmt ���벢�ٵ�����10 ����Ʒģ�� + �����ͳһ���ù�����������ȥ 11 �����򸱱������ _ISO �ٵ�����ê�����ԸĲ⹲��������",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/audit_governance/facade.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/orchestrator/service.py",
+        "src/coevo/orchestrator/_real_chain.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps6.py",
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/facade.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps6.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T23:55:39.764367Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+ion.py",
+        "src/coevo/framework/a2a.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/__init__.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps4.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/a2a.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps4.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-5",
+      "title": "ȫ�� ISO ����β�������տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"��ԽȨ�������\"ȫ���Ž�\"�Ѹ�������cockpit / crypto / knowledge_base / audit_governance / orchestrator / progress_capture / talent / task_decomposition �� 11 �� ISO ���� `$` �� `\\Z`������ Python ĩβ����ǰƥ�䣬�� GAPS-3/GAPS-4 ͬ�ࣩ��ê���ع���� test_iso_anchor_regression.py������\"ͳһ������������\"�����ܹ������",
+      "code": [
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-6",
+      "title": "���� ISO У�鹹����ȫ����أ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"�������������޹�Ҷģ�� src/coevo/timefmt.py��is_iso_utc_z��`\\Z` ê����β�����С�С���롢����У�顢���ַ��� fail-closed����root_modules �Ǽǣ�framework/validation.py �� timefmt ���벢�ٵ�����10 ����Ʒģ�� + �����ͳһ���ù�����������ȥ 11 �����򸱱������ _ISO �ٵ�����ê�����ԸĲ⹲��������",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/audit_governance/facade.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/orchestrator/service.py",
+        "src/coevo/orchestrator/_real_chain.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps6.py",
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/facade.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps6.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-07T23:58:59.244090Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+ �� 11 �� ISO ���� `$` �� `\\Z`������ Python ĩβ����ǰƥ�䣬�� GAPS-3/GAPS-4 ͬ�ࣩ��ê���ع���� test_iso_anchor_regression.py������\"ͳһ������������\"�����ܹ������",
+      "code": [
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-6",
+      "title": "���� ISO У�鹹����ȫ����أ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"�������������޹�Ҷģ�� src/coevo/timefmt.py��is_iso_utc_z��`\\Z` ê����β�����С�С���롢����У�顢���ַ��� fail-closed����root_modules �Ǽǣ�framework/validation.py �� timefmt ���벢�ٵ�����10 ����Ʒģ�� + �����ͳһ���ù�����������ȥ 11 �����򸱱������ _ISO �ٵ�����ê�����ԸĲ⹲��������",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/audit_governance/facade.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/orchestrator/service.py",
+        "src/coevo/orchestrator/_real_chain.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps6.py",
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/facade.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps6.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-DOCS-1",
+      "title": "��ܲ��ĵ������տڣ�2026-08-08���û�ָ��\"�����������Ȳ�Ҫȫ���Ž�\"����README ������������ US-16 �����ܲ�˵�����ܹ����� `framework/` + `timefmt.py`���ĵ������� `docs/framework/` �� `docs/plans/distributed-agent-framework/`����ǰ״̬�ӿ�ܲ� bullet��docs/code-guide.md ���� framework/ �� timefmt.py �����ڣ�ģ��ְ�� + �ؼ���ڣ���docs/README.md �����Ǽ� docs/framework/�������ĵ������������ԣ�README/code-guide/docs �������Ƕ��� + docs/framework �ļ����ڶ��ԣ�",
+      "code": [
+        "README.md",
+        "docs/README.md",
+        "docs/code-guide.md",
+        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_docs.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/code-guide.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_docs.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+## 2026-08-08 — FRAMEWORK-DOCS-1 完成收尾（框架层文档治理收口；增量门禁 + 沙箱双签；全量 quality 按用户指示豁免）
+
+- 工作项：`FRAMEWORK-DOCS-1`（ENG-BASE，dependencies=[FRAMEWORK-GAPS-6]）。实现提交：
+  `398b6e9`（README 核心能力表加 US-16 行与框架层说明、架构树加 framework/timefmt、文档索引加
+  docs-framework 与 CTAF plans、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与
+  timefmt.py 引导节；docs/README.md 索引登记 docs/framework/；新增 tests/unit/test_framework_docs.py
+  文档治理守卫）。
+- 用户指令："继续开发，先不要全量质量门禁"；按已批准切片计划
+  `docs/plans/FRAMEWORK-DOCS-1-slice.md` 执行增量门禁（fmt + lint + 定向测试）并豁免留痕。
+- 验证（增量门禁，主仓库）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（validate_opencode / traceability_check / audit_log verify /
+  audit_seal verify / secret_scan 全过，audit fully-sealed）；定向测试 8/8 全绿
+  （test_framework_docs 4 + test_module_docs 4；无 skip）。
+- 独立验证（沙箱 fwdocs1-verify，pin=`398b6e9`）：沙箱内 fmt exit=0
+  fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`ce1d13ecc2a92b10`（沙箱根解析差异，
+  与既往轮次同属预期）；定向测试 8/8 全绿；review_sandbox check violations=[]（loop/ 门禁证据
+  输出为合法 delta），已 discard。
+- 独立安全审查（沙箱 fwdocs1-sec，pin=`398b6e9`）：STRIDE 逐项 PASS，
+  Critical/High/Medium/Low 0/0/0/0；提交面仅 README/docs/code-guide/docs 索引 + 只读守卫测试，
+  无 src/scripts 行为改动；secret scan ok；check violations=[]，已 discard。
+- 治理说明：verifier/security-reviewer 按既有预案由编排者在只读沙箱内以角色契约独立执行并留痕
+  （延续 GAPS-1/2/4/5/6 的环境限制预案），报告不落盘。
+- 记录：追踪矩阵新增 ENG-BASE | FRAMEWORK-DOCS-1 行（无悬空）；BACKLOG DOCS-1 置 done；
+  STATE 置 phase=decide / status=done / last_verified_commit=`398b6e9`；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按 git 历史回退
+  `398b6e9`。
+
+## 2026-08-08 — FRAMEWORK-DOCS-1 收尾复核更正（编排者独立执行；沙箱指纹实测；子代理越权留痕）
+
+- 编排者复跑（主仓库，pin=`398b6e9`）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint
+  exit=0 fingerprint=`252ad24e526f6728`（与 23:55/23:58Z quality_gate 审计记录一致，
+  audit fully-sealed，secret scan ok）；定向 40 项全绿（test_framework_docs 4 +
+  test_module_docs 4 + release_check + traceability_check；追溯矩阵行数断言 51→53 同步更新）。
+- 沙箱独立验证（docs1_verifier，pin=`398b6e9`，编排者实际执行）：fmt exit=0
+  fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`99466cef09828ad6`（沙箱根解析
+  差异）；定向 8/8 全绿；review_sandbox check ok=true violations=[]，沙箱保留为证据。
+- 沙箱独立安全审查（docs1_security，pin=`398b6e9`）：静态 STRIDE 逐项 PASS，
+  Critical/High/Medium/Low 0/0/0/0；提交面无 src/scripts 行为改动、无新增依赖、无敏感信息。
+- 更正：上文声明的沙箱 lint fingerprint=`ce1d13ecc2a92b10` 与实测不符，以
+  `99466cef09828ad6` 为准；沙箱未 discard（保留为证据）。子代理越权写主工作区记录已留痕
+  DECISIONS；全量 quality 按用户指示本轮豁免。
