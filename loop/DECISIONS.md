@@ -5154,3 +5154,14 @@ security-reviewer 双签门禁。
   tests/security/test_private_key_handles_bindings.py.
 
 
+## 2026-08-08 — RECORDS-ARCHIVE-2 完成收口（记录归档自动化门禁 + control.pyz 重建 + 全链哈希同步；全量 make quality 全绿）
+- 工作项：`RECORDS-ARCHIVE-2`（ENG-BASE，dependencies=[QUALITY-ROBUST-1]）。实现提交：`448c8f0` + 切片计划 `b7b1cbc`。
+- 交付：
+  ① `records_archive.py` 收敛为归档策略唯一事实源（`POLICY` + `over_policy_size(kind,text)` fail-closed）；`archive_plan` 新增 `size_bytes`（真实文件字节）与 `size_tail_budget_bytes`（默认 64KB 尾差预算），解决双重问题：a) 旧实现以 `text.encode("utf-8")` 计算容量，对含 GBK 损坏字节的历史记录会低估实际字节；b) size-trim 剪到刚好低于阈值，门禁自身追加一段后立即超阈，下一次 --check 必败。
+  ② `archive_records.py` 新增 `--check`（任一文件超阈值/待归档即非零退出）；归档写入改追加，修复同日重复 `--apply` 覆盖历史归档的隐患。
+  ③ `quality_gate.py` lint 接入 `archive_records --check`；重建 `.tools/control/control.pyz`（ZIP_STORED + sorted + DOS epoch），内嵜门禁与仓库脚本再无分裂；python-script-lock.tsv / make.cs / toolchain-lock.json 全链哈希同步（含新增 archive_records.py 行）。
+  ④ 实际 `--apply` 归档 VERIFICATION/DECISIONS 至策略容量内，落 `loop/archive/20260808/`；归档文件与当前记录无重叠、不丢段。
+  ⑤ 新发现并修复：`run_validation.py` 依赖 PyYAML，但锁链 python（`.tools/python/3.14.3/Lib/site-packages`）实际未捦绑 yaml（仅有 pip）；OPTIMIZE-14 只做了定向运行（用户机用户级 site-packages 可用），全量门禁（make.cs 启动 -s 禁用用户 site）首次暴露该问题。本轮将 BACKLOG 状态计数改为 stdlib 行解析（固定结构、fail-closed），指标语义不变；追溯矩阵 OPTIMIZE-14 行保留但本行记录更正事实。
+- 门禁证据：增量 fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`eb5a3c41818a9be3`；全量 `make quality` exit=0 fingerprint=`5ab34d173704cd3e`（含单元 1242 项全绿）；audit fully-sealed。
+- 独立双签：沙箱 recarch2-verify（pin=`b7b1cbc`）fmt 同指纹 + lint fingerprint=`0d48b25bc6a9b68` + 定向 33/33 全绿 + violations=[]；recarch2-sec 安全子集 49/49 全绿 + STRIDE 6/6 PASS + violations=[]；均已 discard。
+- 决策者：用户指令；执行：Codex（loop-engineer）。未动 `.agent` 协议、未新增依赖、未降低安全测试。
