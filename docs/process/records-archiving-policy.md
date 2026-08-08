@@ -22,6 +22,13 @@ python scripts/archive_records.py --apply     # 写入 loop/archive/YYYYMMDD/
 `--check` 已接入质量门禁 `lint` 阶段（`quality_gate.py`），任何记录文件
 超出容量阈值或有待归档章节时门禁直接失败，提示先执行 `--apply`。
 
+**audit 种类不在通用归档范围内（RECORDS-ARCHIVE-3）**：`loop/tool-audit.jsonl`
+是只增不改的审计链，裁剪会使签名封缄失效（audit tail deletion），而专用
+重锚定流程尚未实现；`archive_records.py --check/--apply` 只处理
+`verification` 与 `decisions` 两类，audit 超策略时工具打印提示并拒绝触碰
+（`--apply` 非零退出）。审计容量以 `audit_key_health` / 封缄验证为准，
+重锚定流程留作后续工作项。
+
 归档产物保留在 `loop/archive/YYYYMMDD/`，保留期 2 年；删除归档需业务负责人
 单独授权。归档操作只移动旧的记录文本，不触碰 `loop/audit-head.json/.p7s`
 签名链与 `loop/STATE.json`；审计封存以 audit 链为准，不受记录归档影响。

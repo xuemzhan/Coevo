@@ -3,11 +3,15 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from src.coevo.records_archive import (
+    ARCHIVABLE_KINDS,
     POLICY,
+    archivable,
     archive_plan,
     over_policy_size,
     split_audit_lines,
@@ -41,6 +45,58 @@ class ArchivePolicyTests(unittest.TestCase):
         script = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(script)
         self.assertIs(script.POLICY, POLICY)
+
+
+class ArchivableKindTests(unittest.TestCase):
+    """RECORDS-ARCHIVE-3: the generic archive tool must never touch audit."""
+
+    def test_audit_is_excluded_from_archivable_kinds(self):
+        self.assertEqual(("verification", "decisions"), ARCHIVABLE_KINDS)
+        self.assertNotIn("audit", ARCHIVABLE_KINDS)
+        self.assertTrue(archivable("verification"))
+        self.assertTrue(archivable("decisions"))
+        self.assertFalse(archivable("audit"))
+        self.assertFalse(archivable("bogus"))
+
+    def test_audit_policy_metric_still_available(self):
+        # over_policy_size stays a pure metric for monitoring even though the
+        # generic tool refuses to act on audit.
+        self.assertTrue(
+            over_policy_size("audit", "x" * (POLICY["audit"]["size"] + 1))
+        )
+        self.assertFalse(over_policy_size("audit", "x" * 1000))
+
+    def test_apply_refuses_audit_over_policy_without_touching_chain(self):
+        spec = importlib.util.spec_from_file_location(
+            "archive_records", SCRIPTS / "archive_records.py"
+        )
+        script = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(script)
+        with tempfile.TemporaryDirectory() as tmp:
+            audit = Path(tmp) / "tool-audit.jsonl"
+            audit.write_text(
+                "x" * (POLICY["audit"]["size"] + 1), encoding="utf-8"
+            )
+            before = audit.read_bytes()
+            with mock.patch.dict(script.FILES, {"audit": audit}):
+                rc = script.main(["--apply"])
+            self.assertNotEqual(0, rc, "apply must refuse over-policy audit")
+            self.assertEqual(before, audit.read_bytes())
+
+    def test_check_reports_audit_over_policy_but_stays_green(self):
+        spec = importlib.util.spec_from_file_location(
+            "archive_records", SCRIPTS / "archive_records.py"
+        )
+        script = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(script)
+        with tempfile.TemporaryDirectory() as tmp:
+            audit = Path(tmp) / "tool-audit.jsonl"
+            audit.write_text(
+                "x" * (POLICY["audit"]["size"] + 1), encoding="utf-8"
+            )
+            with mock.patch.dict(script.FILES, {"audit": audit}):
+                rc = script.main(["--check"])
+            self.assertEqual(0, rc, "--check only gates archivable kinds")
 
 
 class OverPolicySizeTests(unittest.TestCase):

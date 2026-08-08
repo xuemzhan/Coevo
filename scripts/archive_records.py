@@ -17,7 +17,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.coevo.records_archive import POLICY, archive_plan  # noqa: E402
+from src.coevo.records_archive import (  # noqa: E402
+    ARCHIVABLE_KINDS,
+    POLICY,
+    archivable,
+    archive_plan,
+    over_policy_size,
+)
 
 
 FILES = {
@@ -43,7 +49,31 @@ def main(argv: list[str] | None = None) -> int:
     archive_dir = ROOT / "loop" / "archive" / date_stamp
     pending: list[str] = []
 
-    for kind, path in FILES.items():
+    # Audit-chain guard (RECORDS-ARCHIVE-3): tool-audit.jsonl is append-only
+    # and seal-protected. Trimming it would break the signed audit head
+    # (audit tail deletion) and there is no re-anchor flow yet, so the tool
+    # reports the condition but refuses to touch it.
+    audit_path = FILES["audit"]
+    if audit_path.is_file():
+        audit_over = over_policy_size(
+            "audit", audit_path.read_text(encoding="utf-8", errors="replace")
+        )
+        if audit_over:
+            print(
+                "[audit] over archiving policy but NOT actionable via this tool: "
+                "audit archival requires a dedicated re-anchor flow (not "
+                "implemented); refusing to touch loop/tool-audit.jsonl"
+            )
+            if apply:
+                print(
+                    "apply refused: the audit chain must remain append-only",
+                    file=sys.stderr,
+                )
+                return 3
+
+    for kind in ARCHIVABLE_KINDS:
+        assert archivable(kind), f"{kind} must stay outside the archive tool"
+        path = FILES[kind]
         if not path.is_file():
             print(f"[skip] {kind}: missing {path}")
             if check:

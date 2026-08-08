@@ -20,6 +20,18 @@ POLICY: dict[str, dict[str, int]] = {
     "audit": {"keep_recent": 2000, "min_age_days": 30, "size": 5_000_000},
 }
 
+# Kinds the generic archive tool may touch. The audit chain
+# (``loop/tool-audit.jsonl``) is append-only and seal-protected: trimming it
+# would invalidate the signed audit head without a dedicated re-anchor flow
+# (RECORDS-ARCHIVE-3), so it is deliberately excluded here and the tool
+# refuses to archive it.
+ARCHIVABLE_KINDS: tuple[str, ...] = ("verification", "decisions")
+
+
+def archivable(kind: str) -> bool:
+    """Return whether ``kind`` is actionable by the generic archive tool."""
+    return kind in ARCHIVABLE_KINDS
+
 
 _VERIFICATION_HEADER = re.compile(r"^(\d{4}-\d{2}-\d{2}T[^\s]+Z)")
 _DECISIONS_HEADER = re.compile(r"^(\d{4}-\d{2}-\d{2})")
