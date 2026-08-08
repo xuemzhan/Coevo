@@ -1,5 +1,29 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-7 登记遗漏收尾补齐（真实链失败收尾路径去重；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-7`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-6]）。
+  实现提交：`435eff6`（_real_chain.py 提取 _escalate_and_finish，dispatch 3 处
+  失败收尾单一化，行为不变）；切片计划/门禁记录提交：`a078cb5`。
+- 流程偏差留痕：本轮编排者（Codex）实现后遗漏了 BACKLOG/DECISIONS/STATE 登记，
+  收尾提交时发现；本条目补登记并完成收尾（BACKLOG 置 done、STATE 经受控事务置
+  OPTIMIZE-7 done、追溯断言 60→61、矩阵新增行）。
+- 用户指令：继续（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 验证（增量门禁，主仓）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1204 项 +
+  安全套件 99/99 全绿；demo e2e 3/3。
+- 独立复核（沙箱，pin=`435eff6`）：fwopt7-verify（fmt/lint/定向 28 全绿，
+  violations=[]）+ fwopt7-sec（STRIDE PASS，Critical/High/Medium/Low 0/0/0/0；
+  ESCALATED 语义与 fail-closed 保留、tests/security 零改动），已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-7 行（无悬空）；追溯断言
+  60→61；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-7 / last_verified_commit=`435eff6`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `435eff6`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-6 完成收尾（demo 组合根阶段化收敛；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-6`（ENG-BASE）。实现提交：`1fd6908`；

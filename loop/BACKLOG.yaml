@@ -1344,3 +1344,13 @@ items:
       - tests/unit/test_framework_optimize6.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-7（2026-08-08 用户指令"继续"；登记遗漏已收尾补齐留痕） ----------
+  - id: FRAMEWORK-OPTIMIZE-7
+    story: ENG-BASE
+    title: 真实链失败收尾路径去重：orchestrator/_real_chain.py 提取 _escalate_and_finish，dispatch_real_chain 的 3 处失败收尾（agent 不可用 / facade 失败 / facade 重试失败）单一化，行为不变（ESCALATED 语义与审计存储一致）；守卫测试钉住失败 detail 单一调用点
+    status: done
+    dependencies: [FRAMEWORK-OPTIMIZE-6]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize7.py
+    security_review: true
+    protocol_review: false

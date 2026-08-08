@@ -233,6 +233,33 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-7 完成收尾（真实链失败收尾路径去重；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-7`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-6]）。
+  实现提交：`435eff6`（_real_chain.py 提取 _escalate_and_finish，dispatch 3 处
+  失败收尾单一化，行为不变）；登记提交：`a078cb5`（切片计划、BACKLOG ready、
+  DECISIONS、STATE 事务）。
+- 用户指令：继续（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1204 项 OK
+  （skipped=3，含新增 2 项）；安全套件 99/99 全绿；demo e2e 3/3（97.9s）。
+- 沙箱独立复核（pin=`435eff6`）：
+  * verifier（fwopt7-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `c377a441e0d6d1f2`（沙箱根解析差异属预期）；定向 28/28 全绿（optimize7 +
+    orchestrator）；review_sandbox check violations=[]，已 discard。
+  * security-reviewer（fwopt7-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：ESCALATED 状态与"human escalation required"fail-closed 语义
+    保留、无 eval/exec、变更面仅 _real_chain.py + 新测试、tests/security 零改动；
+    check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-7 行（无悬空）；追溯断言
+  60→61；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-7 / last_verified_commit=`435eff6`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `435eff6`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-6 完成收尾（demo 组合根阶段化收敛；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-6`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-5]）。
