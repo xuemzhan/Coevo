@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-2 登记并开始执行（共享时间生成器全仓落地）
+
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-2`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-GAPS-6]）：`src/coevo/timefmt.py` 新增 `now_utc_iso_z()` 生成器
+  （依赖无关叶子模块，格式与既有副本完全一致），收敛 13 处私有副本
+  （knowledge_base/audit_governance/cockpit/demo_support/task_flow/protocol×4/
+  progress_capture/task_decomposition/talent/crypto）与 3 处直接内联
+  （identity×3）；公开导出名（cockpit/sessions、demo_support）保留名称仅改来源；
+  行为与 wire 字节不变；新增全仓源码守卫防回归。切片计划：
+  `docs/plans/FRAMEWORK-OPTIMIZE-2-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-2。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-1 完成收尾（基于框架优化原应用；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-1`（ENG-BASE）。实现提交：`8777542`；
