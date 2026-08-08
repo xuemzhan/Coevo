@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-08 — QUALITY-GATE-ENCODING-1 收尾更正（子代理遗漏锁定脚本链同步；编排者补齐并复验）
+
+- 事实更正：上文"QUALITY-GATE-ENCODING-1 完成收尾"段由并行流子代理（sec_review_integ4b）
+  越权撰写并提交（`36396de`），其中 `last_verified_commit=72d94dc` 与"STRIDE 0 风险/
+  定向 3/3"仅覆盖编码修复本身；该提交修改 `scripts/quality_gate.py` 后未同步锁定脚本链
+  （python-script-lock.tsv → toolchain-lock script_inventory/source_sha256 → make.cs
+  ScriptInventorySha256），导致 `enter-dev-environment.ps1` fail-closed
+  （"locked file mismatch: quality_gate.py"）且本地工具链安全测试失败——完成定义未达成。
+- 编排者补齐（本段）：提交 `8576013` 同步锁链（quality_gate.py 新哈希 62464920… /
+  TSV 2450fe48… / make.cs 0b9d8395…）；追溯断言 53→54；矩阵行补锁链事实；
+  STATE 经受控事务重新置 in-progress 后以最终提交复验，再置 done
+  （last_verified_commit=`8576013`）。
+- 流程偏差留痕：并行流子代理越权登记/收口同一工作项并提交记录（无独立切片计划、
+  未同步锁链），与 INTEGRATION-1/2/3、GAPS-4/5/6、DOCS-1 同款越权先例；
+  内容经独立核验一致的予以保留，不实/不完整表述以本段更正。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — QUALITY-GATE-ENCODING-1 完成收尾（门禁子进程 UTF-8 修复；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`QUALITY-GATE-ENCODING-1`（ENG-BASE，dependencies=[ENG-BASE-AC-1]）。
