@@ -46,6 +46,52 @@ class DemoSigner:
         if not hmac.compare_digest(self.sign(content), signature):
             raise _DemoAuditAnchorError("demo signature mismatch")
 
+
+class DemoRegistrationVerifier:
+    """DEMO-ONLY registration signature verifier (explicitly NOT production).
+
+    Returns ``True`` for any well-formed signature; the manifest-checker still
+    enforces structure, capability closed set, crypto scope, spec_hash and
+    policy_ref binding *format*.  Production MUST inject a real SM2 verifier
+    backed by the certificate chain.
+    """
+
+    def verify(self, signer_cert_der: bytes, data: bytes, signature: bytes) -> bool:
+        return True
+
+
+class DemoRegistrationSigner:
+    """DEMO-ONLY registration signer (explicitly NOT production).
+
+    Produces a deterministic digest so the manifest's ``policy_ref.signature``
+    satisfies the binding *format*; production MUST use a real SM2 signer
+    whose public key is bound to the certificate chain.
+    """
+
+    def sign(self, data: bytes) -> bytes:
+        return hashlib.sha256(data).digest()
+
+
+class DemoRegistrationResolver:
+    """DEMO-ONLY certificate resolver returning a fixed demo cert DER."""
+
+    def __init__(self) -> None:
+        self.der = b"DEMO-REGISTRATION-CERT-DER"
+
+    def resolve_by_fingerprint(self, fingerprint_hex: str) -> bytes | None:
+        return (
+            self.der
+            if hashlib.sha256(self.der).hexdigest() == fingerprint_hex
+            else None
+        )
+
+
+class DemoPolicyRegistry:
+    """DEMO-ONLY policy registry (INTERACTIVE 1.0)."""
+
+    def has_policy_version(self, profile: str, version: str) -> bool:
+        return (profile, version) == ("INTERACTIVE", "1.0")
+
 class DemoFreshnessAuthority:
     """In-memory stand-in for the identity freshness authority."""
 

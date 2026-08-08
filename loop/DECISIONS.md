@@ -1,5 +1,17 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-4 登记并开始执行（注册门接入 + Manifest 构建器）
+
+- 用户指令："继续开发，但先不要全量质量门禁检查"。
+- 决策：登记 `FRAMEWORK-INTEGRATION-4`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-INTEGRATION-3]）：framework/integration.py 新增
+  build_registration_manifest（纯函数），app/pipeline.py 用 guard_registration
+  对 4 个 demo 智能体做注册门；demo 验签/证书/策略适配器显式标注非生产，
+  生产必须注入真实 SM2 验签；STATE 切换至 ENG-BASE / FRAMEWORK-INTEGRATION-4。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量
+  quality；豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-DOCS-1 收尾更正（编排者独立复核；子代理越权写记录留痕；沙箱指纹实测更正）
 
 - 事实更正：上一段"独立验证（沙箱 fwdocs1-verify，pin=`398b6e9`）：沙箱内 lint exit=0

@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-DOCS-1",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "FRAMEWORK-INTEGRATION-4",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "398b6e95ef12d1029cad0d5cffd3f8d15d4e1df5",
   "blocking_issue": "",
-  "updated_at": "2026-08-07T23:58:32.297481Z"
+  "updated_at": "2026-08-08T00:07:53.161042Z"
 }

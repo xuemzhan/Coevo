@@ -149,6 +149,25 @@ def run_demo_pipeline(
         TalentRecommenderService(),
         TalentPool("pool.1", "1.0", (talent,)),
     )
+    # FRAMEWORK-INTEGRATION-4: registration gate -- agents may only enter the
+    # registry after the framework manifest-checker accepts their manifest.
+    from src.coevo.app.demo_support import (
+        DemoPolicyRegistry,
+        DemoRegistrationResolver,
+        DemoRegistrationSigner,
+        DemoRegistrationVerifier,
+    )
+    from src.coevo.framework.integration import (
+        build_registration_manifest,
+        guard_registration,
+    )
+    from src.coevo.framework.manifest_checker import ManifestCheckInput
+
+    demo_reg_resolver = DemoRegistrationResolver()
+    demo_reg_verifier = DemoRegistrationVerifier()
+    demo_reg_signer = DemoRegistrationSigner()
+    demo_policy_registry = DemoPolicyRegistry()
+    registered: list[str] = []
     registry = AgentRegistry.empty()
     for agent_id, capability in (
         ("agent.task_flow_understanding", AgentCapability.TASK_FLOW_UNDERSTANDING),
@@ -156,6 +175,27 @@ def run_demo_pipeline(
         ("agent.team_recommendation", AgentCapability.TEAM_RECOMMENDATION),
         ("agent.task_package_build", AgentCapability.TASK_PACKAGE_BUILD),
     ):
+        manifest_bytes = build_registration_manifest(
+            agent_id,
+            capability.value,
+            display_name=capability.value,
+            signer_cert_fingerprint=hashlib.sha256(demo_reg_resolver.der).hexdigest(),
+            signer=demo_reg_signer.sign,
+        )
+        guard = guard_registration(
+            ManifestCheckInput(
+                manifest_bytes=manifest_bytes,
+                trusted_anchor_pubkey=b"DEMO-ANCHOR",
+            ),
+            policy_registry=demo_policy_registry,
+            cert_resolver=demo_reg_resolver,
+            signature_verifier=demo_reg_verifier,
+            inner_register=lambda manifest: registered.append(manifest.agent_id),
+        )
+        if not guard.accepted:
+            raise RuntimeError(
+                f"framework registration gate rejected {agent_id}: {guard.reason}"
+            )
         registry = registry.register(AgentRegistration(AgentSpec(
             agent_id, capability, capability.value, ("input",), ("output",)
         )))

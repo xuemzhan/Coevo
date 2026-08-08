@@ -19,6 +19,8 @@ except for the injected inner registration / dispatch calls.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
@@ -131,6 +133,69 @@ def guard_registration(
         manifest=result.validated_manifest,
         reason=None,
     )
+
+
+def build_registration_manifest(
+    agent_id: str,
+    capability: str,
+    *,
+    display_name: str | None = None,
+    semantic_version: str = "1.0.0",
+    policy_profile: str = "INTERACTIVE",
+    policy_version: str = "1.0",
+    crypto_scope: str = "mvp-prototype",
+    requires_human_confirmation: bool = True,
+    signer_cert_fingerprint: str,
+    signer: Any | None = None,
+) -> bytes:
+    """Build a canonical Agent Manifest for registration (pure).
+
+    ``spec_hash`` excludes the self-referential fields
+    (``metadata.spec_hash`` / ``policy_ref.spec_hash`` /
+    ``policy_ref.signature``).  ``signer`` (optional) receives the
+    ``spec_hash|fingerprint`` binding and returns the raw SM2 signature;
+    production callers MUST inject a real signer backed by the certificate
+    chain.
+    """
+
+    manifest: dict[str, Any] = {
+        "apiVersion": "coevo.framework/v1",
+        "kind": "Agent",
+        "metadata": {
+            "agent_id": agent_id,
+            "display_name": display_name or capability,
+            "semantic_version": semantic_version,
+        },
+        "spec": {
+            "capability": capability,
+            "requires_human_confirmation": requires_human_confirmation,
+        },
+        "policy_profile": policy_profile,
+        "policy_version": policy_version,
+        "policy_ref": {
+            "signer_cert_fingerprint": signer_cert_fingerprint,
+            "signature": "",
+        },
+        "security": {"crypto_scope": crypto_scope},
+        "audit": {"redact_in_audit": ["policy_profile"]},
+    }
+
+    def _canonical(obj: Any) -> bytes:
+        return json.dumps(
+            obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        ).encode("utf-8")
+
+    stripped = json.loads(json.dumps(manifest, ensure_ascii=True))
+    stripped["metadata"].pop("spec_hash", None)
+    stripped["policy_ref"].pop("spec_hash", None)
+    stripped["policy_ref"].pop("signature", None)
+    spec_hash = hashlib.sha256(_canonical(stripped)).hexdigest()
+    manifest["metadata"]["spec_hash"] = spec_hash
+    manifest["policy_ref"]["spec_hash"] = spec_hash
+    if signer is not None:
+        binding = (spec_hash + signer_cert_fingerprint).encode("ascii")
+        manifest["policy_ref"]["signature"] = signer(binding).hex()
+    return _canonical(manifest)
 
 
 def plan_to_chain(
