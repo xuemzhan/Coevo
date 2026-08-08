@@ -1324,3 +1324,13 @@ items:
       - tests/unit/test_framework_optimize4.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-5（2026-08-08 用户指令"基于框架，优化原来系统应用的代码实现……做全量门禁，成功后 push 到 github"） ----------
+  - id: FRAMEWORK-OPTIMIZE-5
+    story: ENG-BASE
+    title: real_chain_store 收敛到共享 canonical：canon.py 新增 allow_nan 参数（默认 False fail-closed），orchestrator/real_chain_store 的 canonical_json_bytes/canonical_digest 复用 canon（保留严格类型校验与 RealChainStoreError 语义，字节/摘要逐位不变）；全量门禁 + push
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-3]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize5.py
+    security_review: true
+    protocol_review: false
