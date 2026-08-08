@@ -29,6 +29,11 @@ python scripts/archive_records.py --apply     # 写入 loop/archive/YYYYMMDD/
 （`--apply` 非零退出）。审计容量以 `audit_key_health` / 封缄验证为准，
 重锚定流程留作后续工作项。
 
+**门禁自维护（RECORDS-ARCHIVE-4）**：`quality_gate.py` 每次追加 VERIFICATION
+记录后自动调用 `archive_records.py --apply` 就地裁剪 verification/decisions，
+使记录始终 ≤ 策略容量，无需人工介入；trim 失败隔离（不使门禁失败），由下一次
+lint `--check` 兜底；audit 仍不可被触碰。
+
 归档产物保留在 `loop/archive/YYYYMMDD/`，保留期 2 年；删除归档需业务负责人
 单独授权。归档操作只移动旧的记录文本，不触碰 `loop/audit-head.json/.p7s`
 签名链与 `loop/STATE.json`；审计封存以 audit 链为准，不受记录归档影响。

@@ -50,6 +50,39 @@ TARGETS={
 GO_TEST_ARGV=TARGETS["test"][-1]
 def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
 def fingerprint(argvs): return hashlib.sha256(json.dumps(argvs,separators=(",",":")).encode()).hexdigest()[:16]
+
+def _trim_records_to_policy(verification: Path = VERIFICATION) -> str:
+    """Self-maintain loop-record capacity after the gate appended VERIFICATION.
+
+    The gate grows ``VERIFICATION.md`` on every run; without self-trimming the
+    lint stage's ``archive_records --check`` would force a manual ``--apply``
+    once the file exceeds the policy cap. The generic archive tool is reused
+    (audit is excluded by RECORDS-ARCHIVE-3), so the audit chain is never
+    touched. Failures are isolated: a trim problem never takes the gate down
+    and is caught by the next lint ``--check``.
+
+    Returns a short human-readable note when records were archived, else "".
+    """
+    try:
+        process = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "archive_records.py"), "--apply"],
+            cwd=ROOT,
+            env=gate_env(),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+        )
+        combined = (process.stdout + process.stderr).strip()
+        if process.returncode != 0:
+            return f"trim failed (exit={process.returncode}): {combined[:300]}"
+        if "-> wrote" in combined or "[verification] archive" in combined or "[decisions] archive" in combined:
+            return combined.replace("\n", "; ")[:500]
+        return ""
+    except Exception as exc:  # noqa: BLE001 - never take the gate down on trim failure
+        return f"trim error: {type(exc).__name__}: {exc}"
+
 def run(target):
     try:
         with exclusive_lock(GATE_LOCK):
@@ -123,6 +156,10 @@ def _run_locked(target):
             output.append("audit seal: fully-sealed\n")
         except Exception as exc: rc=14; output.append("audit seal failed: "+str(exc)+"\n")
     with VERIFICATION.open("a",encoding="utf-8") as stream: stream.write(f"\n## {ts} — target=`{target}` fingerprint=`{fp}`\n- exit_code: `{rc}`\n```text\n{''.join(output)[-8000:]}\n```\n")
+    trim_note = _trim_records_to_policy()
+    if trim_note:
+        with VERIFICATION.open("a",encoding="utf-8") as stream:
+            stream.write(f"\n[gate] records self-trim: {trim_note}\n")
     print(json.dumps({"ok":rc==0,"exit_code":rc,"fingerprint":fp})); return rc
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument("--target",required=True,choices=[*TARGETS,"quality"])

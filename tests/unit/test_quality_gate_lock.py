@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import importlib.util
+import subprocess
 import sys
 import tempfile
 import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -44,6 +46,54 @@ class QualityGateLockTests(unittest.TestCase):
             "--check",
         ]
         self.assertIn(archive_check, lint)
+
+    def test_trim_invokes_archive_apply_and_returns_empty_when_nothing_to_do(self):
+        completed = subprocess.CompletedProcess(
+            [],
+            0,
+            stdout="[ok] verification: nothing to archive\n"
+                   "[ok] decisions: nothing to archive\n",
+            stderr="",
+        )
+        with mock.patch.object(subprocess, "run", return_value=completed) as run:
+            note = quality_gate._trim_records_to_policy()
+        self.assertEqual("", note)
+        argv = run.call_args[0][0]
+        self.assertIn("archive_records.py", argv[-2])
+        self.assertEqual("--apply", argv[-1])
+
+    def test_trim_returns_summary_when_records_are_archived(self):
+        completed = subprocess.CompletedProcess(
+            [],
+            0,
+            stdout=(
+                "[verification] archive 3 section(s): size-trimmed 3 kept section(s)\n"
+                "  -> wrote loop/archive/20260808/verification-20260808.txt\n"
+            ),
+            stderr="",
+        )
+        with mock.patch.object(subprocess, "run", return_value=completed):
+            note = quality_gate._trim_records_to_policy()
+        self.assertIn("archive", note)
+        self.assertIn("-> wrote", note)
+
+    def test_trim_failure_is_isolated_and_reported(self):
+        failed = subprocess.CompletedProcess([], 2, stdout="", stderr="boom")
+        with mock.patch.object(subprocess, "run", return_value=failed):
+            note = quality_gate._trim_records_to_policy()
+        self.assertIn("trim failed", note)
+        with mock.patch.object(
+            subprocess, "run", side_effect=OSError("spawn failed")
+        ):
+            note = quality_gate._trim_records_to_policy()
+        self.assertIn("trim error", note)
+
+    def test_trim_never_touches_audit_chain(self):
+        # RECORDS-ARCHIVE-3 excludes audit from the generic archive tool, so
+        # the gate's self-trim cannot trim tool-audit.jsonl.
+        from src.coevo.records_archive import ARCHIVABLE_KINDS
+
+        self.assertNotIn("audit", ARCHIVABLE_KINDS)
 
     def test_exclusive_lock_serializes_holders(self):
         with tempfile.TemporaryDirectory() as tmp:
