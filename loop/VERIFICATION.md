@@ -2968,6 +2968,16 @@ lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability 
 追溯矩阵新增 ENG-BASE | RECORDS-ARCHIVE-3 行，traceability checked=126 missing=0。
 ```
 
+## 2026-08-08T14:30:00Z — REVIEW-SANDBOX-2 增量门禁记录（全量 quality 按用户指示豁免）
+
+```text
+用户指令：继续进行优化，不用做全量门禁。
+fmt：exit=0 fingerprint=`8d456a2ce09245c7`（compileall scripts src tests）。
+lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability + audit_log verify + audit_seal verify --allow-tail + archive_records --check + secret_scan；audit fully-sealed）。
+定向测试：18 项全绿——tests/unit/test_review_sandbox.py（既有机制用例 + 新增 4 项 GovernanceDocTests：主树全量门禁权威证据 / 沙箱守卫+定向复核口径 / junction 与复制环境限制（reparse point、GMH-E-MAGIC、opencode、环境差异）/ review_sandbox.py 模块 docstring 同口径）。
+追溯矩阵新增 ENG-BASE | REVIEW-SANDBOX-2 行，traceability checked=126 missing=0（ENG-BASE 73）。
+```
+
 
 
 
@@ -11185,6 +11195,266 @@ oding=\"utf-8\"+errors=\"replace\"（loop_launcher / dev_environment_entry / sm2
         {
           "kind": "test",
           "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T14:13:02.426855Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T14:13:46.702266Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+ true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/benchmarks.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/benchmarks/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_benchmark_http.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_loop_launcher.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_sm2_test_pki_generation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_crypto_sm3.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_gmssl_prototype_provider.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_loop_environment.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_private_key_handles_bindings.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "RECORDS-ARCHIVE-2",
+      "title": "记录归档自动化门禁 + control.pyz 门禁入口同步（2026-08-08，用户指令\"继续\"）：① `records_archive.py` 收敛为归档策略唯一事实源（`POLICY` + `over_policy_size(kind,text)` fail-closed：未知 kind / 非字符串拒绝；`archive_plan` 新增真实文件字节 `size_bytes` 与尾差预算 `size_tail_budget_bytes`，size-trim 留余量避免 --apply 后紧贴阈值导致下一次 --check 必败）；② `archive_records.py` 新增 `--check` 门禁模式（任一记录文件超阈值/待归档即非零退出，fail-closed），归档写入改追加（同日重复 apply 不再覆盖历史归档）；③ `quality_gate.py` lint 阶段接入 `archive_records --check`；④ 重建 `.tools/control/control.pyz`（ZIP_STORED + sorted + DOS epoch）并全链哈希同步（python-script-lock.tsv / make.cs ScriptInventorySha256+ControlArchiveSha256 / toolchain-lock control_archive+script_inventory+source_sha256）；⑤ 实际 `--apply` 归档 VERIFICATION/DECISIONS 至策略容量内并落 20260808 归档；⑥ 修复 run_validation.py 对 PyYAML 的依赖（锁链 python 实际未捦绑 yaml，full gate 首次暴露），BACKLOG 状态计数改 stdlib 行解析保持指标语义",
+      "code": [
+        "src/coevo/records_archive.py",
+        "scripts/archive_records.py",
+        "scripts/quality_gate.py",
+        "scripts/run_validation.py",
+        "scripts/tool-shims/make.cs",
+        "docs/dependencies/python-script-lock.tsv",
+        "docs/dependencies/toolchain-lock.json",
+        "docs/modules/root_modules.md",
+        "docs/process/records-archiving-policy.md"
+      ],
+      "tests": [
+        "tests/unit/test_records_archive.py",
+        "tests/unit/test_quality_gate_lock.py",
+        "tests/unit/test_run_validation.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/integration/test_dev_environment_entry.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/records_archive.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/archive_records.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/run_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/process/records-archiving-policy.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_records_archive.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_quality_gate_lock.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_run_validation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "RECORDS-ARCHIVE-3",
+      "title": "审计链归档安全（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"；关闭 RECORDS-ARCHIVE-2 安全审查 Medium 1）：`records_archive.py` 新增 `ARCHIVABLE_KINDS=(\"verification\",\"decisions\")` + `archivable()` 单一事实源（audit 不在可归档范围）；`archive_records.py --check/--apply` 只处理可归档种类，audit（tool-audit.jsonl）超策略时打印\"需专用重锚定流程（未实现）\"并失败关闭拒绝触碰（--apply 非零退出），循环内防御性 assert 防未来误加 audit；`over_policy_size(\"audit\", ...)` 保留为纯监控指标；策略文档明确 audit 归档不在通用工具范围；全链哈希同步（python-script-lock.tsv / make.cs ScriptInventorySha256 / toolchain-lock script_inventory+source_sha256，control.pyz 不涉及）",
+      "code": [
+        "src/coevo/records_archive.py",
+        "scripts/archive_records.py",
+        "docs/process/records-archiving-policy.md",
+        "docs/dependencies/python-script-lock.tsv",
+        "scripts/tool-shims/make.cs",
+        "docs/dependencies/toolchain-lock.json"
+      ],
+      "tests": [
+        "tests/unit/test_records_archive.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/records_archive.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/archive_records.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/process/records-archiving-policy.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_records_archive.py",
           "exists": true
         }
       ],

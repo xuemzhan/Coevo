@@ -1476,10 +1476,9 @@ items:
   - id: REVIEW-SANDBOX-2
     story: ENG-BASE
     title: 独立审查沙箱治理修订：independent-review-governance.md §7 的 junction 挂载 .tools 与"拒绝 reparse point"安全加固冲突，且复制 .tools 无法复现 GmSSL 助手/opencode 测试；修订沙箱流程（主树全量门禁 + 沙箱守卫 + 定向复核口径）并同步文档/测试
-    status: ready
+    status: done
     dependencies: [RECORDS-ARCHIVE-2]
     acceptance_tests:
-      - tests/unit/test_loop_environment.py
-      - tests/security/test_local_toolchain_security.py
+      - tests/unit/test_review_sandbox.py
     security_review: true
     protocol_review: false

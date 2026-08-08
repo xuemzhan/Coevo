@@ -5206,6 +5206,25 @@ security-reviewer 双签门禁。
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — REVIEW-SANDBOX-2 完成收口（独立审查沙箱治理修订；增量门禁豁免全量）
+
+- 工作项：`REVIEW-SANDBOX-2`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-2]）。
+- 用户指令：继续进行优化，不用做全量门禁；按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality（豁免留痕）。
+- 交付：`independent-review-governance.md` §2/§7 重写验证口径——完整质量门禁
+  （含 GmSSL/opencode 依赖真实工具链的用例）只在主工作树钉扎提交上执行并作为
+  权威放行证据；沙箱承担守卫校验 + 静态审阅 + fmt/lint/单元/定向复核；文档明确
+  junction 挂载 .tools 被 reparse-point 加固拦截、复制 .tools 无法复现
+  GMH-E-MAGIC / opencode 配置解析，沙箱内 crypto 用例失败按环境差异记录；
+  `review_sandbox.py` 模块 docstring 同步口径。
+- 验证（增量门禁）：fmt exit=0 fingerprint=`8d456a2ce09245c7`；lint exit=0
+  fingerprint=`5103146e112f2dd1`（audit fully-sealed）；定向 18 项全绿
+  （test_review_sandbox 含新增 4 项 GovernanceDocTests）；全量 quality 按用户
+  指示豁免。
+- 安全结论：只读契约未降低（沙箱守卫、violations=[]、审查者仍禁止改主树）；
+  本轮为治理文档与验证口径修订，不涉及协议/密钥路径。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — RECORDS-ARCHIVE-3 完成收口（审计链归档安全；增量门禁豁免全量）
 
 - 工作项：`RECORDS-ARCHIVE-3`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-2]）。
