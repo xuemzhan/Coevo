@@ -5492,3 +5492,10 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-08 - FRAMEWORK-OPTIMIZE-18 closure (OPTIMIZE-11 leftover + shared non-empty validator; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-18` (ENG-BASE). User instruction: continue optimizing, no full gate; incremental gates (fmt + lint + targeted) with the full-quality waiver recorded.
+- Delivery: 1) knowledge_base/models.py local `_SAFE_ID` regex (byte-identical to ids.SAFE_ID, missed by OPTIMIZE-11) unified to the shared leaf; 2) new src/coevo/validate.py with non_empty_string (error_factory preserves exception class and message), risk/models (ValueError) and supervision/models (SupervisionValidationError) `_non_empty` collapsed to thin wrappers; root_modules.md registers validate.py.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 54 tests green (optimize19 8 tests + knowledge_base + risk_analyzer + supervision_meeting); full quality waived per user instruction.
+- Security: safe-id / non-empty validation is model-input security-critical; exception classes and messages preserved byte-for-byte via error_factory; no protocol changes.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
