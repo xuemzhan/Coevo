@@ -151,35 +151,46 @@ def check_replay(
         recipient_cert_id=candidate.recipient_cert_id,
         project_id=candidate.project_id,
     )
-    # 协议 § 17 情况 1: same package_id re-imported
+    # Single-pass scan (PERF-REPLAY-1): track the first package_id hit, the
+    # first package_digest hit and the maximum sequence_no in one traversal
+    # instead of three. Decision order and outcomes are byte-identical to the
+    # previous three-pass version (id -> digest -> sequence priority); the id
+    # hit keeps precedence over a digest hit even when the digest appears
+    # earlier in the scope, so no early break is allowed.
+    first_id_hit: ProcessedPackage | None = None
+    first_digest_hit: ProcessedPackage | None = None
+    previous_sequence_no: int | None = None
     for record in same_scope:
-        if record.package_id == candidate.package_id:
-            return ReplayDecision(
-                outcome=ReplayOutcome.DUPLICATE_PACKAGE_ID,
-                previous_sequence_no=record.sequence_no,
-                detail=(
-                    f"package_id {candidate.package_id!r} already processed "
-                    f"at sequence_no {record.sequence_no}"
-                ),
-            )
-    # 协议 § 17 情况 2: same package_digest re-imported
-    for record in same_scope:
-        if record.package_digest == candidate.package_digest:
-            return ReplayDecision(
-                outcome=ReplayOutcome.DUPLICATE_DIGEST,
-                previous_sequence_no=record.sequence_no,
-                detail=(
-                    f"package_digest {candidate.package_digest!r} already "
-                    f"processed at sequence_no {record.sequence_no}"
-                ),
-            )
+        if first_id_hit is None and record.package_id == candidate.package_id:
+            first_id_hit = record
+        if first_digest_hit is None and record.package_digest == candidate.package_digest:
+            first_digest_hit = record
+        if previous_sequence_no is None or record.sequence_no > previous_sequence_no:
+            previous_sequence_no = record.sequence_no
+    # 协议 § 17 情况 1: same package_id re-imported (highest precedence).
+    if first_id_hit is not None:
+        return ReplayDecision(
+            outcome=ReplayOutcome.DUPLICATE_PACKAGE_ID,
+            previous_sequence_no=first_id_hit.sequence_no,
+            detail=(
+                f"package_id {candidate.package_id!r} already processed "
+                f"at sequence_no {first_id_hit.sequence_no}"
+            ),
+        )
+    # 协议 § 17 情况 2: same package_digest re-imported.
+    if first_digest_hit is not None:
+        return ReplayDecision(
+            outcome=ReplayOutcome.DUPLICATE_DIGEST,
+            previous_sequence_no=first_digest_hit.sequence_no,
+            detail=(
+                f"package_digest {candidate.package_digest!r} already "
+                f"processed at sequence_no {first_digest_hit.sequence_no}"
+            ),
+        )
     # 协议 § 17 情况 3 + § 13: sequence_no must be strictly greater
     # than the most recent processed sequence. An equal sequence with
     # different content is a reordering/replay anomaly and is rejected
     # (previously only strictly-earlier sequences were caught).
-    previous_sequence_no = max(
-        (r.sequence_no for r in same_scope), default=None
-    )
     if (
         previous_sequence_no is not None
         and candidate.sequence_no <= previous_sequence_no
