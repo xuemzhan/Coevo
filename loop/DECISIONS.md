@@ -1,5 +1,19 @@
 # Loop 决策记录
 
+## 2026-08-08 — QUALITY-GATE-ENCODING-1 登记并开始执行（质量门禁输出编码修复）
+
+- 用户指令：继续开发，先不要全量质量门禁检查。
+- 决策：登记 `QUALITY-GATE-ENCODING-1`（ENG-BASE，ready，dependencies=[ENG-BASE-AC-1]）：
+  scripts/quality_gate.py 子进程捕获输出时强制 UTF-8（PYTHONIOENCODING / PYTHONUTF8），
+  消除 VERIFICATION.md 门禁记录乱码根因（子进程按 Windows cp936 输出 GBK，捕获端
+  errors=replace 造成不可逆损坏）；新增回归测试 tests/unit/test_quality_gate_encoding.py；
+  同时修复追溯矩阵 FRAMEWORK-INTEGRATION-4 行乱码（`?` 字符）并将 9825407 遗留的
+  VERIFICATION.md 尾部乱码转录块清理（原文件已备份至 TEMP）。STATE 切换至
+  ENG-BASE / QUALITY-GATE-ENCODING-1。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-4 完成收尾（注册门 + Manifest 构建器；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-INTEGRATION-4`（ENG-BASE）。实现提交：`41f56a8`

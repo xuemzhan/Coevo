@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-INTEGRATION-4",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "QUALITY-GATE-ENCODING-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "3d034906d5f2ea532604904898e0fffb495d2151",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T00:40:33.013009Z"
+  "updated_at": "2026-08-08T00:51:43.052043Z"
 }
