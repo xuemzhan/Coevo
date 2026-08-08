@@ -10519,3 +10519,276 @@ lint: exit=0 fingerprint=`5103146e112f2dd1` (validate_opencode + traceability + 
 targeted: 38 tests green - tests/unit/test_cockpit_http.py (session manager 12 incl. 2 new: keep-newest eviction, source guard heapq.nsmallest/no sorted).
 traceability: ENG-BASE | PERF-SESS-1 row added; checked=126 missing=0 (ENG-BASE 84).
 ```
+
+## 2026-08-08T23:18:11.021502Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T23:18:36.269306Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+         "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize17.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "RECORDS-HYGIENE-1",
+      "title": "DECISIONS 时间序整理与守卫 + 归档前导保留修复（2026-08-08，用户指令\"继续优化，不做全量门禁\"）：① loop/DECISIONS.md 按段落日期稳定排序（消除 9 处日期倒序违规，同日期保序，内容逐字节保留，段落数 174 不变）；② 修复归档重写丢文件头 bug——archive_records --apply 用 `record_preamble(text) + keep` 重写，DECISIONS 标题 `# Loop 决策记录` 恢复且未来归档不再丢失（VERIFICATION 无前导不受影响）；③ 新增守卫：record_preamble 正反例 + DECISIONS 段落日期非递减 + 标题钉住",
+      "code": [
+        "src/coevo/records_archive.py",
+        "scripts/archive_records.py",
+        "loop/DECISIONS.md"
+      ],
+      "tests": [
+        "tests/unit/test_records_archive.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/records_archive.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/archive_records.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "loop/DECISIONS.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_records_archive.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-17",
+      "title": "共享 ISO-UTC 解析助手（2026-08-08，用户指令\"继续优化，不做全量门禁\"）：timefmt.py 新增 `parse_iso_utc(value, *, error_factory, not_utc_message, invalid_message)`（非 str/无 Z → not_utc_message、格式非法 → invalid_message、utcoffset 分支保留但实际不可达），decision_brief/models、merge/receipt、risk/models、supervision/models 四处 `_parse_utc` 副本收敛为薄包装（异常类与消息逐字节保留）；root_modules.md 更新 timefmt 条目",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/decision_brief/models.py",
+        "src/coevo/merge/receipt.py",
+        "src/coevo/risk/models.py",
+        "src/coevo/supervision/models.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize18.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/merge/receipt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/risk/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize18.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-18",
+      "title": "OPTIMIZE-11 补漏 + 共享 non-empty 校验（2026-08-08，用户指令\"继续优化，不做全量门禁\"）：① knowledge_base/models 本地 `_SAFE_ID` 正则（与 ids.SAFE_ID 逐字节相同，OPTIMIZE-11 遗漏）统一到共享叶子 `from src.coevo.ids import SAFE_ID as _SAFE_ID`；② 新增 src/coevo/validate.py（non_empty_string，error_factory 保留异常类与消息，fail-closed），risk/models（ValueError）与 supervision/models（SupervisionValidationError）的 `_non_empty` 收敛为薄包装；root_modules.md 登记 validate.py",
+      "code": [
+        "src/coevo/validate.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/risk/models.py",
+        "src/coevo/supervision/models.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize19.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/validate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/risk/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/supervision/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize19.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-19",
+      "title": "decision_brief/models 纯工具助手提取首个切片（2026-08-08，用户指令\"继续优化，不做全量门禁\"）：新增 decision_brief/_util.py（_ZERO_DIGEST/_safe_string/_digest/_encode_json/_stat_is_reparse/_is_link_or_reparse/_parse_utc，error_factory 保留异常类与消息，无域导入依赖），models.py 删除本地副本并薄包装再导出（_safe_string/_digest/_encode_json/_parse_utc/_is_link_or_reparse 包装、_stat_is_reparse/_ZERO_DIGEST 直导），导入面不变（repositories/service 的私有导入保持可用）；为后续域助手拆分建立\"纯工具 → 数据类+域校验\"分层模式；root_modules.md 登记",
+      "code": [
+        "src/coevo/decision_brief/_util.py",
+        "src/coevo/decision_brief/models.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize20.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/_util.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize20.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-SESS-1",
+      "title": "CockpitSessionManager 会话管理微优化（2026-08-09，用户指令\"继续\"；增量门禁）：sessions.py `validate()` 单次解析 `now` 复用（原 2-3 次 fromisoformat）；`_evict_if_needed()` 改 heapq.nsmallest(excess, ...)（O(n log excess)，正常路径 O(n)），淘汰集合与原 sorted 语义逐位一致",
+      "code": [
+        "src/coevo/cockpit/sessions.py"
+      ],
+      "tests": [
+        "tests/unit/test_cockpit_http.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_cockpit_http.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-09T00:40:00Z - full unit-suite regression snapshot (validation milestone)
+```text
+python -m unittest discover -s tests/unit -v: Ran 1318 tests in 101.091s, OK (skipped=3).
+Validates all optimization iterations (gate stability, archives, governance, GmSSL cache, check_replay, single-source-of-truth leaves, decision_brief util extraction, session micro-opt) with no cross-module regressions.
+Two issues found and fixed: OPTIMIZE-18 guard adapted to the OPTIMIZE-19 delegation chain; decision_brief module doc registered _util.py (commit 47abe20).
+```
