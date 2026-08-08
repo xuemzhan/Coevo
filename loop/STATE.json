@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-OPTIMIZE-19",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "PERF-SESS-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "ac16949",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T15:57:29.467778Z"
+  "updated_at": "2026-08-08T23:06:00.292585Z"
 }

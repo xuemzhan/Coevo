@@ -5512,3 +5512,9 @@ security-reviewer 双签门禁。
 - Security: pure extraction with byte-exact behavior; import surface unchanged; no protocol changes.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - PERF-SESS-1 registration (cockpit session manager micro-opt; incremental gate)
+- User instruction: continue; no full gate (waiver recorded).
+- Decision: register `PERF-SESS-1` (ENG-BASE, ready): cockpit/sessions.py validate() parsed `now` 2-3 times per request; _evict_if_needed used a full O(n log n) sort. Optimize to single now parse + heapq.nsmallest eviction (O(n log excess), O(n) when excess=1) with byte-identical eviction-set semantics.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
