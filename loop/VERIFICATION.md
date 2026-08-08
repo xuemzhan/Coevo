@@ -233,6 +233,34 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-6 完成收尾（demo 组合根阶段化收敛；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-6`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-5]）。
+  实现提交：`1fd6908`（pipeline 提取 _export_demo_package /
+  _build_demo_cockpit_views / _store_demo_knowledge / _publish_demo_audit，
+  组合根薄编排，行为不变）；登记提交：`29679e8`（切片计划、BACKLOG ready、
+  DECISIONS、STATE 事务）。
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁；按增量门禁（fmt + lint + 定向测试）执行并豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1202 项 OK
+  （skipped=3，含新增 4 项）；安全套件 99/99 全绿；demo e2e 3/3（99.4s，
+  覆盖组合根重构后完整闭环）。
+- 沙箱独立复核（pin=`1fd6908`）：
+  * verifier（fwopt6-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `2a79994f1dd36f7e`（沙箱根解析差异属预期）；定向 6/6 全绿（optimize6 +
+    pipeline_framework_gate）；review_sandbox check violations=[]，已 discard。
+  * security-reviewer（fwopt6-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：4 处 DEMO-ONLY 标记保留、包 round-trip 校验与注册/派发门
+    fail-closed 保留、无 eval/exec、变更面仅 pipeline.py + 新测试、tests/security
+    零改动；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-6 行（无悬空）；追溯断言
+  59→60；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-6 / last_verified_commit=`1fd6908`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `1fd6908`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-5 完成收尾（real_chain_store 收敛到共享 canonical；全量门禁 + 沙箱双签 + push）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-5`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-3]）。
