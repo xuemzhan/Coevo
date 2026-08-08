@@ -233,6 +233,34 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-13 完成收尾（共享 64-hex 正则叶子 + OPTIMIZE-11 补漏；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-13`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-12]）。
+  实现提交：`21ea6de`（ids.py 扩展 HEX_64/is_hex_64；7 处 64-hex 副本统一；
+  补齐 framework a2a/plan/memory 3 处 _SAFE_ID 副本）；登记提交：`32264db`
+  （切片计划、BACKLOG ready、DECISIONS、STATE 事务）。
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1232 项 OK
+  （skipped=3，含新增 3 项）；安全套件 99/99 全绿。
+- 沙箱独立复核（pin=`21ea6de`）：
+  * verifier（fwopt13-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `7af2506e11a5b61f`（沙箱根解析差异属预期）；定向 44/44 全绿（optimize13 +
+    framework a2a/plan_lsp/memory）；review_sandbox check violations=[]，
+    已 discard。
+  * security-reviewer（fwopt13-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：HEX_64/is_hex_64 fail-closed（长度/大小写/类型）、7 模块
+    64-hex 副本删除、framework 3 模块 SAFE_ID 补漏、无 eval/exec、tests/security
+    零改动；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-13 行（无悬空）；追溯断言
+  67→68；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-13 / last_verified_commit=`21ea6de`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `21ea6de`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-12 完成收尾（framework 内部 canonical 收敛；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-12`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-11]）。

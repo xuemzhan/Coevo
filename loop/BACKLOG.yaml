@@ -1418,7 +1418,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-13
     story: ENG-BASE
     title: 共享 64-hex 正则叶子：ids.py 扩展 HEX_64 + is_hex_64（fail-closed），cockpit/progress_capture(models+watcher)/report/framework a2a+plan+memory 7 处本地副本统一引用；root_modules.md 更新
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-12]
     acceptance_tests:
       - tests/unit/test_framework_optimize13.py
