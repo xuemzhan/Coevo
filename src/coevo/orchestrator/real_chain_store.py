@@ -18,6 +18,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.coevo.canon import (
+    canonical_json_bytes as _canon_json_bytes,
+)
 from ..identity.audit_anchor import (
     AuditAnchorError,
     FreshnessAuthority,
@@ -41,7 +44,12 @@ class RealChainStoreRecoveryRequired(RealChainStoreError):
 
 
 def canonical_json_bytes(value: Any) -> bytes:
-    """Serialize ``value`` to canonical JSON bytes with strict type checks."""
+    """Serialize ``value`` to canonical JSON bytes with strict type checks.
+
+    The strict type validation (non-finite floats / non-JSON values rejected)
+    is retained here; the serialization itself is delegated to the shared
+    ``src.coevo.canon`` leaf (FRAMEWORK-OPTIMIZE-5).
+    """
     def validate(item: Any, path: str) -> None:
         if item is None or isinstance(item, (str, bool)):
             return
@@ -62,14 +70,18 @@ def canonical_json_bytes(value: Any) -> bytes:
         raise RealChainStoreError(f"non-JSON value at {path}")
     validate(value, "$")
     try:
-        return json.dumps(value, ensure_ascii=False, sort_keys=True,
-                          separators=(",", ":"), allow_nan=False).encode("utf-8")
+        return _canon_json_bytes(
+            value, ensure_ascii=False, allow_nan=False
+        )
     except (TypeError, ValueError, UnicodeEncodeError) as exc:
         raise RealChainStoreError("value cannot be canonicalized") from exc
 
 
 def canonical_digest(value: Any) -> str:
     """Return the SHA-256 hex digest of the canonical JSON form of ``value``."""
+    # The serialization (including strict validation and fail-closed error
+    # mapping) is delegated to canonical_json_bytes, which itself uses the
+    # shared src.coevo.canon leaf (FRAMEWORK-OPTIMIZE-5).
     return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
 
 

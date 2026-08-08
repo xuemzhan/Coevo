@@ -15,20 +15,32 @@ import json
 from typing import Any
 
 
-def canonical_json_bytes(value: Any, *, ensure_ascii: bool = True) -> bytes:
-    """Serialize ``value`` to canonical JSON bytes (sorted keys, compact)."""
+def canonical_json_bytes(
+    value: Any, *, ensure_ascii: bool = True, allow_nan: bool = False
+) -> bytes:
+    """Serialize ``value`` to canonical JSON bytes (sorted keys, compact).
+
+    ``allow_nan`` defaults to False so non-finite floats (NaN/Infinity) are
+    rejected (fail-closed) instead of being emitted as non-standard JSON
+    (FRAMEWORK-OPTIMIZE-5).
+    """
 
     return json.dumps(
         value,
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=ensure_ascii,
+        allow_nan=allow_nan,
     ).encode("utf-8")
 
 
-def canonical_digest(value: Any, *, ensure_ascii: bool = True) -> str:
+def canonical_digest(
+    value: Any, *, ensure_ascii: bool = True, allow_nan: bool = False
+) -> str:
     """Return the SHA-256 hex digest of the canonical JSON bytes."""
 
     return hashlib.sha256(
-        canonical_json_bytes(value, ensure_ascii=ensure_ascii)
+        canonical_json_bytes(
+            value, ensure_ascii=ensure_ascii, allow_nan=allow_nan
+        )
     ).hexdigest()

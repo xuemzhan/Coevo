@@ -7,7 +7,7 @@
 | `config.py` | `AppConfig`、`ConfigError`、`from_env()` | 生产运行配置：环境变量驱动、失败关闭（环回强制、端口/级别/路径校验） |
 | `version.py` | `VERSION`、`APP_NAME`、`APP_DISPLAY_NAME` | 版本元数据（语义化版本，禁用时间戳；当前 0.2.0） |
 | `timefmt.py` | `is_iso_utc_z` / `now_utc_iso_z` | 共享 ISO-8601 UTC 时间戳校验与生成（`\Z` 锚定、小数秒、日历校验、非字符串 fail-closed；依赖无关叶模块，框架层与产品模块统一引用） |
-| `canon.py` | `canonical_json_bytes` / `canonical_digest` | 共享 canonical JSON 序列化与 SHA-256 摘要（sort_keys、紧凑分隔符、可选 ASCII 转义；依赖无关叶模块，框架层与产品审计哈希链统一引用，禁止内联副本） |
+| `canon.py` | `canonical_json_bytes` / `canonical_digest` | 共享 canonical JSON 序列化与 SHA-256 摘要（sort_keys、紧凑分隔符、可选 ASCII 转义、allow_nan 默认 False 拒绝 NaN/Infinity；依赖无关叶模块，框架层与产品审计哈希链统一引用，禁止内联副本） |
 | `logging_setup.py` | `setup_logging()` | 日志引导（stdlib logging，轮转 5MB×5，绝不吞审计链） |
 | `records_archive.py` | `archive_plan()` | 记录归档策略助手（纯函数：VERIFICATION/DECISIONS/tool-audit 分节、按容量+期限裁剪） |
 
