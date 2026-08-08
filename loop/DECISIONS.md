@@ -5228,6 +5228,20 @@ security-reviewer 双签门禁。
   现场编译（其无残留行为被测试钉住，不受本轮影响）。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-15 登记并开始执行（共享 safe-relative-path 校验叶子；增量门禁口径）
+
+- 用户指令：继续进行优化，不用做全量门禁。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-15`（ENG-BASE，ready，dependencies=[]）：
+  progress_capture/watcher、cockpit/static、cockpit/wps 三处同构的"安全相对路径"
+  检查统一到单一事实源叶子 `src/coevo/relpath.py`（is_safe_relative_path，
+  fail-closed），延续 ids.py / jsonutil.py 收敛模式；共享谓词含 NUL 拒绝
+  （static 原有，watcher/wps 为严格化统一——NUL 非合法 Windows 路径段，不拒绝
+  任何合法输入）；workspace/_has_parent_traversal 与 model/config prompts_file
+  语义差异保留独立。切片计划：`docs/plans/FRAMEWORK-OPTIMIZE-15-slice.md`。
+- 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — RECORDS-ARCHIVE-4 完成收口（门禁自维护 VERIFICATION 归档；增量门禁豁免全量）
 
 - 工作项：`RECORDS-ARCHIVE-4`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-3]）。
