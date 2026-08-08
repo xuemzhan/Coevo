@@ -1520,3 +1520,16 @@ items:
       - tests/unit/test_wps_launcher.py
     security_review: true
     protocol_review: false
+  # ---------- PERF-VERIFY-1（2026-08-08 用户指令"继续进行优化，不用做全量门禁"；集成套件回归复测与性能基线） ----------
+  - id: PERF-VERIFY-1
+    story: ENG-BASE
+    title: 集成套件回归复测与性能基线：全量 261 项集成测试复测（含 crypto 缓存路径与未覆盖的 installer/dev_environment/merge 等），量化 PERF-HELPER-1 收益（此前约 17 分钟），记录性能基线；回归就地修复；观察 sm2-test-pki 测试助手是否成为新主要耗时点（作为 PERF-HELPER-2 依据）
+    status: ready
+    dependencies: [PERF-HELPER-1]
+    acceptance_tests:
+      - tests/integration/test_gmssl_prototype_provider.py
+      - tests/integration/test_cng_handle.py
+      - tests/integration/test_sm2_test_pki_generation.py
+      - tests/integration/test_installer.py
+    security_review: false
+    protocol_review: false

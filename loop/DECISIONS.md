@@ -5206,6 +5206,19 @@ security-reviewer 双签门禁。
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — PERF-VERIFY-1 登记并开始执行（集成套件回归复测与性能基线；增量验证口径）
+
+- 用户指令：继续进行优化，不用做全量门禁。
+- 决策：登记 `PERF-VERIFY-1`（ENG-BASE，ready，dependencies=[PERF-HELPER-1]）：
+  PERF-HELPER-1（GmSSL crypto-provider 助手编译缓存）此前只做了 38 项 crypto
+  定向回归；本轮在完整集成套件（20 文件 / 261 项）上复测并量化缓存收益（此前约
+  17 分钟），记录性能基线；回归就地修复；观察 sm2-test-pki 测试助手（仍现场编译）
+  是否成为新主要耗时点（作为 PERF-HELPER-2 依据）。
+  切片计划：`docs/plans/PERF-VERIFY-1-slice.md`。
+- 门禁口径：按用户指示只跑增量验证（集成套件 = 门禁 test 阶段一部分，非全量
+  quality），全量 quality 豁免留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-15 完成收口（共享 safe-relative-path 校验叶子；增量门禁豁免全量）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-15`（ENG-BASE，dependencies=[]）。

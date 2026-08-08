@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-OPTIMIZE-15",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "PERF-VERIFY-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "da2fd24",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T14:40:11.846722Z"
+  "updated_at": "2026-08-08T14:41:30.753098Z"
 }
