@@ -5538,4 +5538,10 @@ security-reviewer 双签门禁。
 - Security: pure structural move; validation semantics unchanged; security tests untouched.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-21 registration (dead-import cleanup + backlog hygiene + static guard; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-21` (ENG-BASE, ready): 11 unused top-level imports across 10 production files are removed (pure deletion, zero behavior change; includes RiskKind/SourceKind introduced by _build.py in OPTIMIZE-20); BACKLOG FRAMEWORK-OPTIMIZE-20 is corrected from ready to done (RECORDS-2 convention, STATE/matrix already done); a repo-wide static guard test (test_framework_optimize22.py) scans src/coevo production modules and asserts no unused imports except an explicit allowlist covering re-export semantics.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
