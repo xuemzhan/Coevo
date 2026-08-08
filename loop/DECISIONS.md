@@ -5518,3 +5518,10 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - PERF-SESS-1 closure (cockpit session manager micro-opt; incremental gate)
+- Work item: `PERF-SESS-1` (ENG-BASE). User instruction: continue; no full gate (waiver recorded).
+- Delivery: sessions.py validate() parses `now` once (was 2-3 fromisoformat calls per request); _evict_if_needed() uses heapq.nsmallest(excess, ...) (O(n log excess), O(n) when excess=1) with an eviction set byte-identical to the previous sorted-then-slice behavior.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 38 tests green (test_cockpit_http full incl. session manager + 2 new guards); full quality waived per user instruction.
+- Security: pure session-management micro-opt, semantics unchanged; no protocol changes.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).

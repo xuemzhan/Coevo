@@ -1611,7 +1611,7 @@ items:
   - id: PERF-SESS-1
     story: ENG-BASE
     title: CockpitSessionManager 会话管理微优化：validate 单次解析 now 复用；_evict_if_needed 用 heapq.nsmallest 淘汰（O(n log excess)，正常路径 O(n)），淘汰集合与原 sorted 语义逐位一致
-    status: ready
+    status: done
     dependencies: []
     acceptance_tests:
       - tests/unit/test_cockpit_http.py
