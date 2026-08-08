@@ -1368,7 +1368,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-9
     story: ENG-BASE
     title: 剩余 canonical 序列化变体统一：canon.py 新增 canonical_json_str（str 变体，字节逐位一致），收敛 cng_handle（bytes 2 处 + 删 _canonical）/cockpit state_store（bytes 1 处）/knowledge_base（str 1 处）/talent（str 4 处）/audit stream_store（str 3 处）；行为不变；全仓守卫防回归
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-5]
     acceptance_tests:
       - tests/unit/test_framework_optimize9.py

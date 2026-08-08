@@ -233,6 +233,35 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-9 完成收尾（剩余 canonical 序列化变体统一；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-9`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-5]）。
+  实现提交：`b029eb0`（canon.py 新增 canonical_json_str；cng_handle /
+  cockpit state_store / knowledge_base / talent / audit stream_store 收敛，
+  行为与哈希链字节逐位不变）；登记提交：`f93f71e`（切片计划、BACKLOG ready、
+  DECISIONS、STATE 事务）。
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1210 项 OK
+  （skipped=3，含新增 4 项）；安全套件 99/99 全绿。
+- 沙箱独立复核（pin=`b029eb0`）：
+  * verifier（fwopt9-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `632dbf0ba64dc9ba`（沙箱根解析差异属预期）；定向 72/72 全绿（optimize9 +
+    cockpit_state_store + knowledge_store + audit_stream_store +
+    talent_recommender）；review_sandbox check violations=[]，已 discard。
+  * security-reviewer（fwopt9-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：cng 注册表哈希链与审计流哈希链 canonical 字节逐位不变、
+    _canonical 本地副本已删除、无 eval/exec、变更面 6 源码 + 新测试、
+    tests/security 零改动；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-9 行（无悬空）；追溯断言
+  62→63；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-9 / last_verified_commit=`b029eb0`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `b029eb0`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-8 完成收尾（真实链 resume 失败收尾收敛；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-8`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-7]）。
