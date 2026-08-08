@@ -25924,3 +25924,263 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-08T03:36:41.535279Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T03:36:53.042886Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+    "code": [
+        "src/coevo/orchestrator/_real_chain.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize7.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize7.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-8",
+      "title": "真实链 resume 失败收尾收敛（2026-08-08，用户指令\"继续\"，延续\"基于框架，优化原来系统应用的代码实现……不做全量门禁\"）：orchestrator/_real_chain.py 的 resume_real_chain 中 2 处结构相同的 ESCALATED 失败收尾（包验证失败 except 分支 / crypto 能力不可用：追加 ESCALATED trace + report + outcome + store.finish_resume_failure）提取为 _finish_resume_escalated 单一辅助，行为不变（ESCALATED 语义与审计存储一致）；守卫测试钉住 2 个 code 常量各单一调用点",
+      "code": [
+        "src/coevo/orchestrator/_real_chain.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize8.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize8.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-9",
+      "title": "剩余 canonical 序列化变体统一（2026-08-08，用户指令\"继续下一步\"，延续\"基于框架，优化原来系统应用的代码实现……不做全量门禁\"）：canon.py 新增 canonical_json_str（str 变体，与 canonical_json_bytes 同参、字节逐位一致），收敛 cng_handle（_write body + 删除本地 _canonical，哈希链调用点改 canonical_json_bytes）/ cockpit state_store（bytes 1 处）/ knowledge_base（str 1 处）/ talent（str 4 处）/ audit stream_store（append 2 处 + _chain_hash 1 处）；行为不变（cng 注册表哈希链、审计流哈希链、DB 载荷字节一致）；全仓守卫（5 模块内联 json.dumps 计数归零，cng_handle 仅留非 canonical 请求体）",
+      "code": [
+        "src/coevo/canon.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/cockpit/state_store.py",
+        "src/coevo/knowledge_base/store.py",
+        "src/coevo/talent/store.py",
+        "src/coevo/audit_governance/stream_store.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize9.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/canon.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/state_store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/stream_store.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize9.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-10",
+      "title": "audit_anchor canonical 统一到 canon（2026-08-08，用户指令\"继续下一步\"，延续\"基于框架，优化原来系统应用的代码实现……不做全量门禁\"）：canon.py 的 canonical_json_bytes/canonical_json_str/canonical_digest 新增 trailing_newline 参数（默认 False 不变，True 追加 \\n）；identity/audit_anchor.py::canonical 改用共享实现（ensure_ascii=False + trailing_newline=True，审计锚定记录字节逐位不变，本地 json.dumps 副本删除，函数签名保留）；canonical 收敛收官",
+      "code": [
+        "src/coevo/canon.py",
+        "src/coevo/identity/audit_anchor.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize10.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/canon.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize10.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-7",
+      "title": "生产验签入口守卫（2026-08-08，用户指令\"继续下一步\"，延续\"基于框架，优化原来系统应用的代码实现……不做全量门禁\"；INTEGRATION-4 Low 1 收口）：guard_registration 新增 require_production_verifier 参数（默认 False 不变），True 时强制验签器显式 is_production=True（真实 SM2 绑定证书链）否则 fail-closed 拒绝（reason 明确）；DemoRegistrationVerifier 补显式 is_production=False；不实现真实验签器（非本轮范围），demo 行为不变",
+      "code": [
+        "src/coevo/framework/integration.py",
+        "src/coevo/app/demo_support.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps7.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/demo_support.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps7.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-11",
+      "title": "共享 safe-id 正则叶子（2026-08-08，用户指令\"继续下一步\"，延续\"基于框架，优化原来系统应用的代码实现……不做全量门禁\"）：新增 src/coevo/ids.py（SAFE_ID `^[a-zA-Z0-9_][a-zA-Z0-9_.\\-]{0,63}$` + is_safe_id fail-closed），workspace/cockpit/report/progress_capture/audit_governance/orchestrator/framework.tools 7 处本地副本统一引用；task_flow（首字符 `[a-zA-Z_]`）与 talent（手写 Unicode 判断）语义差异保留独立；root_modules.md 登记",
+      "code": [
+        "src/coevo/ids.py",
+        "src/coevo/workspace/paths.py",
+        "src/coevo/cockpit/models.py",
+        "src/coevo/report/models.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/audit_governance/stream.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/framework/tools.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize11.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/ids.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/workspace/paths.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/report/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/stream.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/tools.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize11.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```

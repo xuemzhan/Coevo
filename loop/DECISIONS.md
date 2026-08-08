@@ -1,5 +1,20 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-12 登记并开始执行（framework 内部 canonical 收敛）
+
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-12`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-11]）：framework 内部 4 个与 `canon.canonical_json_bytes`
+  完全等价的 domain canonical 序列化（tools schema/descriptor、memory record、
+  k8s_listing listing）统一到共享 canon（字节逐位不变）；`plan.canonical_plan_bytes`
+  因 `default=_json_default`（Enum）语义不同保留独立。切片计划：
+  `docs/plans/FRAMEWORK-OPTIMIZE-12-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-12。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-11 完成收尾（共享 safe-id 正则叶子；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-11`（ENG-BASE）。实现提交：`94c4384`；
