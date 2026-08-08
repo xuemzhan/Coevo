@@ -233,6 +233,36 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-3 完成收尾（共享 canonical JSON 序列化与摘要；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-3`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-2]）。
+  实现提交：`bc44f87`（新增 src/coevo/canon.py：canonical_json_bytes /
+  canonical_digest；收敛 framework integration._canonical /
+  manifest_checker._canonical_bytes 与 identity repository/validation/
+  private_keys 5 处 digest 内联；root_modules.md 登记；全仓守卫测试）；
+  登记提交：`fecd72b`（切片计划、BACKLOG ready、DECISIONS、STATE 事务）。
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁；按增量门禁（fmt + lint + 定向测试）执行并豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1188 项 OK
+  （skipped=3，含新增 6 项）；安全套件 99/99 全绿。
+- 沙箱独立复核（pin=`bc44f87`）：
+  * verifier（fwopt3-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `6eda6992a84d3055`（沙箱根解析差异属预期）；定向 71/71 全绿（optimize3 +
+    framework integration/integration2/integration4/manifest_checker +
+    identity_validation + module_docs）；review_sandbox check violations=[]，
+    已 discard。
+  * security-reviewer（fwopt3-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：canonical 字节/哈希逐位与旧实现一致（含 ensure_ascii 两分支）、
+    identity 审计事件链与私钥审计链 digest 可复现、无 eval/exec、变更面 7 文件 +
+    新测试、tests/security 零改动；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-3 行（无悬空）；追溯断言
+  56→57；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-3 / last_verified_commit=`bc44f87`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `bc44f87`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-2 完成收尾（共享时间生成器全仓落地；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-2`（ENG-BASE，dependencies=[FRAMEWORK-GAPS-6]）。

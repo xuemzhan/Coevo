@@ -1308,7 +1308,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-3
     story: ENG-BASE
     title: 共享 JSON 规范化序列化与摘要：新增根级叶子 src/coevo/canon.py（canonical_json_bytes / canonical_digest，stdlib only），收敛框架内部重复（integration._canonical / manifest_checker._canonical_bytes）与 identity 5 处 digest 内联（repository 事件哈希链 2 + business digest 1、validation bundle digest 1、private_keys 审计链 1）；ensure_ascii 语义逐点保留、digest 逐位不变；全仓源码守卫防回归
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-2]
     acceptance_tests:
       - tests/unit/test_framework_optimize3.py
