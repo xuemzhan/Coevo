@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import enum
-import re
 from dataclasses import dataclass, field
 
 from src.coevo.ids import SAFE_ID as _SAFE_ID

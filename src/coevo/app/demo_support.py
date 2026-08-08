@@ -16,7 +16,6 @@ import uuid
 from pathlib import Path
 from typing import Any
 from src.coevo.identity.audit_anchor import AuditAnchorError, canonical
-from src.coevo.timefmt import now_utc_iso_z
 
 ROOT = Path(__file__).resolve().parents[3]
 

@@ -13,7 +13,8 @@ import zipfile
 from pathlib import PurePosixPath
 from src.coevo.merge.receipt import MergeCommitReceipt
 from src.coevo.merge.repository import MergeReceiptRepository
-from src.coevo.risk import Risk, RiskKind, RiskReport, SourceKind
+from src.coevo.risk import Risk, RiskReport
+
 def _latest_receipt(
     receipt_id: str,
     repository: MergeReceiptRepository,

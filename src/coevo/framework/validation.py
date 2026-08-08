@@ -10,7 +10,7 @@ any injected exception is treated as a rejection (fail-closed).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from src.coevo.timefmt import is_iso_utc_z
 from src.coevo.framework.lifecycle import (

@@ -20,7 +20,6 @@ except for the injected inner registration / dispatch calls.
 from __future__ import annotations
 
 import hashlib
-import json
 from dataclasses import dataclass, replace
 from typing import Any, Protocol, runtime_checkable
 

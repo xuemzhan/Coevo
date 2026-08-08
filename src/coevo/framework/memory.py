@@ -20,7 +20,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from src.coevo.canon import canonical_json_bytes
 from src.coevo.framework.validation import is_iso_utc_z
