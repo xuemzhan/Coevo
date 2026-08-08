@@ -16,18 +16,14 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from src.coevo.powershell import powershell_executable as _shared_powershell_executable
+
 ROOT = Path(__file__).resolve().parents[3]
 HELPER = ROOT / "scripts" / "inspect_certificate.ps1"
 
 
 def _powershell_executable() -> str:
-    exe = os.environ.get("COEVO_POWERSHELL_PATH")
-    if exe and Path(exe).is_absolute():
-        return exe
-    fallback = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
-    if fallback.is_file():
-        return str(fallback)
-    raise CertificateError("Windows PowerShell is unavailable")
+    return _shared_powershell_executable(error_factory=CertificateError)
 
 
 class CertificateError(ValueError):

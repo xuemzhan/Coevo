@@ -46,6 +46,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final
 
+from src.coevo.powershell import locked_powershell_executable as _shared_locked_powershell
+
 
 KEK_PREFIX: Final[str] = "CoevoSm2Kek-"
 KEK_NAME_RE: Final[re.Pattern[str]] = re.compile(r"^CoevoSm2Kek-[0-9a-f]{32}$")
@@ -133,30 +135,10 @@ class CngProtectedKeyHandle:
 
 
 def _locked_powershell() -> str:
-    root = Path(__file__).resolve().parents[3]
-    try:
-        lock = json.loads(
-            (root / "docs" / "dependencies" / "toolchain-lock.json").read_text("utf-8")
-        )
-        expected = lock["tools"]["make_compatibility_shim"]["windows_powershell"]
-    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        raise CngKekHelperError("locked Windows PowerShell metadata is unavailable") from exc
-    configured = os.environ.get("COEVO_POWERSHELL_PATH")
-    candidate = Path(configured) if configured else (
-        Path(os.environ.get("SystemRoot", r"C:\Windows"))
-        / str(expected["windows_directory_relative_path"])
+    return _shared_locked_powershell(
+        Path(__file__).resolve().parents[3] / "docs" / "dependencies" / "toolchain-lock.json",
+        error_factory=CngKekHelperError,
     )
-    if not candidate.is_absolute():
-        raise CngKekHelperError("Windows PowerShell path must be absolute")
-    try:
-        resolved = candidate.resolve(strict=True)
-        stat = resolved.stat()
-        digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
-    except OSError as exc:
-        raise CngKekHelperError("Windows PowerShell is unavailable") from exc
-    if stat.st_size != int(expected["size"]) or digest != expected["sha256"]:
-        raise CngKekHelperError("Windows PowerShell failed the locked integrity check")
-    return str(resolved)
 
 
 class CngKekStore:

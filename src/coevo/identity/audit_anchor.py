@@ -17,6 +17,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Protocol
 from src.coevo.canon import canonical_json_bytes as _canonical_bytes
+from src.coevo.powershell import powershell_executable as _shared_powershell_executable
 from src.coevo.timefmt import now_utc_iso_z
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -26,13 +27,7 @@ SIGNING_CONFIG = ROOT / "loop" / "audit-signing.json"
 
 
 def _powershell_executable() -> str:
-    exe = os.environ.get("COEVO_POWERSHELL_PATH")
-    if exe and Path(exe).is_absolute():
-        return exe
-    fallback = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
-    if fallback.is_file():
-        return str(fallback)
-    raise AuditAnchorError("Windows PowerShell is unavailable")
+    return _shared_powershell_executable(error_factory=AuditAnchorError)
 
 
 class AuditAnchorError(RuntimeError):

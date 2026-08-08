@@ -50,6 +50,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from src.coevo.timefmt import now_utc_iso_z
 from src.coevo.canon import canonical_digest
+from src.coevo.powershell import locked_powershell_executable as _shared_locked_powershell
 from typing import Any, Mapping, Protocol
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -244,29 +245,10 @@ class PrivateKeyStore(Protocol):
 
 
 def _powershell_executable() -> str:
-    try:
-        lock = json.loads(TOOLCHAIN_LOCK.read_text(encoding="utf-8"))
-        expected = lock["tools"]["make_compatibility_shim"]["windows_powershell"]
-        expected_size = int(expected["size"])
-        expected_sha256 = str(expected["sha256"])
-    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        raise PrivateKeyHandleError("locked Windows PowerShell metadata is unavailable") from exc
-    configured = os.environ.get("COEVO_POWERSHELL_PATH")
-    candidate = Path(configured) if configured else (
-        Path(os.environ.get("SystemRoot", r"C:\Windows"))
-        / str(expected["windows_directory_relative_path"])
+    return _shared_locked_powershell(
+        TOOLCHAIN_LOCK,
+        error_factory=PrivateKeyHandleError,
     )
-    if not candidate.is_absolute():
-        raise PrivateKeyHandleError("Windows PowerShell path must be absolute")
-    try:
-        resolved = candidate.resolve(strict=True)
-        stat = resolved.stat()
-        digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
-    except OSError as exc:
-        raise PrivateKeyHandleError("Windows PowerShell is unavailable") from exc
-    if stat.st_size != expected_size or digest != expected_sha256:
-        raise PrivateKeyHandleError("Windows PowerShell failed the locked integrity check")
-    return str(resolved)
 
 
 class WindowsPrivateKeyStore:
