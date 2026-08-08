@@ -233,6 +233,34 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-4 完成收尾（框架默认策略 Profile 惰性缓存；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-4`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-3]）。
+  实现提交：`e3e27a9`（default_profiles() 惰性缓存 + get_default_profile 字典
+  O(1) 查找，fail-closed 保留；framework.md 同步；test_framework_optimize4.py
+  4 项）；登记提交：`8a18360`（切片计划、BACKLOG ready、DECISIONS、STATE 事务）。
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁；按增量门禁（fmt + lint + 定向测试）执行并豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1192 项 OK
+  （skipped=3，含新增 4 项）；安全套件 99/99 全绿。
+- 沙箱独立复核（pin=`e3e27a9`）：
+  * verifier（fwopt4-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `f313fedcc90ee4cc`（沙箱根解析差异属预期）；定向 68/68 全绿（optimize4 +
+    gaps/gaps2/validate_plan/integration/orchestrator/plan_l18/pipeline_gate +
+    module_docs）；review_sandbox check violations=[]，已 discard。
+  * security-reviewer（fwopt4-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：Policy 与嵌套 Profile 全 frozen、缓存共享不可变语义成立、
+    产品代码无 object.__setattr__ 篡改 Policy、fail-closed 未知名拒绝保留、
+    变更面 2 文件 + 新测试、tests/security 零改动、无 eval/exec；
+    check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-4 行（无悬空）；追溯断言
+  57→58；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-4 / last_verified_commit=`e3e27a9`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `e3e27a9`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-3 完成收尾（共享 canonical JSON 序列化与摘要；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-3`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-2]）。

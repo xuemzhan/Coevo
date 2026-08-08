@@ -1318,7 +1318,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-4
     story: ENG-BASE
     title: 框架默认策略 Profile 惰性缓存：default_profiles() 一次性构造并缓存（Policy 全 frozen 不可变，安全共享），get_default_profile 字典 O(1) 查找（fail-closed 保留），消除 pipeline/validate_plan 等消费点的重复 Policy 构造；stdlib only
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-3]
     acceptance_tests:
       - tests/unit/test_framework_optimize4.py
