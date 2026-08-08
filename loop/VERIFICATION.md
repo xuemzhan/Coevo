@@ -23278,3 +23278,267 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-08T01:46:05.971369Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T01:46:18.167426Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+     "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-1",
+      "title": "基于框架优化原应用实现（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：AgentRegistry.by_capability 惰性能力索引（O(V)→摊销 O(1)，注册顺序语义不变，register/set_status 新实例经 __post_init__ 自动失效）；build_registration_manifest 去除 json 双重序列化（结构化剥离自指字段，wire 字节不变并字节级回归锁定 sha256=00ff9ada…）；chain_to_plan 用 dataclasses.replace 一次成型 plan_id（节点/边冻结复用）；demo 注册装配收敛到 demo_support.register_demo_agents（显式非生产，仍强制 guard_registration）+ pipeline 组合根复用模块级 allow-all RBAC/scope 检查器；纯函数 stdlib + L17",
+      "code": [
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/app/demo_support.py",
+        "src/coevo/app/pipeline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize1.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/demo_support.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/pipeline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize1.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-2",
+      "title": "共享时间生成器全仓落地（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：timefmt 新增 now_utc_iso_z（依赖无关叶子模块，格式与既有副本完全一致含微秒与尾随 Z），收敛 13 处私有副本（knowledge_base/audit_governance/cockpit/demo_support/task_flow/protocol×4/progress_capture/task_decomposition/talent/crypto）与 3 处直接内联（identity×3）；公开导出名（cockpit.sessions/demo_support）保留 API 仅改来源；行为与 wire 字节不变；全仓源码守卫防回归；stdlib only",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/app/demo_support.py",
+        "src/coevo/audit_governance/stream_store.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/identity/audit_anchor.py",
+        "src/coevo/identity/private_keys.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/knowledge_base/store.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/protocol/import_service.py",
+        "src/coevo/protocol/package_store_db.py",
+        "src/coevo/protocol/sm2_keywrap.py",
+        "src/coevo/protocol/sm2_sign.py",
+        "src/coevo/talent/store.py",
+        "src/coevo/task_decomposition/baseline.py",
+        "src/coevo/task_flow/parser.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize2.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/demo_support.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/stream_store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/import_service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/package_store_db.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/sm2_keywrap.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/sm2_sign.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_flow/parser.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize2.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-3",
+      "title": "共享 canonical JSON 序列化与摘要（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：新增根级叶子 src/coevo/canon.py（canonical_json_bytes / canonical_digest，stdlib only），收敛框架内部重复（integration._canonical / manifest_checker._canonical_bytes 字节语义相同）与 identity 5 处 digest 内联（repository 事件哈希链 2 + business digest 1、validation bundle digest 1、private_keys 审计链 1）；ensure_ascii 语义逐点保留（business digest=False）、digest 逐位不变；root_modules.md 登记；全仓源码守卫防回归",
+      "code": [
+        "src/coevo/canon.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/private_keys.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize3.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/canon.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize3.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```

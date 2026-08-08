@@ -1,5 +1,21 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-4 登记并开始执行（框架默认策略 Profile 惰性缓存）
+
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-4`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-3]）：`framework/policy.py` 的 `default_profiles()` 每次
+  重新构造全部 4 个 Policy、`get_default_profile()` 线性遍历（被 pipeline 与
+  validate_plan 反复消费）；Policy 及其嵌套 Profile 全 frozen（不可变），可安全
+  惰性缓存——`default_profiles()` 一次构造、`get_default_profile()` 字典 O(1)
+  查找且 fail-closed 保留。切片计划：
+  `docs/plans/FRAMEWORK-OPTIMIZE-4-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-4。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-3 完成收尾（共享 canonical JSON 序列化与摘要；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-3`（ENG-BASE）。实现提交：`bc44f87`；
