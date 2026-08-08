@@ -1,5 +1,26 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-11 完成收尾（共享 safe-id 正则叶子；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-11`（ENG-BASE）。实现提交：`94c4384`；
+  登记提交：`ddcf9f6`。
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 验证（增量门禁，主仓）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1223 项 +
+  安全套件 99/99 全绿。
+- 独立复核（沙箱，pin=`94c4384`）：fwopt11-verify（fmt/lint/定向 75 全绿，
+  violations=[]）+ fwopt11-sec（STRIDE PASS，Critical/High/Medium/Low 0/0/0/0；
+  正则字节等价与 fail-closed 保留、语义差异模块未误统一、tests/security
+  零改动），已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-11 行（无悬空）；追溯断言
+  65→66；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-11 / last_verified_commit=`94c4384`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `94c4384`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-11 登记并开始执行（共享 safe-id 正则叶子）
 
 - 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、

@@ -1398,7 +1398,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-11
     story: ENG-BASE
     title: 共享 safe-id 正则叶子：新增 src/coevo/ids.py（SAFE_ID + is_safe_id fail-closed），workspace/cockpit/report/progress_capture/audit_governance/orchestrator/framework.tools 7 处本地副本统一引用；task_flow/talent 语义差异保留独立；root_modules.md 登记
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-GAPS-7]
     acceptance_tests:
       - tests/unit/test_framework_optimize11.py
