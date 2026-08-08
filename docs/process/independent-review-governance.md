@@ -15,8 +15,12 @@
 
 | 角色 | 职责 | 放行标准 |
 |---|---|---|
-| independent verifier | 在被审提交的隔离沙箱内执行完整质量门禁（`make quality`），复核追溯矩阵与审计链 | exit=0、指纹与仓库既有锁定基线一致、审计链 fully-sealed |
-| security-reviewer | 对密码/协议/鉴权/路径/审计链/私钥处理做安全审查，可只读运行安全测试子集 | 无未解决的 Critical/High；输出四档计数与证据 |
+| independent verifier | 在只读沙箱内做守卫校验（`review_sandbox.py check` violations=[]）+ fmt/lint/单元/定向复核；完整质量门禁（`make quality`）在**主工作树**钉扎到被审提交上执行并作为权威放行证据，复核追溯矩阵与审计链 | 主树全量门禁 exit=0、指纹与锁定基线一致、审计链 fully-sealed、沙箱守卫无违规 |
+| security-reviewer | 对密码/协议/鉴权/路径/审计链/私钥处理做安全审查，可只读运行安全测试子集（依赖 GmSSL/opencode 的用例以主树结果为准） | 无未解决的 Critical/High；输出四档计数与证据 |
+
+> **验证口径（REVIEW-SANDBOX-2）**：完整质量门禁含 GmSSL 助手、opencode 等依赖
+> 真实工具链的用例，只能在主工作树钉扎提交上执行（权威证据）。沙箱内此类用例
+> 失败不构成缺陷证据（环境差异），详见 §7。
 
 审查报告只能以**最终回复文本**交付，禁止以文件形式落盘（防注入正式记录）。
 
@@ -68,7 +72,23 @@ python scripts/review_sandbox.py discard --name <name>
 
 ## 7. 环境说明
 
-沙箱内无 `.tools/`（gitignored）：编排者在 prepare 后以目录联接（junction）挂载主仓库 `.tools/` 与 `loop/runtime/`，二者均为只读工具链/运行时材料，不属于被审对象；守卫因 gitignore 规则不会将其列为变更。实机审查命令使用固定环境变量：
+沙箱内无 `.tools/`（gitignored）：编排者在 prepare 后按需把主仓库 `.tools/` 以
+目录联接（junction）或复制方式提供给沙箱，仅用于 fmt/lint/单元等不触发
+reparse-point 校验的复核；`loop/runtime/` 同理。守卫因 gitignore 规则不会将
+`.tools/` / `loop/runtime/` 列为变更。
+
+**限制与权威验证口径（REVIEW-SANDBOX-2，RECORDS-ARCHIVE-2 独立复核实测）**：
+
+1. junction 挂载 `.tools` 会被安全加固拦截——`Open-CoevoLockedDirectory` /
+   `Enter-CoevoSecureDirectoryChain` 拒绝 reparse point，锁工具链安全测试
+   （`test_local_toolchain_security`、sm2-pki 系列）在沙箱内必然失败；
+2. 复制 `.tools` 到沙箱无法复现 GmSSL 助手/DLL 交互（GMH-E-MAGIC）与 opencode
+   配置解析（opencode resolved config unavailable）；
+3. 因此**完整质量门禁只在主工作树钉扎提交上执行**，作为权威放行证据；沙箱承担
+   守卫校验（violations=[]）、静态审阅、fmt/lint/单元与不依赖 crypto 助手的
+   定向复核；沙箱内 crypto/opencode 用例失败按环境差异记录，不当作缺陷。
+
+实机审查命令使用固定环境变量：
 
 ```text
 COEVO_REPO_ROOT=<sandbox>

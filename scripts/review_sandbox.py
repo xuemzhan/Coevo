@@ -17,6 +17,14 @@ Lifecycle for one independent reviewer role (verifier or security reviewer):
 The guard is executed by the orchestrator before a reviewer report is
 accepted: a violated sandbox voids the review and the report is discarded.
 See docs/process/independent-review-governance.md for the full policy.
+
+Verification venue (REVIEW-SANDBOX-2): the sandbox provides the read-only
+guard, static review and fmt/lint/unit/targeted checks. The authoritative
+full quality gate (crypto/GmSSL/opencode-dependent tests) runs on the MAIN
+worktree pinned to the reviewed commit, because a junction-mounted .tools is
+rejected by the reparse-point hardening and a copied .tools cannot reproduce
+the GmSSL helper/DLL interaction (GMH-E-MAGIC) and opencode config resolution
+(see the governance doc).
 """
 from __future__ import annotations
 

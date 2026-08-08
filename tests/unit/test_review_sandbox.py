@@ -188,5 +188,43 @@ class ReviewSandboxGuardTests(unittest.TestCase):
         self.assertEqual(before["head"], after["head"])
 
 
+class GovernanceDocTests(unittest.TestCase):
+    """REVIEW-SANDBOX-2: the dual-sign governance doc pins the real venue."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.doc = (
+            ROOT / "docs" / "process" / "independent-review-governance.md"
+        ).read_text(encoding="utf-8", errors="replace")
+        cls.sandbox_module = (
+            ROOT / "scripts" / "review_sandbox.py"
+        ).read_text(encoding="utf-8", errors="replace")
+
+    def test_main_tree_full_gate_is_the_authoritative_evidence(self):
+        self.assertIn("主工作树", self.doc)
+        self.assertIn("权威", self.doc)
+        self.assertIn("make quality", self.doc)
+
+    def test_sandbox_role_is_guard_and_targeted_review(self):
+        self.assertIn("守卫校验", self.doc)
+        self.assertIn("定向复核", self.doc)
+
+    def test_doc_documents_junction_and_copy_limitations(self):
+        # The doc must explain why the sandbox cannot host the crypto tests:
+        # reparse-point rejection, GmSSL helper magic mismatch and opencode
+        # config resolution, so sandbox failures are environment differences.
+        self.assertIn("reparse point", self.doc)
+        self.assertIn("GMH-E-MAGIC", self.doc)
+        self.assertIn("opencode", self.doc)
+        self.assertIn("环境差异", self.doc)
+
+    def test_sandbox_module_docstring_pins_the_same_venue(self):
+        self.assertIn("REVIEW-SANDBOX-2", self.sandbox_module)
+        self.assertIn("MAIN", self.sandbox_module)
+        self.assertIn("worktree", self.sandbox_module)
+        self.assertIn("reparse-point", self.sandbox_module)
+        self.assertIn("GMH-E-MAGIC", self.sandbox_module)
+
+
 if __name__ == "__main__":
     unittest.main()
