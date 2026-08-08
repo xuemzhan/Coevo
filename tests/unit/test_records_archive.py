@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ from src.coevo.records_archive import (
     archivable,
     archive_plan,
     over_policy_size,
+    record_preamble,
     split_audit_lines,
     split_decisions_sections,
     split_verification_sections,
@@ -244,6 +246,57 @@ class ArchivePlanTests(unittest.TestCase):
             size_threshold_bytes=100,
         )
         self.assertEqual(1, len(split_decisions_sections(plan["keep"])))
+
+
+class RecordPreambleTests(unittest.TestCase):
+    """RECORDS-HYGIENE-1: rewrites must preserve the record-file header."""
+
+    def test_decisions_title_is_kept(self):
+        text = "# Loop 决策记录\n\n## 2026-08-08 -- one\nbody\n## 2026-08-09 -- two\nbody\n"
+        self.assertEqual("# Loop 决策记录\n\n", record_preamble(text))
+
+    def test_no_preamble_yields_empty(self):
+        text = "## 2026-08-08T00:00:00Z -- one\nbody\n"
+        self.assertEqual("", record_preamble(text))
+
+    def test_non_string_is_rejected(self):
+        with self.assertRaises(TypeError):
+            record_preamble(123)  # type: ignore[arg-type]
+
+
+class DecisionsChronologicalGuardTests(unittest.TestCase):
+    """RECORDS-HYGIENE-1: DECISIONS sections stay in non-decreasing date order."""
+
+    HEADER = re.compile(
+        r"(\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)?)"
+    )
+
+    def test_decisions_sections_are_chronologically_ordered(self):
+        text = (ROOT / "loop" / "DECISIONS.md").read_text(
+            encoding="utf-8", errors="replace"
+        )
+        sections = re.split(r"(?m)^## ", text)
+        previous = ""
+        for section in sections[1:]:
+            header = section.splitlines()[0]
+            match = self.HEADER.match(header)
+            self.assertIsNotNone(
+                match, f"unparseable DECISIONS section header: {header!r}"
+            )
+            date = match.group(1)
+            self.assertGreaterEqual(
+                date,
+                previous,
+                f"DECISIONS sections out of order: {previous} -> {date} "
+                f"({header[:40]!r})",
+            )
+            previous = date
+
+    def test_decisions_title_header_is_preserved(self):
+        text = (ROOT / "loop" / "DECISIONS.md").read_text(
+            encoding="utf-8", errors="replace"
+        )
+        self.assertTrue(text.startswith("# Loop 决策记录"), "DECISIONS title missing")
 
 
 if __name__ == "__main__":

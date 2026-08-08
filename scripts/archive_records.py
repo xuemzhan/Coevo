@@ -23,6 +23,7 @@ from src.coevo.records_archive import (  # noqa: E402
     archivable,
     archive_plan,
     over_policy_size,
+    record_preamble,
 )
 
 
@@ -107,7 +108,9 @@ def main(argv: list[str] | None = None) -> int:
             target = archive_dir / f"{kind}-{date_stamp}.txt"
             with target.open("a", encoding="utf-8") as stream:
                 stream.write(plan["archive"] + "\n")
-            path.write_text(plan["keep"] + "\n", encoding="utf-8")
+            # Preserve the record-file preamble (e.g. DECISIONS title) so a
+            # rewrite never drops the header (RECORDS-HYGIENE-1).
+            path.write_text(record_preamble(text) + plan["keep"] + "\n", encoding="utf-8")
             print(f"  -> wrote {target}")
     if check:
         if pending:

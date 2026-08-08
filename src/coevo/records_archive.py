@@ -102,6 +102,20 @@ def split_audit_lines(text: str) -> list[tuple[str, str]]:
     return result
 
 
+def record_preamble(text: str) -> str:
+    """Return the record-file header before the first ``## `` section.
+
+    ``DECISIONS.md`` carries a ``# Loop 决策记录`` title; rewriting it from the
+    kept sections alone would silently drop that header (RECORDS-HYGIENE-1).
+    Files that start directly with a ``## `` section (e.g. VERIFICATION.md)
+    yield an empty preamble.
+    """
+    if not isinstance(text, str):
+        raise TypeError("text must be a string")
+    parts = re.split(r"(?m)^## ", text)
+    return parts[0]
+
+
 def archive_plan(
     text: str,
     *,
