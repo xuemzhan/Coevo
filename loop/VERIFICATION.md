@@ -24815,3 +24815,252 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-08T03:02:37.745394Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T03:02:46.101773Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_flow/parser.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize2.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-3",
+      "title": "共享 canonical JSON 序列化与摘要（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：新增根级叶子 src/coevo/canon.py（canonical_json_bytes / canonical_digest，stdlib only），收敛框架内部重复（integration._canonical / manifest_checker._canonical_bytes 字节语义相同）与 identity 5 处 digest 内联（repository 事件哈希链 2 + business digest 1、validation bundle digest 1、private_keys 审计链 1）；ensure_ascii 语义逐点保留（business digest=False）、digest 逐位不变；root_modules.md 登记；全仓源码守卫防回归",
+      "code": [
+        "src/coevo/canon.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/identity/repository.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/identity/private_keys.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize3.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/canon.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize3.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-4",
+      "title": "框架默认策略 Profile 惰性缓存（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：default_profiles() 一次性构造并缓存 4 个默认 Policy（Policy 与嵌套 Profile 全 frozen 不可变，安全共享），get_default_profile 字典 O(1) 查找且 fail-closed 保留（未知名仍抛 PolicyValidationError）；消除 pipeline/validate_plan 等消费点每次重复构造 Policy（O(4)×N → 一次构造 + O(1)）；docs/modules/framework.md 同步；stdlib only",
+      "code": [
+        "src/coevo/framework/policy.py",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize4.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/policy.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize4.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-5",
+      "title": "real_chain_store 收敛到共享 canonical（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，做全量门禁，成功后 push 到 github\"）：canon.py 的 canonical_json_bytes/canonical_digest 新增 allow_nan 参数（默认 False 拒绝 NaN/Infinity，fail-closed）；orchestrator/real_chain_store 的 canonical_json_bytes 保留严格类型校验（非有限 float/非 JSON 拒绝、RealChainStoreError 语义）但序列化委托共享 canon（ensure_ascii=False/allow_nan=False，字节逐位不变），canonical_digest 经共享序列化计算摘要；root_modules.md 补充 allow_nan 语义",
+      "code": [
+        "src/coevo/canon.py",
+        "src/coevo/orchestrator/real_chain_store.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize5.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/canon.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/real_chain_store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize5.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-6",
+      "title": "demo 组合根阶段化收敛（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：run_demo_pipeline（~250 行大函数）的包导出/驾驶舱快照/知识库入库/审计流 4 段内联提取为模块级阶段函数（_export_demo_package/_build_demo_cockpit_views/_store_demo_knowledge/_publish_demo_audit，均标注 DEMO-ONLY），组合根薄编排、行为不变（demo e2e 3/3 回归）；hashlib/json import 收敛到包导出阶段；阶段函数可独立单测 + 架构守卫（内联体仅存在于各自助手内）",
+      "code": [
+        "src/coevo/app/pipeline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize6.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/app/pipeline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize6.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-7",
+      "title": "真实链失败收尾路径去重（2026-08-08，用户指令\"继续\"，延续\"基于框架，优化原来系统应用的代码实现……不做全量门禁\"）：orchestrator/_real_chain.py 的 dispatch_real_chain 中 3 处结构相同的失败收尾（agent 不可用 / facade 失败 / facade 重试失败：追加 ESCALATED trace + _finish_dispatch_terminal）提取为 _escalate_and_finish 单一辅助，行为不变（ESCALATED 状态与审计存储语义逐位一致）；守卫测试钉住 3 个失败 detail 各单一调用点",
+      "code": [
+        "src/coevo/orchestrator/_real_chain.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize7.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize7.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-8",
+      "title": "真实链 resume 失败收尾收敛（2026-08-08，用户指令\"继续\"，延续\"基于框架，优化原来系统应用的代码实现……不做全量门禁\"）：orchestrator/_real_chain.py 的 resume_real_chain 中 2 处结构相同的 ESCALATED 失败收尾（包验证失败 except 分支 / crypto 能力不可用：追加 ESCALATED trace + report + outcome + store.finish_resume_failure）提取为 _finish_resume_escalated 单一辅助，行为不变（ESCALATED 语义与审计存储一致）；守卫测试钉住 2 个 code 常量各单一调用点",
+      "code": [
+        "src/coevo/orchestrator/_real_chain.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize8.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize8.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
