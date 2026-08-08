@@ -1465,7 +1465,7 @@ items:
   - id: RECORDS-ARCHIVE-3
     story: ENG-BASE
     title: 审计链归档安全：archive_records.py 的 audit 种类（tool-audit.jsonl）必须有专用重锚定流程（裁剪后重新封缄/重链）或从通用 --apply/--check 中显式排除并失败关闭，防止未来 audit 超策略时被裁剪破坏审计封缄；配套测试与 DECISIONS 留痕
-    status: ready
+    status: done
     dependencies: [RECORDS-ARCHIVE-2]
     acceptance_tests:
       - tests/unit/test_records_archive.py

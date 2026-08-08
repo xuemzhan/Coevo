@@ -5205,3 +5205,21 @@ security-reviewer 双签门禁。
 - 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
+
+## 2026-08-08 — RECORDS-ARCHIVE-3 完成收口（审计链归档安全；增量门禁豁免全量）
+
+- 工作项：`RECORDS-ARCHIVE-3`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-2]）。
+- 用户指令：继续进行优化，不用做全量门禁；按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality（豁免留痕）。
+- 交付：`ARCHIVABLE_KINDS=("verification","decisions")` + `archivable()` 单一
+  事实源；`archive_records.py --check/--apply` 只处理可归档种类，audit 超策略时
+  明确提示"需专用重锚定流程（未实现）"并失败关闭（--apply 非零退出），循环内
+  assert 防误加；`over_policy_size("audit",...)` 保留为监控指标；策略文档更新。
+- 验证（增量门禁）：fmt exit=0 fingerprint=`8d456a2ce09245c7`；lint exit=0
+  fingerprint=`5103146e112f2dd1`（audit fully-sealed）；定向 52 项全绿
+  （records_archive 5 项新增 + quality_gate_lock + traceability 72 + audit_seal）；
+  实测 `--apply` 后 tool-audit.jsonl 字节不变（609088→609088）且 audit
+  fully-sealed。全量 quality 按用户指示豁免。
+- 安全结论：RECORDS-ARCHIVE-2 遗留 Medium 1 关闭——通用归档工具不再可能触碰
+  审计链；真正"重锚定流程"仍留作后续工作项（未实现，超出本轮范围）。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
