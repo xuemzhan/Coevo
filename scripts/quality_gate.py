@@ -17,6 +17,7 @@ from audit_seal import seal, verify_seal
 ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1])); VERIFICATION=ROOT/"loop/VERIFICATION.md"; os.environ.setdefault("COEVO_REPO_ROOT",str(ROOT))
 GATE_LOCK=ROOT/"loop/.quality-gate.lock"
 CONTROL=os.environ.get("COEVO_CONTROL_ARCHIVE",str(ROOT/".tools"/"control"/"control.pyz"))
+CHILD_TIMEOUT_SECS=2400
 def control(module,*args): return [sys.executable,CONTROL,module,*args]
 def gate_env():
     """Child-process environment that forces UTF-8 stdout/stderr capture.
@@ -70,12 +71,32 @@ def _run_locked(target):
         output.append("preflight audit seal failed: "+str(exc)+"\n")
     for argv in argvs:
         if rc: break
+        # Stages between the preflight seal and the final seal append gate
+        # audit records (and some tests exercise the real chain), leaving an
+        # unsealed tail. The e2e stage's fail-fast preflight (AVAIL-1)
+        # requires a fully-sealed audit chain, so re-seal before every stage
+        # to keep the invariant each stage observes (sealing is idempotent and
+        # does not append records).
+        try:
+            seal()
+            if verify_seal()!="fully-sealed":
+                raise RuntimeError("stage audit seal is incomplete")
+        except Exception as exc:  # noqa: BLE001 - seal failure must stop the gate
+            rc=14
+            output.append("stage audit seal failed: "+str(exc)+"\n")
+            break
         cwd=ROOT
         env=gate_env()
         if argv==GO_TEST_ARGV:
             cwd=ROOT/"go"
             env["GOPROXY"]="off"
-        process=subprocess.run(argv,cwd=cwd,env=env,capture_output=True,text=True,encoding="utf-8",errors="replace")
+        try:
+            process=subprocess.run(argv,cwd=cwd,env=env,capture_output=True,text=True,encoding="utf-8",errors="replace",timeout=CHILD_TIMEOUT_SECS)
+        except subprocess.TimeoutExpired as exc:
+            rc=13
+            output.append("$ "+" ".join(argv)+"\n[gate] stage timed out after "
+                          f"{CHILD_TIMEOUT_SECS}s ({exc})\n")
+            break
         combined=process.stdout+process.stderr
         output.append("$ "+" ".join(argv)+"\n"+combined)
         if process.returncode:
@@ -83,7 +104,13 @@ def _run_locked(target):
             # GmSSL helper launch contention (GCP-E-LAUNCH; see
             # src/coevo/crypto/gmssl_provider.py). Retry once and record it.
             if any("tests/e2e" in str(part) for part in argv) and "GCP-E-LAUNCH" in combined:
-                retried=subprocess.run(argv,cwd=ROOT,env=gate_env(),capture_output=True,text=True,encoding="utf-8",errors="replace")
+                try:
+                    retried=subprocess.run(argv,cwd=ROOT,env=gate_env(),capture_output=True,text=True,encoding="utf-8",errors="replace",timeout=CHILD_TIMEOUT_SECS)
+                except subprocess.TimeoutExpired as exc:
+                    rc=13
+                    output.append("\n[gate] e2e retry timed out after "
+                                  f"{CHILD_TIMEOUT_SECS}s ({exc})\n")
+                    break
                 output.append("\n[gate] e2e failed with transient GCP-E-LAUNCH; retried once (bounded)\n$ "+" ".join(argv)+"\n"+retried.stdout+retried.stderr)
                 process=retried
             rc=process.returncode
