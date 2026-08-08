@@ -1548,7 +1548,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-16
     story: ENG-BASE
     title: 共享 PowerShell 解析叶子：新增 src/coevo/powershell.py（powershell_executable 简单变体 + locked_powershell_executable 锁校验变体，error_factory 保留各模块异常语义），identity/certificates、identity/audit_anchor、identity/private_keys、crypto/cng_handle 四处重复副本统一为薄包装；行为逐位不变；root_modules.md 登记
-    status: ready
+    status: done
     dependencies: []
     acceptance_tests:
       - tests/unit/test_framework_optimize17.py

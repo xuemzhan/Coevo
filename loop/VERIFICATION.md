@@ -115,6 +115,16 @@ lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability 
 追溯矩阵新增 ENG-BASE | PERF-REPLAY-1 行，traceability checked=126 missing=0（ENG-BASE 78）。
 ```
 
+## 2026-08-08T15:40:00Z — FRAMEWORK-OPTIMIZE-16 增量门禁记录（全量 quality 按用户指示豁免）
+
+```text
+用户指令：继续优化，不做全量门禁。
+fmt：exit=0 fingerprint=`8d456a2ce09245c7`（compileall scripts src tests）。
+lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability + audit_log verify + audit_seal verify --allow-tail + archive_records --check + secret_scan；audit fully-sealed）。
+定向测试：tests/unit/test_framework_optimize17.py（新增 10 项：简单变体 env/fallback/error_factory、锁校验变体命中/篡改 sha/坏 lock/非绝对路径、四模块委托守卫、无本地解析副本守卫）+ identity/crypto 回归 47 项全绿（identity_validation + private_key_handles_bindings + cng_handle + audit_key_health）；compileall exit=0。
+追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-16 行，traceability checked=126 missing=0（ENG-BASE 79）。
+```
+
 
 
 
@@ -10142,3 +10152,260 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 501404 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260808\verification-20260808.txt; [ok] decisions: nothing to archive
+
+## 2026-08-08T15:25:36.542404Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T15:26:02.798845Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+control.pyz"
+      ],
+      "tests": [
+        "tests/unit/test_quality_gate_lock.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/process/records-archiving-policy.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".tools/control/control.pyz",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_quality_gate_lock.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-HELPER-1",
+      "title": "GmSSL crypto-provider 助手编译缓存（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：`invoke-gmssl-crypto.ps1` 按锁定 source_sha256 缓存编译产物（`.tools/runtime/gmssl-crypto-helper/cache/helper-<sha>.exe`）+ 旁路 `.sha256` 哈希校验——命中直接复用（Open-CoevoLockedFile 按旁路哈希锁定）、损坏/缺失自愈重编译、未命中现场编译且当前调用行为不变（唯一命名助手 + finally 清理）；缓存安装尽力而为且原子（tmp→校验→rename→写旁路），失败不影响当前调用；同步 toolchain-lock `gmssl_prototype_provider.helper.launcher` size/sha256（Python 侧 gmssl_provider 按 lock 校验启动器）；安全取舍（单份持久化可写二进制 + 旁路校验，本地信任模型一致）记录于 approved-crypto-provider-path.md §9",
+      "code": [
+        "scripts/invoke-gmssl-crypto.ps1",
+        "docs/dependencies/toolchain-lock.json",
+        "docs/dependencies/approved-crypto-provider-path.md"
+      ],
+      "tests": [
+        "tests/unit/test_gmssl_provider_retry.py",
+        "tests/integration/test_gmssl_prototype_provider.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/invoke-gmssl-crypto.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/approved-crypto-provider-path.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_gmssl_provider_retry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_gmssl_prototype_provider.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-15",
+      "title": "共享 safe-relative-path 校验叶子（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：新增 src/coevo/relpath.py（is_safe_relative_path fail-closed：非空、无前导 /、无 \\、无 NUL、无空/./.. 段），progress_capture/watcher、cockpit/static、cockpit/wps 三处本地副本统一引用（static 保留扩展名/大小/containment 检查，wps 保留 DENIED 语义，watcher 保留异常类与消息）；NUL 拒绝为严格化统一（static 原有，watcher/wps 不拒绝任何合法输入）；workspace/_has_parent_traversal 与 model/config prompts_file 语义差异保留独立；root_modules.md 登记",
+      "code": [
+        "src/coevo/relpath.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/cockpit/static.py",
+        "src/coevo/cockpit/wps.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize15.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/relpath.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/static.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/wps.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize15.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-VERIFY-1",
+      "title": "集成套件回归复测与性能基线（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"；量化 PERF-HELPER-1 收益）：完整集成套件（20 文件 / 262 项）复测 exit=0（skipped=1），**总耗时 288.6s（约 4.8 分钟）**，对比缓存前基线约 1021s（约 17 分钟）——**约 3.5 倍提速，无回归**；crypto 缓存命中路径在全部集成用例（installer/dev_environment/merge/package_store/orchestrator/sm2-test-pki 等）下稳定；性能基线记录于 VERIFICATION/DECISIONS；sm2-test-pki 测试助手仍现场编译，未成为阻塞项",
+      "code": [
+        "tests/integration/"
+      ],
+      "tests": [
+        "tests/integration/test_gmssl_prototype_provider.py",
+        "tests/integration/test_cng_handle.py",
+        "tests/integration/test_sm2_test_pki_generation.py",
+        "tests/integration/test_installer.py",
+        "tests/integration/test_dev_environment_entry.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "tests/integration/",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_gmssl_prototype_provider.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_sm2_test_pki_generation.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_installer.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-REPLAY-1",
+      "title": "check_replay 单趟作用域扫描（2026-08-08，用户指令\"继续进行优化，不用做全量门禁\"）：`replay_detector.check_replay` 将同作用域三趟 O(k) 扫描（package_id 命中 / package_digest 命中 / max sequence_no）合并为单趟，同时跟踪三者；决策顺序与结果逐位不变（id→digest→sequence 优先级保留；id 命中优先于 digest 即使 digest 早命中，单趟全扫不提前 break）；每作用域扫描降为 1 趟（常数 3×）",
+      "code": [
+        "src/coevo/protocol/replay_detector.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize16.py",
+        "tests/unit/test_agent_wire_regression.py",
+        "tests/integration/test_agent_package_atomic_import.py",
+        "tests/unit/test_package_store_persistence.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/replay_detector.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize16.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_agent_package_atomic_import.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_package_store_persistence.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
