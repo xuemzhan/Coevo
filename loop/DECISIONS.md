@@ -5551,4 +5551,11 @@ security-reviewer 双签门禁。
 - Security: pure import deletion; private_keys.py `os` confirmed unused by AST + lexical scan; security tests untouched and green.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-22 registration (MergeEngine.merge phase decomposition; incremental gate)
+- User instruction: continue; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-22` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-21]): MergeEngine.merge (394 lines, cc~33, largest single method in repo) is split by pure migration into 8 private phase helpers aligned with the docstring algorithm steps 1-7 (_validate_merge_inputs / _import_binding_rejection / _duplicate_rejection / _revision_rejection / _decision_maker_rejection / _merge_fields / _rejected_proposal / _commit_proposal); merge() becomes a linear orchestration; all check order, rejection_reason strings and fail-closed semantics stay byte-identical; import surface unchanged; guard test test_framework_optimize23.py.
+- Security review: required (merge is security-critical: fail-closed, recipient allow-list, CAS atomic register); pure migration.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
