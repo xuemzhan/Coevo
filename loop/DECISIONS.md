@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-1 登记并开始执行（基于框架优化原应用实现）
+
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-1`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-INTEGRATION-4]）：① `AgentRegistry.by_capability` 惰性能力索引
+  （O(V)→摊销 O(1)，注册顺序语义不变）；② `build_registration_manifest` 去除
+  `json.loads(json.dumps())` 双重序列化（结构化剥离自指字段，输出字节不变并补
+  字节级回归锁定）；③ `chain_to_plan` 去二次 Plan 构造（dataclasses.replace）；
+  ④ demo 注册装配从 pipeline 组合根收敛到 `demo_support.register_demo_agents()`
+  （显式非生产）并复用模块级 RBAC/scope 检查器。切片计划：
+  `docs/plans/FRAMEWORK-OPTIMIZE-1-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-1。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — QUALITY-GATE-ENCODING-1 收尾更正（子代理遗漏锁定脚本链同步；编排者补齐并复验）
 
 - 事实更正：上文"QUALITY-GATE-ENCODING-1 完成收尾"段由并行流子代理（sec_review_integ4b）

@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "QUALITY-GATE-ENCODING-1",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "FRAMEWORK-OPTIMIZE-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "8576013c0310c36405811e4ea89cbf89598db5fc",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T01:12:43.411064Z"
+  "updated_at": "2026-08-08T01:15:54.423921Z"
 }

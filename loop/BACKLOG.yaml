@@ -1279,3 +1279,18 @@ items:
       - tests/unit/test_quality_gate_encoding.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-1（2026-08-08 用户指令"基于框架，优化原来系统应用的代码实现"） ----------
+  - id: FRAMEWORK-OPTIMIZE-1
+    story: ENG-BASE
+    title: 基于框架优化原应用实现（数据结构/算法/模块架构）：AgentRegistry.by_capability 惰性能力索引（O(V)→摊销 O(1)）；build_registration_manifest 去除双重 JSON 序列化（输出字节不变）；chain_to_plan 去二次 Plan 构造（dataclasses.replace）；demo 注册装配收敛到 demo_support.register_demo_agents（显式非生产）并复用模块级 RBAC/scope 检查器；纯函数 stdlib + L17
+    status: ready
+    dependencies: [FRAMEWORK-INTEGRATION-4]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize1.py
+      - tests/unit/test_framework_integration2.py
+      - tests/unit/test_framework_integration4.py
+      - tests/unit/test_pipeline_framework_gate.py
+      - tests/unit/test_orchestrator.py
+      - tests/unit/test_module_docs.py
+    security_review: true
+    protocol_review: false
