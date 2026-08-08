@@ -4,6 +4,10 @@ The gate is serialized by an exclusive lock (``loop/.quality-gate.lock``):
 a concurrent invocation waits briefly for the lock and then fails with a
 clear error instead of interleaving VERIFICATION.md writes or racing the
 audit seal. Run one gate at a time (the test suites are not parallel-safe).
+
+All child processes are captured with a UTF-8 environment so their output
+round-trips into VERIFICATION.md without mojibake on Windows consoles
+(QUALITY-GATE-ENCODING-1).
 """
 from __future__ import annotations
 import argparse, datetime as dt, hashlib, json, os, subprocess, sys
@@ -14,6 +18,18 @@ ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1]))
 GATE_LOCK=ROOT/"loop/.quality-gate.lock"
 CONTROL=os.environ.get("COEVO_CONTROL_ARCHIVE",str(ROOT/".tools"/"control"/"control.pyz"))
 def control(module,*args): return [sys.executable,CONTROL,module,*args]
+def gate_env():
+    """Child-process environment that forces UTF-8 stdout/stderr capture.
+
+    Without ``PYTHONIOENCODING``/``PYTHONUTF8``, Python children on a
+    Windows console emit GBK bytes, which the gate captures with
+    ``errors="replace"`` and writes into VERIFICATION.md as irreversible
+    replacement characters (QUALITY-GATE-ENCODING-1).
+    """
+    env=os.environ.copy()
+    env["PYTHONIOENCODING"]="utf-8"
+    env["PYTHONUTF8"]="1"
+    return env
 def go_test_argv():
     """Resolve the locked Go executable and return the offline Go test argv.
 
@@ -55,10 +71,10 @@ def _run_locked(target):
     for argv in argvs:
         if rc: break
         cwd=ROOT
-        env=None
+        env=gate_env()
         if argv==GO_TEST_ARGV:
             cwd=ROOT/"go"
-            env=os.environ.copy(); env["GOPROXY"]="off"
+            env["GOPROXY"]="off"
         process=subprocess.run(argv,cwd=cwd,env=env,capture_output=True,text=True,encoding="utf-8",errors="replace")
         combined=process.stdout+process.stderr
         output.append("$ "+" ".join(argv)+"\n"+combined)
@@ -67,7 +83,7 @@ def _run_locked(target):
             # GmSSL helper launch contention (GCP-E-LAUNCH; see
             # src/coevo/crypto/gmssl_provider.py). Retry once and record it.
             if any("tests/e2e" in str(part) for part in argv) and "GCP-E-LAUNCH" in combined:
-                retried=subprocess.run(argv,cwd=ROOT,capture_output=True,text=True,encoding="utf-8",errors="replace")
+                retried=subprocess.run(argv,cwd=ROOT,env=gate_env(),capture_output=True,text=True,encoding="utf-8",errors="replace")
                 output.append("\n[gate] e2e failed with transient GCP-E-LAUNCH; retried once (bounded)\n$ "+" ".join(argv)+"\n"+retried.stdout+retried.stderr)
                 process=retried
             rc=process.returncode
