@@ -274,6 +274,41 @@ def _escalate_and_finish(
     )
 
 
+def _finish_resume_escalated(
+    chain: Any, event: Any, workspace: Any, traces: list[Any],
+    summaries: dict[str, list[str]], confirmed: Any, resume_digest: str,
+    store: RealChainStore, now: str, step: Any, code: str,
+) -> RealChainOutcome:
+    """Append an ESCALATED trace and finish the resume as ESCALATED.
+
+    Consolidates the repeated failure paths in ``resume_real_chain``
+    (FRAMEWORK-OPTIMIZE-8): package verification failure / crypto capability
+    unavailable.
+    """
+
+    from . import OrchestrationOutcome, OrchestrationStepResult
+
+    traces.append(
+        _trace(
+            event.event_id, step, OrchestrationStepResult.ESCALATED, now,
+            str(code),
+        )
+    )
+    report = _report(
+        chain, event, workspace, traces, OrchestrationOutcome.ESCALATED, now
+    )
+    result = _outcome(
+        chain, event, workspace, report, summaries, confirmed.event_digest,
+        confirmed.project_input_digest, confirmed.confirmation_digest,
+        confirmed.package_preview, store_id=confirmed.store_id,
+    )
+    store.finish_resume_failure(
+        event.event_id, confirmed.event_digest, resume_digest,
+        result, str(code), now,
+    )
+    return result
+
+
 def project_baseline_to_requirements(baseline: Any) -> tuple[TaskRequirement, ...]:
     from src.coevo.talent.models import AvailabilityWindow
     return tuple(
@@ -579,28 +614,16 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
             return result
         except Exception as exc:
             code = getattr(exc, "code", "CRYPTO_PACKAGE_VERIFICATION_FAILED")
-            traces.append(_trace(event.event_id, chain.steps[4], OrchestrationStepResult.ESCALATED,
-                                 now, str(code)))
-            report = _report(chain, event, workspace, traces, OrchestrationOutcome.ESCALATED, now)
-            result = _outcome(chain, event, workspace, report, summaries, confirmed.event_digest,
-                              confirmed.project_input_digest, confirmed.confirmation_digest,
-                              confirmed.package_preview, store_id=confirmed.store_id)
-            store.finish_resume_failure(
-                event.event_id, confirmed.event_digest, resume_digest, result, str(code), now
+            return _finish_resume_escalated(
+                chain, event, workspace, traces, summaries, confirmed,
+                resume_digest, store, now, chain.steps[4], code,
             )
-            return result
 
     code = "CRYPTO_CAPABILITY_UNAVAILABLE"
-    traces.append(_trace(event.event_id, chain.steps[4], OrchestrationStepResult.ESCALATED,
-                         now, code))
-    report = _report(chain, event, workspace, traces, OrchestrationOutcome.ESCALATED, now)
-    result = _outcome(chain, event, workspace, report, summaries, confirmed.event_digest,
-                      confirmed.project_input_digest, confirmed.confirmation_digest,
-                      confirmed.package_preview, store_id=confirmed.store_id)
-    store.finish_resume_failure(
-        event.event_id, confirmed.event_digest, resume_digest, result, code, now
+    return _finish_resume_escalated(
+        chain, event, workspace, traces, summaries, confirmed,
+        resume_digest, store, now, chain.steps[4], code,
     )
-    return result
 
 
 def recover_real_chain(event_id: str, *, actor: Actor, authorizer: Authorizer,
