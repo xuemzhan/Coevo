@@ -11,6 +11,7 @@ from __future__ import annotations
 
 
 import hashlib
+import heapq
 import re
 import secrets
 from datetime import datetime
@@ -85,13 +86,15 @@ class CockpitSessionManager:
         if entry is None:
             return False
         created_at, last_seen = entry
+        # Parse ``now`` once and reuse it for both checks (PERF-SESS-1).
+        now_seconds = _iso_seconds(now)
         if (
             self._max_session_age_sec is not None
-            and _iso_seconds(now) - _iso_seconds(created_at) > self._max_session_age_sec
+            and now_seconds - _iso_seconds(created_at) > self._max_session_age_sec
         ):
             del self._sessions[digest]
             return False
-        if _iso_seconds(now) - _iso_seconds(last_seen) > self._timeout_sec:
+        if now_seconds - _iso_seconds(last_seen) > self._timeout_sec:
             del self._sessions[digest]
             return False
         self._sessions[digest] = (created_at, now)
@@ -119,12 +122,18 @@ class CockpitSessionManager:
         return len(self._sessions)
 
     def _evict_if_needed(self) -> None:
-        if len(self._sessions) <= self._max_sessions:
+        excess = len(self._sessions) - self._max_sessions
+        if excess <= 0:
             return
-        for digest in sorted(
+        # Evict the ``excess`` oldest sessions by last_seen (PERF-SESS-1):
+        # O(n log excess) instead of a full O(n log n) sort; excess is 1 in
+        # the normal create path. The evicted set is identical to the previous
+        # sorted-then-slice behavior.
+        for digest in heapq.nsmallest(
+            excess,
             self._sessions,
             key=lambda item: self._sessions[item][1],
-        )[: len(self._sessions) - self._max_sessions]:
+        ):
             del self._sessions[digest]
 
     @staticmethod

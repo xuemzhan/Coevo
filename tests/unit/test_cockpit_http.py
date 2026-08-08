@@ -156,6 +156,23 @@ class CockpitSessionManagerTests(unittest.TestCase):
         self.assertEqual(2, manager.session_count)
         self.assertFalse(manager.validate(first, now="2026-08-22T00:00:03Z"))
 
+    def test_max_sessions_keeps_the_newest(self):
+        # PERF-SESS-1: the eviction must remove the oldest and keep the rest.
+        manager = CockpitSessionManager(timeout_sec=60, max_sessions=2)
+        first = manager.create(now="2026-08-22T00:00:00Z")
+        second = manager.create(now="2026-08-22T00:00:01Z")
+        third = manager.create(now="2026-08-22T00:00:02Z")
+        self.assertEqual(2, manager.session_count)
+        self.assertTrue(manager.validate(second, now="2026-08-22T00:00:03Z"))
+        self.assertTrue(manager.validate(third, now="2026-08-22T00:00:03Z"))
+
+    def test_eviction_uses_bounded_heap_selection(self):
+        # Source guard: the eviction must not do a full O(n log n) sort.
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "src/coevo/cockpit/sessions.py").read_text(encoding="utf-8")
+        self.assertIn("heapq.nsmallest", source)
+        self.assertNotIn("sorted(\n            self._sessions", source)
+
     def test_empty_and_unknown_tokens_fail(self):
         manager = CockpitSessionManager(timeout_sec=60)
         self.assertFalse(manager.validate("", now=T0))
