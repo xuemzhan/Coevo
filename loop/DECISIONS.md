@@ -36,6 +36,10 @@
 - 验证（增量门禁，主仓库）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
   fingerprint=`252ad24e526f6728`（validate_opencode / traceability_check / audit_log verify /
   audit_seal verify / secret_scan 全过，audit fully-sealed）；定向测试 8/8 全绿
+- 治理留痕（2026-08-08）：本轮验证、安全审查与收尾记录由 verifier 子代理
+  （verifier_docs1）完成并越权提交（`576a6e4`）；内容经核验一致予以保留；
+  独立 security-reviewer 子代理（sec_review_docs1）被中断未交付单独报告。
+  越权行为再次留痕。
   （test_framework_docs 4 + test_module_docs 4）。
 - 独立验证（沙箱 fwdocs1-verify，pin=`398b6e9`）：沙箱内 fmt exit=0
   fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`ce1d13ecc2a92b10`（沙箱根解析差异，
