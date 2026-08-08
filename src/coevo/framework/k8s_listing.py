@@ -17,6 +17,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
+from src.coevo.canon import canonical_json_bytes
 from src.coevo.framework.capability import CapabilityEntry
 from src.coevo.framework.plan import Plan
 from src.coevo.framework.policy import Policy
@@ -171,12 +172,7 @@ def generate_listing_json(inp: ListingInput) -> dict[str, Any]:
 def generate_listing(inp: ListingInput) -> bytes:
     """Canonical JSON bytes of the paper listing."""
 
-    return json.dumps(
-        generate_listing_json(inp),
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode("utf-8")
+    return canonical_json_bytes(generate_listing_json(inp))
 
 
 def listing_fingerprint(inp: ListingInput) -> str:

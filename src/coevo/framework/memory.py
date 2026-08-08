@@ -18,12 +18,12 @@ are treated as rejections.  L15: standard library only.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Protocol, runtime_checkable
 
+from src.coevo.canon import canonical_json_bytes
 from src.coevo.framework.validation import is_iso_utc_z
 
 _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
@@ -124,9 +124,7 @@ def canonical_record_bytes(record: MemoryRecord) -> bytes:
         "sensitive_fields": list(record.sensitive_fields),
         "source_ref": record.source_ref,
     }
-    return json.dumps(
-        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    ).encode("utf-8")
+    return canonical_json_bytes(payload)
 
 
 def record_fingerprint(record: MemoryRecord) -> str:

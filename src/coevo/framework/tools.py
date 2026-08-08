@@ -19,7 +19,6 @@ L15: standard library only — no MCP SDK.
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass, field
 from enum import Enum
@@ -27,6 +26,7 @@ from typing import Any
 
 from src.coevo.crypto.contract import ProviderScope
 
+from src.coevo.canon import canonical_json_bytes
 from src.coevo.ids import SAFE_ID as _SAFE_ID
 _SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 
@@ -150,9 +150,7 @@ def validate_schema(schema: Any, *, depth: int = 0) -> None:
 
 
 def canonical_schema_bytes(schema: dict[str, Any]) -> bytes:
-    return json.dumps(
-        schema, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    ).encode("utf-8")
+    return canonical_json_bytes(schema)
 
 
 def validate_tool(tool: Tool) -> None:
@@ -260,6 +258,4 @@ def mcp_to_tool(descriptor: dict[str, Any]) -> Tool:
 
 
 def canonical_descriptor_bytes(descriptor: dict[str, Any]) -> bytes:
-    return json.dumps(
-        descriptor, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    ).encode("utf-8")
+    return canonical_json_bytes(descriptor)
