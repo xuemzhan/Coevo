@@ -233,6 +233,33 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-8 完成收尾（真实链 resume 失败收尾收敛；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-8`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-7]）。
+  实现提交：`cf14693`（_real_chain.py 提取 _finish_resume_escalated，resume 2 处
+  失败收尾单一化，行为不变）；登记提交：`47aa00f`（切片计划、BACKLOG ready、
+  DECISIONS、STATE 事务）。
+- 用户指令：继续（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1206 项 OK
+  （skipped=3，含新增 2 项）；安全套件 99/99 全绿；demo e2e 3/3（100.9s）。
+- 沙箱独立复核（pin=`cf14693`）：
+  * verifier（fwopt8-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `f25213d064e72ef8`（沙箱根解析差异属预期）；定向 28/28 全绿（optimize8 +
+    orchestrator）；review_sandbox check violations=[]，已 discard。
+  * security-reviewer（fwopt8-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：ESCALATED 语义与 finish_resume_failure fail-closed 保留、
+    无 eval/exec、变更面仅 _real_chain.py + 新测试、tests/security 零改动；
+    check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-8 行（无悬空）；追溯断言
+  61→62；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-8 / last_verified_commit=`cf14693`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `cf14693`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-7 完成收尾（真实链失败收尾路径去重；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-7`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-6]）。
