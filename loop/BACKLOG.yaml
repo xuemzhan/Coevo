@@ -1617,3 +1617,14 @@ items:
       - tests/unit/test_cockpit_http.py
     security_review: false
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-20（2026-08-09 用户指令"继续优化"；decision_brief 域级助手迁出 _build.py） ----------
+  - id: FRAMEWORK-OPTIMIZE-20
+    story: ENG-BASE
+    title: decision_brief 域级助手迁出：新增 _build.py（_latest_receipt/_validate_bound_risk/_clone_risk_report/_clone_confirmation/_build_content/_risk_conclusion/_make_version/_validate_stored_brief/_validate_content_model/_clone_content/_clone_brief/_brief_id/_validate_docx，函数内惰性导入规避 __post_init__ 循环依赖），models.py 底部再导出（导入面不变）；root_modules.md/decision_brief 模块文档登记
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-19]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize21.py
+      - tests/unit/test_decision_brief.py
+    security_review: true
+    protocol_review: false

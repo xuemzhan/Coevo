@@ -5525,3 +5525,9 @@ security-reviewer 双签门禁。
 - Security: pure session-management micro-opt, semantics unchanged; no protocol changes.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-20 registration (decision_brief domain helpers -> _build.py; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-20` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-19]): move the 13 domain helpers not required by dataclass __post_init__ into decision_brief/_build.py using per-function lazy imports (avoids the __post_init__ <-> helper module cycle); models.py re-exports them at the bottom so the import surface is unchanged; decision_brief module doc registers _build.py.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
