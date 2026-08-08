@@ -1,5 +1,21 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-6 登记并开始执行（demo 组合根阶段化收敛）
+
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-6`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-5]）：`app/pipeline.py` 的 `run_demo_pipeline`（~250 行
+  大函数）把包导出、驾驶舱快照、知识库入库、审计流 4 段内联提取为模块级阶段函数
+  （_export_demo_package / _build_demo_cockpit_views / _store_demo_knowledge /
+  _publish_demo_audit），组合根薄编排、行为不变；hashlib/json import 收敛到
+  阶段函数；新增阶段函数独立单测与架构守卫；demo e2e 回归。切片计划：
+  `docs/plans/FRAMEWORK-OPTIMIZE-6-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-6。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-5 完成收尾（real_chain_store 收敛到共享 canonical；全量门禁 + 沙箱双签 + push）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-5`（ENG-BASE）。实现提交：`50e7ef4`；

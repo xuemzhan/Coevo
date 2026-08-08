@@ -1334,3 +1334,13 @@ items:
       - tests/unit/test_framework_optimize5.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-6（2026-08-08 用户指令"基于框架，优化原来系统应用的代码实现……不做全量门禁"） ----------
+  - id: FRAMEWORK-OPTIMIZE-6
+    story: ENG-BASE
+    title: demo 组合根阶段化收敛：pipeline.py 的包导出/驾驶舱快照/知识库入库/审计流 4 段内联提取为模块级阶段函数（_export_demo_package/_build_demo_cockpit_views/_store_demo_knowledge/_publish_demo_audit），run_demo_pipeline 薄编排，行为不变；阶段函数可独立单测；demo e2e 回归
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-5]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize6.py
+    security_review: true
+    protocol_review: false
