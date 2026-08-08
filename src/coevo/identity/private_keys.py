@@ -48,6 +48,7 @@ import uuid
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
+from src.coevo.timefmt import now_utc_iso_z
 from typing import Any, Mapping, Protocol
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -446,7 +447,7 @@ class PrivateKeyService:
             "result": result,
             "key_id": reference.key_id if reference else "-",
             "certificate_id": reference.bound_certificate_id if reference else "-",
-            "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+            "timestamp": now_utc_iso_z(),
         }
         event.update(extra)
         serialized = json.dumps(event, sort_keys=True, separators=(",", ":"))

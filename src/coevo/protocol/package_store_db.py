@@ -46,9 +46,10 @@ from __future__ import annotations
 import hashlib
 import sqlite3
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Final, Iterator
+from src.coevo.timefmt import now_utc_iso_z
 
 from .agent_package import PACKAGE_TYPES
 from .processed_package_store import (
@@ -105,10 +106,6 @@ class PackageStoreDbError(AgentPackageStoreError):
 
 class PackageStoreDbIntegrityError(PackageStoreDbError):
     """The database is corrupt, tampered or schema-drifted; refused to open."""
-
-
-def _now_utc_iso_z() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _validate_record(record: ProcessedPackageRecord) -> None:
@@ -228,7 +225,7 @@ class PackageStoreDb:
                 "schema_version": SCHEMA_VERSION,
                 "schema_sha256": _SCHEMA_SHA256,
                 "store_id": uuid.uuid4().hex,
-                "created_at": _now_utc_iso_z(),
+                "created_at": now_utc_iso_z(),
                 "record_count": "0",
             }
             connection.executemany(

@@ -28,9 +28,9 @@ import hashlib
 import json
 import sqlite3
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
+from src.coevo.timefmt import now_utc_iso_z
 
 from . import (
     KnowledgeBundle,
@@ -86,10 +86,6 @@ class KnowledgeStoreError(Exception):
 
 class KnowledgeStoreConflictError(KnowledgeStoreError):
     """A different bundle already exists under the same bundle_id."""
-
-
-def _now_utc_iso_z() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _digest_text(value: str) -> str:
@@ -290,7 +286,7 @@ class KnowledgeStore:
         now: str | None = None,
     ) -> dict[str, str]:
         """Persist a bundle atomically; idempotent on identical digest."""
-        now = now or _now_utc_iso_z()
+        now = now or now_utc_iso_z()
         payload = bundle_to_payload(bundle)
         if len(payload.encode("utf-8")) > PAYLOAD_MAX_BYTES:
             raise KnowledgeStoreError("bundle payload exceeds size limit")

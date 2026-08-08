@@ -41,9 +41,10 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Final, Iterator
+from src.coevo.timefmt import now_utc_iso_z
 
 from .models import (
     AvailabilityWindow,
@@ -109,10 +110,6 @@ class TalentStoreIntegrityError(TalentStoreError):
 
 class TalentStoreDuplicateError(TalentStoreError):
     """A talent_code is already registered in the store."""
-
-
-def _now_utc_iso_z() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _is_safe_id(value: str) -> bool:
@@ -302,7 +299,7 @@ class TalentStore:
                 "pool_code": pool_code,
                 "pool_schema_version": pool_schema_version,
                 "record_count": "0",
-                "created_at": _now_utc_iso_z(),
+                "created_at": now_utc_iso_z(),
             }
             connection.executemany(
                 "INSERT INTO meta (key, value) VALUES (?, ?)",

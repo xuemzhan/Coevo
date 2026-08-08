@@ -37,7 +37,6 @@ import stat
 import threading
 from collections import deque
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
 
@@ -49,7 +48,7 @@ from . import (
 )
 
 
-from src.coevo.timefmt import is_iso_utc_z
+from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
 _HEX_64: Final[re.Pattern[str]] = re.compile(r"^[0-9a-f]{64}$")
 
 DEFAULT_POLL_INTERVAL_SEC: float = 1.0
@@ -57,10 +56,6 @@ DEFAULT_MAX_EVENTS: int = 256
 DEFAULT_STABILITY_CHECKS: int = 2
 DEFAULT_MAX_DIGEST_BYTES: int = 32 * 1024 * 1024
 _CHUNK: int = 64 * 1024
-
-
-def _now_utc_iso_z() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 class FileEventKind(enum.Enum):
@@ -212,7 +207,7 @@ class WorkspaceWatcher:
 
     def scan(self, now: str | None = None) -> tuple[FileChangeEvent, ...]:
         """Compare the filesystem to the last snapshot and emit events."""
-        now = now or _now_utc_iso_z()
+        now = now or now_utc_iso_z()
         if not is_iso_utc_z(now):
             raise ProgressCaptureValidationError("now must be ISO-8601 UTC Z")
         current = self._collect(self._snapshot)

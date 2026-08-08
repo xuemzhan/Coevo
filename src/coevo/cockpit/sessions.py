@@ -13,25 +13,20 @@ from __future__ import annotations
 import hashlib
 import re
 import secrets
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Final
 
 from .models import CockpitValidationError
 
 
 
-from src.coevo.timefmt import is_iso_utc_z
+from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
 
 
 DEFAULT_MAX_SESSIONS: Final[int] = 64
 
 
 DEFAULT_SESSION_TIMEOUT_SEC: Final[int] = 8 * 3600
-
-
-def now_utc_iso_z() -> str:
-    """Return the current UTC time as an ISO-8601 ``Z`` string."""
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _iso_seconds(iso_z: str) -> float:

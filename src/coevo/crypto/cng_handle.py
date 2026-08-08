@@ -42,7 +42,6 @@ import re
 import subprocess
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
 
@@ -55,7 +54,7 @@ _HELPER_PATH: Final[Path] = Path(__file__).resolve().parents[3] / "scripts" / "c
 _HELPER_SIZE: Final[int] = 6118
 _HELPER_SHA256: Final[str] = "f01e88716658e837c191ca15aa20c6a85423b557bb4efd0661ca350d3d1361ab"
 _MAX_INPUT_BYTES: Final[int] = 64 * 1024
-from src.coevo.timefmt import is_iso_utc_z
+from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
 
 
 class CngKekError(RuntimeError):
@@ -72,10 +71,6 @@ class CngKekUnavailableError(CngKekError):
 
 class CngKekHelperError(CngKekError):
     """The controlled CNG helper rejected an operation."""
-
-
-def _now_utc_iso() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -224,7 +219,7 @@ class CngKekStore:
         return CngKekReference(
             kek_name=str(result["kek_name"]),
             public_sha256=str(result["public_sha256"]),
-            created_at=_now_utc_iso(),
+            created_at=now_utc_iso_z(),
         )
 
     def status(self, ref: CngKekReference) -> dict:
@@ -343,7 +338,7 @@ class CngWrappedKeyRegistry:
             "certificate_id": certificate_id,
             "action": "register",
             "reason": "",
-            "created_at": created_at or _now_utc_iso(),
+            "created_at": created_at or now_utc_iso_z(),
         }
         return self._append(entry)
 
@@ -360,7 +355,7 @@ class CngWrappedKeyRegistry:
             "certificate_id": "",
             "action": "revoke",
             "reason": reason,
-            "created_at": _now_utc_iso(),
+            "created_at": now_utc_iso_z(),
         })
 
     def destroy(self, handle_id: str, *, reason: str) -> str:
@@ -376,7 +371,7 @@ class CngWrappedKeyRegistry:
             "certificate_id": "",
             "action": "destroy",
             "reason": reason,
-            "created_at": _now_utc_iso(),
+            "created_at": now_utc_iso_z(),
         })
 
     def snapshot(self) -> tuple[dict[str, Any], ...]:

@@ -14,9 +14,9 @@ import subprocess
 import tempfile
 import uuid
 from collections.abc import Iterator
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
+from src.coevo.timefmt import now_utc_iso_z
 
 ROOT = Path(__file__).resolve().parents[3]
 SIGNING_SCRIPT = ROOT / "scripts" / "audit_signature.ps1"
@@ -354,7 +354,7 @@ class SignedAuditAnchor:
         binding = hashlib.sha256(canonical(checkpoint)).hexdigest(); marker = self.freshness.create_marker(checkpoint["store_id"], generation, binding)
         item = {
             "schema_version": "3.0", "generation": generation, "previous_head_sha256": previous_hash,
-            "signed_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"), "checkpoint": checkpoint,
+            "signed_at": now_utc_iso_z(), "checkpoint": checkpoint,
             "marker": marker, "previous_marker": previous_marker,
         }
         if previous_marker:

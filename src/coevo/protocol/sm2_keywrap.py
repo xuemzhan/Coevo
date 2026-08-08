@@ -42,11 +42,11 @@ Non-goals
 # US-5 SM2 密钥传输层（§7.3）：会话密钥封装/解封，规范编码。
 from __future__ import annotations
 
-import datetime as dt
 import json
 import secrets
 from dataclasses import dataclass
 from typing import Final
+from src.coevo.timefmt import now_utc_iso_z
 
 from .agent_package import AgentPackageError
 
@@ -93,10 +93,6 @@ class KeyTransportBlock:
         }
 
 
-def _now_utc_iso_z() -> str:
-    return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
-
-
 def generate_session_key() -> bytes:
     """Return a fresh SM4-128 session key from a CSPRNG.
 
@@ -141,7 +137,7 @@ def build_key_transport_block(
             ("salt", ""),  # filled in by wrap_session_key once the SM2 product is wired
             ("iterations", KDF_ITERATIONS_DEFAULT),
         ),
-        wrapped_at=wrapped_at or _now_utc_iso_z(),
+        wrapped_at=wrapped_at or now_utc_iso_z(),
     )
 
 

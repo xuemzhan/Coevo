@@ -13,10 +13,10 @@ import hmac
 import os
 import subprocess
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from src.coevo.identity.audit_anchor import AuditAnchorError, canonical
+from src.coevo.timefmt import now_utc_iso_z
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -25,10 +25,6 @@ DEMO_PROFILE: str = "demo"
 DEMO_REVISION: str = "PRJ001-R0001"
 
 DEMO_ACTOR: str = "u.pm"
-
-def now_utc_iso_z() -> str:
-    """Return the current UTC time as an ISO-8601 ``Z`` string."""
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 class _DemoAuditAnchorError(AuditAnchorError):
     pass

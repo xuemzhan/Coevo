@@ -64,6 +64,7 @@ from .replay_detector import (
 )
 from .sm2_sign import compute_sm3_digest
 from .sm2_keywrap import encode_key_transport_bytes
+from src.coevo.timefmt import now_utc_iso_z
 
 
 @dataclasses.dataclass(frozen=True)
@@ -169,7 +170,7 @@ class PackageImportService:
                     "master revision"
                 )
             tx = self.importer.advance(tx, to_step=ImportStep.COMMIT)
-            timestamp = processed_at or _now_utc_iso_z()
+            timestamp = processed_at or now_utc_iso_z()
             revision = current_revision or base_revision
             record = _record(timestamp, "committed", revision)
             new_store = store.register(record)
@@ -184,10 +185,6 @@ class PackageImportService:
 
 DEFAULT_EMPTY_STORE: ProcessedPackageStore = ProcessedPackageStore.empty()
 
-
-def _now_utc_iso_z() -> str:
-    import datetime as dt
-    return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def _check_fixed_header_consistency(package: BuiltPackage) -> None:

@@ -21,10 +21,10 @@ Validation done here
 # US-2 基线工厂：build_baseline/confirm_baseline，每次确认全量重校验。
 from __future__ import annotations
 
-import datetime as dt
 import re
 from dataclasses import dataclass
 from typing import Iterable, Sequence
+from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
 
 from .models import (
     Deliverable,
@@ -37,7 +37,6 @@ from .models import (
 )
 
 
-from src.coevo.timefmt import is_iso_utc_z
 _DELIVERABLE_KINDS = frozenset({"document", "code", "review", "report", "evidence"})
 _SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.\-]{0,63}$")
 
@@ -59,10 +58,6 @@ class BaselineInput:
     responsible_units: tuple[str, ...]
     process_flow_ref: tuple[str, int]
     work_packages: tuple[WorkPackage, ...]
-
-
-def _now_utc_iso_z() -> str:
-    return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def _validate_iso_z(value: str, path: str) -> None:
@@ -219,7 +214,7 @@ def build_baseline(
     return ProjectBaseline(
         project_id=inp.project_id,
         version=1,
-        created_at=now or _now_utc_iso_z(),
+        created_at=now or now_utc_iso_z(),
         title=inp.title,
         process_flow_ref=inp.process_flow_ref,
         objective=inp.objective,

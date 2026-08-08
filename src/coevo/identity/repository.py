@@ -11,9 +11,9 @@ import json
 import logging
 import sqlite3
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from src.coevo.timefmt import now_utc_iso_z
 
 from .audit_anchor import AuditAnchorError, FreshnessAuthority, SignedAuditAnchor, Signer, WindowsCertificateSigner, WindowsFreshnessAuthority
 from .models import IdentityBundle, RegistrationResult
@@ -120,7 +120,7 @@ class IdentityRepository:
         previous = self.connection.execute("SELECT event_hash FROM identity_audit_events ORDER BY sequence_no DESC LIMIT 1").fetchone()
         prev_hash = previous[0] if previous else "0" * 64
         event = {
-            "event_id": str(uuid.uuid4()), "occurred_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+            "event_id": str(uuid.uuid4()), "occurred_at": now_utc_iso_z(),
             "actor_id": actor_id, "action": action, "request_id": request_id, "result": result,
             "target_summary": json.dumps(target, sort_keys=True, separators=(",", ":")),
             "payload_digest": payload_digest, "prev_hash": prev_hash,

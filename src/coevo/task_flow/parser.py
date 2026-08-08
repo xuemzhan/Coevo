@@ -30,9 +30,9 @@ What the parser refuses (fail-closed, AGENTS.md §3 第 7 条)
 # US-1 确定性流程解析器：canonical/tabular/tree 三 schema，失败关闭。
 from __future__ import annotations
 
-import datetime as dt
 import re
 from typing import Any, Mapping
+from src.coevo.timefmt import now_utc_iso_z
 
 from .models import (
     Node,
@@ -47,11 +47,6 @@ from .models import (
 
 
 _SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.\-]{0,63}$")
-
-
-def _now_utc_iso_z() -> str:
-    """Return current UTC as ISO-8601 with 'Z' suffix (informational)."""
-    return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def _str_traced(value: Any, source_path: str, kind: SourceKind,
@@ -235,7 +230,7 @@ def parse_flow(raw: Mapping[str, Any]) -> ProcessFlow:
     return ProcessFlow(
         unit_id=unit_id,
         version=1,
-        created_at=_now_utc_iso_z(),
+        created_at=now_utc_iso_z(),
         title=title,
         stages=stages,
         roles=roles,

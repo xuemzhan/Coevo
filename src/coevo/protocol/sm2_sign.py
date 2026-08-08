@@ -40,11 +40,11 @@ from __future__ import annotations
 
 import base64
 import binascii
-import datetime as dt
 import json
 import re
 from dataclasses import dataclass
 from typing import Any, Final, Mapping
+from src.coevo.timefmt import now_utc_iso_z
 
 from .agent_package import AgentPackageError
 
@@ -98,10 +98,6 @@ class SignatureRecord:
             "signature": self.signature,
             "signed_at": self.signed_at,
         }
-
-
-def _now_utc_iso_z() -> str:
-    return dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def _ascii_digit_only(value: Any, *, path: str) -> None:
@@ -239,7 +235,7 @@ def build_signature_record(
         signed_object=SIGNED_OBJECT_NAME,
         manifest_sm3=digest_hex,
         signature="",
-        signed_at=signed_at or _now_utc_iso_z(),
+        signed_at=signed_at or now_utc_iso_z(),
     )
 
 
@@ -268,7 +264,7 @@ def sign_manifest(
             raise AgentPackageCryptoUnavailableError("SM2 provider returned an empty signature")
         return SignatureRecord(
             SIGNATURE_ALGORITHM, signer_cert_id, SIGNED_OBJECT_NAME, digest,
-            base64.b64encode(signature).decode("ascii"), signed_at or _now_utc_iso_z(),
+            base64.b64encode(signature).decode("ascii"), signed_at or now_utc_iso_z(),
         )
     record = build_signature_record(manifest, signer_cert_id=signer_cert_id, signed_at=signed_at)
     raise AgentPackageCryptoUnavailableError(

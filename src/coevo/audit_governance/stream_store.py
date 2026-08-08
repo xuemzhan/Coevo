@@ -21,9 +21,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
+from src.coevo.timefmt import now_utc_iso_z
 
 from . import AuditEvent, AuditEventSource
 
@@ -35,10 +35,6 @@ GENESIS: Final[str] = "GENESIS"
 
 class AuditStreamStoreError(Exception):
     """Base class for stream-store failures (fail-closed)."""
-
-
-def _now_utc_iso_z() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def event_to_mapping(event: AuditEvent) -> dict[str, Any]:
@@ -156,7 +152,7 @@ class AuditStreamStore:
             raise AuditStreamStoreError("audit stream store exceeds size limit")
         record = {
             "schema_version": SCHEMA_VERSION,
-            "ts": _now_utc_iso_z(),
+            "ts": now_utc_iso_z(),
             "action": action,
             "payload": payload,
             "prev_hash": self._last_hash,
