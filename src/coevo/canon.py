@@ -16,7 +16,11 @@ from typing import Any
 
 
 def canonical_json_bytes(
-    value: Any, *, ensure_ascii: bool = True, allow_nan: bool = False
+    value: Any,
+    *,
+    ensure_ascii: bool = True,
+    allow_nan: bool = False,
+    trailing_newline: bool = False,
 ) -> bytes:
     """Serialize ``value`` to canonical JSON bytes (sorted keys, compact).
 
@@ -26,12 +30,19 @@ def canonical_json_bytes(
     """
 
     return canonical_json_str(
-        value, ensure_ascii=ensure_ascii, allow_nan=allow_nan
+        value,
+        ensure_ascii=ensure_ascii,
+        allow_nan=allow_nan,
+        trailing_newline=trailing_newline,
     ).encode("utf-8")
 
 
 def canonical_json_str(
-    value: Any, *, ensure_ascii: bool = True, allow_nan: bool = False
+    value: Any,
+    *,
+    ensure_ascii: bool = True,
+    allow_nan: bool = False,
+    trailing_newline: bool = False,
 ) -> str:
     """Serialize ``value`` to canonical JSON text (sorted keys, compact).
 
@@ -40,22 +51,30 @@ def canonical_json_str(
     identical after UTF-8 encoding.
     """
 
-    return json.dumps(
+    text = json.dumps(
         value,
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=ensure_ascii,
         allow_nan=allow_nan,
     )
+    return text + "\n" if trailing_newline else text
 
 
 def canonical_digest(
-    value: Any, *, ensure_ascii: bool = True, allow_nan: bool = False
+    value: Any,
+    *,
+    ensure_ascii: bool = True,
+    allow_nan: bool = False,
+    trailing_newline: bool = False,
 ) -> str:
     """Return the SHA-256 hex digest of the canonical JSON bytes."""
 
     return hashlib.sha256(
         canonical_json_bytes(
-            value, ensure_ascii=ensure_ascii, allow_nan=allow_nan
+            value,
+            ensure_ascii=ensure_ascii,
+            allow_nan=allow_nan,
+            trailing_newline=trailing_newline,
         )
     ).hexdigest()

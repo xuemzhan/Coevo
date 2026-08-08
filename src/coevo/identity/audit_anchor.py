@@ -16,6 +16,7 @@ import uuid
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Protocol
+from src.coevo.canon import canonical_json_bytes as _canonical_bytes
 from src.coevo.timefmt import now_utc_iso_z
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -211,7 +212,9 @@ class WindowsFreshnessAuthority:
 
 def canonical(value: object) -> bytes:
     """Render ``value`` as canonical UTF-8 JSON bytes (sorted keys, no spaces)."""
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
+    return _canonical_bytes(
+        value, ensure_ascii=False, trailing_newline=True
+    )
 
 
 def durable_write(path: Path, content: bytes) -> None:
