@@ -1,4 +1,4 @@
-# 框架接入现有编排（GuardedOrchestrator 适配，FRAMEWORK-INTEGRATION-1）
+# 框架接入现有编排（GuardedOrchestrator 适配，FRAMEWORK-INTEGRATION-1/4）
 
 > 交付：2026-08-08。实现：`src/coevo/framework/integration.py`。
 
@@ -8,6 +8,10 @@
 
 - `guard_registration`：Agent Manifest 经 manifest-checker 通过后才调用
   inner_register（注册）；
+- `build_registration_manifest`（FRAMEWORK-INTEGRATION-4）：纯函数生成规范
+  Agent Manifest，`spec_hash` 排除自指字段（metadata.spec_hash /
+  policy_ref.spec_hash / policy_ref.signature），可选注入签名器对
+  `spec_hash|signer_cert_fingerprint` 绑定签名；
 - `plan_to_chain`：框架 Plan → 现有 `OrchestrationChain`（AGENT 节点按能力
   解析注册代理为 AGENT_CALL；HUMAN_GATE → HUMAN_CONFIRM；TOOL 节点与框架
   抽象能力明确拒绝——当前产品编排器不可执行）；
@@ -31,6 +35,17 @@
 - `plan_to_chain` 对闭集外能力统一抛 `IntegrationError`（不泄漏
   `CapabilityValidationError` 类型细节）。
 
+## 注册门演示接线（FRAMEWORK-INTEGRATION-4）
+
+- `app/demo_support.py` 提供演示专用注册适配器：`DemoRegistrationVerifier`
+  （对任意良构签名返回 True）、`DemoRegistrationResolver`（固定演示证书）、
+  `DemoPolicyRegistry`（仅 INTERACTIVE 1.0）。三者**显式非生产**：生产必须
+  注入真实 SM2 验签器、证书链 resolver 与部署点策略注册表，否则注册门无法
+  提供真实身份保证。
+- `app/pipeline.py` 在注册 4 个 demo 智能体前先 `guard_registration`：Manifest
+  结构、capability 闭集、crypto_scope、spec_hash、policy_ref 绑定格式与
+  policy_version 全部通过才调用内部注册，任一失败即拒绝且不触达注册。
+
 ## 测试覆盖
 
 `tests/unit/test_framework_integration.py`（plan_to_chain 混合/TOOL/非 MVP/
@@ -40,3 +55,8 @@
 `tests/unit/test_framework_integration2.py`（chain_to_plan 混合/未注册代理/
 CONDITIONAL 拒绝、validate_product_chain 通过与 RBAC 拒绝、plan_to_chain
 闭集外错误类型收口、stdlib 断言）。
+
+`tests/unit/test_framework_integration4.py`（FRAMEWORK-INTEGRATION-4：
+build_registration_manifest 产物 spec_hash 一致、篡改拒绝、未知能力拒绝、
+缺 policy_version 拒绝、4 个 demo 智能体全部 accepted 且各注册一次、demo
+适配器 stdlib 断言）。

@@ -243,7 +243,9 @@ NEW_SUPERVISION_ITEM；不实际召集会议，只产出建议）。
 
 * `demo_support.py`：**仅演示用**（显式非生产）：`DemoSigner`（HMAC 签名替代）、
   `DemoFreshnessAuthority`（内存新鲜度权威）、`ensure_demo_profile`（引导 SM2
-  测试 PKI）、`sample_project_input`。
+  测试 PKI）、`sample_project_input`；注册门演示适配器
+  （`DemoRegistrationVerifier`/`DemoRegistrationResolver`/`DemoPolicyRegistry`，
+  生产必须注入真实 SM2 验签与证书链）。
 * `pipeline.py`：`run_demo_pipeline` 七阶段组合根——PKI/加密 → 真实链环境 →
   五步固定链（两阶段）→ 加密包导出与回读校验 → 驾驶舱快照/服务 → 知识包 →
   审计流。是离线演示闭环的官方入口（`scripts/run_demo.py` 调用）。

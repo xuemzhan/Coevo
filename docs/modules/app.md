@@ -17,7 +17,7 @@
 | 文件 | 关键类型/函数 | 职责 |
 |---|---|---|
 | `pipeline.py` | `run_demo_pipeline()` | 七阶段演示流水线（PKI 引导 → 真实链 → 加密包 → 驾驶舱 → 知识 → 审计） |
-| `demo_support.py` | `DemoSigner`、`DemoFreshnessAuthority`、`ensure_demo_profile()`、`sample_project_input()` | 演示专用支撑：SM2 测试 PKI 引导、模拟签名/新鲜度权威、业务化样例输入 |
+| `demo_support.py` | `DemoSigner`、`DemoFreshnessAuthority`、`DemoRegistrationVerifier`/`DemoRegistrationResolver`/`DemoPolicyRegistry`、`ensure_demo_profile()`、`sample_project_input()` | 演示专用支撑：SM2 测试 PKI 引导、模拟签名/新鲜度权威、注册门演示适配器（**显式非生产**，生产须注入真实 SM2 验签）、业务化样例输入 |
 
 ## 关键入口与数据流
 
@@ -36,6 +36,8 @@
 - Python 进程不接触私钥字节（密码运算只经 `GmsslPrototypeProvider` 受控路径）；
 - 演示替身（HMAC 签名、内存新鲜度权威）**显式标注非生产**；生产签名走
   `identity/private_keys` + `crypto/cng_handle` 受保护句柄；
+- 注册门演示适配器（`DemoRegistrationVerifier` 对任意良构签名返回 True 等）
+  **仅限演示**：生产注册必须注入真实 SM2 验签器与证书链，否则不提供身份保证；
 - 加密包生成后立即回读校验（解密 + 验签），失败即中止，不留半成品。
 
 ## 测试覆盖

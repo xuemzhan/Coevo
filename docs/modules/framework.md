@@ -11,6 +11,8 @@ US-16-AC-1 交付部署点 manifest-checker：只有声明合规、策略受控�
 序列化（Plan-LSP，M6）；US-16-AC-8 交付 Hybrid Orchestrator 核心（M7）。
 US-16-AC-9 交付 K8s CRD 纸面清单生成器（M9）。
 FRAMEWORK-INTEGRATION-1 交付框架接入现有编排（GuardedOrchestrator 适配）。
+FRAMEWORK-INTEGRATION-4 交付注册门接线：`build_registration_manifest` 纯函数
+Manifest 构建器 + demo 注册适配器（显式非生产）。
 设计基线：`docs/plans/distributed-agent-framework/design-proposal.md` §5。
 
 ## 职责边界
@@ -40,7 +42,7 @@ FRAMEWORK-INTEGRATION-1 交付框架接入现有编排（GuardedOrchestrator 适
 | `a2a.py` | `A2aMessage`、`PolicyRef`、`verify_policy_ref`、`to_agent_fields`/`from_agent_fields`、`validate_payload_size` | A2A 信封 + policy_ref 五步验证 + `.agent` 字段映射 + 大小边界 |
 | `orchestrator.py` | `plan_for`、`dispatch`、`transition`、`chain_plan`、`StaticChainProvider`/`LlmPlanProvider`/`PlanExecutor`（注入协议）、`OrchestrationOutcome` | Hybrid Orchestrator：validate_plan 前置 + 三种模式 + L19 + HOLD 门 |
 | `k8s_listing.py` | `generate_listing`、`listing_fingerprint`、`render_yaml`、`validate_listing_bytes`、`ListingInput` | 声明式纸面清单生成（JSON + YAML 子集），确定性可哈希、零 IO |
-| `integration.py` | `guard_registration`、`plan_to_chain`、`guarded_dispatch`、`report_to_outcome`、`chain_to_plan`、`validate_product_chain`、`GuardResult` | 框架门禁接入现有编排：注册过 manifest、派发过 validate_plan、Plan↔OrchestrationChain 双向适配 |
+| `integration.py` | `guard_registration`、`build_registration_manifest`、`plan_to_chain`、`guarded_dispatch`、`report_to_outcome`、`chain_to_plan`、`validate_product_chain`、`GuardResult` | 框架门禁接入现有编排：注册过 manifest、派发过 validate_plan、Manifest 构建器（spec_hash 排除自指字段）、Plan↔OrchestrationChain 双向适配 |
 
 ## 关键入口与数据流
 
@@ -95,6 +97,8 @@ Agent Manifest（canonical JSON）→ ManifestCheckInput
 - `tests/unit/test_framework_k8s_listing.py`（AC-9.1..9.5，M9 纸面清单）。
 - `tests/unit/test_framework_integration.py`（FRAMEWORK-INTEGRATION-1）。
 - `tests/unit/test_framework_integration2.py`（FRAMEWORK-INTEGRATION-2）。
+- `tests/unit/test_framework_integration4.py`（FRAMEWORK-INTEGRATION-4：注册门
+  接线 + Manifest 构建器；demo 验签适配器显式非生产）。
 
 ## 依赖与下游
 
