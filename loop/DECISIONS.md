@@ -5473,3 +5473,9 @@ security-reviewer 双签门禁。
 - Security: pure records hygiene + guard; no code/key/audit-chain changes.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-08 - FRAMEWORK-OPTIMIZE-17 registration (shared ISO-UTC parser; incremental gate)
+- User instruction: continue optimizing, no full gate.
+- Decision: register `FRAMEWORK-OPTIMIZE-17` (ENG-BASE, ready): four modules (decision_brief/models, merge/receipt, risk/models, supervision/models) duplicate `_parse_utc` with identical structure and per-module error/message; add `parse_iso_utc` to timefmt.py (error_factory + message params preserve byte-exact behavior), collapse the four copies to thin wrappers; root_modules.md updated.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).

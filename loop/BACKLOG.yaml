@@ -1569,3 +1569,17 @@ items:
       - tests/unit/test_traceability_check.py
     security_review: false
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-17（2026-08-08 用户指令"继续优化，不做全量门禁"；ISO-UTC 解析单一事实源） ----------
+  - id: FRAMEWORK-OPTIMIZE-17
+    story: ENG-BASE
+    title: 共享 ISO-UTC 解析助手：timefmt.py 新增 parse_iso_utc（error_factory + 消息参数保留各模块异常类与消息，行为逐字节不变），decision_brief/models、merge/receipt、risk/models、supervision/models 四处 _parse_utc 副本收敛为薄包装；root_modules.md 更新
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_framework_optimize18.py
+      - tests/unit/test_decision_brief.py
+      - tests/unit/test_merge_commit_receipt.py
+      - tests/unit/test_risk_analyzer.py
+      - tests/unit/test_supervision_meeting.py
+    security_review: true
+    protocol_review: false
