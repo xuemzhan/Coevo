@@ -1328,7 +1328,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-5
     story: ENG-BASE
     title: real_chain_store 收敛到共享 canonical：canon.py 新增 allow_nan 参数（默认 False fail-closed），orchestrator/real_chain_store 的 canonical_json_bytes/canonical_digest 复用 canon（保留严格类型校验与 RealChainStoreError 语义，字节/摘要逐位不变）；全量门禁 + push
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-3]
     acceptance_tests:
       - tests/unit/test_framework_optimize5.py

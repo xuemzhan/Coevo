@@ -1,5 +1,24 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-5 完成收尾（real_chain_store 收敛到共享 canonical；全量门禁 + 沙箱双签 + push）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-5`（ENG-BASE）。实现提交：`50e7ef4`；
+  登记提交：`53c4fa8`。
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  做全量门禁，成功后 push 到 github。
+- **全量质量门禁**：`quality_gate --target quality` exit=0，
+  fingerprint=`34d637f035600903`（unit/integration/security/e2e/go 全绿，
+  audit fully-sealed）；单元全量 1198 项 + 安全套件 99/99 全绿。
+- 独立复核（沙箱，pin=`50e7ef4`）：fwopt5-verify（fmt/lint/定向 56 全绿，
+  violations=[]）+ fwopt5-sec（STRIDE PASS，Critical/High/Medium/Low 0/0/0/0；
+  严格校验保留、字节逐位不变、tests/security 零改动），已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-5 行（无悬空）；追溯断言
+  58→59；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-5 / last_verified_commit=`50e7ef4`（loop_state 事务）；
+  audit fully-sealed；按用户授权 push 至 GitHub（origin/main）。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `50e7ef4`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-5 登记并开始执行（real_chain_store 收敛到共享 canonical；全量门禁 + push）
 
 - 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
