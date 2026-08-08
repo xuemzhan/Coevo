@@ -52,6 +52,10 @@ class DemoRegistrationVerifier:
     backed by the certificate chain.
     """
 
+    # FRAMEWORK-GAPS-7: explicit production-boundary marker. guard_registration
+    # with require_production_verifier=True rejects this adapter fail-closed.
+    is_production: bool = False
+
     def verify(self, signer_cert_der: bytes, data: bytes, signature: bytes) -> bool:
         return True
 

@@ -103,8 +103,29 @@ def guard_registration(
     cert_resolver: Any,
     signature_verifier: Any,
     inner_register: InnerRegister,
+    require_production_verifier: bool = False,
 ) -> GuardResult:
-    """Register an agent only after manifest-checker acceptance."""
+    """Register an agent only after manifest-checker acceptance.
+
+    ``require_production_verifier=True`` enforces the production boundary
+    (FRAMEWORK-GAPS-7): the injected signature verifier MUST declare
+    ``is_production is True`` (real SM2 verification bound to the certificate
+    chain).  Demo adapters declare ``is_production=False`` and are rejected on
+    production registration paths, fail-closed.
+    """
+
+    if (
+        require_production_verifier
+        and getattr(signature_verifier, "is_production", False) is not True
+    ):
+        return GuardResult(
+            accepted=False,
+            manifest_accepted=False,
+            manifest=None,
+            reason="production registration requires a production verifier "
+            "(real SM2 bound to the certificate chain, is_production=True); "
+            "demo adapters are rejected",
+        )
 
     result = check(
         manifest_input,
