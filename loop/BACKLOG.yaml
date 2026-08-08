@@ -1486,7 +1486,7 @@ items:
   - id: RECORDS-ARCHIVE-4
     story: ENG-BASE
     title: 门禁自维护 VERIFICATION 归档：quality_gate.py 在追加 VERIFICATION 后复用 archive_records.py --apply 就地裁剪 verification/decisions（audit 仍被 RECORDS-ARCHIVE-3 排除），使记录始终 ≤ 策略容量且无需人工 --apply；trim 失败隔离由下一次 lint --check 兜底；重建 control.pyz 并全链哈希同步
-    status: ready
+    status: done
     dependencies: [RECORDS-ARCHIVE-3]
     acceptance_tests:
       - tests/unit/test_quality_gate_lock.py

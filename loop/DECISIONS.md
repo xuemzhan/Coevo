@@ -5206,6 +5206,29 @@ security-reviewer 双签门禁。
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — RECORDS-ARCHIVE-4 完成收口（门禁自维护 VERIFICATION 归档；增量门禁豁免全量）
+
+- 工作项：`RECORDS-ARCHIVE-4`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-3]）。
+- 用户指令：继续进行优化，不用做全量门禁；按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality（豁免留痕）。
+- 交付：`quality_gate.py` 新增 `_trim_records_to_policy()`——VERIFICATION 追加后
+  复用 `archive_records.py --apply` 就地裁剪 verification/decisions（audit 仍被
+  RECORDS-ARCHIVE-3 排除），trim 失败隔离（不使门禁失败，由下一次 lint --check
+  兜底），trim 摘要追加到 VERIFICATION 留痕；重建 control.pyz（内嵌 quality_gate
+  同步，ZIP_STORED + sorted + DOS epoch）并全链哈希同步（python-script-lock.tsv /
+  make.cs ScriptInventorySha256+ControlArchiveSha256 / toolchain-lock
+  control_archive+script_inventory+source_sha256）。
+- 验证（增量门禁）：fmt exit=0 fingerprint=`8d456a2ce09245c7`；lint exit=0
+  fingerprint=`5103146e112f2dd1`；pyz 入口 lint exit=0 fingerprint=
+  `eb5a3c41818a9be3`（control.pyz 重建后分派正常）；定向 60 项全绿
+  （dev_environment_entry 链验证 + quality_gate_lock 4 项新增 + records_archive +
+  traceability 74）；实测自维护：VERIFICATION 被门禁追加推至 508545 字节后自动
+  裁剪回 449950 字节并留痕 trim 记录，tool-audit.jsonl 未被触碰；audit
+  fully-sealed。全量 quality 按用户指示豁免。
+- 安全结论：audit 链仍不可被通用归档触碰（RECORDS-ARCHIVE-3 语义保留）；trim
+  失败隔离不绕过 --check；本轮不涉及协议/密钥路径。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — REVIEW-SANDBOX-2 完成收口（独立审查沙箱治理修订；增量门禁豁免全量）
 
 - 工作项：`REVIEW-SANDBOX-2`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-2]）。
