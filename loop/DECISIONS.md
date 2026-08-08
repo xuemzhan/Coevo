@@ -1,5 +1,32 @@
 # Loop 决策记录
 
+## 2026-08-08 — QUALITY-GATE-ENCODING-1 完成收尾（门禁子进程 UTF-8 修复；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`QUALITY-GATE-ENCODING-1`（ENG-BASE，dependencies=[ENG-BASE-AC-1]）。
+  实现提交：`72d94dc`（scripts/quality_gate.py 新增 gate_env：PYTHONIOENCODING=utf-8
+  + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env；
+  tests/unit/test_quality_gate_encoding.py 3 项）。
+- 用户指令：继续开发，先不要全量质量门禁检查；按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality。
+- 验证（增量门禁，主仓）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed，输出无乱码——修复生效）；
+  定向测试 3/3 全绿。
+- 独立复核（沙箱，pin=`72d94dc`：fwenc1-verify / fwenc1-sec）：
+  * verifier 契约：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `f23830598ef964ba`（沙箱根解析差异属预期）；定向 3/3 全绿；review_sandbox
+    check violations=[]，已 discard。
+  * security-reviewer 契约：STRIDE 逐项 PASS，Critical/High/Medium/Low 0/0/0/0；
+    探针：gate_env 复制语义（不污染父环境）、中文子进程输出无替换符、源码无
+    env=None 残留、变更模块无 eval/exec/open、提交面仅 quality_gate.py + 新测试
+    （tests/security 零改动）；review_sandbox check violations=[]，已 discard。
+- 治理说明：本项由会话内并行流登记并实现（未产出独立切片计划），编排者独立复核
+  后按内容核验一致保留；流程偏差与越权行为再次留痕。
+- 记录：追溯矩阵新增 ENG-BASE | QUALITY-GATE-ENCODING-1 行（无悬空）；BACKLOG 置
+  done；STATE 置 phase=decide / status=done / current_item=QUALITY-GATE-ENCODING-1 /
+  last_verified_commit=`72d94dc`（loop_state 事务）；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `72d94dc`。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-4 收尾更正（验证子代理越权收口与矩阵乱码；编排者独立复核并补实测证据）
 
 - 事实更正：上文"FRAMEWORK-INTEGRATION-4 完成收尾"段（提交 `9825407`）由验证子代理

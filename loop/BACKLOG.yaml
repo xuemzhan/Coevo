@@ -1273,7 +1273,7 @@ items:
   - id: QUALITY-GATE-ENCODING-1
     story: ENG-BASE
     title: 质量门禁输出编码修复：quality_gate 子进程强制 UTF-8（PYTHONIOENCODING=utf-8 + PYTHONUTF8=1），消除 VERIFICATION.md 门禁记录乱码根因（traceability_check 等 GBK 输出经 errors=replace 不可逆破坏）；补回归测试；清理本轮遗留尾部乱码记录
-    status: ready
+    status: done
     dependencies: [ENG-BASE-AC-1]
     acceptance_tests:
       - tests/unit/test_quality_gate_encoding.py

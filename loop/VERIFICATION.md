@@ -8355,6 +8355,30 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — QUALITY-GATE-ENCODING-1 完成收尾（门禁子进程 UTF-8 修复；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`QUALITY-GATE-ENCODING-1`（ENG-BASE，dependencies=[ENG-BASE-AC-1]）。
+  实现提交：`72d94dc`（gate_env 强制 PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制
+  不污染父环境；两个 subprocess.run 均使用；回归测试 3 项）。
+- 用户指令：继续开发，先不要全量质量门禁检查；按增量门禁口径执行并豁免全量 quality。
+- 验证（增量门禁，主仓）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（validate_opencode / traceability_check /
+  audit_log verify / audit_seal verify / secret_scan 全过，audit fully-sealed，
+  输出无乱码）；定向测试 3/3 全绿。
+- 独立复核（沙箱，pin=`72d94dc`：fwenc1-verify / fwenc1-sec）：
+  * verifier 契约：沙箱内 fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+    fingerprint=`f23830598ef964ba`（沙箱根解析差异属预期）；定向 3/3 全绿；
+    review_sandbox check violations=[]，已 discard。
+  * security-reviewer 契约：STRIDE 逐项 PASS，Critical/High/Medium/Low 0/0/0/0；
+    行为探针：gate_env 复制语义（不污染父环境）、中文子进程输出无替换符、源码无
+    env=None 残留、无 eval/exec/open、提交面仅 scripts/quality_gate.py + 新测试
+    （tests/security 零改动）；review_sandbox check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | QUALITY-GATE-ENCODING-1 行（无悬空）；BACKLOG 置
+  done；STATE 置 phase=decide / status=done / last_verified_commit=`72d94dc`
+  （loop_state 事务）；audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `72d94dc`。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-4 独立复核更正（编排者沙箱实测，覆盖子代理自述）
 
 - 事实更正：上文"完成收尾"段的沙箱双签（fwint4-verify / fwint4-sec，pin=`3d03490`）
@@ -21736,6 +21760,291 @@ audit seal: fully-sealed
         {
           "kind": "test",
           "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T00:57:42.699717Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T01:00:21.194303Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+         "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-6",
+      "title": "共享 ISO 校验构造器全仓落地（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z：`\\Z` 锚定拒尾部换行、小数秒、日历校验、非字符串 fail-closed），root_modules 登记；framework/validation.py 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，去 11 处正则副本与包级 _ISO 再导出；锚定测试改测共享构造器",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/audit_governance/facade.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/orchestrator/service.py",
+        "src/coevo/orchestrator/_real_chain.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps6.py",
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/facade.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps6.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-DOCS-1",
+      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
+      "code": [
+        "README.md",
+        "docs/README.md",
+        "docs/code-guide.md",
+        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_docs.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/code-guide.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_docs.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "QUALITY-GATE-ENCODING-1",
+      "title": "质量门禁输出编码修复（2026-08-08，用户指令“继续开发”）：quality_gate 子进程强制 UTF-8（gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env），消除 VERIFICATION.md 门禁记录乱码根因（Windows 控制台 GBK 输出经 errors=replace 不可逆破坏）；历史乱码记录已清理（截除备份）；补回归测试 test_quality_gate_encoding.py；仅 stdlib 离线",
+      "code": [
+        "scripts/quality_gate.py",
+        "tests/unit/test_quality_gate_encoding.py"
+      ],
+      "tests": [
+        "tests/unit/test_quality_gate_encoding.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "tests/unit/test_quality_gate_encoding.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_quality_gate_encoding.py",
           "exists": true
         }
       ],
