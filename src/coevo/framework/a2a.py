@@ -14,7 +14,6 @@ L15: standard library only, no third-party runtime dependency.
 from __future__ import annotations
 
 import hashlib
-import re
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
@@ -22,8 +21,8 @@ from src.coevo.framework.capability import CapabilityValidationError, resolve_ca
 from src.coevo.framework.manifest_checker import _InvalidManifest, manifest_spec_hash
 from src.coevo.framework.validation import is_iso_utc_z
 
-_SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
-_HEX64 = re.compile(r"^[0-9a-f]{64}$")
+from src.coevo.ids import SAFE_ID as _SAFE_ID
+from src.coevo.ids import HEX_64 as _HEX64
 _HEX = frozenset("0123456789abcdefABCDEF")
 
 ENVELOPE_MAX_BYTES = 64 * 1024  # protocol §7.1 parity

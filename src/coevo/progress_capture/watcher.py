@@ -32,7 +32,6 @@ import enum
 import hashlib
 import mimetypes
 import os
-import re
 import stat
 import threading
 from collections import deque
@@ -49,7 +48,7 @@ from . import (
 
 
 from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
-_HEX_64: Final[re.Pattern[str]] = re.compile(r"^[0-9a-f]{64}$")
+from src.coevo.ids import HEX_64 as _HEX_64
 
 DEFAULT_POLL_INTERVAL_SEC: float = 1.0
 DEFAULT_MAX_EVENTS: int = 256

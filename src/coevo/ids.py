@@ -1,4 +1,4 @@
-"""Shared safe-id pattern and validator (FRAMEWORK-OPTIMIZE-11).
+"""Shared id patterns and validators (FRAMEWORK-OPTIMIZE-11 / -13).
 
 Dependency-free leaf module (stdlib only), symmetric to ``timefmt.py`` and
 ``canon.py``.  The repository-wide safe-id form is
@@ -14,8 +14,16 @@ import re
 
 SAFE_ID: re.Pattern[str] = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
+HEX_64: re.Pattern[str] = re.compile(r"^[0-9a-f]{64}$")
+
 
 def is_safe_id(value: object) -> bool:
     """Return True only for a non-empty safe-id string (fail-closed)."""
 
     return isinstance(value, str) and SAFE_ID.match(value) is not None
+
+
+def is_hex_64(value: object) -> bool:
+    """Return True only for a 64-char lowercase hex string (fail-closed)."""
+
+    return isinstance(value, str) and HEX_64.match(value) is not None

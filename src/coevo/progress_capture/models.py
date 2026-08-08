@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import enum
-import re
 from dataclasses import dataclass, field
 from src.coevo.workspace.models import WorkspaceEntry
 
@@ -15,7 +14,7 @@ SCHEMA_VERSION: str = "1.0"
 
 DOMAIN: str = "coevo.progress_capture"
 
-_HEX_64 = re.compile(r"^[0-9a-f]{64}$")
+from src.coevo.ids import HEX_64 as _HEX_64
 
 from src.coevo.ids import SAFE_ID as _SAFE_ID
 

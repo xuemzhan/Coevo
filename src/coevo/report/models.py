@@ -31,7 +31,6 @@ Non-goals
 from __future__ import annotations
 
 import enum
-import re
 from dataclasses import dataclass, field
 
 # 协议 § 9: schema_version is 1.0
@@ -39,7 +38,7 @@ SCHEMA_VERSION: str = "1.0"
 
 # Re-use the safe-id from identity / protocol layers.
 from src.coevo.ids import SAFE_ID as _SAFE_ID
-_HEX_64 = re.compile(r"^[0-9a-f]{64}$")
+from src.coevo.ids import HEX_64 as _HEX_64
 
 
 class ReportManifestError(Exception):

@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 import enum
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -16,7 +15,7 @@ from src.coevo.ids import SAFE_ID as _SAFE_ID
 
 from src.coevo.timefmt import is_iso_utc_z
 
-_HEX_64 = re.compile(r"^[0-9a-f]{64}$")
+from src.coevo.ids import HEX_64 as _HEX_64
 
 LOOPBACK_HOST: str = "127.0.0.1"
 
