@@ -5189,5 +5189,19 @@ security-reviewer 双签门禁。
 - 治理漂移（建议修订）：`docs/process/independent-review-governance.md` §7 建议的
   junction 挂载 .tools 与当前"拒绝 reparse point"安全加固冲突，且沙箱复制环境
   无法跑通 crypto 集成测试；独立验证的实际可行口径=主树全量门禁 + 沙箱守卫 +
-  定向/单元复核。登记后续工作项 `REVIEW-SANDBOX-1`（BACKLOG ready）。
+  定向/单元复核。登记后续工作项 `REVIEW-SANDBOX-2`（BACKLOG ready；
+  原登记误用 `REVIEW-SANDBOX-1` 与历史 done 项重名，已更名避免冲突）。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
+
+## 2026-08-08 — RECORDS-ARCHIVE-3 登记并开始执行（审计链归档安全；增量门禁口径）
+
+- 用户指令：继续进行优化，不用做全量门禁。
+- 决策：登记 `RECORDS-ARCHIVE-3`（ENG-BASE，ready，dependencies=
+  [RECORDS-ARCHIVE-2]）：关闭上轮安全审查 Medium 1——`archive_records.py` 的 audit
+  种类必须有专用重锚定流程或从通用 `--apply/--check` 显式排除并失败关闭。本轮采用
+  "显式排除 + 失败关闭"：`ARCHIVABLE_KINDS=("verification","decisions")` 单一事实源，
+  audit 超策略时工具拒绝触碰 tool-audit.jsonl（--apply 非零退出），审计链保持只增
+  不改；真正重锚定流程留作后续工作项。切片计划：`docs/plans/RECORDS-ARCHIVE-3-slice.md`。
+- 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
