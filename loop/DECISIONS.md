@@ -5206,6 +5206,23 @@ security-reviewer 双签门禁。
   豁免在 VERIFICATION/DECISIONS 留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — PERF-REPLAY-1 完成收口（check_replay 单趟扫描；增量门禁豁免全量）
+
+- 工作项：`PERF-REPLAY-1`（ENG-BASE，dependencies=[]）。
+- 用户指令：继续进行优化，不用做全量门禁；按增量门禁（fmt + lint + 定向测试）
+  执行并豁免全量 quality（豁免留痕）。
+- 交付：`check_replay` 三趟 O(k) 作用域扫描合并为单趟（同趟跟踪首个 package_id
+  命中、首个 package_digest 命中、最大 sequence_no），决策顺序与结果逐位不变
+  （id→digest→sequence 优先级保留；id 命中优先于 digest 即使 digest 早命中，
+  单趟全扫不提前 break）；每作用域扫描降为 1 趟（常数 3×）。
+- 验证（增量门禁）：fmt exit=0 fingerprint=`8d456a2ce09245c7`；lint exit=0
+  fingerprint=`5103146e112f2dd1`（audit fully-sealed）；定向 60 项全绿
+  （optimize16 7 项含优先级回归与单趟结构守卫 + agent_wire_regression +
+  atomic_import + package_store）。全量 quality 按用户指示豁免。
+- 安全结论：重放检测决策语义逐位不变（协议安全关键，security-review 口径评估）；
+  不改 wire 布局。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — PERF-VERIFY-1 登记并开始执行（集成套件回归复测与性能基线；增量验证口径）
 
 - 用户指令：继续进行优化，不用做全量门禁。
