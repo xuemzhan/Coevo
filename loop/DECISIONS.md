@@ -5544,4 +5544,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-21 closure (dead-import cleanup + backlog hygiene + static guard; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-21` (ENG-BASE, dependencies=[]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: 11 unused top-level imports across 10 production files removed (pure deletion, zero behavior change): app/demo_support now_utc_iso_z; cockpit/sessions re; decision_brief/_build RiskKind/SourceKind; framework/integration json; framework/memory and framework/validation Any; identity/certificates and identity/private_keys os; identity/validation json; knowledge_base/models re; progress_capture/watcher Final. BACKLOG FRAMEWORK-OPTIMIZE-20 corrected from ready to done (RECORDS-2 convention; STATE/matrix already done). New repo-wide static guard tests/unit/test_framework_optimize22.py scans src/coevo production modules via AST and asserts no unused imports except the explicit allowlist (decision_brief/models 14 intentional re-exports).
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 197 tests green (cockpit_http + identity_validation + private_key_handles + knowledge_base + knowledge_store + progress_capture + framework_memory + framework_a2a + framework_integration + decision_brief + guards); full quality waived per user instruction.
+- Security: pure import deletion; private_keys.py `os` confirmed unused by AST + lexical scan; security tests untouched and green.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
