@@ -230,11 +230,11 @@
       "name": "Coevo Make compatibility shim",
       "version": "1.0",
       "source": "scripts/tool-shims/make.cs",
- "source_sha256": "0b9d8395c0df57d61107d0b3800a98690385338ed4369724bd8fd0ef394fc82d",
+ "source_sha256": "6f45c9620755caf39205ff0a879c57508335934bac60b87e192bc9de1dd147c8",
  "script_inventory": {
   "path": "docs/dependencies/python-script-lock.tsv",
   "size": 951,
-  "sha256": "2450fe48be66109241819431a12bf18c42b0da9d0c078a6a273da85d68b5e297"
+  "sha256": "98ca9f419c27428e9815aae1621d91f19a1703f039ecd3bd9a8723d11a8ab9ac"
  },
       "compiler": "%WINDIR%/Microsoft.NET/Framework64/v4.0.30319/csc.exe",
       "compiler_lock": {
