@@ -38,8 +38,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -82,6 +80,170 @@ class _AllowAllScopeRbac:
 _ALLOW_ALL_SCOPE_RBAC = _AllowAllScopeRbac()
 
 
+def _export_demo_package(
+    run_dir: Path,
+    project_input: dict[str, Any],
+    now: str,
+    completed: Any,
+    provider: Any,
+    sender_handle: Any,
+    recipient_handle: Any,
+) -> tuple[Path, str]:
+    """DEMO-ONLY: build, round-trip-verify and export the encrypted package."""
+
+    import hashlib
+    import json
+
+    from src.coevo.protocol import (
+        build_encrypted_package,
+        build_envelope_template,
+        open_encrypted_package,
+        parse_package_bytes,
+    )
+
+    outbox = run_dir / "outbox"
+    outbox.mkdir(parents=True, exist_ok=True)
+    envelope = build_envelope_template(
+        sender_cert_id="CERT-SENDER",
+        recipient_cert_id="CERT-RECIPIENT",
+        project_id="PRJ001",
+        package_type="TASK_ASSIGNMENT",
+        sequence_no=1,
+        payload_length=0,
+        created_at=now,
+        expires_at="2027-08-02T00:00:00Z",
+    )
+    manifest = {
+        "event_id": "ev.demo.001",
+        "project_id": "PRJ001",
+        "task_id": "t.1",
+        "base_revision": DEMO_REVISION,
+        "payload_digest": project_input["payload_digest"],
+    }
+    content = json.dumps(
+        {
+            "title": project_input["title"],
+            "objective": project_input["objective"],
+            "flow_summary": list(completed.flow_understanding_summary),
+            "baseline_summary": list(completed.baseline_summary),
+            "recommendations": list(completed.recommendation_summary),
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    package = build_encrypted_package(
+        envelope=envelope,
+        manifest=manifest,
+        content=content,
+        provider=provider,
+        sender_handle=sender_handle,
+        recipient_handle=recipient_handle,
+        signed_at=now,
+    )
+    parsed = parse_package_bytes(package.to_bytes())
+    opened = open_encrypted_package(
+        parsed,
+        provider=provider,
+        recipient_handle=recipient_handle,
+        sender_handle=sender_handle,
+    )
+    if opened.content != content:
+        raise RuntimeError("demo package round-trip verification failed")
+    package_path = outbox / (
+        f"TASK_ASSIGNMENT_PRJ001_{parsed.envelope.package_id}.agent"
+    )
+    package_path.write_bytes(package.to_bytes())
+    export_digest = hashlib.sha256(package.to_bytes()).hexdigest()
+    return package_path, export_digest
+
+
+def _build_demo_cockpit_views() -> tuple[Any, Any]:
+    """DEMO-ONLY: build the cockpit workspace/role snapshots."""
+
+    from src.coevo.cockpit import (
+        ArtifactSummary,
+        MilestoneSummary,
+        RoleView,
+        TaskSummary,
+        WorkspaceView,
+    )
+
+    workspace_view = WorkspaceView(
+        "PRJ001",
+        "Ship offline MVP demo",
+        ("a.pm", "a.eng"),
+        1,
+        1,
+        1,
+    )
+    role_view = RoleView(
+        "a.eng",
+        "PRJ001",
+        "Engineering",
+        (TaskSummary("t.1", "Implement demo", "in_progress",
+                     "2026-08-31T00:00:00Z", "a.eng"),),
+        (MilestoneSummary("m.1", "Demo ready", "2026-08-31T00:00:00Z", False),),
+        (ArtifactSummary("docs/report.docx", "document",
+                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                         128, "0" * 64),),
+    )
+    return workspace_view, role_view
+
+
+def _store_demo_knowledge(run_dir: Path, now: str) -> str:
+    """DEMO-ONLY: aggregate and persist the knowledge bundle."""
+
+    from src.coevo.knowledge_base import KnowledgeBaseFacade, KnowledgeStore
+
+    bundle = KnowledgeBaseFacade.aggregate(
+        project_id="PRJ001",
+        baseline={
+            "title": "Ship offline MVP demo",
+            "summary": "demo baseline",
+            "stages": ["plan", "execute", "review"],
+            "work_packages": ["wp.1"],
+        },
+        merge_records=(),
+        risk_reports=(),
+        meeting_conclusions=(),
+        decision_briefs=(),
+        progress_captures=(),
+        model_summaries=({"id": "ms.1", "title": "demo model summary"},),
+        now=now,
+    )
+    knowledge_store = KnowledgeStore.create(run_dir / "knowledge.db")
+    knowledge_store.save(bundle, now=now)
+    knowledge_store.close()
+    return bundle.bundle_id
+
+
+def _publish_demo_audit(hub: Any, now: str) -> None:
+    """DEMO-ONLY: publish the three demo completion audit events."""
+
+    from src.coevo.audit_governance import AuditEvent, AuditEventSource
+
+    for action, result in (
+        ("chain.completed", "ok"),
+        ("package.exported", "ok"),
+        ("knowledge.stored", "ok"),
+    ):
+        hub.publish(
+            AuditEvent.from_audit_record(
+                {
+                    "ts": now,
+                    "actor": "u.pm",
+                    "action": action,
+                    "result": result,
+                    "project_id": "PRJ001",
+                    "task_id": "t.1",
+                    "tool": "coevo.demo",
+                },
+                source=AuditEventSource.STATE,
+            )
+        )
+
+
 def run_demo_pipeline(
     runtime_dir: Path,
     *,
@@ -93,10 +255,6 @@ def run_demo_pipeline(
     from src.coevo.crypto import GmsslPrototypeProvider
     from src.coevo.identity.models import Actor
     from src.coevo.identity.service import StaticAuthorizer
-    from src.coevo.knowledge_base import (
-        KnowledgeBaseFacade,
-        KnowledgeStore,
-    )
     from src.coevo.orchestrator import (
         MVP_FIXED_CHAIN,
         AgentRegistry,
@@ -108,19 +266,10 @@ def run_demo_pipeline(
         RealChainStore,
         canonical_digest,
     )
-    from src.coevo.audit_governance import (
-        AuditEvent,
-        AuditEventSource,
-        AuditStreamHub,
-    )
+    from src.coevo.audit_governance import AuditStreamHub
     from src.coevo.cockpit import (
-        ArtifactSummary,
         CockpitHttpConfig,
         CockpitHttpServer,
-        MilestoneSummary,
-        RoleView,
-        TaskSummary,
-        WorkspaceView,
     )
     from src.coevo.talent.models import (
         AvailabilityWindow,
@@ -255,87 +404,13 @@ def run_demo_pipeline(
     )
 
     # 4. Export a real encrypted package to the outbox and verify it.
-    from src.coevo.protocol import (
-        build_encrypted_package,
-        build_envelope_template,
-        open_encrypted_package,
-        parse_package_bytes,
+    package_path, export_digest = _export_demo_package(
+        run_dir, project_input, now, completed,
+        provider, sender_handle, recipient_handle,
     )
-    outbox = run_dir / "outbox"
-    outbox.mkdir(parents=True, exist_ok=True)
-    envelope = build_envelope_template(
-        sender_cert_id="CERT-SENDER",
-        recipient_cert_id="CERT-RECIPIENT",
-        project_id="PRJ001",
-        package_type="TASK_ASSIGNMENT",
-        sequence_no=1,
-        payload_length=0,
-        created_at=now,
-        expires_at="2027-08-02T00:00:00Z",
-    )
-    manifest = {
-        "event_id": "ev.demo.001",
-        "project_id": "PRJ001",
-        "task_id": "t.1",
-        "base_revision": DEMO_REVISION,
-        "payload_digest": project_input["payload_digest"],
-    }
-    content = json.dumps(
-        {
-            "title": project_input["title"],
-            "objective": project_input["objective"],
-            "flow_summary": list(completed.flow_understanding_summary),
-            "baseline_summary": list(completed.baseline_summary),
-            "recommendations": list(completed.recommendation_summary),
-        },
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    package = build_encrypted_package(
-        envelope=envelope,
-        manifest=manifest,
-        content=content,
-        provider=provider,
-        sender_handle=sender_handle,
-        recipient_handle=recipient_handle,
-        signed_at=now,
-    )
-    parsed = parse_package_bytes(package.to_bytes())
-    opened = open_encrypted_package(
-        parsed,
-        provider=provider,
-        recipient_handle=recipient_handle,
-        sender_handle=sender_handle,
-    )
-    if opened.content != content:
-        raise RuntimeError("demo package round-trip verification failed")
-    package_path = outbox / (
-        f"TASK_ASSIGNMENT_PRJ001_{parsed.envelope.package_id}.agent"
-    )
-    package_path.write_bytes(package.to_bytes())
-    export_digest = hashlib.sha256(package.to_bytes()).hexdigest()
 
     # 5. Cockpit snapshot (views) + optional live server.
-    workspace_view = WorkspaceView(
-        "PRJ001",
-        "Ship offline MVP demo",
-        ("a.pm", "a.eng"),
-        1,
-        1,
-        1,
-    )
-    role_view = RoleView(
-        "a.eng",
-        "PRJ001",
-        "Engineering",
-        (TaskSummary("t.1", "Implement demo", "in_progress",
-                     "2026-08-31T00:00:00Z", "a.eng"),),
-        (MilestoneSummary("m.1", "Demo ready", "2026-08-31T00:00:00Z", False),),
-        (ArtifactSummary("docs/report.docx", "document",
-                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                         128, "0" * 64),),
-    )
+    workspace_view, role_view = _build_demo_cockpit_views()
     cockpit_url = ""
     server = None
     if with_cockpit:
@@ -352,56 +427,20 @@ def run_demo_pipeline(
         cockpit_url = server.url
 
     # 6. Knowledge bundle + persistent store.
-    bundle = KnowledgeBaseFacade.aggregate(
-        project_id="PRJ001",
-        baseline={
-            "title": "Ship offline MVP demo",
-            "summary": "demo baseline",
-            "stages": ["plan", "execute", "review"],
-            "work_packages": ["wp.1"],
-        },
-        merge_records=(),
-        risk_reports=(),
-        meeting_conclusions=(),
-        decision_briefs=(),
-        progress_captures=(),
-        model_summaries=({"id": "ms.1", "title": "demo model summary"},),
-        now=now,
-    )
-    knowledge_store = KnowledgeStore.create(run_dir / "knowledge.db")
-    knowledge_store.save(bundle, now=now)
-    knowledge_store.close()
+    knowledge_bundle_id = _store_demo_knowledge(run_dir, now)
 
     # 7. Audit stream (push notifications).
     hub = AuditStreamHub()
-    pushed: list[AuditEvent] = []
+    pushed: list[Any] = []
     hub.subscribe("u.auditor", pushed.append)
-    for action, result in (
-        ("chain.completed", "ok"),
-        ("package.exported", "ok"),
-        ("knowledge.stored", "ok"),
-    ):
-        hub.publish(
-            AuditEvent.from_audit_record(
-                {
-                    "ts": now,
-                    "actor": "u.pm",
-                    "action": action,
-                    "result": result,
-                    "project_id": "PRJ001",
-                    "task_id": "t.1",
-                    "tool": "coevo.demo",
-                },
-                source=AuditEventSource.STATE,
-            )
-        )
+    _publish_demo_audit(hub, now)
 
     return DemoResult(
         runtime_dir=run_dir,
         outcome=completed.orch_report.outcome.value,
         package_path=package_path,
         package_wire_sha256=export_digest or wire_sha256,
-        knowledge_bundle_id=bundle.bundle_id,
+        knowledge_bundle_id=knowledge_bundle_id,
         audit_event_count=hub.event_count,
         cockpit_url=cockpit_url,
         store=store,
