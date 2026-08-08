@@ -233,6 +233,34 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-2 完成收尾（共享时间生成器全仓落地；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-2`（ENG-BASE，dependencies=[FRAMEWORK-GAPS-6]）。
+  实现提交：`db0a550`（timefmt.now_utc_iso_z 单一生成器 + 13 处私有副本与 3 处
+  直接内联收敛；公开导出名保留 API 仅改来源；全仓源码守卫测试）；
+  登记提交：`8d176c4`（切片计划、BACKLOG ready、DECISIONS、STATE 事务）。
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁；按增量门禁（fmt + lint + 定向测试）执行并豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1182 项 OK
+  （skipped=3，含新增 2 项）；关键集成 72 项 + 安全套件 99/99 全绿。
+- 沙箱独立复核（pin=`db0a550`）：
+  * verifier（fwopt2-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `a3a3bb3d511c3d9f`（沙箱根解析差异属预期）；定向 87/87 全绿（optimize2 +
+    knowledge_store + audit_stream_store + cockpit_state_store + task_decomposition +
+    progress_watcher + identity_validation）；review_sandbox check violations=[]，
+    已 discard。
+  * security-reviewer（fwopt2-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：now_utc_iso_z 输出与 is_iso_utc_z 一致且含微秒；17 模块导入
+    无环（stdlib-only 叶子）；变更面仅 17 源码 + 新测试、tests/security 零改动、
+    无 eval/exec；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-2 行（无悬空）；追溯断言
+  55→56；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-2 / last_verified_commit=`db0a550`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `db0a550`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-1 完成收尾（基于框架优化原应用；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-1`（ENG-BASE，dependencies=[FRAMEWORK-INTEGRATION-4]）。

@@ -1298,7 +1298,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-2
     story: ENG-BASE
     title: 共享时间生成器全仓落地：timefmt.now_utc_iso_z（依赖无关叶子模块，格式与既有副本完全一致）收敛 13 处私有副本（knowledge_base/audit_governance/cockpit/demo_support/task_flow/protocol×4/progress_capture/task_decomposition/talent/crypto）与 3 处直接内联（identity×3）；行为与 wire 字节不变；全仓源码守卫防回归；stdlib only
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-GAPS-6]
     acceptance_tests:
       - tests/unit/test_framework_optimize2.py
