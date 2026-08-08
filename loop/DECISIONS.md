@@ -5437,3 +5437,16 @@ security-reviewer 双签门禁。
   携带上述治理标记（测试 `test_decisions_records_the_audit_corpus_status` 钉住
   最新段）。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
+
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-16 登记并开始执行（共享 PowerShell 解析叶子；增量门禁口径）
+
+- 用户指令：继续优化，不做全量门禁。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-16`（ENG-BASE，ready，dependencies=[]）：
+  identity/certificates、identity/audit_anchor（简单变体）与
+  identity/private_keys、crypto/cng_handle（锁哈希校验变体）四处重复实现
+  "解析 Windows PowerShell 可执行文件"；统一到 `src/coevo/powershell.py`
+  （jsonutil 式 error_factory 保留各模块异常语义，行为逐位不变），四模块收敛为
+  薄包装。切片计划：`docs/plans/FRAMEWORK-OPTIMIZE-16-slice.md`。
+- 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。

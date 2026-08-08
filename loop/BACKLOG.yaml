@@ -1544,3 +1544,16 @@ items:
       - tests/unit/test_agent_wire_regression.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-16（2026-08-08 用户指令"继续优化，不做全量门禁"；PowerShell 解析单一事实源） ----------
+  - id: FRAMEWORK-OPTIMIZE-16
+    story: ENG-BASE
+    title: 共享 PowerShell 解析叶子：新增 src/coevo/powershell.py（powershell_executable 简单变体 + locked_powershell_executable 锁校验变体，error_factory 保留各模块异常语义），identity/certificates、identity/audit_anchor、identity/private_keys、crypto/cng_handle 四处重复副本统一为薄包装；行为逐位不变；root_modules.md 登记
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_framework_optimize17.py
+      - tests/unit/test_identity_validation.py
+      - tests/unit/test_private_key_handles_bindings.py
+      - tests/unit/test_cng_handle.py
+    security_review: true
+    protocol_review: false
