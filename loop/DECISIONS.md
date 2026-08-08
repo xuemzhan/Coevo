@@ -1,5 +1,22 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-3 登记并开始执行（共享 JSON 规范化序列化与摘要）
+
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-3`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-2]）：新增根级叶子 `src/coevo/canon.py`
+  （canonical_json_bytes / canonical_digest，stdlib only），收敛框架内部重复
+  （integration._canonical / manifest_checker._canonical_bytes 字节语义相同）与
+  identity 5 处 digest 内联（repository 事件哈希链 2 + business digest 1、
+  validation bundle digest 1、private_keys 审计链 1）；ensure_ascii 语义逐点
+  保留、digest 逐位不变；root_modules.md 登记；全仓源码守卫防回归。切片计划：
+  `docs/plans/FRAMEWORK-OPTIMIZE-3-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-3。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-2 完成收尾（共享时间生成器全仓落地；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-2`（ENG-BASE）。实现提交：`db0a550`；
