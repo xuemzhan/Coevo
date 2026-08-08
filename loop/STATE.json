@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-GAPS-7",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "FRAMEWORK-OPTIMIZE-11",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "b69517b7605511b9029f140f9fd7482447cce09d",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T03:23:47.469958Z"
+  "updated_at": "2026-08-08T03:25:22.315670Z"
 }

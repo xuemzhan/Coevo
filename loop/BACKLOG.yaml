@@ -1394,3 +1394,13 @@ items:
       - tests/unit/test_framework_gaps7.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-11（2026-08-08 用户指令"继续下一步"；safe-id 正则单一事实源） ----------
+  - id: FRAMEWORK-OPTIMIZE-11
+    story: ENG-BASE
+    title: 共享 safe-id 正则叶子：新增 src/coevo/ids.py（SAFE_ID + is_safe_id fail-closed），workspace/cockpit/report/progress_capture/audit_governance/orchestrator/framework.tools 7 处本地副本统一引用；task_flow/talent 语义差异保留独立；root_modules.md 登记
+    status: ready
+    dependencies: [FRAMEWORK-GAPS-7]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize11.py
+    security_review: true
+    protocol_review: false
