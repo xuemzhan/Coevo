@@ -249,6 +249,31 @@ def _finish_dispatch_terminal(chain: Any, event: Any, workspace: Any, traces: li
     return result
 
 
+def _escalate_and_finish(
+    chain: Any, event: Any, workspace: Any, traces: list[Any],
+    summaries: dict[str, list[str]], event_digest: str, project_digest: str,
+    package_preview: PackagePreview | None, store: RealChainStore, now: str,
+    step: Any, detail: str,
+) -> RealChainOutcome:
+    """Append an ESCALATED trace and finish the dispatch as ESCALATED.
+
+    Consolidates the repeated failure paths in ``dispatch_real_chain``
+    (FRAMEWORK-OPTIMIZE-7): agent unavailable / facade failed / retry failed.
+    """
+
+    from . import OrchestrationOutcome, OrchestrationStepResult
+
+    traces.append(
+        _trace(
+            event.event_id, step, OrchestrationStepResult.ESCALATED, now, detail
+        )
+    )
+    return _finish_dispatch_terminal(
+        chain, event, workspace, traces, OrchestrationOutcome.ESCALATED,
+        summaries, event_digest, project_digest, package_preview, store, now,
+    )
+
+
 def project_baseline_to_requirements(baseline: Any) -> tuple[TaskRequirement, ...]:
     from src.coevo.talent.models import AvailabilityWindow
     return tuple(
@@ -305,11 +330,10 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
     for step in chain.steps[:3]:
         registration = registry.get(step.agent_id)
         if registration.status != AgentStatus.AVAILABLE:
-            traces.append(_trace(event.event_id, step, OrchestrationStepResult.ESCALATED,
-                                 now, "agent unavailable; human escalation required"))
-            return _finish_dispatch_terminal(
-                chain, event, workspace, traces, OrchestrationOutcome.ESCALATED,
-                summaries, event_digest, project_digest, package_preview, store, now,
+            return _escalate_and_finish(
+                chain, event, workspace, traces, summaries,
+                event_digest, project_digest, package_preview, store, now,
+                step, "agent unavailable; human escalation required",
             )
         store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "attempt", now)
         try:
@@ -319,11 +343,10 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
         except Exception:
             store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "failure", now)
             if step.on_failure != FailurePolicy.RETRY:
-                traces.append(_trace(event.event_id, step, OrchestrationStepResult.ESCALATED,
-                                     now, "facade failed; human escalation required"))
-                return _finish_dispatch_terminal(
-                    chain, event, workspace, traces, OrchestrationOutcome.ESCALATED,
-                    summaries, event_digest, project_digest, package_preview, store, now,
+                return _escalate_and_finish(
+                    chain, event, workspace, traces, summaries,
+                    event_digest, project_digest, package_preview, store, now,
+                    step, "facade failed; human escalation required",
                 )
             store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "retry_attempt", now)
             try:
@@ -332,11 +355,10 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
                 store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "retry_success", now)
             except Exception:
                 store.record_attempt(event.event_id, event_digest, f"facade.{step.step_index}", "retry_failure", now)
-                traces.append(_trace(event.event_id, step, OrchestrationStepResult.ESCALATED,
-                                     now, "facade retry failed; human escalation required"))
-                return _finish_dispatch_terminal(
-                    chain, event, workspace, traces, OrchestrationOutcome.ESCALATED,
-                    summaries, event_digest, project_digest, package_preview, store, now,
+                return _escalate_and_finish(
+                    chain, event, workspace, traces, summaries,
+                    event_digest, project_digest, package_preview, store, now,
+                    step, "facade retry failed; human escalation required",
                 )
         outputs[step.step_index] = output
         if step.step_index == 0:
