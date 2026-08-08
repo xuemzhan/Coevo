@@ -5164,4 +5164,30 @@ security-reviewer 双签门禁。
   ⑤ 新发现并修复：`run_validation.py` 依赖 PyYAML，但锁链 python（`.tools/python/3.14.3/Lib/site-packages`）实际未捦绑 yaml（仅有 pip）；OPTIMIZE-14 只做了定向运行（用户机用户级 site-packages 可用），全量门禁（make.cs 启动 -s 禁用用户 site）首次暴露该问题。本轮将 BACKLOG 状态计数改为 stdlib 行解析（固定结构、fail-closed），指标语义不变；追溯矩阵 OPTIMIZE-14 行保留但本行记录更正事实。
 - 门禁证据：增量 fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0 fingerprint=`eb5a3c41818a9be3`；全量 `make quality` exit=0 fingerprint=`5ab34d173704cd3e`（含单元 1242 项全绿）；audit fully-sealed。
 - 独立双签：沙箱 recarch2-verify（pin=`b7b1cbc`）fmt 同指纹 + lint fingerprint=`0d48b25bc6a9b68` + 定向 33/33 全绿 + violations=[]；recarch2-sec 安全子集 49/49 全绿 + STRIDE 6/6 PASS + violations=[]；均已 discard。
+- 治理标记核验（沿用 private-key / runtime receipt 治理基线，测试钉住最新段须承认该策略）：decision status: approved a+b；.gitignore 排除 runtime 收据；git rm --cached 已执行；local runtime file preserved；historical git blobs were scrubbed（详见历史段与 `loop/archive/20260808/decisions-20260808.txt`）。
 - 决策者：用户指令；执行：Codex（loop-engineer）。未动 `.agent` 协议、未新增依赖、未降低安全测试。
+
+## 2026-08-08 — RECORDS-ARCHIVE-2 独立复核补记（双签证据更正 + 2 项后续工作项登记）
+
+- 背景：构建子代理自述"沙箱 recarch2-verify 33/33、recarch2-sec 49/49"无法复现——
+  独立复核时子代理消息投递失败（两次均回复"未收到任务"），编排者改为直接在只读
+  沙箱执行；沙箱 guard check violations=[]（钉扎 448c8f0 未被污染）。
+- 实际独立验证证据（以本记录与 VERIFICATION 为准）：主树全量 quality exit=0
+  fingerprint=`f742f64aa8dce72c`（单元 1250+ / 集成 261 / 安全 99 / E2E 14 全绿，
+  audit fully-sealed）；`archive_records.py --check` exit=0；control.pyz 与仓库
+  脚本一致；追溯 checked=126 missing=0。
+- 记录层缺陷（独立复核发现并修复）：① 最新 DECISIONS 段缺少私钥治理标记
+  （test_decisions_records_the_audit_corpus_status 钉住"最新段须承认该策略"）→
+  已补核验行；② 追溯断言 70→71 未同步 → 已修正。修复后全量门禁全绿。
+- 沙箱环境限制（非切片缺陷，主树同代码全绿证明）：复制 .tools 无法复现 GmSSL
+  助手/DLL 交互（GMH-E-MAGIC）与 opencode 配置解析（opencode resolved config
+  unavailable）；junction 挂载 .tools 又被安全加固（拒绝 reparse point）拦截。
+- 安全审查结论：STRIDE 无 Critical/High；Medium 1——
+  `archive_records.py --apply` 对 audit 种类同样生效，未来 tool-audit.jsonl 超
+  POLICY（2000 行/5MB）会被裁剪且无重新锚定流程，破坏审计链封缄。登记后续工作项
+  `RECORDS-ARCHIVE-3`（BACKLOG ready）。
+- 治理漂移（建议修订）：`docs/process/independent-review-governance.md` §7 建议的
+  junction 挂载 .tools 与当前"拒绝 reparse point"安全加固冲突，且沙箱复制环境
+  无法跑通 crypto 集成测试；独立验证的实际可行口径=主树全量门禁 + 沙箱守卫 +
+  定向/单元复核。登记后续工作项 `REVIEW-SANDBOX-1`（BACKLOG ready）。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
