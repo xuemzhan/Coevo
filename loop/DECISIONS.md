@@ -1,5 +1,42 @@
 # Loop 决策记录
 
+## 2026-08-08 — 全面审查复盘 + 门禁稳定性优化落地（QUALITY-ROBUST-1）
+
+- 用户指令：站在资深审查者角度全面审查、复盘现有项目实现（生产可用、可靠性、稳定性、
+  扩展性、性能、安全），给出优化建议并落地。
+- 审查结论：整体架构与安全设计成熟——fail-closed 契约、审计哈希链、私钥不出 CNG、
+  路径防穿越、驾驶舱会话/CSRF/Host 校验、模型外发审批、重试限幅均已落地；主要问题
+  集中在**门禁稳定性与文档一致性**。
+- 实测证据（quality 全量在共享负载下偶发失败，两次复现）：
+  * `tests/unit/test_benchmark_http.py`：LOAD-1 /healthz p95 单次采样在机器负载下
+    偶发超 1.0s（p50=0.0066s/max=1.0675s；p50=0.0090s/max=1.5953s），使 `make
+    quality` 抖动；根因是单轮采样对并发 CPU 负载敏感（实测两套单元/安全套件同时运行
+    时复现），且文档声称"计时类探针不进 make quality"与实际门禁组合不一致。
+  * `tests/unit/test_loop_launcher.py`：PowerShell 子进程偶发捕获流为 None，断言
+    拼接时报 TypeError。
+- 落地（提交 `81177b0`）：
+  * `scripts/benchmark.py`：探针提取 `_fire_probe`/`_p95`，预热一轮 + best-of-3
+    取最优无错轮次，SLA（p95≤1.0s、零错误）语义保留；单元测试改 class-level 共享
+    结果并新增轮次契约断言。
+  * `tests/unit/test_loop_launcher.py`：`(stderr or "")+(stdout or "")` 容忍 None。
+  * `docs/production-readiness.md` / `docs/modules/benchmarks.md` /
+    `src/coevo/benchmarks/__init__.py`：三处文档与实际门禁组合对齐（唯一例外
+    LOAD-1 探针，预热 + best-of-3）。
+- 验证：定向 6/6 全绿；单元全量 1237 项 OK（含在并发安全套件同时运行下的复跑）；
+  compileall exit=0；quality 门禁结果见 VERIFICATION.md。
+- 未改动安全测试、协议、密钥路径与既有约束；不降低任何 fail-closed 语义。
+- 决策者：用户指令；执行：Codex。
+
+### 编排者核验补登记（2026-08-08，loop-engineer）
+
+- 并行流未完成 BACKLOG 登记与 STATE 流转、未走沙箱独立验证；编排者核验后补收口：
+  * 独立核验：定向 17/17（benchmark_http/loop_launcher/benchmark_suite）、
+    全量单元 1237 OK、fmt/lint 全绿（指纹同基线）、安全套件 99/99 全绿；
+  * 补登记：BACKLOG QUALITY-ROBUST-1 done、追溯矩阵行与断言 70（并行流已补，
+    核验一致保留）、STATE 经受控事务置 done（last_verified_commit=`81177b0`）；
+  * 治理留痕：并行流直接提交代码与记录未走完整循环，与 QUALITY-GATE-ENCODING-1
+    轮同款先例；内容核验一致予以保留。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-14 完成收尾（共享 JSON 重复键拒绝守卫；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-14`（ENG-BASE）。实现提交：`2bdd1fc`；

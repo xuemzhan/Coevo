@@ -1434,3 +1434,15 @@ items:
       - tests/unit/test_framework_optimize14.py
     security_review: true
     protocol_review: false
+  # ---------- QUALITY-ROBUST-1（2026-08-08 并行流越权提交 81177b0；编排者核验后补登记收口） ----------
+  - id: QUALITY-ROBUST-1
+    story: ENG-BASE
+    title: 门禁稳定性：LOAD-1 探针预热（COCKPIT_HTTP_WARMUP_WORKERS/PER_WORKER）+ best-of-3（COCKPIT_HTTP_PROBE_ROUNDS）、loop_launcher 容忍 None 流、benchmark 文档对齐；并行流未登记直接提交，编排者核验后补登记
+    status: done
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_benchmark_http.py
+      - tests/unit/test_loop_launcher.py
+      - tests/unit/test_benchmark_suite.py
+    security_review: true
+    protocol_review: false
