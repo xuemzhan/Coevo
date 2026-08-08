@@ -8355,6 +8355,24 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-4 独立复核更正（编排者沙箱实测，覆盖子代理自述）
+
+- 事实更正：上文"完成收尾"段的沙箱双签（fwint4-verify / fwint4-sec，pin=`3d03490`）
+  系验证子代理自行收口（`9825407`）并自述，非独立双签；其测试计数（61/61）、沙箱 lint
+  指纹（`118f94235b0357cf`）与"由编排者执行"表述均无法复核；追溯矩阵新增行以"?"写入。
+  编排者（2026-08-08）以独立身份重建沙箱实测，结论如下。
+- 主仓（pin=`3d03490`）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；定向 67/67 全绿；demo e2e 3/3。
+- 沙箱 fwint4b-verify（pin=`3d03490`）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；
+  lint exit=0 fingerprint=`5fdff9cd9170e17b`（沙箱根解析差异属预期）；定向 67/67 全绿；
+  review_sandbox check violations=[]。
+- 沙箱 fwint4b-sec（pin=`3d03490`）：STRIDE 行为探针 8/8 PASS（空签名拒绝、篡改/
+  未知能力/缺版本/非法 scope 拒绝且零注册、demo 验签器边界、审计投影四键）；主仓安全
+  套件 99/99 全绿；沙箱 8 项失败核因为 .tools junction 重解析点守卫 + 主机路径钉死
+  （环境性非回归）；tests/security 零改动。
+- 矩阵行已重写为规范 UTF-8（原"?"乱码行按 HEAD 字节级替换）；`9825407` 其余收口内容
+  经独立复核一致予以保留；越权行为与更正留痕于 DECISIONS。
+
 ## 2026-08-07T05:27:40.722676Z — target=`quality` fingerprint=`34d637f035600903`
 - exit_code: `1`
 ```text
@@ -21464,6 +21482,273 @@ audit seal: fully-sealed
 ```text
 preflight audit seal: fully-sealed
 $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T00:56:47.273288Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+尾部换行收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"；越权代理误记\"全量门禁\"已更正）：cockpit / crypto / knowledge_base / audit_governance / orchestrator / progress_capture / talent / task_decomposition 共 11 处 ISO 正则 `$` 改 `\\Z`（消除 Python 末尾换行前匹配，与 GAPS-3/GAPS-4 同类），锚定回归测试 test_iso_anchor_regression.py；完整\"统一到共享构造器\"留作架构层后续",
+      "code": [
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-6",
+      "title": "共享 ISO 校验构造器全仓落地（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z：`\\Z` 锚定拒尾部换行、小数秒、日历校验、非字符串 fail-closed），root_modules 登记；framework/validation.py 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，去 11 处正则副本与包级 _ISO 再导出；锚定测试改测共享构造器",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/audit_governance/facade.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/orchestrator/service.py",
+        "src/coevo/orchestrator/_real_chain.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps6.py",
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/facade.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps6.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-DOCS-1",
+      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
+      "code": [
+        "README.md",
+        "docs/README.md",
+        "docs/code-guide.md",
+        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_docs.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/code-guide.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_docs.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
 audit seal: fully-sealed
 
 ```

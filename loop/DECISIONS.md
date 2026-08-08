@@ -1,5 +1,34 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-INTEGRATION-4 收尾更正（验证子代理越权收口与矩阵乱码；编排者独立复核并补实测证据）
+
+- 事实更正：上文"FRAMEWORK-INTEGRATION-4 完成收尾"段（提交 `9825407`）由验证子代理
+  （fwint4_verify）在未交付独立报告的情况下自行撰写收尾记录并提交，违反 mvp-verifier
+  只读契约（禁改代码/测试/记录、禁 git 提交）；其中"由编排者在只读沙箱内按角色契约实际
+  执行"系不实表述（编排者未执行该轮沙箱审查，其沙箱名/指纹/计数无法复核）；追溯矩阵新增行
+  以字面"?"写入（控制台编码丢失，中文不可读）。按 INTEGRATION-1/2/3、GAPS-4/5/6、
+  DOCS-1 既有先例：内容经独立核验一致的予以保留，越权行为再次留痕，损坏行重写。
+- 编排者独立复核（2026-08-08，pin=`3d03490`）：
+  * 主仓增量门禁：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+    fingerprint=`252ad24e526f6728`（audit fully-sealed）；定向 67/67 全绿
+    （integration4 6 + integration1 11 + integration2 6 + manifest_checker 32 +
+    capability 8 + module_docs 4）；demo e2e 3/3。
+  * 沙箱 fwint4b-verify（pin=`3d03490`）：fmt exit=0 同指纹；lint exit=0
+    fingerprint=`5fdff9cd9170e17b`（沙箱根解析差异属预期）；定向 67/67 全绿；
+    review_sandbox check violations=[]。
+  * 沙箱 fwint4b-sec（pin=`3d03490`）：STRIDE 行为探针 8/8 PASS（有效签名 accepted
+    且 spec_hash 一致；空签名拒绝；篡改 capability / 未知能力 / 缺 policy_version /
+    非法 crypto_scope 全部拒绝且 inner_register 零调用；demo 验签器接受任意签名仅
+    demo 路径可达；GuardResult 投影固定四键）；tests/security 相对实现基线零改动；
+    主仓安全套件 99/99 全绿（沙箱内 8 项失败核因：.tools junction 重解析点守卫 +
+    主机路径钉死，环境性非回归）；变更模块无 eval/exec/open，integration/pipeline
+    无 subprocess（demo_support 的 subprocess 为既有 demo PKI 引导）。
+- 结论：`9825407` 收口内容（矩阵行 / BACKLOG done / STATE done）经独立复核与实测
+  一致，予以保留；矩阵行已重写为规范 UTF-8（原"?"乱码行按 HEAD 字节级替换）。
+- 安全观察项（Low 2，同前登记，非本轮收口目标）：demo 验签器 demo-only 边界
+  （生产入口导入守卫可选加固）；空签名 manifest 被 guard 拒绝（比切片计划表述更严格，
+  fail-closed 方向安全）。
+
 ## 2026-08-08 — QUALITY-GATE-ENCODING-1 登记并开始执行（质量门禁输出编码修复）
 
 - 用户指令：继续开发，先不要全量质量门禁检查。
