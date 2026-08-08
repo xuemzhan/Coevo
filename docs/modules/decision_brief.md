@@ -16,6 +16,7 @@
 
 | 文件 | 关键类型/函数 | 职责 |
 |---|---|---|
+| `_util.py` | `_safe_string` / `_digest` / `_encode_json` / `_stat_is_reparse` / `_is_link_or_reparse` / `_parse_utc` / `_ZERO_DIGEST` | 纯工具助手（error_factory 保留异常语义；models 薄包装再导出，导入面不变） |
 | `models.py` | `DecisionBrief`、`BriefContent`、`BriefType`、`RiskConfirmation`、`WpsDocumentRequest` | 简报/内容/模板/风险确认模型与全部校验（含 DOCX 校验：宏-free、尺寸/条目上限） |
 | `repositories.py` | `DecisionBriefRepository`、`ApprovedTemplateRegistry`、`RiskConfirmationRepository` | 修订 CAS + 事件幂等 + 内容哈希链；模板复验；权威风险确认 |
 | `service.py` | `DecisionBriefService.generate/revise/to_audit_record` | 简报生成/修订门面：只消费最新 verified 回执 + owner 签名风险确认 |

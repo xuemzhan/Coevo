@@ -70,7 +70,6 @@ class ParseIsoUtcTests(unittest.TestCase):
 class UnificationGuardTests(unittest.TestCase):
     def test_modules_delegate_to_shared_parser(self):
         for relative in (
-            "src/coevo/decision_brief/models.py",
             "src/coevo/merge/receipt.py",
             "src/coevo/risk/models.py",
             "src/coevo/supervision/models.py",
@@ -79,6 +78,12 @@ class UnificationGuardTests(unittest.TestCase):
             self.assertIn(
                 "parse_iso_utc", text, f"{relative} must use the shared parser"
             )
+        # decision_brief delegates via _util, which wraps timefmt.parse_iso_utc
+        # (FRAMEWORK-OPTIMIZE-19 extraction).
+        db = (ROOT / "src/coevo/decision_brief/models.py").read_text(encoding="utf-8")
+        util = (ROOT / "src/coevo/decision_brief/_util.py").read_text(encoding="utf-8")
+        self.assertIn("_util_parse_utc", db)
+        self.assertIn("parse_iso_utc", util)
 
     def test_no_local_fromisoformat_parse_copies(self):
         for relative in (
