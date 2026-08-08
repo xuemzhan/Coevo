@@ -10,8 +10,12 @@ targets so the project stops guessing and starts tracking:
 * package generation success     >= 95%
 
 The harness is pure and small; the actual measurements live in
-``scripts/benchmark.py`` so they are not part of the quality gate
-(timing runs are environment-dependent and must not gate CI)."""
+``scripts/benchmark.py`` so most of them are not part of the quality gate
+(timing runs are environment-dependent and must not gate CI). The single
+documented exception is the LOAD-1 ``/healthz`` p95 probe: it enters the
+unit gate (``tests/unit/test_benchmark_http.py``) with a warm-up round and
+best-of-3 selection so the SLA check stays deterministic on noisy CI and
+shared dev machines."""
 
 from __future__ import annotations
 

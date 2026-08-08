@@ -39,7 +39,10 @@ class LoopLauncherTest(unittest.TestCase):
         for name in ('Item','Model'):
             result=subprocess.run([_powershell_executable(),'-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/run-loop.ps1'),'-MaxIterations','1',f'-{name}','--auto'],cwd=ROOT,capture_output=True,text=True)
             self.assertNotEqual(0,result.returncode,name)
-            output=result.stderr+result.stdout
+            # PowerShell may exit without writing anything to a captured
+            # stream (e.g. under process-spawn contention), so tolerate None
+            # instead of crashing the assertion with a TypeError.
+            output=(result.stderr or '')+(result.stdout or '')
             self.assertTrue('ParameterArgumentValidationError' in output or 'Cannot validate argument' in output or 'does not match' in output, f'unexpected output: {output}')
 
 if __name__=='__main__': unittest.main()

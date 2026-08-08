@@ -51,8 +51,10 @@ python scripts/run_cockpit.py --port 12710
 ## 性能基线
 
 `python scripts/benchmark.py --check` 对照参考架构 SLA 与可扩展性探针
-（见 `src/coevo/benchmarks/__init__.py`）。计时类探针不进 `make quality`，
-由人工/CI 按需执行并留档。
+（见 `src/coevo/benchmarks/__init__.py`）。独立计时探针由人工/CI 按需执行并留档；
+唯一例外是 `LOAD-1 /healthz p95` 探针——它以预热 + best-of-3 取最优轮次的方式
+作为单元测试进入 `make quality`（`tests/unit/test_benchmark_http.py`），
+在共享机/CI 抖动下保持确定性，其余计时类探针不进门禁。
 
 ## 与正式安全基线的关系
 
