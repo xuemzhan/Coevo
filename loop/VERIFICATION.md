@@ -1266,6 +1266,18 @@ lint：exit=0 fingerprint=`5103146e112f2dd1`（validate_opencode + traceability 
 追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-15 行，traceability checked=126 missing=0（ENG-BASE 76）。
 ```
 
+## 2026-08-08T15:05:00Z — PERF-VERIFY-1 增量验证记录（集成套件性能基线；全量 quality 按用户指示豁免）
+
+```text
+用户指令：继续进行优化，不用做全量门禁。
+命令：python -m unittest discover -s tests/integration -p "*test*.py" -v（门禁 test 阶段的集成部分；PYTHONUTF8）。
+结果：Ran 262 tests in 288.645s，OK (skipped=1) —— 无回归。
+性能基线：PERF-HELPER-1（GmSSL crypto-provider 助手编译缓存）前集成套件约 1021.8s（约 17 分钟）→ 缓存后 288.6s（约 4.8 分钟）≈ 3.5 倍提速，节省约 12 分钟/次。
+覆盖：20 个集成测试文件全量（installer / dev_environment / merge / package_store / orchestrator / talent / knowledge / progress / sm2-test-pki / cng / gmssl provider / crypto_sm3 / audit / cockpit http / recovery / workspace 等）。
+archive_records --check：exit=0；audit fully-sealed。
+追溯矩阵新增 ENG-BASE | PERF-VERIFY-1 行，traceability checked=126 missing=0（ENG-BASE 77）。
+```
+
 
 
 

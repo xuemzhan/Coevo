@@ -1524,7 +1524,7 @@ items:
   - id: PERF-VERIFY-1
     story: ENG-BASE
     title: 集成套件回归复测与性能基线：全量 261 项集成测试复测（含 crypto 缓存路径与未覆盖的 installer/dev_environment/merge 等），量化 PERF-HELPER-1 收益（此前约 17 分钟），记录性能基线；回归就地修复；观察 sm2-test-pki 测试助手是否成为新主要耗时点（作为 PERF-HELPER-2 依据）
-    status: ready
+    status: done
     dependencies: [PERF-HELPER-1]
     acceptance_tests:
       - tests/integration/test_gmssl_prototype_provider.py

@@ -5219,6 +5219,21 @@ security-reviewer 双签门禁。
   quality），全量 quality 豁免留痕。
 - 提出者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — PERF-VERIFY-1 完成收口（集成套件回归复测与性能基线；增量验证豁免全量）
+
+- 工作项：`PERF-VERIFY-1`（ENG-BASE，dependencies=[PERF-HELPER-1]）。
+- 用户指令：继续进行优化，不用做全量门禁；按增量验证（集成套件 = 门禁 test
+  阶段一部分）执行并豁免全量 quality（豁免留痕）。
+- 结果：完整集成套件（20 文件 / **262 项**）exit=0（skipped=1），总耗时
+  **288.645s（约 4.8 分钟）**；对比 PERF-HELPER-1 前基线 **1021.8s（约 17 分钟）**
+  ——**约 3.5 倍提速、节省约 12 分钟/次全量门禁，无回归**。crypto 缓存命中路径在
+  全部集成用例（installer / dev_environment / merge / package_store /
+  orchestrator / sm2-test-pki 等）下稳定；archive_records --check exit=0；
+  audit fully-sealed。
+- 观察：sm2-test-pki 测试助手仍现场编译，但在缓存后未成为阻塞项（整体 4.8 分钟）；
+  若后续追求更激进提速可评估 PERF-HELPER-2（测试助手缓存，需调整"无残留"测试）。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-15 完成收口（共享 safe-relative-path 校验叶子；增量门禁豁免全量）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-15`（ENG-BASE，dependencies=[]）。
