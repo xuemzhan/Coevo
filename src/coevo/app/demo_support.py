@@ -92,6 +92,83 @@ class DemoPolicyRegistry:
     def has_policy_version(self, profile: str, version: str) -> bool:
         return (profile, version) == ("INTERACTIVE", "1.0")
 
+
+_DEMO_REGISTRATION_AGENTS: tuple[tuple[str, str], ...] = (
+    ("agent.task_flow_understanding", "task_flow_understanding"),
+    ("agent.task_decomposition", "task_decomposition"),
+    ("agent.team_recommendation", "team_recommendation"),
+    ("agent.task_package_build", "task_package_build"),
+)
+
+
+def register_demo_agents(
+    registry: Any,
+    registered: list[str] | None = None,
+) -> tuple[Any, list[str]]:
+    """DEMO-ONLY: register the four fixed demo agents through the framework gate.
+
+    Each agent manifest is built with :func:`build_registration_manifest` and
+    must pass :func:`guard_registration` (manifest-checker) before the agent
+    enters the registry.  Explicitly NOT production: production MUST inject a
+    real SM2 signer/verifier and a certificate-chain-backed resolver.
+
+    Returns ``(registry, registered_agent_ids)``; ``registry`` is the
+    immutable product registry extended with the four accepted agents.
+    """
+
+    from src.coevo.framework.integration import (
+        build_registration_manifest,
+        guard_registration,
+    )
+    from src.coevo.framework.manifest_checker import ManifestCheckInput
+    from src.coevo.orchestrator.models import (
+        AgentCapability,
+        AgentRegistration,
+        AgentSpec,
+    )
+
+    resolver = DemoRegistrationResolver()
+    verifier = DemoRegistrationVerifier()
+    signer = DemoRegistrationSigner()
+    policy_registry = DemoPolicyRegistry()
+    fingerprint = hashlib.sha256(resolver.der).hexdigest()
+    registered = [] if registered is None else registered
+    for agent_id, capability_name in _DEMO_REGISTRATION_AGENTS:
+        capability = AgentCapability(capability_name)
+        manifest_bytes = build_registration_manifest(
+            agent_id,
+            capability.value,
+            display_name=capability.value,
+            signer_cert_fingerprint=fingerprint,
+            signer=signer.sign,
+        )
+        guard = guard_registration(
+            ManifestCheckInput(
+                manifest_bytes=manifest_bytes,
+                trusted_anchor_pubkey=b"DEMO-ANCHOR",
+            ),
+            policy_registry=policy_registry,
+            cert_resolver=resolver,
+            signature_verifier=verifier,
+            inner_register=lambda manifest: registered.append(manifest.agent_id),
+        )
+        if not guard.accepted:
+            raise RuntimeError(
+                f"framework registration gate rejected {agent_id}: {guard.reason}"
+            )
+        registry = registry.register(
+            AgentRegistration(
+                AgentSpec(
+                    agent_id,
+                    capability,
+                    capability.value,
+                    ("input",),
+                    ("output",),
+                )
+            )
+        )
+    return registry, registered
+
 class DemoFreshnessAuthority:
     """In-memory stand-in for the identity freshness authority."""
 

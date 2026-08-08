@@ -62,6 +62,26 @@ class DemoResult:
     hub: Any
     cockpit_server: Any | None = None
 
+
+class _AllowAllScopeRbac:
+    """Demo composition-root gate checkers (structural allow-all).
+
+    The framework plan gate validates the chain shape, policy invariants and
+    L18/L19; RBAC / tool-scope enforcement is a structural allow-all for the
+    demo and the product wiring plugs real authorizers here later.
+    """
+
+    def within_scope(self, tool_ref: str, policy_profile: str) -> bool:
+        return True
+
+    def authorized(self, plan: object, actor: str) -> bool:
+        return True
+
+
+# Shared immutable gate-checker instance for the demo composition root.
+_ALLOW_ALL_SCOPE_RBAC = _AllowAllScopeRbac()
+
+
 def run_demo_pipeline(
     runtime_dir: Path,
     *,
@@ -79,10 +99,7 @@ def run_demo_pipeline(
     )
     from src.coevo.orchestrator import (
         MVP_FIXED_CHAIN,
-        AgentCapability,
-        AgentRegistration,
         AgentRegistry,
-        AgentSpec,
         OrchestrationEvent,
         OrchestrationEventKind,
         OrchestrationOutcome,
@@ -149,56 +166,13 @@ def run_demo_pipeline(
         TalentRecommenderService(),
         TalentPool("pool.1", "1.0", (talent,)),
     )
-    # FRAMEWORK-INTEGRATION-4: registration gate -- agents may only enter the
-    # registry after the framework manifest-checker accepts their manifest.
-    from src.coevo.app.demo_support import (
-        DemoPolicyRegistry,
-        DemoRegistrationResolver,
-        DemoRegistrationSigner,
-        DemoRegistrationVerifier,
-    )
-    from src.coevo.framework.integration import (
-        build_registration_manifest,
-        guard_registration,
-    )
-    from src.coevo.framework.manifest_checker import ManifestCheckInput
+    # FRAMEWORK-INTEGRATION-4 / FRAMEWORK-OPTIMIZE-1: agents may only enter
+    # the registry after the framework manifest-checker accepts their manifest
+    # (assembly converged into demo_support.register_demo_agents).
+    from src.coevo.app.demo_support import register_demo_agents
 
-    demo_reg_resolver = DemoRegistrationResolver()
-    demo_reg_verifier = DemoRegistrationVerifier()
-    demo_reg_signer = DemoRegistrationSigner()
-    demo_policy_registry = DemoPolicyRegistry()
-    registered: list[str] = []
     registry = AgentRegistry.empty()
-    for agent_id, capability in (
-        ("agent.task_flow_understanding", AgentCapability.TASK_FLOW_UNDERSTANDING),
-        ("agent.task_decomposition", AgentCapability.TASK_DECOMPOSITION),
-        ("agent.team_recommendation", AgentCapability.TEAM_RECOMMENDATION),
-        ("agent.task_package_build", AgentCapability.TASK_PACKAGE_BUILD),
-    ):
-        manifest_bytes = build_registration_manifest(
-            agent_id,
-            capability.value,
-            display_name=capability.value,
-            signer_cert_fingerprint=hashlib.sha256(demo_reg_resolver.der).hexdigest(),
-            signer=demo_reg_signer.sign,
-        )
-        guard = guard_registration(
-            ManifestCheckInput(
-                manifest_bytes=manifest_bytes,
-                trusted_anchor_pubkey=b"DEMO-ANCHOR",
-            ),
-            policy_registry=demo_policy_registry,
-            cert_resolver=demo_reg_resolver,
-            signature_verifier=demo_reg_verifier,
-            inner_register=lambda manifest: registered.append(manifest.agent_id),
-        )
-        if not guard.accepted:
-            raise RuntimeError(
-                f"framework registration gate rejected {agent_id}: {guard.reason}"
-            )
-        registry = registry.register(AgentRegistration(AgentSpec(
-            agent_id, capability, capability.value, ("input",), ("output",)
-        )))
+    registry, _ = register_demo_agents(registry)
     project_input = sample_project_input()
     event = OrchestrationEvent(
         "ev.demo.001",
@@ -221,19 +195,12 @@ def run_demo_pipeline(
     from src.coevo.framework.integration import validate_product_chain
     from src.coevo.framework.policy import get_default_profile
 
-    class _FrameworkGateAll:
-        def within_scope(self, tool_ref: str, policy_profile: str) -> bool:
-            return True
-
-        def authorized(self, plan: object, actor: str) -> bool:
-            return True
-
     gate = validate_product_chain(
         MVP_FIXED_CHAIN,
         registry,
         get_default_profile("INTERACTIVE"),
-        scope_checker=_FrameworkGateAll(),
-        rbac_checker=_FrameworkGateAll(),
+        scope_checker=_ALLOW_ALL_SCOPE_RBAC,
+        rbac_checker=_ALLOW_ALL_SCOPE_RBAC,
         actor=DEMO_ACTOR,
         validated_at=now,
     )

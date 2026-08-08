@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Protocol, runtime_checkable
 
 from src.coevo.framework.capability import (
@@ -185,10 +185,29 @@ def build_registration_manifest(
             obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True
         ).encode("utf-8")
 
-    stripped = json.loads(json.dumps(manifest, ensure_ascii=True))
-    stripped["metadata"].pop("spec_hash", None)
-    stripped["policy_ref"].pop("spec_hash", None)
-    stripped["policy_ref"].pop("signature", None)
+    # FRAMEWORK-OPTIMIZE-1: structural copy that excludes the
+    # self-referential fields -- no JSON round-trip needed. The canonical
+    # bytes are identical to the previous implementation (sort_keys +
+    # separators are unchanged), pinned by a byte-level regression test.
+    stripped: dict[str, Any] = {
+        "apiVersion": manifest["apiVersion"],
+        "kind": manifest["kind"],
+        "metadata": {
+            key: value
+            for key, value in manifest["metadata"].items()
+            if key != "spec_hash"
+        },
+        "spec": manifest["spec"],
+        "policy_profile": manifest["policy_profile"],
+        "policy_version": manifest["policy_version"],
+        "policy_ref": {
+            key: value
+            for key, value in manifest["policy_ref"].items()
+            if key not in ("spec_hash", "signature")
+        },
+        "security": manifest["security"],
+        "audit": manifest["audit"],
+    }
     spec_hash = hashlib.sha256(_canonical(stripped)).hexdigest()
     manifest["metadata"]["spec_hash"] = spec_hash
     manifest["policy_ref"]["spec_hash"] = spec_hash
@@ -309,14 +328,9 @@ def chain_to_plan(
         nodes=tuple(nodes),
         edges=tuple(edges),
     )
-    return Plan(
-        plan_id=plan_fingerprint(plan),
-        plan_version=plan.plan_version,
-        policy_profile=plan.policy_profile,
-        policy_version=plan.policy_version,
-        nodes=plan.nodes,
-        edges=plan.edges,
-    )
+    # FRAMEWORK-OPTIMIZE-1: set the fingerprint in one pass instead of
+    # rebuilding the whole Plan (nodes/edges are frozen and reused).
+    return replace(plan, plan_id=plan_fingerprint(plan))
 
 
 def validate_product_chain(

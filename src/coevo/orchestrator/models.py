@@ -160,6 +160,10 @@ class AgentRegistry:
         # Lazy O(1) agent_id -> registration index. Private and
         # excluded from equality / hashing.
         object.__setattr__(self, "_id_cache", None)
+        # Lazy capability -> registrations index (FRAMEWORK-OPTIMIZE-1).
+        # Same pattern: private, rebuilt lazily, invalidated on mutation via
+        # __post_init__ (register/set_status return fresh instances).
+        object.__setattr__(self, "_capability_cache", None)
 
     @classmethod
     def empty(cls) -> "AgentRegistry":
@@ -176,7 +180,16 @@ class AgentRegistry:
         return tuple(r for r in self._by_id if r.status == AgentStatus.AVAILABLE)
 
     def by_capability(self, capability: AgentCapability) -> tuple[AgentRegistration, ...]:
-        return tuple(r for r in self._by_id if r.spec.capability == capability)
+        cache = self._capability_cache
+        if cache is None:
+            grouped: dict[AgentCapability, list[AgentRegistration]] = {}
+            for reg in self._by_id:
+                grouped.setdefault(reg.spec.capability, []).append(reg)
+            cache = {
+                cap: tuple(regs) for cap, regs in grouped.items()
+            }
+            object.__setattr__(self, "_capability_cache", cache)
+        return cache.get(capability, ())
 
     def register(self, registration: AgentRegistration) -> "AgentRegistry":
         """Register an agent after validation."""
