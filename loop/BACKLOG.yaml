@@ -1354,3 +1354,13 @@ items:
       - tests/unit/test_framework_optimize7.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-8（2026-08-08 用户指令"继续"，延续真实链失败收尾收敛） ----------
+  - id: FRAMEWORK-OPTIMIZE-8
+    story: ENG-BASE
+    title: 真实链 resume 失败收尾收敛：orchestrator/_real_chain.py 提取 _finish_resume_escalated，resume_real_chain 的 2 处 ESCALATED 失败收尾（包验证失败 except / crypto 能力不可用）单一化，行为不变；守卫测试钉住 code 常量单一调用点
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-7]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize8.py
+    security_review: true
+    protocol_review: false

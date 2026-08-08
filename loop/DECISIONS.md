@@ -1,5 +1,19 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-8 登记并开始执行（真实链 resume 失败收尾收敛）
+
+- 用户指令：继续（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-8`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-7]）：`orchestrator/_real_chain.py::resume_real_chain`
+  的 2 处 ESCALATED 失败收尾（包验证失败 except 分支 / crypto 能力不可用分支）
+  提取为 `_finish_resume_escalated` 单一辅助，行为不变；守卫测试钉住 code 常量
+  单一调用点。切片计划：`docs/plans/FRAMEWORK-OPTIMIZE-8-slice.md`。
+  STATE 切换至 ENG-BASE / FRAMEWORK-OPTIMIZE-8。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-7 登记遗漏收尾补齐（真实链失败收尾路径去重；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-7`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-6]）。
