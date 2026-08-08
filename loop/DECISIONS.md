@@ -5223,3 +5223,16 @@ security-reviewer 双签门禁。
 - 安全结论：RECORDS-ARCHIVE-2 遗留 Medium 1 关闭——通用归档工具不再可能触碰
   审计链；真正"重锚定流程"仍留作后续工作项（未实现，超出本轮范围）。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
+
+## 2026-08-08 — REVIEW-SANDBOX-2 登记并开始执行（独立审查沙箱治理修订；增量门禁口径）
+
+- 用户指令：继续进行优化，不用做全量门禁。
+- 决策：登记 `REVIEW-SANDBOX-2`（ENG-BASE，ready，dependencies=
+  [RECORDS-ARCHIVE-2]）：修订独立双签治理文档的验证口径——junction 挂载 .tools
+  与"拒绝 reparse point"安全加固冲突，复制 .tools 无法复现 GmSSL 助手/opencode
+  测试（RECORDS-ARCHIVE-2 独立复核实测）；确立"主树全量门禁（权威）+ 沙箱守卫 +
+  定向复核"口径并同步 review_sandbox.py docstring 与一致性测试。
+  切片计划：`docs/plans/REVIEW-SANDBOX-2-slice.md`。
+- 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。

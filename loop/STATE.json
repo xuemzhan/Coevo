@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "RECORDS-ARCHIVE-3",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "REVIEW-SANDBOX-2",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "2fb5879",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T14:07:49.829511Z"
+  "updated_at": "2026-08-08T14:09:39.457573Z"
 }
