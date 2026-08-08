@@ -233,6 +233,45 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — QUALITY-GATE-ENCODING-1 最终复验（编排者独立复核；锁链同步补齐；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`QUALITY-GATE-ENCODING-1`（ENG-BASE）。实现提交：`72d94dc`
+  （scripts/quality_gate.py 新增 gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，
+  复制不污染父环境；两个 subprocess.run 均改用 gate_env；tests/unit/
+  test_quality_gate_encoding.py 3 项）；锁链同步提交：`8576013`
+  （quality_gate.py 哈希 → python-script-lock.tsv → toolchain-lock
+  script_inventory/source_sha256 → make.cs ScriptInventorySha256）；
+  记录更正提交：`0e89dd0`（断言 53→54、矩阵行补锁链事实、DECISIONS 更正）。
+- 用户指令：继续开发，先不要全量质量门禁检查；增量门禁（fmt + lint + 定向测试）
+  并豁免全量 quality（VERIFICATION/DECISIONS 留痕）。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（validate_opencode / traceability_check /
+  audit_log verify / audit_seal verify / secret_scan 全过，audit fully-sealed，
+  门禁记录输出无乱码——修复生效）；单元全量 1175 项 OK（skipped=3）；
+  安全套件 99/99 全绿（含锁链一致回归：test_local_toolchain_security 18 项、
+  test_dev_environment_entry 等）。
+- 沙箱独立复核（pin=`0e89dd0`）：
+  * verifier（qgenc2-verify）：沙箱内 fmt exit=0 同指纹 `fe39766e2048d2bc`；
+    lint exit=0 fingerprint=`002aa9a9da2f279f`（沙箱根解析差异属预期）；
+    定向 43/43 全绿（encoding 3 + lock 3 + traceability + engineering_baseline +
+    control_main + dev_environment_tools）；review_sandbox check violations=[]，
+    已 discard。
+  * security-reviewer（qgenc2-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：gate_env 复制语义（不污染父环境）、子进程中文输出无替换符、
+    源码无 env=None 残留、变更面无 eval/exec、tests/security 相对实现基线零改动、
+    锁链哈希端到端一致；沙箱内安全套件 9 项失败全部归因于 .tools junction
+    reparse-point 守卫与沙箱审计链状态（主仓 99/99 全绿，环境性非回归，
+    2026-08-02 已知决策项按先例放行）；check violations=[]，已 discard。
+- 治理更正：并行流子代理（sec_review_integ4b）越权置 done（`36396de`）时遗漏锁定
+  脚本链同步，导致环境入口 fail-closed 与本地工具链安全测试失败（完成定义未达成）；
+  编排者补齐锁链（`8576013`）并复验后置 done；越权与更正详见 DECISIONS。
+- 记录：追溯矩阵 ENG-BASE | QUALITY-GATE-ENCODING-1 行（含锁链事实，无悬空）；
+  BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  QUALITY-GATE-ENCODING-1 / last_verified_commit=`8576013`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `8576013`。
+
 ## 2026-08-08 — FRAMEWORK-INTEGRATION-4 完成收尾（注册门接入 + Manifest 构建器；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-INTEGRATION-4`（ENG-BASE，dependencies=
@@ -22045,6 +22084,281 @@ audit seal: fully-sealed
         {
           "kind": "test",
           "path": "tests/unit/test_quality_gate_encoding.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T01:09:49.115329Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T01:10:01.258924Z — target=`lint` fingerprint=`252ad24e526f6728`
+- exit_code: `0`
+```text
+s": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-GAPS-6",
+      "title": "共享 ISO 校验构造器全仓落地（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z：`\\Z` 锚定拒尾部换行、小数秒、日历校验、非字符串 fail-closed），root_modules 登记；framework/validation.py 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，去 11 处正则副本与包级 _ISO 再导出；锚定测试改测共享构造器",
+      "code": [
+        "src/coevo/timefmt.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/cockpit/models.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/crypto/cng_handle.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/audit_governance/facade.py",
+        "src/coevo/orchestrator/models.py",
+        "src/coevo/orchestrator/service.py",
+        "src/coevo/orchestrator/_real_chain.py",
+        "src/coevo/progress_capture/models.py",
+        "src/coevo/progress_capture/watcher.py",
+        "src/coevo/talent/models.py",
+        "src/coevo/task_decomposition/agent.py",
+        "src/coevo/task_decomposition/baseline.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_gaps6.py",
+        "tests/unit/test_iso_anchor_regression.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/timefmt.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/facade.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/_real_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/agent.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/task_decomposition/baseline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_gaps6.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_iso_anchor_regression.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-DOCS-1",
+      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
+      "code": [
+        "README.md",
+        "docs/README.md",
+        "docs/code-guide.md",
+        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_docs.py",
+        "tests/unit/test_module_docs.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/code-guide.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_docs.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_module_docs.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "QUALITY-GATE-ENCODING-1",
+      "title": "质量门禁输出编码修复（2026-08-08，用户指令“继续开发”）：quality_gate 子进程强制 UTF-8（gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env），消除 VERIFICATION.md 门禁记录乱码根因（Windows 控制台 GBK 输出经 errors=replace 不可逆破坏）；历史乱码记录已清理（截除备份）；锁定脚本链同步（quality_gate.py 哈希 → python-script-lock.tsv → toolchain-lock script_inventory/source_sha256 → make.cs ScriptInventorySha256）；补回归测试；仅 stdlib 离线",
+      "code": [
+        "scripts/quality_gate.py",
+        "docs/dependencies/python-script-lock.tsv",
+        "docs/dependencies/toolchain-lock.json",
+        "scripts/tool-shims/make.cs",
+        "tests/unit/test_quality_gate_encoding.py"
+      ],
+      "tests": [
+        "tests/unit/test_quality_gate_encoding.py",
+        "tests/security/test_local_toolchain_security.py",
+        "tests/integration/test_dev_environment_entry.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/quality_gate.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/python-script-lock.tsv",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/tool-shims/make.cs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "tests/unit/test_quality_gate_encoding.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_quality_gate_encoding.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_dev_environment_entry.py",
           "exists": true
         }
       ],
