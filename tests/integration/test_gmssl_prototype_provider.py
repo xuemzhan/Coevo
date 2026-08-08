@@ -74,6 +74,35 @@ class GmsslPrototypeProviderTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(launcher.read_bytes()).hexdigest(), helper["launcher"]["sha256"])
         self.assertIn("No secrets in argv", helper["secret_transport"])
 
+    def test_helper_compile_cache_is_verified_and_self_heals(self) -> None:
+        """PERF-HELPER-1: cached helper + sidecar are hash-verified; corruption self-heals."""
+        lock = json.loads((ROOT / "docs/dependencies/toolchain-lock.json").read_text("utf-8"))
+        source_sha = lock["tools"]["gmssl_prototype_provider"]["helper"]["source_sha256"]
+        cache_dir = ROOT / ".tools" / "runtime" / "gmssl-crypto-helper" / "cache"
+        cache_exe = cache_dir / f"helper-{source_sha}.exe"
+        sidecar = cache_dir / f"helper-{source_sha}.exe.sha256"
+        # A real crypto operation populates the cache on the first helper
+        # launch (cache miss -> compile -> best-effort install).
+        signature = self.provider.sign(self.sender, b"cache-probe")
+        self.assertTrue(signature)
+        self.assertTrue(cache_exe.is_file(), "cached helper should exist after provider use")
+        self.assertTrue(sidecar.is_file(), "cache sidecar should exist")
+        self.assertEqual(
+            hashlib.sha256(cache_exe.read_bytes()).hexdigest(),
+            sidecar.read_text(encoding="utf-8").strip(),
+            "sidecar must record the cached helper hash",
+        )
+        # Corrupt the sidecar: the next call must fail closed and self-heal by
+        # recompiling, and the sidecar must be re-recorded.
+        sidecar.write_text("0" * 64, encoding="utf-8")
+        signature2 = self.provider.sign(self.sender, b"cache-probe-2")
+        self.assertTrue(signature2)
+        self.assertEqual(
+            hashlib.sha256(cache_exe.read_bytes()).hexdigest(),
+            sidecar.read_text(encoding="utf-8").strip(),
+            "sidecar must be re-recorded after a self-heal recompile",
+        )
+
     def test_official_sm3_vector_and_sm2_signature_tamper(self) -> None:
         self.assertEqual(
             "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0",

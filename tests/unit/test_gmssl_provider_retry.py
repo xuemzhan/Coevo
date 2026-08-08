@@ -92,5 +92,34 @@ class GmsslLaunchRetryTests(unittest.TestCase):
             provider._invoke(1, "demo", b"request", retries=5)
 
 
+class LauncherCompileCacheStaticTests(unittest.TestCase):
+    """PERF-HELPER-1: the launcher pins the compile-cache contract."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.launcher = (Path("scripts") / "invoke-gmssl-crypto.ps1").read_text(
+            encoding="utf-8", errors="replace"
+        )
+
+    def test_cache_is_keyed_by_locked_source_hash(self):
+        self.assertIn("helper-", self.launcher)
+        self.assertIn("source_sha256", self.launcher)
+        self.assertIn("cache", self.launcher.lower())
+
+    def test_sidecar_is_64_hex_and_verified_before_use(self):
+        self.assertIn("Test-CachedHelper", self.launcher)
+        self.assertIn("^[0-9a-f]{64}$", self.launcher)
+        self.assertIn(".sha256", self.launcher)
+
+    def test_cache_miss_still_compiles_fresh_and_install_is_best_effort(self):
+        self.assertIn("helper-$PID-", self.launcher)
+        self.assertIn("Copy-Item", self.launcher)
+        self.assertIn("WriteAllText", self.launcher)
+
+    def test_cache_entry_is_not_deleted_on_cleanup(self):
+        # The finally block must skip deletion when the cached helper is used.
+        self.assertIn("-not $useCache", self.launcher)
+
+
 if __name__ == "__main__":
     unittest.main()

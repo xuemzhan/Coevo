@@ -141,3 +141,28 @@ The protected-key-handle path is partially implemented:
 * **External**: a nationally certified SM2/SM3/SM4 module (SKF /
   PKCS#11 / validated hardware) still requires vendor procurement; the
   adapter contract in §4 and acceptance gates in §6 apply unchanged.
+
+## 9. Prototype helper compile cache (2026-08-08, PERF-HELPER-1)
+
+The prototype launcher (`scripts/invoke-gmssl-crypto.ps1`) previously
+recompiled `gmssl-crypto-helper.cs` on every call (ephemeral
+`helper-<PID>-<GUID>.exe`). PERF-HELPER-1 adds a **compile cache**:
+
+* cache key = the locked `source_sha256` (`helper-<source_sha256>.exe`
+  under `.tools/runtime/gmssl-crypto-helper/cache/`);
+* a sidecar `.sha256` records the compiled binary's hash at build time;
+  a cached binary is reused only when its on-disk SHA-256 equals the
+  sidecar (missing / corrupt entries recompile, fail-closed);
+* the current call's behavior is unchanged on a cache miss (fresh unique
+  helper, per-call compile); the cache install is best-effort and atomic.
+
+**Security tradeoff (documented)**: this creates a single persistent,
+writable helper binary on disk. The sidecar hash detects accidental
+corruption / AV modification and fails closed by recompiling. A local
+attacker able to write both the binary and its sidecar (i.e., with write
+access to the user's `.tools/runtime`) could substitute the helper; that
+threat is consistent with the prototype's local-trust model (the runtime
+dir is already gitignored, per-user, and handle-locked during sessions).
+The nationally certified module path (§8) remains the authoritative
+production target and is unaffected. No crypto algorithm, key
+management, or protocol semantics change.

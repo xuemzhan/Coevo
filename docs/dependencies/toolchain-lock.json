@@ -98,7 +98,7 @@
         "protocol": "COEVOCRYPTO/1",
         "source": "scripts/gmssl-crypto-helper.cs",
         "source_size": 20950, "source_sha256": "eb17d6e110c90c7b0bec234350d7f2c51b5885f2e4873c9806fa90743b514934",
-    "launcher": { "path": "scripts/invoke-gmssl-crypto.ps1", "size": 6339, "sha256": "2e24425cdd15cefaf1e066f39f6921cd68eab9609ae6bc5420102e566ad91390"
+    "launcher": { "path": "scripts/invoke-gmssl-crypto.ps1", "size": 8166, "sha256": "4ff4543715b26b624c8a4b06ec4212a21b37267a7711ebd903c7befbad18a908"
     },
         "compiler_lock": {
           "windows_directory_relative_path": "Microsoft.NET/Framework64/v4.0.30319/csc.exe",
