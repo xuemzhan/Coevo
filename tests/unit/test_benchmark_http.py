@@ -39,7 +39,9 @@ class CockpitHttpProbeTests(unittest.TestCase):
 
     def test_probe_reports_latency_bounds(self):
         result = self.result
-        self.assertLess(result.value, result.limit)
+        # Match the probe's own SLA comparison (``p95 <= limit``) so an
+        # exact-boundary sample does not contradict ``result.ok``.
+        self.assertLessEqual(result.value, result.limit)
         self.assertIn("p50=", result.detail)
         self.assertIn("max=", result.detail)
 
