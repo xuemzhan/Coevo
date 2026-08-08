@@ -7,7 +7,9 @@ import unittest
 from pathlib import Path
 
 from src.coevo.records_archive import (
+    POLICY,
     archive_plan,
+    over_policy_size,
     split_audit_lines,
     split_decisions_sections,
     split_verification_sections,
@@ -20,25 +22,52 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 
-class ArchiveScriptPolicyTests(unittest.TestCase):
-    """REVIEW-FIX-3 (L-4): pin the lowered VERIFICATION archive threshold."""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        spec = importlib.util.spec_from_file_location(
-            "archive_records", SCRIPTS / "archive_records.py"
-        )
-        cls.script = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(cls.script)
+class ArchivePolicyTests(unittest.TestCase):
+    """RECORDS-ARCHIVE-2: policy lives in ``records_archive`` as one source."""
 
     def test_verification_policy_keeps_file_readable(self):
-        policy = self.script.POLICY["verification"]
+        policy = POLICY["verification"]
         self.assertLessEqual(policy["keep_recent"], 30)
         self.assertLessEqual(policy["size"], 500_000)
 
     def test_other_policies_are_unchanged(self):
-        self.assertEqual(20, self.script.POLICY["decisions"]["keep_recent"])
-        self.assertEqual(2000, self.script.POLICY["audit"]["keep_recent"])
+        self.assertEqual(20, POLICY["decisions"]["keep_recent"])
+        self.assertEqual(2000, POLICY["audit"]["keep_recent"])
+
+    def test_script_imports_policy_from_module(self):
+        spec = importlib.util.spec_from_file_location(
+            "archive_records", SCRIPTS / "archive_records.py"
+        )
+        script = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(script)
+        self.assertIs(script.POLICY, POLICY)
+
+
+class OverPolicySizeTests(unittest.TestCase):
+    def test_under_threshold_is_false(self):
+        self.assertFalse(over_policy_size("verification", "x" * 10))
+
+    def test_exact_threshold_is_false(self):
+        text = "x" * POLICY["verification"]["size"]
+        self.assertFalse(over_policy_size("verification", text))
+
+    def test_over_threshold_is_true(self):
+        text = "x" * (POLICY["verification"]["size"] + 1)
+        self.assertTrue(over_policy_size("verification", text))
+
+    def test_decisions_and_audit_kinds_use_their_own_caps(self):
+        self.assertTrue(
+            over_policy_size("decisions", "x" * (POLICY["decisions"]["size"] + 1))
+        )
+        self.assertFalse(over_policy_size("audit", "x" * 1000))
+
+    def test_unknown_kind_is_rejected(self):
+        with self.assertRaises(ValueError):
+            over_policy_size("bogus", "x")
+
+    def test_non_string_text_is_rejected(self):
+        with self.assertRaises(TypeError):
+            over_policy_size("verification", 123)  # type: ignore[arg-type]
 
 
 class SplitTests(unittest.TestCase):
@@ -109,6 +138,44 @@ class ArchivePlanTests(unittest.TestCase):
         self.assertNotIn("2026-07-01", plan["keep"])
         self.assertIn("2026-07-03", plan["keep"])
         self.assertIn("size-trimmed", plan["reason"])
+
+    def test_size_trim_leaves_headroom_below_threshold(self):
+        text = (
+            "## 2026-07-01 -- a\n" + "x" * 300 + "\n"
+            "## 2026-07-02 -- b\n" + "y" * 300 + "\n"
+            "## 2026-07-03 -- c\n" + "z" * 300 + "\n"
+        )
+        plan = archive_plan(
+            text,
+            kind="decisions",
+            now="2026-08-02T00:00:00Z",
+            keep_recent=3,
+            min_age_days=1,
+            size_threshold_bytes=400,
+            size_tail_budget_bytes=50,
+        )
+        # The trim target is threshold - budget, so the kept tail fits with
+        # headroom instead of landing exactly at the cap.
+        self.assertLessEqual(len(plan["keep"].encode("utf-8")), 350)
+        self.assertNotIn("2026-07-01", plan["keep"])
+
+    def test_size_bytes_override_uses_true_file_size(self):
+        text = (
+            "## 2026-07-01 -- a\n" + "x" * 300 + "\n"
+            "## 2026-07-02 -- b\n" + "y" * 300 + "\n"
+        )
+        plan = archive_plan(
+            text,
+            kind="decisions",
+            now="2026-08-02T00:00:00Z",
+            keep_recent=2,
+            min_age_days=1,
+            size_threshold_bytes=700,
+            size_bytes=900,
+            size_tail_budget_bytes=400,
+        )
+        self.assertGreaterEqual(plan["archived_sections"], 1)
+        self.assertIn("900 > 700", plan["reason"])
 
     def test_size_threshold_never_empties_keep(self):
         text = "## 2026-08-01 -- only\n" + "x" * 5000 + "\n"

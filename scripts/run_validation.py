@@ -18,8 +18,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import yaml
-
 ROOT = Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1]))
 VERIFY = "scripts/validate_opencode.py"
 
@@ -109,6 +107,40 @@ def run_validator() -> tuple[int, str]:
     return proc.returncode, proc.stdout + proc.stderr
 
 
+def _backlog_status_counts(text: str) -> tuple[int, dict[str, int]]:
+    """Count BACKLOG items and their status values from the minimal YAML shape.
+
+    The repository's BACKLOG.yaml is a fixed, machine-written subset of YAML:
+    top-level ``items:`` followed by ``- id:`` blocks whose ``status:`` is
+    indented exactly four spaces. This parser is deliberately line-based and
+    fail-closed: it only counts a ``status:`` field that appears after an
+    ``- id:`` item header, so strings or unrelated keys cannot inflate the
+    counts. Returns ``(item_count, status_counts)``.
+    """
+    items = 0
+    by_status: dict[str, int] = {}
+    in_item = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if line.startswith("  - id:"):
+            items += 1
+            in_item = True
+            continue
+        if line.startswith("    status:"):
+            value = stripped.split(":", 1)[1].strip()
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1]
+            if not value or not in_item:
+                raise ValueError("malformed BACKLOG status field")
+            by_status[value] = by_status.get(value, 0) + 1
+            continue
+        if line.startswith("  - "):
+            in_item = False
+    return items, by_status
+
+
 def collect_extra_metrics() -> dict:
     started = _dt.datetime.now(_dt.UTC)
 
@@ -123,10 +155,9 @@ def collect_extra_metrics() -> dict:
     org_dir = Path(projdata) / "opencode"
     org_policy_exists = (org_dir / "opencode.jsonc").exists()
 
-    backlog = yaml.safe_load((ROOT / "loop/BACKLOG.yaml").read_text(encoding="utf-8"))
-    by_status: dict[str, int] = {}
-    for it in backlog.get("items", []):
-        by_status[it.get("status", "?")] = by_status.get(it.get("status", "?"), 0) + 1
+    items, by_status = _backlog_status_counts(
+        (ROOT / "loop/BACKLOG.yaml").read_text(encoding="utf-8")
+    )
 
     audit_lines = 0
     with open(ROOT / "loop/tool-audit.jsonl", encoding="utf-8") as fh:
@@ -150,7 +181,7 @@ def collect_extra_metrics() -> dict:
             "task_allow": task_allow,
         },
         "org_policy": {"path": str(org_dir), "exists": org_policy_exists},
-        "backlog": {"items": len(backlog.get("items", [])), "status_counts": by_status},
+        "backlog": {"items": items, "status_counts": by_status},
         "audit": {"lines": audit_lines},
     }
 

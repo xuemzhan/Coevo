@@ -1,8 +1,4 @@
-"""OPTIMIZE-14: tests for the locked validation-report script (run_validation.py).
-
-The script imports PyYAML, which is bundled in the locked toolchain python
-(`.tools/python/3.14.3`); run this test with that interpreter.
-"""
+"""OPTIMIZE-14: tests for the locked validation-report script (run_validation.py)."""
 from __future__ import annotations
 
 import importlib.util
@@ -39,6 +35,43 @@ class StripJsoncTests(unittest.TestCase):
 
 
 class MetricsTests(unittest.TestCase):
+    def test_backlog_status_counts(self):
+        text = (
+            "version: \"1.0\"\n"
+            "items:\n"
+            "  - id: A\n"
+            "    status: done\n"
+            "  - id: B\n"
+            "    status: ready\n"
+            "  - id: C\n"
+            "    status: \"blocked\"\n"
+        )
+        items, counts = run_validation._backlog_status_counts(text)
+        self.assertEqual(3, items)
+        self.assertEqual({"done": 1, "ready": 1, "blocked": 1}, counts)
+
+    def test_backlog_status_counts_ignores_status_like_strings(self):
+        text = (
+            "items:\n"
+            "  - id: A\n"
+            "    title: 'contains status: not-a-field'\n"
+            "    status: done\n"
+            "  - id: B\n"
+            "    status: ready\n"
+            "    note: |\n"
+            "      indented text with status: fake at deeper level\n"
+            "    status: done\n"
+        )
+        items, counts = run_validation._backlog_status_counts(text)
+        self.assertEqual(2, items)
+        self.assertEqual({"done": 2, "ready": 1}, counts)
+
+    def test_backlog_status_counts_rejects_malformed_status(self):
+        with self.assertRaises(ValueError):
+            run_validation._backlog_status_counts(
+                "items:\n  - id: A\n    status:\n"
+            )
+
     def test_collect_extra_metrics(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

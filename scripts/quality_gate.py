@@ -43,7 +43,7 @@ def go_test_argv():
     return [go_tool,"test","./..."]
 TARGETS={
  "fmt":[[sys.executable,"-m","compileall","-q","-f","scripts","src","tests"]],
- "lint":[[sys.executable,str(ROOT/"scripts"/"validate_opencode.py")],control("traceability_check"),control("audit_log","verify"),[sys.executable,str(ROOT/"scripts"/"audit_seal.py"),"verify","--allow-tail"],[sys.executable,str(ROOT/"scripts"/"secret_scan.py")]],
+ "lint":[[sys.executable,str(ROOT/"scripts"/"validate_opencode.py")],control("traceability_check"),control("audit_log","verify"),[sys.executable,str(ROOT/"scripts"/"audit_seal.py"),"verify","--allow-tail"],[sys.executable,str(ROOT/"scripts"/"archive_records.py"),"--check"],[sys.executable,str(ROOT/"scripts"/"secret_scan.py")]],
  "test":[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"],[sys.executable,"-m","unittest","discover","-s","tests/integration","-p","*test*.py","-v"],go_test_argv()],
  "test-security":[[sys.executable,"-m","unittest","discover","-s","tests/security","-v"],[os.environ.get("COEVO_NODE_PATH",str(ROOT/".tools"/"node"/"24.14.0"/"node.exe")),"tests/security/path_policy_test.mjs"]],
  "test-e2e":[[sys.executable,"-m","unittest","discover","-s","tests/e2e","-v"]]}

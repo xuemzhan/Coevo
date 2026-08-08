@@ -36,6 +36,15 @@ class QualityGateLockTests(unittest.TestCase):
             source.index("for argv in argvs"),
         )
 
+    def test_lint_target_includes_records_archive_check(self):
+        lint = quality_gate.TARGETS["lint"]
+        archive_check = [
+            sys.executable,
+            str(ROOT / "scripts" / "archive_records.py"),
+            "--check",
+        ]
+        self.assertIn(archive_check, lint)
+
     def test_exclusive_lock_serializes_holders(self):
         with tempfile.TemporaryDirectory() as tmp:
             lock_path = Path(tmp) / "gate.lock"

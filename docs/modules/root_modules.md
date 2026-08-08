@@ -11,13 +11,15 @@
 | `ids.py` | `SAFE_ID` / `is_safe_id` / `HEX_64` / `is_hex_64` | 共享 safe-id 与 64-hex 正则/校验（safe-id `[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,63}`、hex `[0-9a-f]{64}`，非字符串/空/超长 fail-closed；依赖无关叶模块，产品与 framework 统一引用；task_flow/talent 语义差异保留独立） |
 | `jsonutil.py` | `reject_duplicate_pairs` | 共享 JSON 重复键拒绝守卫（object_pairs_hook，error_factory 可注入保持各模块异常语义，重复键 fail-closed；依赖无关叶模块，协议/清单/存储/清单解析统一引用） |
 | `logging_setup.py` | `setup_logging()` | 日志引导（stdlib logging，轮转 5MB×5，绝不吞审计链） |
-| `records_archive.py` | `archive_plan()` | 记录归档策略助手（纯函数：VERIFICATION/DECISIONS/tool-audit 分节、按容量+期限裁剪） |
+| `records_archive.py` | `archive_plan()` / `over_policy_size()` / `POLICY` | 记录归档策略唯一事实源（纯函数：VERIFICATION/DECISIONS/tool-audit 分节、按容量+期限裁剪、容量判定与策略常量） |
 
 ## 关键入口
 
 - `AppConfig.from_env()` — 非法值一律抛 `ConfigError`，绝不静默回退；
 - `archive_plan(text, kind, now, keep_recent, min_age_days, size_threshold_bytes)`
   — 供 `scripts/archive_records.py` 驱动归档（含 size-trim 语义）；
+- `over_policy_size(kind, text)` — 容量阈值判定（fail-closed：未知 kind / 非字符串拒绝）；
+  `POLICY` — 归档策略常量（keep_recent / min_age_days / size）唯一来源；
 - `setup_logging()` — 应用日志与安全审计（`loop/tool-audit.jsonl`）严格分离。
 
 ## 约束
@@ -27,7 +29,7 @@
 
 ## 测试覆盖
 
-- `tests/unit/test_records_archive.py`（分节/裁剪/策略常量）；
+- `tests/unit/test_records_archive.py`（分节/裁剪/策略常量/`over_policy_size`）；
 - `tests/unit/test_production_docs.py`（配置⇄文档一致性）；
 - `tests/security/test_loop_state_transaction.py` 等（配置/状态安全）。
 
