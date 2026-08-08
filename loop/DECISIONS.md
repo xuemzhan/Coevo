@@ -1,5 +1,21 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-14 登记并开始执行（共享 JSON 重复键拒绝守卫）
+
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）。
+- 决策：登记 `FRAMEWORK-OPTIMIZE-14`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-OPTIMIZE-13]）：JSON 解析"拒绝重复键"守卫（object_pairs_hook）在
+  5 个模块重复（agent_package / k8s_listing / cng_handle / cockpit/state_store /
+  manifest_checker），实现同构、异常类型各异；新增根级叶子
+  `src/coevo/jsonutil.py`（reject_duplicate_pairs，error_factory 注入保持各模块
+  异常语义，消息统一为 "duplicate key ..." 兼容既有断言）；root_modules.md 登记。
+  切片计划：`docs/plans/FRAMEWORK-OPTIMIZE-14-slice.md`。STATE 切换至 ENG-BASE /
+  FRAMEWORK-OPTIMIZE-14。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-13 完成收尾（共享 64-hex 正则叶子 + OPTIMIZE-11 补漏；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-13`（ENG-BASE）。实现提交：`21ea6de`；

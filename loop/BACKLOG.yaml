@@ -1424,3 +1424,13 @@ items:
       - tests/unit/test_framework_optimize13.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-14（2026-08-08 用户指令"继续下一步"；JSON 重复键守卫单一事实源） ----------
+  - id: FRAMEWORK-OPTIMIZE-14
+    story: ENG-BASE
+    title: 共享 JSON 重复键拒绝守卫：新增 src/coevo/jsonutil.py（reject_duplicate_pairs，error_factory 可注入保持异常语义），protocol/agent_package、framework/k8s_listing、crypto/cng_handle、cockpit/state_store、framework/manifest_checker 5 处本地守卫统一引用；fail-closed 不降；root_modules.md 登记
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-13]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize14.py
+    security_review: true
+    protocol_review: false
