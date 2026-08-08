@@ -1,5 +1,26 @@
 # Loop 决策记录
 
+## 2026-08-08 — QUALITY-ROBUST-1 补强收口（根因修复 + 门禁自洽 + 锁链同步；全量 quality 全绿）
+
+- 背景：QUALITY-ROBUST-1 首轮落地后，全量 quality 在门禁 UTF-8 环境下连续复现失败，
+  且 E2E 阶段出现一次 3.5h 无限挂起（未复现，以 2400s 限时兜底）。
+- 根因（已定位并修复）：门禁 `gate_env()` 强制 `PYTHONUTF8=1`，而 Windows PowerShell
+  5.1 经管道输出 GBK 字节；测试里 `subprocess.run(..., text=True)` 未设
+  `errors="replace"` 时，子进程 reader 线程 `UnicodeDecodeError`（0xcb）崩溃 →
+  `stderr=None` / 空输出 / TypeError。修复：所有捕获 PowerShell/原生进程输出的测试
+  调用统一 `encoding="utf-8", errors="replace"`（与生产代码一致）。
+- 门禁自洽（新发现）：quality_gate 在预封缄与终封缄之间追加审计记录，导致 E2E
+  `run_cockpit.py --preflight`（AVAIL-1，要求 fully-sealed）在门禁内必然失败；
+  近期迭代均豁免全量 quality 故未暴露。修复：quality_gate 每阶段前重新封缄 +
+  子进程 2400s 限时（失败关闭，杜绝无限挂起）。
+- 锁链同步（仓库规则触发）：修改 `scripts/quality_gate.py` 后按既有先例
+  （8576013）全链同步 `python-script-lock.tsv` / `make.cs ScriptInventorySha256` /
+  `toolchain-lock.json`，否则环境入口失败关闭（locked file mismatch exit=69）。
+- 最终验证：全量 `quality` exit=0 fingerprint=`196179208515746b`——fmt、lint、
+  单元全量、集成 261 项、Go、安全 99 项、E2E 14 项全绿，`audit fully-sealed`；
+  LOAD-1 探针预热 + best-of-3 在并发负载下稳定通过。
+- 决策者：用户指令；执行：Codex。未改动安全测试语义、协议与密钥路径。
+
 ## 2026-08-08 — 全面审查复盘 + 门禁稳定性优化落地（QUALITY-ROBUST-1）
 
 - 用户指令：站在资深审查者角度全面审查、复盘现有项目实现（生产可用、可靠性、稳定性、

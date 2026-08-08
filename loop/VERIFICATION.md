@@ -27229,3 +27229,349 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-08T04:27:01.559533Z — target=`quality` fingerprint=`196179208515746b`
+- exit_code: `1`
+```text
+~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xcb in position 43: invalid continuation byte
+Exception in thread Thread-532 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1613, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xcb in position 43: invalid continuation byte
+ok
+test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper) ... ok
+test_lock_matches_offline_artifact_and_records_unsigned_risk (test_sm2_test_pki_generation.Sm2TestPkiTests.test_lock_matches_offline_artifact_and_records_unsigned_risk) ... ok
+test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper) ... Exception in thread Thread-538 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1613, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xcb in position 73: invalid continuation byte
+ERROR
+test_prepositioned_profile_file_is_preserved_and_no_staging_remains (test_sm2_test_pki_generation.Sm2TestPkiTests.test_prepositioned_profile_file_is_preserved_and_no_staging_remains) ... Exception in thread Thread-540 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1613, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xcb in position 31: invalid continuation byte
+ok
+test_recover_unknown_staged_object_fails_closed_without_deleting_it (test_sm2_test_pki_generation.Sm2TestPkiTests.test_recover_unknown_staged_object_fails_closed_without_deleting_it) ... ok
+test_runtime_output_is_gitignored (test_sm2_test_pki_generation.Sm2TestPkiTests.test_runtime_output_is_gitignored) ... ok
+test_wide_runtime_acl_is_corrected_before_staging_creation (test_sm2_test_pki_generation.Sm2TestPkiTests.test_wide_runtime_acl_is_corrected_before_staging_creation) ... ok
+test_append_after_reopen_extends_store (test_talent_store_persistence.CrossRestartPersistenceTests.test_append_after_reopen_extends_store) ... ok
+test_duplicate_talent_code_detected_across_restart (test_talent_store_persistence.CrossRestartPersistenceTests.test_duplicate_talent_code_detected_across_restart) ... ok
+test_from_pool_then_reopen_round_trip (test_talent_store_persistence.CrossRestartPersistenceTests.test_from_pool_then_reopen_round_trip) ... ok
+test_registered_talents_survive_restart (test_talent_store_persistence.CrossRestartPersistenceTests.test_registered_talents_survive_restart) ... ok
+test_snapshot_after_restart_drives_recommender (test_talent_store_persistence.CrossRestartPersistenceTests.test_snapshot_after_restart_drives_recommender) ... ok
+test_tampered_file_is_refused_on_reopen (test_talent_store_persistence.CrossRestartPersistenceTests.test_tampered_file_is_refused_on_reopen) ... ok
+test_custom_tools_reference_existing_controlled_scripts (test_tool_contracts.ToolContractIntegrationTests.test_custom_tools_reference_existing_controlled_scripts) ... ok
+
+======================================================================
+ERROR: test_repeated_entry_deduplicates_paths_and_rebuilds_shim (test_dev_environment_entry.DevEnvironmentEntryTest.test_repeated_entry_deduplicates_paths_and_rebuilds_shim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\test_dev_environment_entry.py", line 21, in test_repeated_entry_deduplicates_paths_and_rebuilds_shim
+    self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+                                         ~~~~~~~~~~~~~^~~~~~~~~~~~~~
+TypeError: can only concatenate str (not "NoneType") to str
+
+======================================================================
+ERROR: test_concurrent_same_profile_has_one_atomic_winner (test_sm2_test_pki_generation.Sm2TestPkiTests.test_concurrent_same_profile_has_one_atomic_winner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 671, in test_concurrent_same_profile_has_one_atomic_winner
+    self.assertNotRegex("".join(out + err for _, out, err in results), r"BEGIN (?:ENCRYPTED )?PRIVATE KEY")
+                        ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 671, in <genexpr>
+    self.assertNotRegex("".join(out + err for _, out, err in results), r"BEGIN (?:ENCRYPTED )?PRIVATE KEY")
+                                ~~~~^~~~~
+TypeError: can only concatenate str (not "NoneType") to str
+
+======================================================================
+ERROR: test_hung_helper_is_tree_killed_and_drains_are_bounded (test_sm2_test_pki_generation.Sm2TestPkiTests.test_hung_helper_is_tree_killed_and_drains_are_bounded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 270, in test_hung_helper_is_tree_killed_and_drains_are_bounded
+    self.assertIn("helper timed out", result.stderr)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\unittest\case.py", line 1189, in assertIn
+    if member not in container:
+       ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not a container or iterable
+
+======================================================================
+ERROR: test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 306, in test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper
+    self.assertRegex(result.stderr, r"GMH-E-DIRECTORY-LOCK-[A-Z-]+-WIN32-32-ATTEMPT-4|Unable to lock file|Unable to lock tool directory")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\unittest\case.py", line 1440, in assertRegex
+    if not expected_regex.search(text):
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+TypeError: expected string or bytes-like object, got 'NoneType'
+
+----------------------------------------------------------------------
+Ran 261 tests in 534.456s
+
+FAILED (errors=4, skipped=1)
+
+```
+
+## 2026-08-08T08:07:29.326619Z — target=`quality` fingerprint=`196179208515746b`
+- exit_code: `1`
+```text
+rivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 99 tests in 235.644s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ C:\Python314\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... ok
+test_preflight_exits_zero_on_healthy_repo (test_cockpit_launcher.CockpitLauncherE2ETest.test_preflight_exits_zero_on_healthy_repo) ... ok
+test_print_token_issues_usable_session (test_cockpit_launcher.CockpitLauncherE2ETest.test_print_token_issues_usable_session) ... ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ERROR
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+======================================================================
+ERROR: test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\e2e\test_identity_dev_environment.py", line 27, in test_windows_certificate_parser_and_generation_markers_work_end_to_end
+    result = service.register_identity_bundle(Actor("dev-admin"), "dev-environment-check", identity_payload())
+  File "E:\Workspace\Coevo\src\coevo\identity\service.py", line 74, in register_identity_bundle
+    return self.repository.register(actor_id, valid_request_id, bundle)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\repository.py", line 227, in register
+    self._commit_with_anchor(); return result
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\Workspace\Coevo\src\coevo\identity\repository.py", line 184, in _commit_with_anchor
+    self.anchor.promote()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "E:\Workspace\Coevo\src\coevo\identity\audit_anchor.py", line 387, in promote
+    self._complete_retirement(tombstone)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\audit_anchor.py", line 331, in _complete_retirement
+    self.signer.verify(raw, main_signature)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\audit_anchor.py", line 78, in verify
+    self._run("Verify", content, signature)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Workspace\Coevo\src\coevo\identity\audit_anchor.py", line 66, in _run
+    process = subprocess.run(
+        [_powershell_executable(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(SIGNING_SCRIPT), "-Action", action, "-HeadPath", str(head), "-SignaturePath", str(signed), "-ConfigPath", str(SIGNING_CONFIG)],
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30,
+    )
+  File "C:\Python314\Lib\subprocess.py", line 556, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1239, in communicate
+    sts = self.wait(timeout=self._remaining_time(endtime))
+  File "C:\Python314\Lib\subprocess.py", line 1278, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\subprocess.py", line 1607, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'E:\\Workspace\\Coevo\\scripts\\audit_signature.ps1', '-Action', 'Verify', '-HeadPath', 'C:\\Users\\liq08\\AppData\\Local\\Temp\\coevo-audit-sign-yjq6y0jj\\head.json', '-SignaturePath', 'C:\\Users\\liq08\\AppData\\Local\\Temp\\coevo-audit-sign-yjq6y0jj\\head.p7s', '-ConfigPath', 'E:\\Workspace\\Coevo\\loop\\audit-signing.json']' timed out after 30 seconds
+
+----------------------------------------------------------------------
+Ran 14 tests in 11808.864s
+
+FAILED (errors=1)
+
+```
+
+## 2026-08-08T08:14:42.668136Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-08T08:35:02.476201Z — target=`quality` fingerprint=`196179208515746b`
+- exit_code: `1`
+```text
+ess_capture) ... ok
+test_partial_upgrade_leaves_pointer_intact_and_force_completes (test_recovery_faults.InstallerInterruptedUpgradeTests.test_partial_upgrade_leaves_pointer_intact_and_force_completes) ... ok
+test_restart_loads_last_committed_state (test_recovery_faults.StateStoreInterruptedSaveTests.test_restart_loads_last_committed_state) ... ok
+test_stale_tmp_does_not_corrupt_committed_state (test_recovery_faults.StateStoreInterruptedSaveTests.test_stale_tmp_does_not_corrupt_committed_state) ... ok
+test_committed_profile_rejects_minimal_receipt_and_missing_or_tampered_artifact (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_profile_rejects_minimal_receipt_and_missing_or_tampered_artifact) ... ok
+test_committed_receipt_hardlink_is_rejected (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_receipt_hardlink_is_rejected) ... ok
+test_committed_receipt_reparse_is_rejected_when_supported (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_receipt_reparse_is_rejected_when_supported) ... skipped "file symlink privilege unavailable: [WinError 1314] 客户端没有所需的特权。: 'E:\\\\Workspace\\\\Coevo\\\\loop\\\\runtime\\\\sm2-test-pki\\\\receipt-target-3820b921331d4c2c8e51e99f627c0e26.json' -> 'E:\\\\Workspace\\\\Coevo\\\\loop\\\\runtime\\\\sm2-test-pki\\\\test-cd88c5690c0f4745849f\\\\receipt.json'"
+test_concurrent_same_profile_has_one_atomic_winner (test_sm2_test_pki_generation.Sm2TestPkiTests.test_concurrent_same_profile_has_one_atomic_winner) ... ok
+test_directory_lock_non_sharing_error_is_not_retried (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_non_sharing_error_is_not_retried) ... ok
+test_directory_lock_retries_sharing_violation_then_succeeds (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_retries_sharing_violation_then_succeeds) ... ok
+test_directory_lock_roles_and_share_flags_are_fixed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_roles_and_share_flags_are_fixed) ... ok
+test_directory_lock_sharing_violation_retry_exhaustion_fails_closed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_sharing_violation_retry_exhaustion_fails_closed) ... ok
+test_dpapi_and_encrypted_pkcs8_round_trip_without_command_line_secret (test_sm2_test_pki_generation.Sm2TestPkiTests.test_dpapi_and_encrypted_pkcs8_round_trip_without_command_line_secret) ... ok
+test_existing_profile_acl_must_remain_protected_owner_only (test_sm2_test_pki_generation.Sm2TestPkiTests.test_existing_profile_acl_must_remain_protected_owner_only) ... ok
+test_generation_is_isolated_encrypted_verified_and_non_overwriting (test_sm2_test_pki_generation.Sm2TestPkiTests.test_generation_is_isolated_encrypted_verified_and_non_overwriting) ... ok
+test_helper_command_line_and_input_channel_are_fail_closed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_command_line_and_input_channel_are_fail_closed) ... ok
+test_helper_is_static_no_child_and_launcher_has_no_job_or_native_directory_layer (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_is_static_no_child_and_launcher_has_no_job_or_native_directory_layer) ... ok
+test_helper_launch_surface_has_no_cli_or_subprocess_secret_path (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_launch_surface_has_no_cli_or_subprocess_secret_path) ... ok
+test_helper_owns_handle_identity_reparse_rename_and_strict_recovery (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_owns_handle_identity_reparse_rename_and_strict_recovery) ... ok
+test_helper_response_is_fixed_public_frame_and_response_loss_recovers (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_response_is_fixed_public_frame_and_response_loss_recovers) ... ok
+test_hung_helper_is_tree_killed_and_drains_are_bounded (test_sm2_test_pki_generation.Sm2TestPkiTests.test_hung_helper_is_tree_killed_and_drains_are_bounded) ... ok
+test_kill_points_are_recovered_with_same_nonce (test_sm2_test_pki_generation.Sm2TestPkiTests.test_kill_points_are_recovered_with_same_nonce) ... ok
+test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper) ... ok
+test_lock_matches_offline_artifact_and_records_unsigned_risk (test_sm2_test_pki_generation.Sm2TestPkiTests.test_lock_matches_offline_artifact_and_records_unsigned_risk) ... ok
+test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper) ... ok
+test_prepositioned_profile_file_is_preserved_and_no_staging_remains (test_sm2_test_pki_generation.Sm2TestPkiTests.test_prepositioned_profile_file_is_preserved_and_no_staging_remains) ... ok
+test_recover_unknown_staged_object_fails_closed_without_deleting_it (test_sm2_test_pki_generation.Sm2TestPkiTests.test_recover_unknown_staged_object_fails_closed_without_deleting_it) ... ok
+test_runtime_output_is_gitignored (test_sm2_test_pki_generation.Sm2TestPkiTests.test_runtime_output_is_gitignored) ... ok
+test_wide_runtime_acl_is_corrected_before_staging_creation (test_sm2_test_pki_generation.Sm2TestPkiTests.test_wide_runtime_acl_is_corrected_before_staging_creation) ... ok
+test_append_after_reopen_extends_store (test_talent_store_persistence.CrossRestartPersistenceTests.test_append_after_reopen_extends_store) ... ok
+test_duplicate_talent_code_detected_across_restart (test_talent_store_persistence.CrossRestartPersistenceTests.test_duplicate_talent_code_detected_across_restart) ... ok
+test_from_pool_then_reopen_round_trip (test_talent_store_persistence.CrossRestartPersistenceTests.test_from_pool_then_reopen_round_trip) ... ok
+test_registered_talents_survive_restart (test_talent_store_persistence.CrossRestartPersistenceTests.test_registered_talents_survive_restart) ... ok
+test_snapshot_after_restart_drives_recommender (test_talent_store_persistence.CrossRestartPersistenceTests.test_snapshot_after_restart_drives_recommender) ... ok
+test_tampered_file_is_refused_on_reopen (test_talent_store_persistence.CrossRestartPersistenceTests.test_tampered_file_is_refused_on_reopen) ... ok
+test_custom_tools_reference_existing_controlled_scripts (test_tool_contracts.ToolContractIntegrationTests.test_custom_tools_reference_existing_controlled_scripts) ... ok
+
+======================================================================
+FAIL: test_bin_directory_is_removed_after_run_ends (test_dev_environment_entry.DevEnvironmentEntryTest.test_bin_directory_is_removed_after_run_ends)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\test_dev_environment_entry.py", line 29, in test_bin_directory_is_removed_after_run_ends
+    self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 69 : Coevo gate: locking verified toolchain (5421 runtime files)...
+locked Python launch failed: locked file mismatch: E:\Workspace\Coevo\scripts\quality_gate.py
+
+
+======================================================================
+FAIL: test_stale_bin_directory_is_swept_on_entry (test_dev_environment_entry.DevEnvironmentEntryTest.test_stale_bin_directory_is_swept_on_entry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\integration\test_dev_environment_entry.py", line 44, in test_stale_bin_directory_is_swept_on_entry
+    self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 69 : Coevo gate: locking verified toolchain (5421 runtime files)...
+locked Python launch failed: locked file mismatch: E:\Workspace\Coevo\scripts\quality_gate.py
+
+
+----------------------------------------------------------------------
+Ran 261 tests in 1021.810s
+
+FAILED (failures=2, skipped=1)
+
+```
+
+## 2026-08-08T09:04:03.692167Z — target=`quality` fingerprint=`196179208515746b`
+- exit_code: `0`
+```text
+ests.test_promote_failure_requires_recovery_and_reopen_commits_exactly_once) ... ok
+test_row_shape_validator_rejects_each_oversize_and_malformed_column (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_row_shape_validator_rejects_each_oversize_and_malformed_column) ... ok
+test_signed_chain_binds_store_head_sequence_and_previous_hash (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
+test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
+test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
+test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
+test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
+test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
+test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
+test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
+test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
+test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
+test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
+test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
+test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
+test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
+test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
+test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
+test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
+test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
+test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
+test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
+test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
+test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
+test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
+test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
+test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
+test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
+test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
+test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
+test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
+test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
+test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
+test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 99 tests in 206.020s
+
+OK
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ C:\Python314\python.exe -m unittest discover -s tests/e2e -v
+test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... ok
+test_preflight_exits_zero_on_healthy_repo (test_cockpit_launcher.CockpitLauncherE2ETest.test_preflight_exits_zero_on_healthy_repo) ... ok
+test_print_token_issues_usable_session (test_cockpit_launcher.CockpitLauncherE2ETest.test_print_token_issues_usable_session) ... ok
+test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
+test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
+test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
+test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... ok
+test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
+test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
+test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
+test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
+test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
+test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
+test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 245.098s
+
+OK
+audit seal: fully-sealed
+
+```
