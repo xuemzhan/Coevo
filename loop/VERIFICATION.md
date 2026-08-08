@@ -233,6 +233,35 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-1 完成收尾（基于框架优化原应用；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-1`（ENG-BASE，dependencies=[FRAMEWORK-INTEGRATION-4]）。
+  实现提交：`8777542`（AgentRegistry.by_capability 惰性能力索引 / 
+  build_registration_manifest 去双重序列化（wire 字节不变，字节级回归锁定）/
+  chain_to_plan 用 dataclasses.replace 一次成型 / demo 注册装配收敛到
+  demo_support.register_demo_agents + pipeline 组合根模块级检查器复用）；
+  登记提交：`116ac2e`（切片计划落盘、BACKLOG ready、DECISIONS、STATE 事务）。
+- 用户指令：基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，
+  不做全量门禁；按增量门禁（fmt + lint + 定向测试）执行并豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1180 项 OK
+  （skipped=3，含新增 5 项）；安全套件 99/99 全绿；定向 60/60 全绿。
+- 沙箱独立复核（pin=`8777542`）：
+  * verifier（fwopt1-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `16147a697717ec7e`（沙箱根解析差异属预期）；定向 60/60 全绿；review_sandbox
+    check violations=[]，已 discard。
+  * security-reviewer（fwopt1-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：by_capability 注册顺序与不可变语义不变、缓存经 __post_init__
+    自动失效；manifest wire 字节回归锁定一致；register_demo_agents 仍强制
+    guard_registration（拒绝路径零注册）；变更面仅 4 源码 + 新测试、tests/security
+    零改动、无 eval/exec/open；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-1 行（无悬空）；追溯断言
+  54→55；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-1 / last_verified_commit=`8777542`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `8777542`。
+
 ## 2026-08-08 — QUALITY-GATE-ENCODING-1 最终复验（编排者独立复核；锁链同步补齐；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`QUALITY-GATE-ENCODING-1`（ENG-BASE）。实现提交：`72d94dc`
