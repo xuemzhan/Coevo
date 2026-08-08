@@ -13,6 +13,7 @@ import unicodedata
 from datetime import UTC, datetime
 from typing import Any, Mapping
 
+from src.coevo.canon import canonical_digest
 from .certificates import CertificateError, inspect_certificate
 from .models import ClientIdentity, IdentityBundle, Organization, ProjectRoleBinding, TrustedCertificate, UserIdentity
 
@@ -196,5 +197,5 @@ def validate_bundle(payload: Any) -> IdentityBundle:
         roles.append(binding)
     if len(set(roles)) != len(roles):
         raise ValidationError("duplicate role binding")
-    digest = hashlib.sha256(json.dumps(_digestable(root), sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()).hexdigest()
+    digest = canonical_digest(_digestable(root))
     return IdentityBundle(organization, identity, device, certificate, tuple(roles), digest)

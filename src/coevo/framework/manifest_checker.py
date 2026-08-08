@@ -39,6 +39,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
+from src.coevo.canon import canonical_json_bytes
 from src.coevo.crypto.contract import ProviderScope
 from src.coevo.framework.capability import (
     CapabilityKind,
@@ -222,7 +223,7 @@ def manifest_spec_hash(manifest_bytes: bytes) -> str:
 
     parsed = _parse_manifest(manifest_bytes)
     return hashlib.sha256(
-        _canonical_bytes(_strip_self_referential(parsed))
+        canonical_json_bytes(_strip_self_referential(parsed))
     ).hexdigest()
 
 
@@ -268,12 +269,6 @@ def _reject_non_standard_constant(name: str) -> Any:
 def _sanitize_reason(reason: str) -> str:
     cleaned = "".join(ch for ch in reason if ch >= " " or ch == "\t")
     return cleaned[:MAX_REASON_LENGTH]
-
-
-def _canonical_bytes(obj: Any) -> bytes:
-    return json.dumps(
-        obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    ).encode("utf-8")
 
 
 def _strip_self_referential(parsed: dict[str, Any]) -> dict[str, Any]:
@@ -401,7 +396,7 @@ def _validate(
 
     declared = _declared_spec_hash(parsed)
     computed = hashlib.sha256(
-        _canonical_bytes(_strip_self_referential(parsed))
+        canonical_json_bytes(_strip_self_referential(parsed))
     ).hexdigest()
     if declared != computed:
         raise _InvalidManifest(

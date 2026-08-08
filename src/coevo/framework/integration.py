@@ -29,6 +29,7 @@ from src.coevo.framework.capability import (
     CapabilityValidationError,
     resolve_capability,
 )
+from src.coevo.canon import canonical_json_bytes
 from src.coevo.framework.manifest_checker import (
     AgentManifest,
     ManifestCheckInput,
@@ -180,11 +181,6 @@ def build_registration_manifest(
         "audit": {"redact_in_audit": ["policy_profile"]},
     }
 
-    def _canonical(obj: Any) -> bytes:
-        return json.dumps(
-            obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        ).encode("utf-8")
-
     # FRAMEWORK-OPTIMIZE-1: structural copy that excludes the
     # self-referential fields -- no JSON round-trip needed. The canonical
     # bytes are identical to the previous implementation (sort_keys +
@@ -208,13 +204,13 @@ def build_registration_manifest(
         "security": manifest["security"],
         "audit": manifest["audit"],
     }
-    spec_hash = hashlib.sha256(_canonical(stripped)).hexdigest()
+    spec_hash = hashlib.sha256(canonical_json_bytes(stripped)).hexdigest()
     manifest["metadata"]["spec_hash"] = spec_hash
     manifest["policy_ref"]["spec_hash"] = spec_hash
     if signer is not None:
         binding = (spec_hash + signer_cert_fingerprint).encode("ascii")
         manifest["policy_ref"]["signature"] = signer(binding).hex()
-    return _canonical(manifest)
+    return canonical_json_bytes(manifest)
 
 
 def plan_to_chain(

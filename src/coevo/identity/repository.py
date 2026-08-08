@@ -14,6 +14,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 from src.coevo.timefmt import now_utc_iso_z
+from src.coevo.canon import canonical_digest
 
 from .audit_anchor import AuditAnchorError, FreshnessAuthority, SignedAuditAnchor, Signer, WindowsCertificateSigner, WindowsFreshnessAuthority
 from .models import IdentityBundle, RegistrationResult
@@ -125,7 +126,7 @@ class IdentityRepository:
             "target_summary": json.dumps(target, sort_keys=True, separators=(",", ":")),
             "payload_digest": payload_digest, "prev_hash": prev_hash,
         }
-        event_hash = hashlib.sha256(json.dumps(event, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        event_hash = canonical_digest(event)
         self.connection.execute(
             "INSERT INTO identity_audit_events(event_id,occurred_at,actor_id,action,request_id,result,target_summary,payload_digest,prev_hash,event_hash) VALUES(?,?,?,?,?,?,?,?,?,?)",
             (event["event_id"], event["occurred_at"], actor_id, action, request_id, result, event["target_summary"], payload_digest, prev_hash, event_hash),
@@ -140,7 +141,7 @@ class IdentityRepository:
         for table, ordering in self.BUSINESS_TABLES.items():
             rows = self.connection.execute(f"SELECT * FROM {table} ORDER BY {ordering}").fetchall()
             state[table] = [{key: self._safe_value(row[key]) for key in row.keys()} for row in rows]
-        return hashlib.sha256(json.dumps(state, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        return canonical_digest(state, ensure_ascii=False)
 
     def _checkpoint(self) -> dict:
         metadata = self.connection.execute("SELECT store_id,schema_version FROM identity_metadata WHERE singleton=1").fetchone()
@@ -156,7 +157,7 @@ class IdentityRepository:
         previous = "0" * 64
         for row in self.connection.execute("SELECT * FROM identity_audit_events ORDER BY sequence_no"):
             event = {key: row[key] for key in ("event_id", "occurred_at", "actor_id", "action", "request_id", "result", "target_summary", "payload_digest", "prev_hash")}
-            expected = hashlib.sha256(json.dumps(event, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            expected = canonical_digest(event)
             if row["prev_hash"] != previous or row["event_hash"] != expected:
                 return False
             previous = row["event_hash"]

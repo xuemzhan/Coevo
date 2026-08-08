@@ -49,6 +49,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from src.coevo.timefmt import now_utc_iso_z
+from src.coevo.canon import canonical_digest
 from typing import Any, Mapping, Protocol
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -625,9 +626,7 @@ class PrivateKeyService:
         previous = "0" * 64
         for event in self.audit_trail:
             snapshot = {key: event[key] for key in event if key not in {"event_hash", "previous_hash"}}
-            expected = hashlib.sha256(
-                json.dumps(snapshot, sort_keys=True, separators=(",", ":")).encode("utf-8")
-            ).hexdigest()
+            expected = canonical_digest(snapshot)
             if event["previous_hash"] != previous or event["event_hash"] != expected:
                 return False
             previous = event["event_hash"]
