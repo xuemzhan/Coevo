@@ -19,6 +19,15 @@ from pathlib import Path, PurePosixPath
 from src.coevo.merge.receipt import MergeCommitReceipt
 from src.coevo.merge.repository import MergeReceiptRepository
 from src.coevo.risk import Risk, RiskKind, RiskReport, SourceKind
+from ._util import (
+    _ZERO_DIGEST,
+    _digest as _util_digest,
+    _encode_json as _util_encode_json,
+    _is_link_or_reparse as _util_is_link_or_reparse,
+    _parse_utc as _util_parse_utc,
+    _safe_string as _util_safe_string,
+    _stat_is_reparse as _stat_is_reparse,
+)
 
 BRIEF_DOMAIN = "coevo.decision_brief"
 
@@ -49,10 +58,6 @@ MAX_TEMPLATE_BYTES = 8 * 1024 * 1024
 MAX_TEMPLATE_UNCOMPRESSED_BYTES = 32 * 1024 * 1024
 
 MAX_TEMPLATE_ZIP_ENTRIES = 4096
-
-_ZERO_DIGEST = "0" * 64
-
-_REPARSE_POINT = 0x400
 
 class DecisionBriefError(Exception):
     """Base class for fail-closed decision-brief errors."""
@@ -892,46 +897,29 @@ def _validate_docx(payload: bytes) -> None:
         raise DecisionBriefValidationError("template is not a valid DOCX ZIP") from exc
 
 def _is_link_or_reparse(path: Path) -> bool:
-    try:
-        info = path.lstat()
-    except OSError as exc:
-        raise DecisionBriefValidationError("template path is unavailable") from exc
-    return stat.S_ISLNK(info.st_mode) or _stat_is_reparse(info)
-
-def _stat_is_reparse(info: os.stat_result) -> bool:
-    return bool(getattr(info, "st_file_attributes", 0) & _REPARSE_POINT)
+    return _util_is_link_or_reparse(path, error_factory=DecisionBriefValidationError)
 
 def _safe_string(value: object, *, field: str, max_bytes: int) -> None:
-    if not isinstance(value, str) or not value.strip() or any(ord(c) < 32 for c in value):
-        raise DecisionBriefValidationError(f"{field} must be a non-empty safe string")
-    if len(value.encode("utf-8")) > max_bytes:
-        raise DecisionBriefValidationError(f"{field} exceeds byte limit")
+    _util_safe_string(
+        value,
+        field=field,
+        max_bytes=max_bytes,
+        error_factory=DecisionBriefValidationError,
+    )
 
 def _digest(value: object, *, field: str) -> None:
-    if (
-        not isinstance(value, str)
-        or len(value) != 64
-        or any(char not in "0123456789abcdef" for char in value)
-    ):
-        raise DecisionBriefValidationError(f"{field} must be lowercase SHA-256")
+    _util_digest(value, field=field, error_factory=DecisionBriefValidationError)
 
 def _parse_utc(value: object, *, field: str) -> dt.datetime:
-    from src.coevo.timefmt import parse_iso_utc
-
-    return parse_iso_utc(
+    return _util_parse_utc(
         value,
+        field=field,
         error_factory=DecisionBriefValidationError,
         not_utc_message=f"{field} must be ISO-8601 UTC",
         invalid_message=f"{field} must be valid ISO-8601 UTC",
     )
 
 def _encode_json(value: object, *, max_bytes: int) -> bytes:
-    try:
-        payload = json.dumps(
-            value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        ).encode("utf-8")
-    except (TypeError, ValueError, RecursionError) as exc:
-        raise DecisionBriefValidationError("value is not canonical JSON") from exc
-    if len(payload) > max_bytes:
-        raise DecisionBriefValidationError("canonical payload exceeds byte limit")
-    return payload
+    return _util_encode_json(
+        value, max_bytes=max_bytes, error_factory=DecisionBriefValidationError
+    )
