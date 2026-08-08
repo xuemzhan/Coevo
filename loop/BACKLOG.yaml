@@ -1408,7 +1408,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-12
     story: ENG-BASE
     title: framework 内部 canonical 函数收敛到 canon：tools.canonical_schema_bytes/canonical_descriptor_bytes、memory.canonical_record_bytes、k8s_listing.generate_listing 4 处与 canonical_json_bytes 完全等价的序列化统一引用（字节逐位不变）；plan.canonical_plan_bytes 因 default=Enum 处理保留独立
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-11]
     acceptance_tests:
       - tests/unit/test_framework_optimize12.py

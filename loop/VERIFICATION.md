@@ -233,6 +233,34 @@ audit seal: fully-sealed
 
 ```
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-12 完成收尾（framework 内部 canonical 收敛；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-12`（ENG-BASE，dependencies=[FRAMEWORK-OPTIMIZE-11]）。
+  实现提交：`acb39a4`（tools schema/descriptor、memory record、k8s listing 4 处
+  canonical 统一到 canon，字节逐位不变；plan 保留 Enum default 语义）；
+  登记提交：`bc1557f`（切片计划、BACKLOG ready、DECISIONS、STATE 事务）。
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 主仓增量门禁（最终态）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1228 项 OK
+  （skipped=3，含新增 4 项）；安全套件 99/99 全绿。
+- 沙箱独立复核（pin=`acb39a4`）：
+  * verifier（fwopt12-verify）：沙箱内 fmt exit=0 同指纹；lint exit=0 fingerprint=
+    `fb3b799ee59ae643`（沙箱根解析差异属预期）；定向 37/37 全绿（optimize12 +
+    framework_tools + framework_memory + framework_k8s_listing）；
+    review_sandbox check violations=[]，已 discard。
+  * security-reviewer（fwopt12-sec）：STRIDE 逐项 PASS，Critical/High/Medium/Low
+    0/0/0/0；探针：4 处 canonical 字节逐位不变、tools/memory 无 json.dumps、
+    k8s YAML 转义保留、plan Enum default 语义保留、无 eval/exec、tests/security
+    零改动；check violations=[]，已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-12 行（无悬空）；追溯断言
+  66→67；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-12 / last_verified_commit=`acb39a4`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `acb39a4`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-11 完成收尾（共享 safe-id 正则叶子；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-11`（ENG-BASE，dependencies=[FRAMEWORK-GAPS-7]）。
