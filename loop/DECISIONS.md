@@ -1,5 +1,21 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-GAPS-7 登记并开始执行（生产验签入口守卫；INTEGRATION-4 Low 1 收口）
+
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）。
+- 决策：登记 `FRAMEWORK-GAPS-7`（ENG-BASE，ready，dependencies=
+  [FRAMEWORK-INTEGRATION-4]）：收口 INTEGRATION-4 安全审查 Low 1（demo 验签器
+  对任意非空签名返回 True、生产须注入真实 SM2 验签）——`guard_registration`
+  新增 `require_production_verifier` 参数（默认 False 不变），True 时强制验签器
+  显式 `is_production=True`（真实 SM2/证书链），否则 fail-closed 拒绝；
+  `DemoRegistrationVerifier` 补显式 `is_production=False`；不实现真实验签器
+  （非本轮范围）。切片计划：`docs/plans/FRAMEWORK-GAPS-7-slice.md`。
+  STATE 切换至 ENG-BASE / FRAMEWORK-GAPS-7。
+- 门禁口径：按用户指示本轮只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-10 完成收尾（audit_anchor canonical 统一到 canon；增量门禁 + 沙箱双签，豁免全量 quality）
 
 - 工作项：`FRAMEWORK-OPTIMIZE-10`（ENG-BASE）。实现提交：`e276bf1`；

@@ -1384,3 +1384,13 @@ items:
       - tests/unit/test_framework_optimize10.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-GAPS-7（2026-08-08 用户指令"继续下一步"；INTEGRATION-4 Low 1 收口：生产验签入口守卫） ----------
+  - id: FRAMEWORK-GAPS-7
+    story: ENG-BASE
+    title: 生产验签入口守卫：guard_registration 新增 require_production_verifier 参数（默认 False 不变），True 时强制验签器显式 is_production=True（真实 SM2/证书链），否则 fail-closed 拒绝；DemoRegistrationVerifier 补显式 is_production=False；demo 行为不变
+    status: ready
+    dependencies: [FRAMEWORK-INTEGRATION-4]
+    acceptance_tests:
+      - tests/unit/test_framework_gaps7.py
+    security_review: true
+    protocol_review: false
