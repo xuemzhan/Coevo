@@ -64,10 +64,22 @@ class Policy:
     ground_truth_required: tuple[str, ...]
 
 
+# FRAMEWORK-OPTIMIZE-4: lazy caches for the four immutable default profiles.
+# Policy and its nested profiles are frozen dataclasses, so sharing the same
+# instances is safe; get_default_profile resolves in O(1) instead of
+# reconstructing all profiles and scanning linearly on every call.
+_DEFAULT_PROFILES_CACHE: tuple[Policy, ...] | None = None
+_DEFAULT_PROFILE_BY_NAME: dict[str, Policy] | None = None
+
+
 def default_profiles() -> tuple[Policy, ...]:
     """The four v0.4.1 default profiles (CTAF §6.5, B6/F1/F9)."""
 
-    return (
+    global _DEFAULT_PROFILES_CACHE, _DEFAULT_PROFILE_BY_NAME
+    cached = _DEFAULT_PROFILES_CACHE
+    if cached is not None:
+        return cached
+    profiles = (
         Policy(
             policy_id="policy.interactive.v1",
             policy_version="1.0",
@@ -125,6 +137,9 @@ def default_profiles() -> tuple[Policy, ...]:
             ),
         ),
     )
+    _DEFAULT_PROFILES_CACHE = profiles
+    _DEFAULT_PROFILE_BY_NAME = {policy.profile: policy for policy in profiles}
+    return profiles
 
 
 def validate_policy(policy: Policy) -> None:
@@ -227,9 +242,10 @@ def _require_strict_int(value: object, label: str) -> None:
 def get_default_profile(profile: str) -> Policy:
     """Return the default profile for a closed-set name (fail-closed)."""
 
-    for candidate in default_profiles():
-        if candidate.profile == profile:
-            return candidate
+    default_profiles()  # ensure the lazy caches are populated
+    candidate = _DEFAULT_PROFILE_BY_NAME.get(profile)  # type: ignore[union-attr]
+    if candidate is not None:
+        return candidate
     raise PolicyValidationError(
         f"profile outside the closed set {sorted(PROFILES)}: {profile!r}"
     )

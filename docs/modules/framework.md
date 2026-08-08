@@ -32,7 +32,7 @@ Manifest 构建器 + demo 注册适配器（显式非生产）。
 |---|---|---|
 | `capability.py` | `CAPABILITY_CLOSED_SET`、`CapabilityEntry`、`CapabilityKind`、`resolve_capability`、`check_consistency` | CTAF §5.2 能力闭集收敛：MVP 映射 AgentCapability、框架抽象、CRYPTO_PROXY 限 approved scope |
 | `manifest_checker.py` | `check`、`AgentManifest`、`ManifestCheckInput`、`ManifestCheckResult`、`ManifestRegistry`、`PolicyRegistry`/`CertificateResolver`/`SignatureVerifier`（注入协议） | 部署点强制校验（纯函数、fail-closed）+ 校验通过才注册 |
-| `policy.py` | `Policy`/`TimeoutProfile`/`RetryProfile`/`ConsentProfile`、`default_profiles`、`validate_policy`、`get_default_profile` | 策略数值边界（L16 / F7 / EMERGENCY fail-fast F1/F9） |
+| `policy.py` | `Policy`/`TimeoutProfile`/`RetryProfile`/`ConsentProfile`、`default_profiles`、`validate_policy`、`get_default_profile` | 策略数值边界（L16 / F7 / EMERGENCY fail-fast F1/F9）；默认 Profile 惰性缓存（FRAMEWORK-OPTIMIZE-4：frozen 不可变、一次构造、O(1) 查找） |
 | `plan.py` | `Plan`/`PlanNode`/`PlanEdge`/`PlanNodeKind`、`POLICY_OWNED_NUMERIC_KEYS`（L18 白名单）、`plan_fingerprint`、`validate_plan_structure` | Plan 纯结构模型与规范化哈希、L18 校验 |
 | `lifecycle.py` | `LifecycleState`、`can_transition`、`validate_transition_path` | 八态生命周期与 L19 路径规则 |
 | `memory.py` | `MemoryRecord`、`MemoryKind`、`write_memory`、`redact_record`、`Redactor`/`EpisodicMemoryStore`/`SemanticApprovalChecker`/`SemanticMemoryStore`（注入协议） | Memory 统一模型：审计投影 + Semantic 审批 + L12 脱敏 |
