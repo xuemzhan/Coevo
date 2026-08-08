@@ -39,7 +39,7 @@ class LoopLauncherTest(unittest.TestCase):
         for name in ('Item','Model'):
             output=''
             for _attempt in range(3):
-                result=subprocess.run([_powershell_executable(),'-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/run-loop.ps1'),'-MaxIterations','1',f'-{name}','--auto'],cwd=ROOT,capture_output=True,text=True)
+                result=subprocess.run([_powershell_executable(),'-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/run-loop.ps1'),'-MaxIterations','1',f'-{name}','--auto'],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
                 self.assertNotEqual(0,result.returncode,name)
                 # The fail-closed invariant is the non-zero exit: the launcher
                 # stopped before CLI start. The validation-error text is the

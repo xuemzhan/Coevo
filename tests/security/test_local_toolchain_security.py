@@ -45,7 +45,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
                  "foreach($path in $locked){try{$stream=[IO.File]::Open($path,'Open','Write','Read');$stream.Dispose();exit 73}"
                  "catch [IO.IOException]{}}; "
                  "& $env:COEVO_MAKE_PATH --version; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE")
-        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
+        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('Coevo Make compatibility shim 1.0',result.stdout)
 
@@ -123,7 +123,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
     def test_inherited_windir_cannot_select_make_compiler(self):
         command=("$env:WINDIR=(Resolve-Path .).Path; . .\\scripts\\enter-dev-environment.ps1 -Quiet; "
                  "& $env:COEVO_MAKE_PATH --version; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE")
-        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
+        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('Coevo Make compatibility shim 1.0',result.stdout)
 
@@ -138,7 +138,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
             except PermissionError:
                 return  # The outer quality gate already holds the stronger write/delete lock.
             command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; & $env:COEVO_MAKE_PATH env-check; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE"
-            result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
+            result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
             self.assertEqual(69,result.returncode,result.stdout+result.stderr)
             self.assertIn('locked file mismatch',result.stderr)
         finally:
@@ -153,7 +153,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
             shutil.copyfile(ROOT/'scripts/import-toolchain.ps1',root/'scripts/import-toolchain.ps1')
             shutil.copyfile(ROOT/'scripts/windows-native-security.ps1',root/'scripts/windows-native-security.ps1')
             (root/'docs/dependencies/toolchain-lock.json').write_text(json.dumps(lock),encoding='utf-8')
-            result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'scripts/import-toolchain.ps1'),'-ArchivePath',str(ROOT/lock['tools']['opencode']['archive']['path'])],capture_output=True,text=True)
+            result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'scripts/import-toolchain.ps1'),'-ArchivePath',str(ROOT/lock['tools']['opencode']['archive']['path'])],capture_output=True,text=True,encoding='utf-8',errors='replace')
             self.assertNotEqual(0,result.returncode,result.stdout+result.stderr)
             self.assertIn('traversal',result.stdout+result.stderr)
             self.assertFalse((root.parent/'escaped/opencode.exe').exists())
@@ -166,9 +166,9 @@ class LocalToolchainSecurityTest(unittest.TestCase):
             shutil.copyfile(ROOT/'scripts/windows-native-security.ps1',root/'scripts/windows-native-security.ps1')
             (root/'docs/dependencies/toolchain-lock.json').write_text(json.dumps(lock),encoding='utf-8')
             tools=root/'.tools'; tools.mkdir(); outside=root/'outside'; outside.mkdir(); link=tools/'opencode'
-            linked=subprocess.run(['cmd','/c','mklink','/J',str(link),str(outside)],capture_output=True,text=True)
+            linked=subprocess.run(['cmd','/c','mklink','/J',str(link),str(outside)],capture_output=True,text=True,encoding='utf-8',errors='replace')
             self.assertEqual(0,linked.returncode,linked.stdout+linked.stderr)
-            result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'scripts/import-toolchain.ps1'),'-ArchivePath',str(ROOT/lock['tools']['opencode']['archive']['path'])],capture_output=True,text=True)
+            result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'scripts/import-toolchain.ps1'),'-ArchivePath',str(ROOT/lock['tools']['opencode']['archive']['path'])],capture_output=True,text=True,encoding='utf-8',errors='replace')
             self.assertNotEqual(0,result.returncode,result.stdout+result.stderr)
             self.assertIn('reparse point',(result.stdout+result.stderr).lower())
             self.assertFalse((outside/'v1.18.2/opencode.exe').exists())
@@ -185,7 +185,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
 
     def test_make_rejects_unknown_and_injected_targets(self):
         command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; & make 'quality;whoami'; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE"
-        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
+        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
         self.assertEqual(64,result.returncode,result.stdout+result.stderr)
         self.assertIn('usage: make',result.stderr)
 

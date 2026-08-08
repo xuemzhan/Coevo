@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[2]
 class DevEnvironmentEntryTest(unittest.TestCase):
     def test_entry_exposes_locked_tools(self):
         command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; make --version; opencode --version; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE"
-        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
+        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('Coevo Make compatibility shim 1.0',result.stdout)
         self.assertIn('1.18.2',result.stdout)
@@ -17,7 +17,7 @@ class DevEnvironmentEntryTest(unittest.TestCase):
                  "$parts=@($env:PATH -split ';'); $bin=Split-Path $env:COEVO_MAKE_PATH; "
                  "if(@($parts|Where-Object {$_ -eq $bin}).Count -ne 1){exit 71}; "
                  "& $env:COEVO_MAKE_PATH --version; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE")
-        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True)
+        result=subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-Command',command],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
         self.assertEqual(0,result.returncode,result.stdout+result.stderr)
         self.assertIn('Coevo Make compatibility shim 1.0',result.stdout)
 

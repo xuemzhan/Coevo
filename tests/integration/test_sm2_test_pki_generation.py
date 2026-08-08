@@ -90,7 +90,7 @@ class Sm2TestPkiTests(unittest.TestCase):
                 "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
                 "-File", str(SCRIPT), "-ProfileName", self.profile, *extra,
             ],
-            cwd=ROOT, capture_output=True, text=True, timeout=60,
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
         )
 
     def test_lock_matches_offline_artifact_and_records_unsigned_risk(self) -> None:
@@ -153,7 +153,7 @@ class Sm2TestPkiTests(unittest.TestCase):
                     "[Security.Cryptography.DataProtectionScope]::CurrentUser); "
                     "try { if($p.Length -ne 65 -or $p[64] -ne 0){exit 9} } finally { [Array]::Clear($p,0,$p.Length) }",
                 ],
-                cwd=ROOT, env=dpapi_env, capture_output=True, text=True, timeout=20,
+                cwd=ROOT, env=dpapi_env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
             )
             self.assertEqual(0, dpapi_check.returncode, dpapi_check.stderr)
         for forbidden in (
@@ -186,7 +186,7 @@ class Sm2TestPkiTests(unittest.TestCase):
         sender_verify = subprocess.run(
             [str(self.gmssl), "certverify", "-client", "-in", str(self.output / "sender-cert.pem"),
              "-cacert", str(self.output / "root-ca-cert.pem")],
-            cwd=ROOT, capture_output=True, text=True, timeout=20,
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
         )
         self.assertEqual(0, sender_verify.returncode, sender_verify.stderr)
         pair = self.output / "test-pair.pem"
@@ -198,14 +198,14 @@ class Sm2TestPkiTests(unittest.TestCase):
             recipient_verify = subprocess.run(
                 [str(self.gmssl), "certverify", "-tlcp_server", "-in", str(pair),
                  "-cacert", str(self.output / "root-ca-cert.pem")],
-                cwd=ROOT, capture_output=True, text=True, timeout=20,
+                cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
             )
             self.assertEqual(0, recipient_verify.returncode, recipient_verify.stderr)
         finally:
             pair.unlink(missing_ok=True)
         parsed = subprocess.run(
             [str(self.gmssl), "certparse", "-in", str(self.output / "recipient-cert.pem")],
-            cwd=ROOT, capture_output=True, text=True, timeout=20,
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
         )
         self.assertEqual(0, parsed.returncode, parsed.stderr)
         self.assertIn("sm2sign-with-sm3", parsed.stdout)
@@ -222,12 +222,12 @@ class Sm2TestPkiTests(unittest.TestCase):
         candidate = ROOT / "loop" / "runtime" / "sm2-test-pki" / "never-track" / "private.pem"
         result = subprocess.run(
             ["git", "check-ignore", "-q", str(candidate.relative_to(ROOT))],
-            cwd=ROOT, capture_output=True, text=True, timeout=10,
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10,
         )
         self.assertEqual(0, result.returncode)
         tracked = subprocess.run(
             ["git", "ls-files", "--", "loop/runtime"],
-            cwd=ROOT, capture_output=True, text=True, timeout=10,
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10,
         )
         self.assertEqual(0, tracked.returncode)
         self.assertEqual("", tracked.stdout.strip())
@@ -328,7 +328,7 @@ class Sm2TestPkiTests(unittest.TestCase):
              "'Authenticated Users','Modify','ContainerInherit,ObjectInherit','None','Allow');"
              "$a.SetAccessRuleProtection($false,$true);$a.AddAccessRule($r);[IO.Directory]::SetAccessControl($p,$a)"],
             cwd=ROOT, env={**os.environ, "COEVO_ACL_PATH": str(runtime)},
-            capture_output=True, text=True, timeout=15,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
         )
         self.assertEqual(0, widen.returncode, widen.stderr)
         result = self.run_generator()
@@ -341,7 +341,7 @@ class Sm2TestPkiTests(unittest.TestCase):
              "if(-not $a.AreAccessRulesProtected -or $rules.Count-ne 1 -or "
              "$rules[0].IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value-ne $sid){exit 9}"],
             cwd=ROOT, env={**os.environ, "COEVO_ACL_PATH": str(runtime)},
-            capture_output=True, text=True, timeout=15,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
         )
         self.assertEqual(0, inspect.returncode, inspect.stderr)
 
@@ -371,7 +371,7 @@ class Sm2TestPkiTests(unittest.TestCase):
             query = subprocess.run(
                 [str(powershell), "-NoProfile", "-Command",
                  f"(Get-CimInstance Win32_Process -Filter \"ProcessId={process.pid}\").CommandLine"],
-                cwd=ROOT, capture_output=True, text=True, timeout=15,
+                cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
             )
             self.assertEqual(0, query.returncode, query.stderr)
             command_line = query.stdout.strip()
@@ -449,7 +449,7 @@ class Sm2TestPkiTests(unittest.TestCase):
              "$r=New-Object Security.AccessControl.FileSystemAccessRule($s,'FullControl','ContainerInherit,ObjectInherit','None','Allow');"
              "$a.AddAccessRule($r);[IO.Directory]::SetAccessControl($p,$a)"],
             cwd=ROOT, env={**os.environ, "COEVO_ACL_PATH": str(staging)},
-            capture_output=True, text=True, timeout=15,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
         )
         self.assertEqual(0, secured.returncode, secured.stderr)
         unknown = staging / "attacker-object"
@@ -491,7 +491,7 @@ class Sm2TestPkiTests(unittest.TestCase):
         result = subprocess.run(
             [str(powershell), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(SCRIPT),
              "-ProfileName", self.profile],
-            cwd=ROOT, env=env, capture_output=True, text=True, timeout=60,
+            cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
         )
         self.assertEqual(0, result.returncode, result.stderr)
         runtime = ROOT / ".tools" / "runtime" / "sm2-test-pki-helper"
@@ -508,7 +508,7 @@ class Sm2TestPkiTests(unittest.TestCase):
              f"/reference:{framework / 'mscorlib.dll'}", f"/reference:{framework / 'System.dll'}",
              "/target:exe", "/platform:x64", "/optimize+", "/debug-", "/checked+",
              f"/out:{output}", str(HELPER_SOURCE)],
-            cwd=ROOT, capture_output=True, text=True, timeout=30,
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual(helper_lock["source_sha256"], sha256(HELPER_SOURCE))
@@ -598,7 +598,7 @@ class Sm2TestPkiTests(unittest.TestCase):
              "'Authenticated Users','ReadAndExecute','ContainerInherit,ObjectInherit','None','Allow');"
              "$a.SetAccessRuleProtection($false,$true);$a.AddAccessRule($r);[IO.Directory]::SetAccessControl($p,$a)"],
             cwd=ROOT, env={**os.environ, "COEVO_ACL_PATH": str(self.output)},
-            capture_output=True, text=True, timeout=15,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
         )
         self.assertEqual(0, widened.returncode, widened.stderr)
         rejected = self._recover_with_helper(helper, nonce)
@@ -658,8 +658,8 @@ class Sm2TestPkiTests(unittest.TestCase):
             "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
             "-File", str(SCRIPT), "-ProfileName", self.profile,
         ]
-        first = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        second = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        first = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace")
+        second = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace")
         first_out, first_err = first.communicate(timeout=60)
         second_out, second_err = second.communicate(timeout=60)
         results = [(first.returncode, first_out, first_err), (second.returncode, second_out, second_err)]

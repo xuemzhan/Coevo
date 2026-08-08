@@ -24,7 +24,7 @@ class Sm3CrossCheckTests(unittest.TestCase):
             ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
              str(ROOT / "scripts" / "generate-sm2-test-pki.ps1"),
              "-ProfileName", cls.profile],
-            cwd=ROOT, capture_output=True, text=True, timeout=60,
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
         )
         if result.returncode != 0:
             raise AssertionError(result.stderr)

@@ -56,7 +56,7 @@ SENSITIVE = [
 def _git_ls_files_for(path: Path) -> str:
     res = subprocess.run(
         ["git", "-C", str(ROOT), "ls-files", "--stage", "--", str(path.relative_to(ROOT))],
-        capture_output=True, text=True, encoding="utf-8",
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
     return res.stdout.strip()
 
