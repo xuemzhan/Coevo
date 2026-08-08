@@ -5499,3 +5499,9 @@ security-reviewer 双签门禁。
 - Security: safe-id / non-empty validation is model-input security-critical; exception classes and messages preserved byte-for-byte via error_factory; no protocol changes.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-08 - FRAMEWORK-OPTIMIZE-19 registration (decision_brief models util extraction; incremental gate)
+- User instruction: continue optimizing, no full gate.
+- Decision: register `FRAMEWORK-OPTIMIZE-19` (ENG-BASE, ready): decision_brief/models.py (862 lines) is the largest single file; a full split is constrained by dataclass __post_init__ <-> helper circularity. This slice safely extracts 7 dependency-free pure utilities (_ZERO_DIGEST, _safe_string, _digest, _encode_json, _stat_is_reparse, _is_link_or_reparse, _parse_utc) into _util.py, keeps models.py re-exporting them (import surface unchanged), and establishes the pure-util -> domain layer pattern for later slices.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).

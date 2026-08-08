@@ -1596,3 +1596,14 @@ items:
       - tests/unit/test_supervision_meeting.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-19（2026-08-08 用户指令"继续优化，不做全量门禁"；decision_brief models 纯工具提取首个切片） ----------
+  - id: FRAMEWORK-OPTIMIZE-19
+    story: ENG-BASE
+    title: decision_brief/models 纯工具助手提取：新增 _util.py（_ZERO_DIGEST/_safe_string/_digest/_encode_json/_stat_is_reparse/_is_link_or_reparse/_parse_utc，无数据类依赖），models.py 删除本地副本并原样再导出（导入面不变）；为后续域助手拆分建立分层模式；root_modules.md 登记
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_framework_optimize20.py
+      - tests/unit/test_decision_brief.py
+    security_review: false
+    protocol_review: false
