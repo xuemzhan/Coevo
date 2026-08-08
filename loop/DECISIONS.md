@@ -1,5 +1,25 @@
 # Loop 决策记录
 
+## 2026-08-08 — FRAMEWORK-OPTIMIZE-10 完成收尾（audit_anchor canonical 统一到 canon；增量门禁 + 沙箱双签，豁免全量 quality）
+
+- 工作项：`FRAMEWORK-OPTIMIZE-10`（ENG-BASE）。实现提交：`e276bf1`；
+  登记提交：`5a27e2d`。
+- 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、
+  算法与模块架构，不做全量门禁"）；按增量门禁（fmt + lint + 定向测试）执行并
+  豁免全量 quality。
+- 验证（增量门禁，主仓）：fmt exit=0 fingerprint=`fe39766e2048d2bc`；lint exit=0
+  fingerprint=`252ad24e526f6728`（audit fully-sealed）；单元全量 1214 项 +
+  安全套件 99/99 全绿。
+- 独立复核（沙箱，pin=`e276bf1`）：fwopt10-verify（fmt/lint/定向 10 全绿，
+  violations=[]）+ fwopt10-sec（STRIDE PASS，Critical/High/Medium/Low 0/0/0/0；
+  审计锚定链字节逐位不变、tests/security 零改动），已 discard。
+- 记录：追溯矩阵新增 ENG-BASE | FRAMEWORK-OPTIMIZE-10 行（无悬空）；追溯断言
+  63→64；BACKLOG 置 done；STATE 置 phase=decide / status=done / current_item=
+  FRAMEWORK-OPTIMIZE-10 / last_verified_commit=`e276bf1`（loop_state 事务）；
+  audit fully-sealed。
+- 回滚条件：任一新增测试失败、门禁指纹变化未复核、或审计链非 fully-sealed 时按
+  git 历史回退 `e276bf1`。
+
 ## 2026-08-08 — FRAMEWORK-OPTIMIZE-10 登记并开始执行（audit_anchor canonical 统一到 canon）
 
 - 用户指令：继续下一步（延续"基于框架，优化原来系统应用的代码实现，包括数据结构、

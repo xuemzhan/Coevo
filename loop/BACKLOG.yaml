@@ -1378,7 +1378,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-10
     story: ENG-BASE
     title: audit_anchor canonical 统一到 canon：canon.py 新增 trailing_newline 参数（默认 False 不变），identity/audit_anchor.py 的 canonical 改用共享实现（ensure_ascii=False + trailing_newline=True，字节逐位不变）；审计锚定链语义与 fail-closed 保留；守卫防回归
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-9]
     acceptance_tests:
       - tests/unit/test_framework_optimize10.py
