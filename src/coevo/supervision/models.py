@@ -377,16 +377,11 @@ def _non_empty(value: object, *, field: str) -> None:
         raise SupervisionValidationError(f"{field} must be a non-empty string")
 
 def _parse_utc(value: object, *, field: str) -> dt.datetime:
-    if not isinstance(value, str) or not value.endswith("Z"):
-        raise SupervisionValidationError(
-            f"{field} must be an ISO-8601 UTC string ending in Z"
-        )
-    try:
-        parsed = dt.datetime.fromisoformat(value[:-1] + "+00:00")
-    except ValueError as exc:
-        raise SupervisionValidationError(
-            f"{field} must be a valid ISO-8601 UTC string"
-        ) from exc
-    if parsed.utcoffset() != dt.timedelta(0):
-        raise SupervisionValidationError(f"{field} must use UTC")
-    return parsed
+    from src.coevo.timefmt import parse_iso_utc
+
+    return parse_iso_utc(
+        value,
+        error_factory=SupervisionValidationError,
+        not_utc_message=f"{field} must be an ISO-8601 UTC string ending in Z",
+        invalid_message=f"{field} must be a valid ISO-8601 UTC string",
+    )

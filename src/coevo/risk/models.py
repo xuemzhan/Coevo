@@ -149,15 +149,14 @@ def _non_empty(value: object, *, field: str) -> None:
         raise ValueError(f"{field} must be a non-empty string")
 
 def _parse_utc(value: object, *, field: str) -> dt.datetime:
-    if not isinstance(value, str) or not value.endswith("Z"):
-        raise RiskValidationError(f"{field} must be an ISO-8601 UTC string ending in Z")
-    try:
-        parsed = dt.datetime.fromisoformat(value[:-1] + "+00:00")
-    except ValueError as exc:
-        raise RiskValidationError(f"{field} must be a valid ISO-8601 UTC string") from exc
-    if parsed.utcoffset() != dt.timedelta(0):
-        raise RiskValidationError(f"{field} must use UTC")
-    return parsed
+    from src.coevo.timefmt import parse_iso_utc
+
+    return parse_iso_utc(
+        value,
+        error_factory=RiskValidationError,
+        not_utc_message=f"{field} must be an ISO-8601 UTC string ending in Z",
+        invalid_message=f"{field} must be a valid ISO-8601 UTC string",
+    )
 
 def _source_kind_counts(risks: Iterable[Risk]) -> dict[str, int]:
     counts = {source.value: 0 for source in SourceKind}

@@ -666,12 +666,14 @@ def _guard_integer_materialization(value: object, *, max_bytes: int) -> None:
 
 
 def _parse_utc(value: str, field: str) -> dt.datetime:
-    if not isinstance(value, str) or not value.endswith("Z"):
-        raise MergeCommitReceiptError(f"{field} must be UTC ending in Z")
-    try:
-        return dt.datetime.fromisoformat(value[:-1] + "+00:00")
-    except ValueError as exc:
-        raise MergeCommitReceiptError(f"{field} must be ISO-8601 UTC") from exc
+    from src.coevo.timefmt import parse_iso_utc
+
+    return parse_iso_utc(
+        value,
+        error_factory=MergeCommitReceiptError,
+        not_utc_message=f"{field} must be UTC ending in Z",
+        invalid_message=f"{field} must be ISO-8601 UTC",
+    )
 
 
 def _revision_number(revision: str, project_id: str) -> int:

@@ -916,15 +916,14 @@ def _digest(value: object, *, field: str) -> None:
         raise DecisionBriefValidationError(f"{field} must be lowercase SHA-256")
 
 def _parse_utc(value: object, *, field: str) -> dt.datetime:
-    if not isinstance(value, str) or not value.endswith("Z"):
-        raise DecisionBriefValidationError(f"{field} must be ISO-8601 UTC")
-    try:
-        parsed = dt.datetime.fromisoformat(value[:-1] + "+00:00")
-    except ValueError as exc:
-        raise DecisionBriefValidationError(f"{field} must be valid ISO-8601 UTC") from exc
-    if parsed.utcoffset() != dt.timedelta(0):
-        raise DecisionBriefValidationError(f"{field} must use UTC")
-    return parsed
+    from src.coevo.timefmt import parse_iso_utc
+
+    return parse_iso_utc(
+        value,
+        error_factory=DecisionBriefValidationError,
+        not_utc_message=f"{field} must be ISO-8601 UTC",
+        invalid_message=f"{field} must be valid ISO-8601 UTC",
+    )
 
 def _encode_json(value: object, *, max_bytes: int) -> bytes:
     try:

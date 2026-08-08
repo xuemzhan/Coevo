@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import datetime as _datetime
 import re
+from typing import Callable
 
 _ISO_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z\Z")
 
@@ -42,3 +43,32 @@ def is_iso_utc_z(value: object) -> bool:
     except ValueError:
         return False
     return True
+
+
+def parse_iso_utc(
+    value: object,
+    *,
+    error_factory: Callable[[str], Exception],
+    not_utc_message: str,
+    invalid_message: str,
+) -> _datetime.datetime:
+    """Parse an ISO-8601 UTC ``Z`` string, raising ``error_factory`` on failure.
+
+    Unifies the per-module ``_parse_utc`` copies (FRAMEWORK-OPTIMIZE-17).
+    Callers pass their own exception class and exact messages so behavior is
+    byte-identical to the original implementations:
+
+    * non-string / missing trailing ``Z`` -> ``error_factory(not_utc_message)``;
+    * malformed timestamp -> ``error_factory(invalid_message)``;
+    * non-zero UTC offset -> ``error_factory(not_utc_message)`` (unreachable in
+      practice because ``Z`` is replaced by ``+00:00``, kept for parity).
+    """
+    if not isinstance(value, str) or not value.endswith("Z"):
+        raise error_factory(not_utc_message)
+    try:
+        parsed = _datetime.datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError as exc:
+        raise error_factory(invalid_message) from exc
+    if parsed.utcoffset() != _datetime.timedelta(0):
+        raise error_factory(not_utc_message)
+    return parsed
