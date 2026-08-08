@@ -5229,6 +5229,23 @@ security-reviewer 双签门禁。
   失败隔离不绕过 --check；本轮不涉及协议/密钥路径。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — PERF-HELPER-1 登记并开始执行（GmSSL 助手编译缓存；增量门禁口径）
+
+- 用户指令：继续进行优化，不用做全量门禁。
+- 决策：登记 `PERF-HELPER-1`（ENG-BASE，ready，dependencies=[]）：crypto 密集
+  套件（集成约 17 分钟）的主要开销是 `invoke-gmssl-crypto.ps1` 每次现场编译
+  `gmssl-crypto-helper.cs`；本轮为 crypto-provider 助手增加编译缓存——按锁定
+  `source_sha256` 缓存编译产物 + 旁路哈希校验（命中复用、损坏自愈重编译、未命中
+  现场编译且当前调用行为不变）；同步 toolchain-lock launcher 哈希（Python 侧
+  gmssl_provider 按 lock 校验启动器）。仅缓存 crypto-provider 助手；sm2-test-pki
+  测试助手保持现场编译（其"无残留"行为被测试钉住）。
+- 边界声明：本项为 **crypto 助手启动链的编译缓存优化，非密码算法/密钥管理方案
+  变更**；"单份持久化可写二进制 + 旁路哈希校验"的安全取舍在 DECISIONS 与
+  approved-crypto-provider-path 记录，须 security-reviewer 放行。
+- 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — REVIEW-SANDBOX-2 完成收口（独立审查沙箱治理修订；增量门禁豁免全量）
 
 - 工作项：`REVIEW-SANDBOX-2`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-2]）。

@@ -1494,3 +1494,16 @@ items:
       - tests/security/test_audit_seal.py
     security_review: true
     protocol_review: false
+  # ---------- PERF-HELPER-1（2026-08-08 用户指令"继续进行优化，不用做全量门禁"；GmSSL 助手编译缓存） ----------
+  - id: PERF-HELPER-1
+    story: ENG-BASE
+    title: GmSSL crypto-provider 助手编译缓存：invoke-gmssl-crypto.ps1 按锁定 source_sha256 缓存编译产物 + 旁路哈希校验（命中即复用、损坏自愈重编译、未命中现场编译且当前调用行为不变）；同步 toolchain-lock launcher 哈希；crypto 密集套件（集成约 17 分钟）预计降到数分钟
+    status: ready
+    dependencies: []
+    acceptance_tests:
+      - tests/unit/test_gmssl_provider_retry.py
+      - tests/integration/test_gmssl_prototype_provider.py
+      - tests/integration/test_cng_handle.py
+      - tests/unit/test_cng_handle.py
+    security_review: true
+    protocol_review: false

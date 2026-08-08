@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "RECORDS-ARCHIVE-4",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "PERF-HELPER-1",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "00d4bac",
   "blocking_issue": "",
-  "updated_at": "2026-08-08T14:24:35.670440Z"
+  "updated_at": "2026-08-08T14:26:59.953177Z"
 }
