@@ -1446,3 +1446,16 @@ items:
       - tests/unit/test_benchmark_suite.py
     security_review: true
     protocol_review: false
+  # ---------- RECORDS-ARCHIVE-2（2026-08-08 用户指令"继续"；记录归档自动化 + control.pyz 门禁入口同步） ----------
+  - id: RECORDS-ARCHIVE-2
+    story: ENG-BASE
+    title: 记录归档自动化：archive_records.py 新增 --check 门禁模式（任一记录文件超阈值/待归档即非零退出，fail-closed），接入 quality_gate lint 阶段；重建 .tools/control/control.pyz 同步内嵌门禁与仓库脚本（消除 make quality 与 python scripts/quality_gate.py 行为分裂），全链哈希同步（python-script-lock.tsv / make.cs ScriptInventorySha256+ControlArchiveSha256 / toolchain-lock control_archive+script_inventory+source_sha256）；实际执行 --apply 归档 VERIFICATION/DECISIONS 至阈值内
+    status: ready
+    dependencies: [QUALITY-ROBUST-1]
+    acceptance_tests:
+      - tests/unit/test_records_archive.py
+      - tests/unit/test_quality_gate_lock.py
+      - tests/security/test_local_toolchain_security.py
+      - tests/integration/test_dev_environment_entry.py
+    security_review: true
+    protocol_review: false

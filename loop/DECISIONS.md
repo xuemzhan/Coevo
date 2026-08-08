@@ -1,5 +1,23 @@
 # Loop 决策记录
 
+## 2026-08-08 — RECORDS-ARCHIVE-2 登记（记录归档自动化 + control.pyz 门禁入口同步）
+
+- 触发：用户指令"继续"，延续上轮全面审查建议（归档瘦身自动化优先）。
+- DISCOVER 发现：`loop/VERIFICATION.md` 已达 1.50MB、`DECISIONS.md` 575KB，
+  均超 500KB 归档阈值；归档脚本 `scripts/archive_records.py` 已有
+  `--dry-run/--apply` 但未纳入任何自动检查——记录文件会无限线性膨胀。
+- 新发现（门禁入口分裂，P1）：`.tools/control/control.pyz` 内嵌的
+  `quality_gate.py`（3315B，2026-07-25 版）与仓库 `scripts/quality_gate.py`
+  （7502B，含 secret_scan / UTF-8 子进程 / 2400s 限时 / 阶段间重封缄）长期
+  不同步；`make quality`（经 make.cs → control.pyz）与
+  `python scripts/quality_gate.py --target quality` 行为不一致。本轮归档自动化
+  必须修改 quality_gate.py，故一并重建 control.pyz 并全链哈希同步，消除分裂。
+- 切片：① `archive_records.py --check`（fail-closed，任一文件需归档即非零退出）
+  接入 quality_gate lint；② 重建 control.pyz（ZIP_STORED + sorted + DOS epoch，
+  按 2026-07-25 先例）+ toolchain-lock/make.cs/python-script-lock 同步；
+  ③ 实际执行 `--apply` 归档；④ 回归测试与文档。
+- 决策者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — QUALITY-ROBUST-1 补强收口（根因修复 + 门禁自洽 + 锁链同步；全量 quality 全绿）
 
 - 背景：QUALITY-ROBUST-1 首轮落地后，全量 quality 在门禁 UTF-8 环境下连续复现失败，
