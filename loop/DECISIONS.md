@@ -5225,6 +5225,19 @@ security-reviewer 双签门禁。
   本轮为治理文档与验证口径修订，不涉及协议/密钥路径。
 - 决策者：用户指令；执行：Codex（loop-engineer）。
 
+## 2026-08-08 — RECORDS-ARCHIVE-4 登记并开始执行（门禁自维护 VERIFICATION 归档；增量门禁口径）
+
+- 用户指令：继续进行优化，不用做全量门禁。
+- 决策：登记 `RECORDS-ARCHIVE-4`（ENG-BASE，ready，dependencies=
+  [RECORDS-ARCHIVE-3]）：VERIFICATION.md 由门禁每次追加增长（当前 498KB 逼近
+  500KB 阈值），超阈后 lint `--check` 会强制人工 `--apply`；本轮让门禁追加后
+  自维护——复用 `archive_records.py --apply`（audit 已被 RECORDS-ARCHIVE-3 排除）
+  就地裁剪 verification/decisions，记录始终有界；trim 失败隔离，由下一次
+  lint --check 兜底。切片计划：`docs/plans/RECORDS-ARCHIVE-4-slice.md`。
+- 门禁口径：按用户指示只跑增量门禁（fmt + lint + 定向测试），不跑全量 quality；
+  豁免在 VERIFICATION/DECISIONS 留痕。
+- 提出者：用户指令；执行：Codex（loop-engineer）。
+
 ## 2026-08-08 — RECORDS-ARCHIVE-3 完成收口（审计链归档安全；增量门禁豁免全量）
 
 - 工作项：`RECORDS-ARCHIVE-3`（ENG-BASE，dependencies=[RECORDS-ARCHIVE-2]）。
