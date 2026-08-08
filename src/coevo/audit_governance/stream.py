@@ -25,7 +25,6 @@ No new dependency; Python stdlib only.
 # 持久化委托 AuditStreamStore。
 from __future__ import annotations
 
-import re
 import threading
 import uuid
 from collections import deque
@@ -39,9 +38,7 @@ from . import (
 from .stream_store import AuditStreamStore, AuditStreamStoreError
 
 
-_SAFE_ID: Final[re.Pattern[str]] = re.compile(
-    r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$"
-)
+from src.coevo.ids import SAFE_ID as _SAFE_ID
 _SUB_ID_PREFIX: Final[str] = "as-"
 
 DEFAULT_MAX_QUEUED: int = 64

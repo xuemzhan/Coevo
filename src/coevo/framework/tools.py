@@ -27,7 +27,7 @@ from typing import Any
 
 from src.coevo.crypto.contract import ProviderScope
 
-_SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
+from src.coevo.ids import SAFE_ID as _SAFE_ID
 _SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 
 SCHEMA_TYPES = frozenset({"string", "number", "integer", "boolean", "object", "array"})

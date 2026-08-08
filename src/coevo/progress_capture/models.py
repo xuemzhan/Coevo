@@ -17,7 +17,7 @@ DOMAIN: str = "coevo.progress_capture"
 
 _HEX_64 = re.compile(r"^[0-9a-f]{64}$")
 
-_SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
+from src.coevo.ids import SAFE_ID as _SAFE_ID
 
 from src.coevo.timefmt import is_iso_utc_z
 

@@ -38,7 +38,7 @@ from dataclasses import dataclass, field
 SCHEMA_VERSION: str = "1.0"
 
 # Re-use the safe-id from identity / protocol layers.
-_SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
+from src.coevo.ids import SAFE_ID as _SAFE_ID
 _HEX_64 = re.compile(r"^[0-9a-f]{64}$")
 
 

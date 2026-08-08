@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-_SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
+from src.coevo.ids import SAFE_ID as _SAFE_ID
 
 from src.coevo.timefmt import is_iso_utc_z
 

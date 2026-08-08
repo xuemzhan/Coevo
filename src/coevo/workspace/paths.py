@@ -34,7 +34,6 @@ canonical names; downstream code MUST NOT compose its own paths.
 # US-6 工作区路径策略：安全 ID、防穿越、默认根与完整路径装配。
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from pathlib import PurePosixPath, PureWindowsPath
 from typing import Final
@@ -47,7 +46,7 @@ class WorkspacePathError(Exception):
 # letters / digits / underscores / hyphens / dots. Mirrors the
 # safe-id used in identity / protocol layers so all components
 # share one canonical id shape.
-_SAFE_ID: Final[re.Pattern[str]] = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
+from src.coevo.ids import SAFE_ID as _SAFE_ID
 PROJECT_ID_MAX: Final[int] = 64
 ROLE_ID_MAX: Final[int] = 64
 _PACKAGE_ID_MAX: Final[int] = 64
