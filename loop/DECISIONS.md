@@ -5479,3 +5479,10 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-08 - FRAMEWORK-OPTIMIZE-17 closure (shared ISO-UTC parser; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-17` (ENG-BASE). User instruction: continue optimizing, no full gate; incremental gates (fmt + lint + targeted) with the full-quality waiver recorded.
+- Delivery: timefmt.py gained `parse_iso_utc(value, *, error_factory, not_utc_message, invalid_message)`; four `_parse_utc` copies (decision_brief/models, merge/receipt, risk/models, supervision/models) collapsed to thin wrappers with byte-identical exception class and message behavior; root_modules.md updated.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 80 tests green (optimize18 8 tests + decision_brief + merge_commit_receipt + risk_analyzer + supervision_meeting); full quality waived per user instruction.
+- Security: ISO-UTC parsing is protocol/audit security-critical; error classes and messages preserved byte-for-byte via error_factory + message params; no protocol changes.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).

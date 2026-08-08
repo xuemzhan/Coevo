@@ -1573,7 +1573,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-17
     story: ENG-BASE
     title: 共享 ISO-UTC 解析助手：timefmt.py 新增 parse_iso_utc（error_factory + 消息参数保留各模块异常类与消息，行为逐字节不变），decision_brief/models、merge/receipt、risk/models、supervision/models 四处 _parse_utc 副本收敛为薄包装；root_modules.md 更新
-    status: ready
+    status: done
     dependencies: []
     acceptance_tests:
       - tests/unit/test_framework_optimize18.py
