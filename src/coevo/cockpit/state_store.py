@@ -16,12 +16,14 @@ No new dependency; Python stdlib only.
 from __future__ import annotations
 
 import json
+import functools
 import os
 import uuid
 from pathlib import Path
 from typing import Any
 
 from src.coevo.canon import canonical_json_bytes
+from src.coevo.jsonutil import reject_duplicate_pairs
 from . import (
     ArtifactSummary,
     CockpitValidationError,
@@ -235,15 +237,6 @@ def deserialize_views(
     return workspace, roles
 
 
-def _unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    result: dict[str, Any] = {}
-    for key, value in pairs:
-        if key in result:
-            raise CockpitValidationError(f"duplicate JSON key {key!r}")
-        result[key] = value
-    return result
-
-
 class CockpitStateStore:
     """Atomic, fail-closed JSON persistence for cockpit views."""
 
@@ -302,7 +295,12 @@ class CockpitStateStore:
         if len(body) > STATE_MAX_BYTES:
             raise CockpitValidationError("cockpit state file exceeds size limit")
         try:
-            data = json.loads(body.decode("utf-8"), object_pairs_hook=_unique_pairs)
+            data = json.loads(
+                body.decode("utf-8"),
+                object_pairs_hook=functools.partial(
+                    reject_duplicate_pairs, error_factory=CockpitValidationError
+                ),
+            )
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise CockpitValidationError("cockpit state is not valid JSON") from exc
         return deserialize_views(data)

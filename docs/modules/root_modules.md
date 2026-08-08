@@ -9,6 +9,7 @@
 | `timefmt.py` | `is_iso_utc_z` / `now_utc_iso_z` | 共享 ISO-8601 UTC 时间戳校验与生成（`\Z` 锚定、小数秒、日历校验、非字符串 fail-closed；依赖无关叶模块，框架层与产品模块统一引用） |
 | `canon.py` | `canonical_json_bytes` / `canonical_digest` | 共享 canonical JSON 序列化与 SHA-256 摘要（sort_keys、紧凑分隔符、可选 ASCII 转义、allow_nan 默认 False 拒绝 NaN/Infinity；依赖无关叶模块，框架层与产品审计哈希链统一引用，禁止内联副本） |
 | `ids.py` | `SAFE_ID` / `is_safe_id` / `HEX_64` / `is_hex_64` | 共享 safe-id 与 64-hex 正则/校验（safe-id `[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,63}`、hex `[0-9a-f]{64}`，非字符串/空/超长 fail-closed；依赖无关叶模块，产品与 framework 统一引用；task_flow/talent 语义差异保留独立） |
+| `jsonutil.py` | `reject_duplicate_pairs` | 共享 JSON 重复键拒绝守卫（object_pairs_hook，error_factory 可注入保持各模块异常语义，重复键 fail-closed；依赖无关叶模块，协议/清单/存储/清单解析统一引用） |
 | `logging_setup.py` | `setup_logging()` | 日志引导（stdlib logging，轮转 5MB×5，绝不吞审计链） |
 | `records_archive.py` | `archive_plan()` | 记录归档策略助手（纯函数：VERIFICATION/DECISIONS/tool-audit 分节、按容量+期限裁剪） |
 

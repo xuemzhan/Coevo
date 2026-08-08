@@ -13,11 +13,13 @@ L15: standard library only.
 from __future__ import annotations
 
 import hashlib
+import functools
 import json
 from dataclasses import dataclass
 from typing import Any
 
 from src.coevo.canon import canonical_json_bytes
+from src.coevo.jsonutil import reject_duplicate_pairs
 from src.coevo.framework.capability import CapabilityEntry
 from src.coevo.framework.plan import Plan
 from src.coevo.framework.policy import Policy
@@ -197,7 +199,12 @@ def validate_listing_bytes(data: bytes) -> dict[str, Any]:
     except UnicodeDecodeError as exc:
         raise ListingValidationError(f"listing is not valid UTF-8: {exc}") from exc
     try:
-        parsed = json.loads(text, object_pairs_hook=_reject_duplicate_pairs)
+        parsed = json.loads(
+            text,
+            object_pairs_hook=functools.partial(
+                reject_duplicate_pairs, error_factory=ListingValidationError
+            ),
+        )
     except json.JSONDecodeError as exc:
         raise ListingValidationError(f"listing is not valid JSON: {exc}") from exc
     if not isinstance(parsed, dict):
@@ -252,15 +259,6 @@ def _check_keys(mapping: dict[str, Any], allowed: frozenset[str], label: str) ->
         raise ListingValidationError(
             f"unsupported {label} keys: " + ", ".join(unknown)
         )
-
-
-def _reject_duplicate_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    out: dict[str, Any] = {}
-    for key, value in pairs:
-        if key in out:
-            raise ListingValidationError(f"duplicate key in listing: {key!r}")
-        out[key] = value
-    return out
 
 
 def render_yaml(listing_bytes: bytes) -> str:

@@ -33,6 +33,7 @@ L15: standard library only, no third-party runtime dependency.
 from __future__ import annotations
 
 import copy
+import functools
 import hashlib
 import json
 import re
@@ -40,6 +41,7 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
 from src.coevo.canon import canonical_json_bytes
+from src.coevo.jsonutil import reject_duplicate_pairs
 from src.coevo.crypto.contract import ProviderScope
 from src.coevo.framework.capability import (
     CapabilityKind,
@@ -243,7 +245,9 @@ def _parse_manifest(data: bytes) -> dict[str, Any]:
     try:
         parsed = json.loads(
             text,
-            object_pairs_hook=_reject_duplicate_keys,
+            object_pairs_hook=functools.partial(
+                reject_duplicate_pairs, error_factory=_InvalidManifest
+            ),
             parse_constant=_reject_non_standard_constant,
         )
     except json.JSONDecodeError as exc:
@@ -251,15 +255,6 @@ def _parse_manifest(data: bytes) -> dict[str, Any]:
     if not isinstance(parsed, dict):
         raise _InvalidManifest("manifest must be a JSON object")
     return parsed
-
-
-def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    out: dict[str, Any] = {}
-    for key, value in pairs:
-        if key in out:
-            raise _InvalidManifest(f"duplicate key in manifest: {key!r}")
-        out[key] = value
-    return out
 
 
 def _reject_non_standard_constant(name: str) -> Any:

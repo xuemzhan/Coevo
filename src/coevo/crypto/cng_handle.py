@@ -36,6 +36,7 @@ receives private-key bytes"):
 from __future__ import annotations
 
 import hashlib
+import functools
 import json
 import os
 import re
@@ -56,6 +57,7 @@ _HELPER_SHA256: Final[str] = "f01e88716658e837c191ca15aa20c6a85423b557bb4efd0661
 _MAX_INPUT_BYTES: Final[int] = 64 * 1024
 from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
 from src.coevo.canon import canonical_json_bytes
+from src.coevo.jsonutil import reject_duplicate_pairs
 
 
 class CngKekError(RuntimeError):
@@ -407,7 +409,12 @@ class CngWrappedKeyRegistry:
         if len(raw) > 4 * 1024 * 1024:
             raise CngKekValidationError("registry exceeds the size limit")
         try:
-            data = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique_pairs)
+            data = json.loads(
+                raw.decode("utf-8"),
+                object_pairs_hook=functools.partial(
+                    reject_duplicate_pairs, error_factory=CngKekValidationError
+                ),
+            )
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise CngKekValidationError("registry is not valid JSON") from exc
         if not isinstance(data, dict) or not isinstance(data.get("entries"), list):
@@ -443,15 +450,6 @@ class CngWrappedKeyRegistry:
             if entry["prev_hash"] != previous or entry["entry_hash"] != entry_hash:
                 raise CngKekValidationError("registry hash chain is invalid (tampered?)")
             previous = entry["entry_hash"]
-
-
-def _unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    result: dict[str, Any] = {}
-    for key, value in pairs:
-        if key in result:
-            raise CngKekValidationError(f"duplicate JSON key {key!r}")
-        result[key] = value
-    return result
 
 
 __all__ = [

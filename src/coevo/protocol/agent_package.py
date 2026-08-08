@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import functools
 import json
 import re
 import struct
@@ -43,6 +44,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import IntFlag
+from src.coevo.jsonutil import reject_duplicate_pairs
 from typing import Any, Mapping
 
 # Wire constants ------------------------------------------------------------
@@ -516,7 +518,15 @@ def decode_envelope(blob: bytes) -> EnvelopeHeader:
     except UnicodeDecodeError as exc:
         raise AgentPackageEnvelopeError("envelope is not valid UTF-8") from exc
     try:
-        parsed = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
+        parsed = json.loads(
+            text,
+            object_pairs_hook=functools.partial(
+                reject_duplicate_pairs,
+                error_factory=lambda message: json.JSONDecodeError(
+                    message, "", 0
+                ),
+            ),
+        )
     except json.JSONDecodeError as exc:
         raise AgentPackageEnvelopeError(f"envelope JSON is malformed: {exc.msg}") from exc
     if not isinstance(parsed, dict):
@@ -525,16 +535,6 @@ def decode_envelope(blob: bytes) -> EnvelopeHeader:
     if bytes(blob) != EnvelopeHeader.canonical_bytes(envelope):
         raise AgentPackageCanonicalizationError("envelope JSON is not canonical")
     return envelope
-
-
-def _reject_duplicate_keys(pairs: list[tuple[Any, Any]]) -> dict[Any, Any]:
-    seen: set[Any] = set()
-    for key, _ in pairs:
-        if key in seen:
-            from json import JSONDecodeError
-            raise JSONDecodeError("duplicate key in envelope", "", 0)
-        seen.add(key)
-    return dict(pairs)
 
 
 # ----------------------------------------------------------------------------
