@@ -49,6 +49,7 @@ from . import (
 
 from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
 from src.coevo.ids import HEX_64 as _HEX_64
+from src.coevo.relpath import is_safe_relative_path as _is_safe_relative_path
 
 DEFAULT_POLL_INTERVAL_SEC: float = 1.0
 DEFAULT_MAX_EVENTS: int = 256
@@ -116,13 +117,7 @@ class FileChangeEvent:
 
 
 def _check_relative_path(path: str) -> None:
-    if (
-        not isinstance(path, str)
-        or not path
-        or path.startswith("/")
-        or "\\" in path
-        or any(part in ("", ".", "..") for part in path.split("/"))
-    ):
+    if not _is_safe_relative_path(path):
         raise ProgressCaptureValidationError(
             f"relative_path must be a safe workspace-relative path; got {path!r}"
         )

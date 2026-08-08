@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from . import CockpitValidationError, WPSAllowList
+from src.coevo.relpath import is_safe_relative_path
 
 
 DEFAULT_WPS_EXECUTABLE: str = "wps.exe"
@@ -97,13 +98,7 @@ class WpsLauncher:
     def launch(self, artifact_path: str) -> WpsLaunchResult:
         """Validate the path, then launch the document in WPS."""
         digest = _hash_path(artifact_path)
-        if (
-            not isinstance(artifact_path, str)
-            or not artifact_path
-            or artifact_path.startswith("/")
-            or "\\" in artifact_path
-            or any(part in ("", ".", "..") for part in artifact_path.split("/"))
-        ):
+        if not is_safe_relative_path(artifact_path):
             return WpsLaunchResult(
                 WpsLaunchDecision.DENIED, digest, "path is not a safe relative path"
             )

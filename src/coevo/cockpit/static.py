@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Final
 
 from .models import CockpitValidationError
+from src.coevo.relpath import is_safe_relative_path
 
 
 
@@ -112,12 +113,7 @@ class _StaticAssetCache:
 
 def resolve_static_path(static_root: Path, relative: str) -> Path | None:
     """Resolve a static asset inside the root, or return None (fail-closed)."""
-    if not isinstance(relative, str) or not relative:
-        return None
-    if relative.startswith("/") or "\\" in relative or "\x00" in relative:
-        return None
-    parts = relative.split("/")
-    if any(part in ("", ".", "..") for part in parts):
+    if not is_safe_relative_path(relative):
         return None
     try:
         root = static_root.resolve(strict=True)
