@@ -1773,7 +1773,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-34
     story: ENG-BASE
     title: EnvelopeHeader.from_mapping（103 行）跨字段不变量校验块（package_type 枚举/协议期望值/compression/expires>created/nonce/1TiB）抽为静态方法 _validate_cross_fields，from_mapping 收敛为约 78 行，错误语义逐字节不变；守卫 test_framework_optimize35.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-33]
     acceptance_tests:
       - tests/unit/test_framework_optimize35.py

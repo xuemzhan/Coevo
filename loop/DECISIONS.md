@@ -5418,4 +5418,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-34 closure (from_mapping cross-field validation extraction; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-34` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-33]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: EnvelopeHeader.from_mapping (103 lines) extracted its post-construction cross-field invariant checks (package_type enum / protocol expected values / compression allow-list / expires>created / nonce non-empty / 1 TiB cap) into the static method _validate_cross_fields (29 lines); from_mapping is now a 78-line construction + validation orchestration. Check order, error messages and fail-closed semantics byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize35.py.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 63 integration/regression tests + 7 guard tests green (test_agent_wire_regression + test_agent_package_aead + test_agent_package_atomic_import); full quality waived per user instruction.
+- Security: pure structural migration; package validation semantics unchanged.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
