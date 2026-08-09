@@ -5383,4 +5383,11 @@ security-reviewer 双签门禁。
 - Security: pure structural migration; no keys/permissions/file boundaries.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-32 registration (_analyze risk-rule phase decomposition; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-32` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-31]): RiskAnalyzer._analyze (120 lines, the deferred P2 item) extracts its six risk rules into module-level pure functions returning Risk | None (_deadline_overrun_risk / _evidence_shortfall_risk / _long_silence_risk / _predecessor_unfinished_risk / _status_bloom_risk / _coordination_risk); _analyze becomes a ~65-line orchestration; rule order, risk fields (severity/due/affected/text) stay byte-identical; coordination keeps its original computation order (before the coordination rule appends); import surface unchanged; guard test test_framework_optimize33.py.
+- Security review: not required (pure structural migration; no keys/permissions).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

@@ -1747,3 +1747,14 @@ items:
       - tests/unit/test_talent_recommender.py
     security_review: false
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-32（2026-08-09 用户指令"继续优化"；_analyze 风险规则阶段化拆分） ----------
+  - id: FRAMEWORK-OPTIMIZE-32
+    story: ENG-BASE
+    title: risk/analyzer._analyze（120 行，P2 挂起项）六条风险规则抽为模块级纯函数 -> Risk | None（deadline/evidence/silence/predecessor/status-bloom/coordination），_analyze 收敛为约 65 行编排，判定顺序与风险字段逐字节不变；守卫 test_framework_optimize33.py
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-31]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize33.py
+      - tests/unit/test_risk_analyzer.py
+    security_review: false
+    protocol_review: false
