@@ -5621,4 +5621,11 @@ security-reviewer 双签门禁。
 - Security: model-output parsing security path reviewed (SAFE_ID, byte caps, ISO window, unknown-reference fail-closed); pure structural migration.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-27 registration (resume_real_chain phase decomposition; incremental gate)
+- User instruction: continue; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-27` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-26]): _real_chain.resume_real_chain (148 lines, cc~19) splits its validation-gate sequence by pure migration into 4 module-level helpers (_validate_resume_context / _verify_resume_bindings / _require_package_agent / _begin_resume); resume_real_chain keeps the local import block and the encrypted-package build/escalation path and becomes a ~95-line orchestration; check order, error messages and fail-closed semantics stay byte-identical; import surface unchanged; guard test test_framework_optimize28.py.
+- Security review: required (US-5 package build is security-critical: confirmed-state binding, event digest recompute, store consistency, package-agent capability gate, failure escalates to human); pure migration.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
