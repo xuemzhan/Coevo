@@ -5376,4 +5376,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-31 closure (_score_candidate phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-31` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-30]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: talent/recommender._score_candidate (123 lines) decomposed by pure migration into 5 module-level phase helpers (_match_skills / _match_credentials / _window_fit / _load_headroom / _tie_break) following the documented five-stage scoring algorithm; _score_candidate is now a 32-line orchestration. Weights, reason/alert semantics and deterministic ordering byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize32.py.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 60 tests green (test_talent_recommender + test_talent_store + guard); full quality waived per user instruction.
+- Security: pure structural migration; no keys/permissions/file boundaries.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

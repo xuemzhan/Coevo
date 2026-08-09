@@ -1740,7 +1740,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-31
     story: ENG-BASE
     title: talent/recommender._score_candidate（123 行）按评分算法五阶段纯迁移式拆分为 5 个模块级助手（skill/credential/window/load/tie-break），_score_candidate 收敛为约 35 行编排，权重与 reason/alert 语义逐字节不变；守卫 test_framework_optimize32.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-30]
     acceptance_tests:
       - tests/unit/test_framework_optimize32.py
