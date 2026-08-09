@@ -1794,7 +1794,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-36
     story: ENG-BASE
     title: 根因修复——CP65001 下 .NET StandardInput StreamWriter 预写 UTF-8 BOM 导致 COEVOPKI/2 帧双重 BOM → GMH-E-MAGIC；generate-sm2-test-pki.ps1 顶部钉无 BOM 编码（CP936）+ toolchain-lock launcher 重哈希
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-35]
     acceptance_tests:
       - tests/integration/test_sm2_test_pki_generation.py
