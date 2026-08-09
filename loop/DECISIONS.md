@@ -5355,4 +5355,11 @@ security-reviewer 双签门禁。
 - Security: comments only; no logic change; docstrings match existing fail-closed semantics.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-30 registration (comment completion final batch: audit_governance + real_chain_store; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-30` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-29]): final comment-completion batch ? 32 functions in audit_governance (stream_store/facade, 5) and orchestrator/real_chain_store (27, including 9 nested `operation` transaction closures and the nested `validate` in canonical_json_bytes) get docstrings documenting fail-closed semantics, audit/hash-chain binding and transaction atomicity contracts; pure comments, zero behavior change; guard test test_framework_optimize31.py.
+- Security review: not required (comments only, no logic change).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
