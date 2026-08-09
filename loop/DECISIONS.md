@@ -5411,4 +5411,11 @@ security-reviewer 双签门禁。
 - Security: validation tightening is fail-closed strengthening; behavior delta recorded above.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-34 registration (from_mapping cross-field validation extraction; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-34` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-33]): EnvelopeHeader.from_mapping (103 lines) extracts its post-construction cross-field invariant checks (package_type enum / protocol expected values / compression allow-list / expires>created / nonce non-empty / 1 TiB cap) into a static method _validate_cross_fields; from_mapping becomes a ~78-line construction + validation orchestration; check order, error messages and fail-closed semantics stay byte-identical; import surface unchanged; guard test test_framework_optimize35.py.
+- Security review: not required (pure structural migration; package validation semantics unchanged).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
