@@ -478,16 +478,19 @@ def confirm_real_chain(held: RealChainOutcome, *, preview: PackagePreview,
         raise OrchestratorValidationError(str(exc)) from exc
 
 
-def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any, event: Any,
-                      workspace: Any, executor: RealChainExecutor,
-                      store: RealChainStore, now: str, crypto_provider: Any | None = None,
-                      sender_handle: Any | None = None,
-                      recipient_handle: Any | None = None) -> RealChainOutcome:
-    """Build the US-5 package only after the stored confirmation is validated."""
-    from . import (
-        FailurePolicy, OrchestrationOutcome, OrchestrationStepResult,
-        OrchestratorValidationError,
-    )
+def _validate_resume_context(
+    *,
+    confirmed: RealChainOutcome,
+    registry: Any,
+    chain: Any,
+    event: Any,
+    workspace: Any,
+    executor: RealChainExecutor,
+    store: RealChainStore,
+    now: str,
+) -> None:
+    """Validate the confirmed outcome and the resume context (fail-closed)."""
+    from . import OrchestrationOutcome, OrchestratorValidationError
     if (not isinstance(confirmed, RealChainOutcome)
             or confirmed.orch_report.outcome != OrchestrationOutcome.CONFIRMED_PENDING_PACKAGE
             or not confirmed.confirmation_digest):
@@ -506,6 +509,16 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
         raise OrchestratorValidationError(
             "resume workspace revision does not match confirmed base_revision"
         )
+
+
+def _verify_resume_bindings(
+    *,
+    confirmed: RealChainOutcome,
+    event: Any,
+    store: RealChainStore,
+) -> None:
+    """Recompute the event digest and require the stored confirmed outcome to match."""
+    from . import OrchestratorValidationError
     try:
         current_event_digest = canonical_digest({
             "event_id": event.event_id,
@@ -521,6 +534,18 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
             raise OrchestratorValidationError("confirmed outcome does not match stored state")
     except RealChainStoreError as exc:
         raise OrchestratorValidationError(str(exc)) from exc
+
+
+def _require_package_agent(
+    *,
+    registry: Any,
+    chain: Any,
+    confirmed: RealChainOutcome,
+    store: RealChainStore,
+    now: str,
+) -> None:
+    """Require the step-4 package agent to be registered, capable and AVAILABLE."""
+    from . import AgentCapability, AgentStatus, OrchestratorValidationError
     registration = registry.get(chain.steps[4].agent_id)
     from . import AgentCapability, AgentStatus
     if (registration is None
@@ -529,6 +554,16 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
         store.record_attempt(confirmed.event_id, confirmed.event_digest,
                              "resume", "package_agent_unavailable", now)
         raise OrchestratorValidationError("step 4 package agent must be registered and AVAILABLE")
+
+
+def _begin_resume(
+    *,
+    confirmed: RealChainOutcome,
+    store: RealChainStore,
+    now: str,
+) -> str:
+    """Require the package preview and begin the atomic resume; returns the resume digest."""
+    from . import OrchestratorValidationError
     if confirmed.package_preview is None:
         raise OrchestratorValidationError("confirmed outcome is missing package preview")
     resume_digest = canonical_digest({
@@ -541,6 +576,29 @@ def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any,
         store.begin_resume(confirmed.event_id, confirmed.event_digest, resume_digest, now)
     except RealChainStoreError as exc:
         raise OrchestratorValidationError(str(exc)) from exc
+    return resume_digest
+
+
+def resume_real_chain(confirmed: RealChainOutcome, *, registry: Any, chain: Any, event: Any,
+                      workspace: Any, executor: RealChainExecutor,
+                      store: RealChainStore, now: str, crypto_provider: Any | None = None,
+                      sender_handle: Any | None = None,
+                      recipient_handle: Any | None = None) -> RealChainOutcome:
+    """Build the US-5 package only after the stored confirmation is validated."""
+    from . import (
+        FailurePolicy, OrchestrationOutcome, OrchestrationStepResult,
+        OrchestratorValidationError,
+    )
+    _validate_resume_context(
+        confirmed=confirmed, registry=registry, chain=chain, event=event,
+        workspace=workspace, executor=executor, store=store, now=now,
+    )
+    _verify_resume_bindings(confirmed=confirmed, event=event, store=store)
+    _require_package_agent(
+        registry=registry, chain=chain, confirmed=confirmed,
+        store=store, now=now,
+    )
+    resume_digest = _begin_resume(confirmed=confirmed, store=store, now=now)
 
     traces = list(confirmed.orch_report.trace)
     summaries = {
