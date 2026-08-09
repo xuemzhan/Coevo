@@ -5586,4 +5586,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-24 closure (merge_and_commit phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-24` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-23]). User instruction: continue; no full gate (waiver recorded).
+- Delivery: MergeEngine.merge_and_commit (176 lines) decomposed by pure migration into 4 private phase helpers (_receipt_context / _receipt_binding_rejection / _field_decision_rejection / _status_task_rejection); merge_and_commit() is now a 123-line linear orchestration. Check order, rejection_reason strings and fail-closed semantics byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize25.py. Two migration omissions were caught by the regression suite and fixed (receipt_builder closure referenced imported_record; the final MergeCommitOutcome return was missing); tests red then green.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 74 tests green (test_merge_commit_receipt + test_merge_engine + test_merge_engine_v3 + guard = 71 unit; integration test_merge_risk_receipt_chain = 3); full quality waived per user instruction.
+- Security: receipt-chain security path reviewed (signer binding, field-decision allow-list, CAS atomic commit); pure structural migration.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

@@ -10103,3 +10103,248 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-09T00:38:17.100274Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-09T00:39:10.455308Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+lone_risk_report/_clone_confirmation/_build_content/_risk_conclusion/_make_version/_validate_stored_brief/_validate_content_model/_clone_content/_clone_brief/_brief_id/_validate_docx），逐函数惰性导入 `.models` 规避 dataclass↔助手循环，models 底部 `from ._build import (...)` 再导出保持导入面不变；随迁出清理 models 不再使用的 zipfile 导入",
+      "code": [
+        "src/coevo/decision_brief/_build.py",
+        "src/coevo/decision_brief/models.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize21.py",
+        "tests/unit/test_decision_brief.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/_build.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/models.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize21.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_decision_brief.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-21",
+      "title": "死导入清理 + BACKLOG 卫生（2026-08-09，用户指令\"继续优化\"；增量门禁）：AST 全仓扫描确认 10 个生产文件共 11 处未使用顶层导入并全部删除（app/demo_support now_utc_iso_z、cockpit/sessions re、decision_brief/_build RiskKind/SourceKind、framework/integration json、framework/memory 与 framework/validation Any、identity/certificates 与 identity/private_keys os、identity/validation json、knowledge_base/models re、progress_capture/watcher Final；纯删除零行为变化）；BACKLOG FRAMEWORK-OPTIMIZE-20 ready→done 补正（RECORDS-2 惯例）；新增全仓静态守卫 tests/unit/test_framework_optimize22.py（AST 扫描 src/coevo 非 `__init__` 模块，允许清单仅覆盖 decision_brief/models 的 14 个有意再导出）",
+      "code": [
+        "src/coevo/app/demo_support.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/decision_brief/_build.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/private_keys.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/progress_capture/watcher.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize22.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/app/demo_support.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/_build.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize22.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-22",
+      "title": "MergeEngine.merge 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：394 行/复杂度约 33 的全仓最大单体方法按 docstring 算法 1-7 步纯迁移拆为 8 个私有阶段助手（_validate_merge_inputs/_import_binding_rejection/_duplicate_rejection/_revision_rejection/_decision_maker_rejection/_merge_fields/_rejected_proposal/_commit_proposal），merge 收敛为 133 行线性编排；校验顺序、rejection_reason 字符串、失败关闭语义逐字节不变；新增守卫 tests/unit/test_framework_optimize23.py（merge≤200 行、8 助手存在且被调用、关键拒绝标记存活）",
+      "code": [
+        "src/coevo/merge/engine.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize23.py",
+        "tests/unit/test_merge_engine.py",
+        "tests/unit/test_merge_engine_v3.py",
+        "tests/unit/test_merge_commit_receipt.py",
+        "tests/integration/test_merge_risk_receipt_chain.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/merge/engine.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize23.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_merge_engine.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_merge_engine_v3.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_merge_commit_receipt.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_merge_risk_receipt_chain.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-23",
+      "title": "manifest_checker._validate 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：150 行/复杂度约 33 的部署点校验函数按既有顺序纯迁移拆为 7 个模块级阶段助手（_validate_metadata/_validate_spec/_validate_security/_validate_audit/_require_policy/_compute_spec_hash/_verify_policy_binding），_validate 收敛为 31 行线性编排；错误消息与失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize24.py；同时修复 OPTIMIZE-21 回归——demo_support.now_utc_iso_z 实为 app 包再导出（app/__init__.py 依赖），恢复导入并把该再导出加入未使用导入守卫允许清单",
+      "code": [
+        "src/coevo/framework/manifest_checker.py",
+        "src/coevo/app/demo_support.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize24.py",
+        "tests/unit/test_framework_manifest_checker.py",
+        "tests/unit/test_framework_optimize14.py",
+        "tests/unit/test_framework_optimize22.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/demo_support.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize24.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_manifest_checker.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize14.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize22.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
