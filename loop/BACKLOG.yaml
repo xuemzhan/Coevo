@@ -1815,7 +1815,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-38
     story: ENG-BASE
     title: decision_brief/_build._build_content（145 行/cc~19，当前最高复杂度大函数）按三类型分支纯迁移式拆分为 3 个模块级助手（_type_parameters/_content_title/_progress_text），_build_content 收敛为约 70 行组装编排，文案与错误语义逐字节不变；守卫 test_framework_optimize38.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-37]
     acceptance_tests:
       - tests/unit/test_framework_optimize38.py

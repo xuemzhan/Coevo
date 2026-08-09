@@ -5456,4 +5456,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-38 closure (_build_content phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-38` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-37]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: decision_brief/_build._build_content (145 lines, cc~19) decomposed by pure migration into 3 module-level phase helpers (_type_parameters: AC-5 type-parameter validation returning the topic set; _content_title: label + type suffix; _progress_text: per-type progress text); _build_content is now a 98-line assembly orchestration keeping the source/change conclusions and the RISK_TOPIC/default branches verbatim. Check order, error messages, title/progress text and risk fields byte-identical; per-function lazy imports kept. Guard test tests/unit/test_framework_optimize38.py; OPTIMIZE-21 guard updated for the 3 new helpers. Also closed a records gap: OPTIMIZE-35/36/37 matrix rows were added retroactively and the ENG-BASE row-count pin updated 98 -> 102.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 33 tests green (test_decision_brief + guards); full quality waived per user instruction.
+- Security: pure structural migration; brief content semantics unchanged.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

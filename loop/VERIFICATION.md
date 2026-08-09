@@ -9805,3 +9805,270 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-09T13:19:15.953153Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-09T13:20:04.339625Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+    "kind": "code",
+          "path": "src/coevo/crypto/gmssl_provider.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/sm3.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/audit_anchor.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/repository.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/agent_package.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/package_store_db.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/package_builder.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/import_service.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/replay_detector.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize30.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-30",
+      "title": "注释补全收尾（2026-08-09，用户指令\"继续优化\"；增量门禁）：audit_governance（stream_store/facade，5 处）+ orchestrator/real_chain_store（27 处，含 canonical_json_bytes 内嵌套 validate 与 9 个 operation 事务闭包）共 32 个函数补全 docstring，写明失败关闭/审计链绑定/事务原子性契约；纯注释零行为变化；守卫 tests/unit/test_framework_optimize31.py（32 函数每个出现均有非空 docstring，一行桩豁免）",
+      "code": [
+        "src/coevo/audit_governance/stream_store.py",
+        "src/coevo/audit_governance/facade.py",
+        "src/coevo/orchestrator/real_chain_store.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize31.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/stream_store.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/facade.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/orchestrator/real_chain_store.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize31.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-31",
+      "title": "_score_candidate 阶段化拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：talent/recommender._score_candidate（123 行）按评分算法五阶段纯迁移式拆分为 5 个模块级助手（_match_skills/_match_credentials/_window_fit/_load_headroom/_tie_break），_score_candidate 收敛为 32 行编排；评分权重、reason/alert 语义、确定性排序逐字节不变；守卫 tests/unit/test_framework_optimize32.py",
+      "code": [
+        "src/coevo/talent/recommender.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize32.py",
+        "tests/unit/test_talent_recommender.py",
+        "tests/unit/test_talent_store.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/talent/recommender.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize32.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_talent_recommender.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_talent_store.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-33",
+      "title": "64-hex 正则收敛并收紧（2026-08-09，用户指令\"继续优化\"；增量门禁）：4 处本地 `[0-9a-f]{64}` 副本收敛到共享叶子 ids.HEX_64/is_hex_64（identity/private_keys PUBLIC_DIGEST_RE、protocol/sm2_sign _HEX_RE（随删未使用的 import re）、audit_governance/models digest_hex、crypto/cng_handle 两处 fullmatch）；共享正则 `$`→`\\Z` 收紧——尾部换行由放行改拒绝（失败关闭强化，与既有 fullmatch 站点一致，行为差异记录在案）；更新 test_framework_optimize13 pattern 钉与收敛守卫 + 新增守卫 test_framework_optimize34.py",
+      "code": [
+        "src/coevo/ids.py",
+        "src/coevo/identity/private_keys.py",
+        "src/coevo/protocol/sm2_sign.py",
+        "src/coevo/audit_governance/models.py",
+        "src/coevo/crypto/cng_handle.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize34.py",
+        "tests/unit/test_framework_optimize13.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/ids.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/sm2_sign.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/audit_governance/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/cng_handle.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize34.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize13.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-34",
+      "title": "from_mapping 跨字段校验抽取（2026-08-09，用户指令\"继续优化\"；增量门禁）：EnvelopeHeader.from_mapping（103 行）构造后跨字段不变量校验块（package_type 枚举/协议期望值/compression 白名单/expires>created/nonce 非空/1 TiB 上限）抽为静态方法 `_validate_cross_fields`（29 行），from_mapping 收敛为 78 行构造+校验编排；校验顺序、错误消息、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize35.py",
+      "code": [
+        "src/coevo/protocol/agent_package.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize35.py",
+        "tests/unit/test_agent_wire_regression.py",
+        "tests/integration/test_agent_package_aead.py",
+        "tests/integration/test_agent_package_atomic_import.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/protocol/agent_package.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize35.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_agent_wire_regression.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_agent_package_aead.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_agent_package_atomic_import.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
