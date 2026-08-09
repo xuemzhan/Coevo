@@ -81,6 +81,10 @@ class RiskAnalyzer:
         baseline: ProjectBaseline,
         now: str,
     ) -> RiskReport:
+        """Run the deterministic US-11 risk rules over the latest authoritative receipt.
+
+        Produces a candidate RiskReport only (the model enforces
+        ``requires_owner_confirmation`` before formal release)."""
         reference_time = _parse_utc(now, field="now")
         decided_time = _parse_utc(
             receipt.commit_decided_at, field="receipt.commit_decided_at",
@@ -92,98 +96,70 @@ class RiskAnalyzer:
         all_tasks = tuple(sorted(tasks))
         package_id = receipt.package_id
         risks: list[Risk] = []
-        project_receipts = tuple(
-            item for item in receipt_history if item.project_id == baseline.project_id
+        completed_task_ids = _validated_completed_task_ids(
+            receipt=receipt, receipt_history=receipt_history,
+            baseline=baseline, tasks=tasks,
         )
-        if not project_receipts or project_receipts[-1] != receipt:
-            raise RiskValidationError(
-                "receipt must be the latest authoritative project commit"
-            )
-        completed_task_ids = {
-            historical.completed_task_id
-            for historical in project_receipts
-            if historical.completed_task_id is not None
-        }
-        if not completed_task_ids.issubset(tasks):
-            raise RiskValidationError(
-                "receipt history contains completion for an unknown task"
-            )
 
         overdue = tuple(sorted(
             task_id for task_id, task in tasks.items()
             if _parse_utc(task.plan_end, field=f"task {task_id}.plan_end") < reference_time
         ))
         project_end = _parse_utc(baseline.plan_end, field="baseline.plan_end")
-        if overdue or project_end < reference_time:
-            risks.append(_risk(
-                package_id, RiskKind.DEADLINE_OVERRUN, SourceKind.FACTUAL,
-                f"task/project deadline precedes now {now!r} (AC-2 deadline)",
-                overdue or all_tasks,
-                "renegotiate the plan or escalate to the project owner",
-                reference_time, 7, 4, "factual deadline overrun",
-            ))
+        risk = _deadline_overrun_risk(
+            package_id=package_id, all_tasks=all_tasks, overdue=overdue,
+            project_end=project_end, reference_time=reference_time, now=now,
+        )
+        if risk is not None:
+            risks.append(risk)
 
-        if len(completed_task_ids) < self.evidence_shortfall_threshold:
-            risks.append(_risk(
-                package_id, RiskKind.INSUFFICIENT_EVIDENCE, SourceKind.FACTUAL,
-                "authoritative receipts contain insufficient completed tasks (AC-2 evidence)",
-                all_tasks, "request accepted completed-work evidence",
-                reference_time, 3, 2, "factual evidence shortfall",
-            ))
+        risk = _evidence_shortfall_risk(
+            package_id=package_id, all_tasks=all_tasks,
+            completed_task_ids=completed_task_ids, reference_time=reference_time,
+            threshold=self.evidence_shortfall_threshold,
+        )
+        if risk is not None:
+            risks.append(risk)
 
-        if reference_time - decided_time >= dt.timedelta(days=self.silence_threshold_days):
-            risks.append(_risk(
-                package_id, RiskKind.LONG_SILENCE, SourceKind.FACTUAL,
-                f"no merged feedback for at least {self.silence_threshold_days} days (AC-2 silence)",
-                all_tasks, "follow up with the reporter and review the task plan",
-                reference_time, 2, 3, "factual long-silence detection",
-            ))
+        risk = _long_silence_risk(
+            package_id=package_id, all_tasks=all_tasks,
+            reference_time=reference_time, decided_time=decided_time,
+            threshold_days=self.silence_threshold_days,
+        )
+        if risk is not None:
+            risks.append(risk)
 
         unfinished = tuple(sorted({
             edge.predecessor_task_id for edge in baseline.dependencies
             if edge.predecessor_task_id not in completed_task_ids
         }))
-        if unfinished:
-            affected = _descendants(unfinished, successors)
-            risks.append(_risk(
-                package_id, RiskKind.PREDECESSOR_UNFINISHED, SourceKind.RULE,
-                f"predecessors {unfinished!r} lack accepted completion markers (AC-2 predecessor)",
-                affected, "confirm predecessor completion before starting successors",
-                reference_time, 5, 3, "deterministic dependency-edge rule",
-            ))
+        risk = _predecessor_unfinished_risk(
+            package_id=package_id, unfinished=unfinished,
+            successors=successors, reference_time=reference_time,
+        )
+        if risk is not None:
+            risks.append(risk)
 
         dependent_tasks = tuple(sorted({
             task_id for values in successors.values() for task_id in values
         })) or all_tasks
-        if receipt.report_status is ReportStatus.AT_RISK:
-            risks.append(_risk(
-                package_id, RiskKind.AT_RISK_BLOOM, SourceKind.INFERRED,
-                "merged status is AT_RISK; dependent tasks may inherit risk (AC-4 inferred)",
-                dependent_tasks, "schedule a checkpoint before the next deliverable",
-                reference_time, 3, 2, "deterministic AT_RISK propagation heuristic",
-            ))
-        elif receipt.report_status is ReportStatus.BLOCKED:
-            risks.append(_risk(
-                package_id, RiskKind.BLOCKED_BLOOM, SourceKind.INFERRED,
-                "merged status is BLOCKED; dependent tasks may stall (AC-4 inferred)",
-                dependent_tasks, "prepare a coordination-meeting proposal for owner review",
-                reference_time, 1, 4, "deterministic BLOCKED propagation heuristic",
-            ))
+        risk = _status_bloom_risk(
+            package_id=package_id, dependent_tasks=dependent_tasks,
+            report_status=receipt.report_status, reference_time=reference_time,
+        )
+        if risk is not None:
+            risks.append(risk)
 
         coordination = any(
             risk.severity >= self.severe_severity_threshold for risk in risks
         )
-        if coordination:
-            affected = tuple(sorted({
-                task_id for risk in risks for task_id in risk.affected_tasks
-            }))
-            risks.append(_risk(
-                package_id, RiskKind.SEVERE_COORDINATION_NEEDED, SourceKind.RULE,
-                f"risk severity reached {self.severe_severity_threshold} (AC-7 suggestion only)",
-                affected, "request owner confirmation before starting a meeting",
-                reference_time, 2, 4,
-                "coordination threshold rule; no meeting was started",
-            ))
+        risk = _coordination_risk(
+            package_id=package_id, risks=risks, reference_time=reference_time,
+            severe_threshold=self.severe_severity_threshold,
+            coordination=coordination,
+        )
+        if risk is not None:
+            risks.append(risk)
 
         risks.sort(key=lambda risk: (risk.kind.value, risk.risk_id))
         return RiskReport(
@@ -343,3 +319,156 @@ def _risk(
 
 def _plus_days(value: dt.datetime, days: int) -> str:
     return (value + dt.timedelta(days=days)).isoformat().replace("+00:00", "Z")
+
+
+def _validated_completed_task_ids(
+    *,
+    receipt: MergeCommitReceipt,
+    receipt_history: tuple[MergeCommitReceipt, ...],
+    baseline: ProjectBaseline,
+    tasks: dict[str, object],
+) -> set[str]:
+    """Require the latest authoritative project receipt; return its completed-task ids (fail-closed)."""
+    project_receipts = tuple(
+        item for item in receipt_history if item.project_id == baseline.project_id
+    )
+    if not project_receipts or project_receipts[-1] != receipt:
+        raise RiskValidationError(
+            "receipt must be the latest authoritative project commit"
+        )
+    completed_task_ids = {
+        historical.completed_task_id
+        for historical in project_receipts
+        if historical.completed_task_id is not None
+    }
+    if not completed_task_ids.issubset(tasks):
+        raise RiskValidationError(
+            "receipt history contains completion for an unknown task"
+        )
+    return completed_task_ids
+
+
+def _deadline_overrun_risk(
+    *,
+    package_id: str,
+    all_tasks: tuple[str, ...],
+    overdue: tuple[str, ...],
+    project_end: dt.datetime,
+    reference_time: dt.datetime,
+    now: str,
+) -> Risk | None:
+    """DEADLINE_OVERRUN: task/project deadline precedes now (AC-2 deadline)."""
+    if overdue or project_end < reference_time:
+        return _risk(
+            package_id, RiskKind.DEADLINE_OVERRUN, SourceKind.FACTUAL,
+            f"task/project deadline precedes now {now!r} (AC-2 deadline)",
+            overdue or all_tasks,
+            "renegotiate the plan or escalate to the project owner",
+            reference_time, 7, 4, "factual deadline overrun",
+        )
+    return None
+
+
+def _evidence_shortfall_risk(
+    *,
+    package_id: str,
+    all_tasks: tuple[str, ...],
+    completed_task_ids: set[str],
+    reference_time: dt.datetime,
+    threshold: int,
+) -> Risk | None:
+    """INSUFFICIENT_EVIDENCE: authoritative receipts carry too few completed tasks (AC-2 evidence)."""
+    if len(completed_task_ids) < threshold:
+        return _risk(
+            package_id, RiskKind.INSUFFICIENT_EVIDENCE, SourceKind.FACTUAL,
+            "authoritative receipts contain insufficient completed tasks (AC-2 evidence)",
+            all_tasks, "request accepted completed-work evidence",
+            reference_time, 3, 2, "factual evidence shortfall",
+        )
+    return None
+
+
+def _long_silence_risk(
+    *,
+    package_id: str,
+    all_tasks: tuple[str, ...],
+    reference_time: dt.datetime,
+    decided_time: dt.datetime,
+    threshold_days: int,
+) -> Risk | None:
+    """LONG_SILENCE: no merged feedback for at least threshold days (AC-2 silence)."""
+    if reference_time - decided_time >= dt.timedelta(days=threshold_days):
+        return _risk(
+            package_id, RiskKind.LONG_SILENCE, SourceKind.FACTUAL,
+            f"no merged feedback for at least {threshold_days} days (AC-2 silence)",
+            all_tasks, "follow up with the reporter and review the task plan",
+            reference_time, 2, 3, "factual long-silence detection",
+        )
+    return None
+
+
+def _predecessor_unfinished_risk(
+    *,
+    package_id: str,
+    unfinished: tuple[str, ...],
+    successors: dict[str, set[str]],
+    reference_time: dt.datetime,
+) -> Risk | None:
+    """PREDECESSOR_UNFINISHED: predecessors lack accepted completion markers (AC-2 predecessor)."""
+    if unfinished:
+        affected = _descendants(unfinished, successors)
+        return _risk(
+            package_id, RiskKind.PREDECESSOR_UNFINISHED, SourceKind.RULE,
+            f"predecessors {unfinished!r} lack accepted completion markers (AC-2 predecessor)",
+            affected, "confirm predecessor completion before starting successors",
+            reference_time, 5, 3, "deterministic dependency-edge rule",
+        )
+    return None
+
+
+def _status_bloom_risk(
+    *,
+    package_id: str,
+    dependent_tasks: tuple[str, ...],
+    report_status: ReportStatus,
+    reference_time: dt.datetime,
+) -> Risk | None:
+    """AT_RISK_BLOOM / BLOCKED_BLOOM: merged status may propagate to dependent tasks (AC-4 inferred)."""
+    if report_status is ReportStatus.AT_RISK:
+        return _risk(
+            package_id, RiskKind.AT_RISK_BLOOM, SourceKind.INFERRED,
+            "merged status is AT_RISK; dependent tasks may inherit risk (AC-4 inferred)",
+            dependent_tasks, "schedule a checkpoint before the next deliverable",
+            reference_time, 3, 2, "deterministic AT_RISK propagation heuristic",
+        )
+    if report_status is ReportStatus.BLOCKED:
+        return _risk(
+            package_id, RiskKind.BLOCKED_BLOOM, SourceKind.INFERRED,
+            "merged status is BLOCKED; dependent tasks may stall (AC-4 inferred)",
+            dependent_tasks, "prepare a coordination-meeting proposal for owner review",
+            reference_time, 1, 4, "deterministic BLOCKED propagation heuristic",
+        )
+    return None
+
+
+def _coordination_risk(
+    *,
+    package_id: str,
+    risks: list[Risk],
+    reference_time: dt.datetime,
+    severe_threshold: int,
+    coordination: bool,
+) -> Risk | None:
+    """SEVERE_COORDINATION_NEEDED: severity threshold reached (AC-7 suggestion only)."""
+    if not coordination:
+        return None
+    affected = tuple(sorted({
+        task_id for risk in risks for task_id in risk.affected_tasks
+    }))
+    return _risk(
+        package_id, RiskKind.SEVERE_COORDINATION_NEEDED, SourceKind.RULE,
+        f"risk severity reached {severe_threshold} (AC-7 suggestion only)",
+        affected, "request owner confirmation before starting a meeting",
+        reference_time, 2, 4,
+        "coordination threshold rule; no meeting was started",
+    )
