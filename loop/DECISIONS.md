@@ -5579,4 +5579,11 @@ security-reviewer 双签门禁。
 - Security: deployment-point manifest security path reviewed (capability allow-list, cert fingerprint binding, SM2 verification, policy registry); pure structural migration.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-24 registration (merge_and_commit phase decomposition; incremental gate)
+- User instruction: continue; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-24` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-23]): MergeEngine.merge_and_commit (176 lines, cc~10) is split by pure migration into 4 private phase helpers (_receipt_context / _receipt_binding_rejection / _field_decision_rejection / _status_task_rejection); merge_and_commit() becomes a linear orchestration (~100 lines); check order, rejection_reason strings and fail-closed semantics stay byte-identical; import surface unchanged; guard test test_framework_optimize25.py.
+- Security review: required (receipt chain is security-critical: signer binding, field-decision allow-list, CAS atomic commit); pure migration.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

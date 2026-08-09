@@ -1661,3 +1661,15 @@ items:
       - tests/unit/test_framework_manifest_checker.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-24（2026-08-09 用户指令"继续"；merge_and_commit 阶段化拆分） ----------
+  - id: FRAMEWORK-OPTIMIZE-24
+    story: ENG-BASE
+    title: MergeEngine.merge_and_commit（176 行）在 merge 拆分后做同款纯迁移式拆分为 4 个阶段助手（回执上下文/导入绑定/字段决策/status-task），merge_and_commit 收敛为线性编排，拒绝字符串与失败关闭语义逐字节不变；守卫 test_framework_optimize25.py
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-23]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize25.py
+      - tests/unit/test_merge_commit_receipt.py
+      - tests/unit/test_merge_engine.py
+    security_review: true
+    protocol_review: false
