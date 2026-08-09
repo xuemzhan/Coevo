@@ -1822,3 +1822,14 @@ items:
       - tests/unit/test_decision_brief.py
     security_review: false
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-39（2026-08-09 用户指令"继续优化"；revise 字段覆盖去重） ----------
+  - id: FRAMEWORK-OPTIMIZE-39
+    story: ENG-BASE
+    title: ProgressCaptureService.revise（109 行）内 text/kind/confidence 三块同构 ItemOverride 构造去重为共享助手 _apply_override，判定顺序与 override 语义逐字节不变；守卫 test_framework_optimize39.py
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-38]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize39.py
+      - tests/unit/test_progress_capture.py
+    security_review: false
+    protocol_review: false

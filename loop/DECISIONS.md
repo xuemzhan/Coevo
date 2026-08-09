@@ -5463,4 +5463,11 @@ security-reviewer 双签门禁。
 - Security: pure structural migration; brief content semantics unchanged.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-39 registration (revise field-override dedup; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-39` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-38]): ProgressCaptureService.revise (109 lines) has three isomorphic per-field override blocks (text/kind/confidence) each constructing ItemOverride with the same shape; extract a shared module-level helper _apply_override(overrides, *, target_path, original_value, edited_value, reason, now) -> (overrides + (ItemOverride(...),), edited_value); revise keeps the ProgressItemKind type check at the kind call site; check order, override fields and error semantics stay byte-identical; guard test test_framework_optimize39.py.
+- Security review: not required (pure dedup extraction; override semantics unchanged).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
