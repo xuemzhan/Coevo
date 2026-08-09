@@ -5362,4 +5362,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-30 closure (comment completion final batch: audit + real_chain_store; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-30` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-29]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: final comment-completion batch ? 32 functions in audit_governance (stream_store/facade, 5) and orchestrator/real_chain_store (27, including the nested `validate` in canonical_json_bytes and 9 `operation` transaction closures) received docstrings documenting fail-closed semantics, audit/hash-chain binding and transaction atomicity contracts. Pure comments, zero behavior change. Guard test tests/unit/test_framework_optimize31.py asserts every occurrence of the 32 required names carries a non-empty docstring (one-line stubs exempt). With this round the repository-wide docstring-completion sweep (FRAMEWORK-OPTIMIZE-28/29/30) is complete: 163 functions documented across decision_brief/merge/orchestrator/crypto/identity/protocol/audit/real_chain_store.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 82 tests green (audit_governance + audit_stream_store + real_chain_store + orchestrator + guard); full quality waived per user instruction.
+- Security: comments only; no logic change.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

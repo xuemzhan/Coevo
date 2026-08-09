@@ -1730,7 +1730,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-30
     story: ENG-BASE
     title: audit_governance（5 处）+ orchestrator/real_chain_store（27 处，含 9 个 operation 事务闭包）共 32 个函数 docstring 补全（审计链/事务原子性契约，纯注释零行为变化），注释补全收尾；守卫 test_framework_optimize31.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-29]
     acceptance_tests:
       - tests/unit/test_framework_optimize31.py
