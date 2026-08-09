@@ -5635,4 +5635,11 @@ security-reviewer 双签门禁。
 - Security: US-5 package-build security path reviewed (confirmed-state binding, event digest recompute, store consistency, package-agent capability gate, failure escalates to human); pure structural migration.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-28 registration (comment strengthening: docstring completion for refactored domains; incremental gate)
+- User instruction: continue strengthening code comments; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-28` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-27]): complete docstrings for 70 functions in the three recently refactored domains (decision_brief/_build,_util,models; merge/engine,receipt,repository,models; orchestrator/_real_chain), documenting fail-closed semantics, hash-chain bindings and return/exception contracts; pure documentation, zero behavior change; also closes the docstring gap left by the OPTIMIZE-20 _build.py migration; guard test test_framework_optimize29.py.
+- Security review: not required (comments only, no logic change; docstrings match existing fail-closed semantics).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

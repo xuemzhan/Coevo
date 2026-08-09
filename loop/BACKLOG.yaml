@@ -1706,3 +1706,13 @@ items:
       - tests/unit/test_orchestrator.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-28（2026-08-09 用户指令"继续加强代码的注释"；重构域注释强化） ----------
+  - id: FRAMEWORK-OPTIMIZE-28
+    story: ENG-BASE
+    title: decision_brief/merge/orchestrator 三域 70 个函数 docstring 补全（失败关闭/哈希链/回执绑定契约，纯注释零行为变化），补齐 OPTIMIZE-20 _build.py 迁移缺口；守卫 test_framework_optimize29.py
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-27]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize29.py
+    security_review: false
+    protocol_review: false
