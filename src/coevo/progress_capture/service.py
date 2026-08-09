@@ -139,42 +139,27 @@ class ProgressCaptureService:
             replaced_confidence = item.confidence
             if new_text is not None:
                 _check_non_empty_str(new_text, field="new_text")
-                new_overrides = new_overrides + (
-                    ItemOverride(
-                        target_path="text",
-                        original_value=item.text,
-                        edited_value=new_text,
-                        reason=reason,
-                        edited_at=now,
-                    ),
+                new_overrides, replaced_text = _apply_override(
+                    new_overrides, target_path="text",
+                    original_value=item.text, edited_value=new_text,
+                    reason=reason, now=now,
                 )
-                replaced_text = new_text
             if new_kind is not None:
                 if not isinstance(new_kind, ProgressItemKind):
                     raise ProgressCaptureValidationError(
                         f"new_kind must be ProgressItemKind; got {new_kind!r}"
                     )
-                new_overrides = new_overrides + (
-                    ItemOverride(
-                        target_path="kind",
-                        original_value=item.kind,
-                        edited_value=new_kind,
-                        reason=reason,
-                        edited_at=now,
-                    ),
+                new_overrides, replaced_kind = _apply_override(
+                    new_overrides, target_path="kind",
+                    original_value=item.kind, edited_value=new_kind,
+                    reason=reason, now=now,
                 )
-                replaced_kind = new_kind
             if new_confidence is not None:
-                new_overrides = new_overrides + (
-                    ItemOverride(
-                        target_path="confidence",
-                        original_value=item.confidence,
-                        edited_value=new_confidence,
-                        reason=reason,
-                        edited_at=now,
-                    ),
+                new_overrides, replaced_confidence = _apply_override(
+                    new_overrides, target_path="confidence",
+                    original_value=item.confidence, edited_value=new_confidence,
+                    reason=reason, now=now,
                 )
-                replaced_confidence = new_confidence
             new_items.append(
                 ProgressItem(
                     item_id=item.item_id,
@@ -441,3 +426,25 @@ def _make_capture_id(project_id: str, now: str, item_count: int) -> str:
     # the project-wide safe-id regex (mirrors US-2/5/9/10/13 naming).
     safe_now = now.replace(":", "").replace("T", "t").replace(".", "p")
     return f"pc.{project_id}.{safe_now}.{item_count}"
+
+
+def _apply_override(
+    overrides: tuple[ItemOverride, ...],
+    *,
+    target_path: str,
+    original_value: object,
+    edited_value: object,
+    reason: str,
+    now: str,
+) -> tuple[tuple[ItemOverride, ...], object]:
+    """Append one auditable field override; returns (overrides, edited_value)."""
+    return (
+        overrides + (ItemOverride(
+            target_path=target_path,
+            original_value=original_value,
+            edited_value=edited_value,
+            reason=reason,
+            edited_at=now,
+        ),),
+        edited_value,
+    )
