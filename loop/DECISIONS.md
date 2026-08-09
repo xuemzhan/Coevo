@@ -5425,4 +5425,12 @@ security-reviewer 双签门禁。
 - Security: pure structural migration; package validation semantics unchanged.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-35 closure (gate stability: tamper-test restore hardening; full-gate re-run)
+- Work item: `FRAMEWORK-OPTIMIZE-35` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-34]). User instruction: continue optimizing; found during the full-gate closure run.
+- Root cause: DECISIONS-documented known flake ? tests/security/test_local_toolchain_security `test_tampered_locked_python_script_is_rejected_before_execution` temporarily appends `raise RuntimeError("must not execute")` to scripts/validate_opencode.py; if the restore is skipped or the pre-test bytes were already poisoned by an interrupted run, tests/unit/test_engineering_baseline (which execs the script for its pure helpers) fails with RuntimeError. Observed in the full-gate run: leftover guard in the working tree.
+- Fix: the tamper test now restores from the pristine HEAD blob (`git show HEAD:scripts/validate_opencode.py`, check=True) in finally, unconditionally; a poisoned baseline can no longer self-perpetuate. No production code change. Poisoning simulation verified: with a leftover guard present, the tamper test restores the file to clean.
+- Verification: tamper test + test_engineering_baseline + full security module green; full quality exit=0 fingerprint=`f742f64aa8dce72c` (unit 1365 + integration + Go + security + e2e 14, audit fully-sealed).
+- Security: tamper-detection assertions unchanged; only the restore source is hardened.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

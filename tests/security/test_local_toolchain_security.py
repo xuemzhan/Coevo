@@ -128,13 +128,24 @@ class LocalToolchainSecurityTest(unittest.TestCase):
         self.assertIn('Coevo Make compatibility shim 1.0',result.stdout)
 
     def test_tampered_locked_python_script_is_rejected_before_execution(self):
-        script=ROOT/'scripts/validate_opencode.py'
-        original=script.read_bytes()
-        changed=False
+        script = ROOT / "scripts/validate_opencode.py"
+        relative = script.relative_to(ROOT).as_posix()
+        # Restore from the pristine HEAD blob instead of the pre-test bytes:
+        # a leftover tamper marker from an interrupted run would otherwise
+        # poison the "original" snapshot and permanently re-tamper the file.
+        pristine = subprocess.run(
+            ["git", "show", f"HEAD:{relative}"],
+            cwd=ROOT,
+            capture_output=True,
+            check=True,
+        ).stdout
+        changed = False
         try:
             try:
-                script.write_bytes(original+b'\nraise RuntimeError("must not execute")\n')
-                changed=True
+                script.write_bytes(
+                    pristine + b'\nraise RuntimeError("must not execute")\n'
+                )
+                changed = True
             except PermissionError:
                 return  # The outer quality gate already holds the stronger write/delete lock.
             command=". .\\scripts\\enter-dev-environment.ps1 -Quiet; & $env:COEVO_MAKE_PATH env-check; Clear-CoevoDevelopmentEnvironment; exit $LASTEXITCODE"
@@ -143,7 +154,7 @@ class LocalToolchainSecurityTest(unittest.TestCase):
             self.assertIn('locked file mismatch',result.stderr)
         finally:
             if changed:
-                script.write_bytes(original)
+                script.write_bytes(pristine)
 
     def test_importer_rejects_manifest_target_traversal(self):
         lock=json.loads((ROOT/'docs/dependencies/toolchain-lock.json').read_text(encoding='utf-8'))

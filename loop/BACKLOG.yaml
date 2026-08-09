@@ -1779,3 +1779,14 @@ items:
       - tests/unit/test_framework_optimize35.py
     security_review: false
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-35（2026-08-09 用户指令"继续优化"；门禁稳定性：tamper 测试复原硬化） ----------
+  - id: FRAMEWORK-OPTIMIZE-35
+    story: ENG-BASE
+    title: 关闭 DECISIONS 记录的已知门禁 flakiness——test_local_toolchain_security tamper 测试复原源改为 git HEAD 纯净 blob（finally 无条件写回），污染基线无法自我延续，test_engineering_baseline 不再偶发失败
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-34]
+    acceptance_tests:
+      - tests/security/test_local_toolchain_security.py
+      - tests/unit/test_engineering_baseline.py
+    security_review: true
+    protocol_review: false
