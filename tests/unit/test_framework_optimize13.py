@@ -13,12 +13,21 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class Hex64Tests(unittest.TestCase):
     def test_shared_pattern_matches_64_lowercase_hex(self) -> None:
-        self.assertEqual(r"^[0-9a-f]{64}$", HEX_64.pattern)
+        self.assertEqual(r"^[0-9a-f]{64}\Z", HEX_64.pattern)
         self.assertTrue(is_hex_64("a" * 64))
         self.assertTrue(is_hex_64("0123456789abcdef" * 4))
 
     def test_is_hex_64_fails_closed(self) -> None:
-        for value in ("", "A" * 64, "g" * 64, "a" * 63, "a" * 65, None, 123):
+        for value in (
+            "",
+            "A" * 64,
+            "g" * 64,
+            "a" * 63,
+            "a" * 65,
+            "a" * 64 + "\n",
+            None,
+            123,
+        ):
             self.assertFalse(is_hex_64(value), repr(value))
 
 
@@ -32,6 +41,10 @@ class Hex64ConsolidationGuardTests(unittest.TestCase):
             "src/coevo/framework/a2a.py",
             "src/coevo/framework/plan.py",
             "src/coevo/framework/memory.py",
+            "src/coevo/identity/private_keys.py",
+            "src/coevo/protocol/sm2_sign.py",
+            "src/coevo/audit_governance/models.py",
+            "src/coevo/crypto/cng_handle.py",
         )
         for relative in modules:
             source = (ROOT / relative).read_text(encoding="utf-8")

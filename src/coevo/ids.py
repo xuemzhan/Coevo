@@ -14,7 +14,7 @@ import re
 
 SAFE_ID: re.Pattern[str] = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
-HEX_64: re.Pattern[str] = re.compile(r"^[0-9a-f]{64}$")
+HEX_64: re.Pattern[str] = re.compile(r"^[0-9a-f]{64}\Z")
 
 
 def is_safe_id(value: object) -> bool:

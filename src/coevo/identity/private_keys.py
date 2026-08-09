@@ -49,6 +49,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from src.coevo.timefmt import now_utc_iso_z
 from src.coevo.canon import canonical_digest
+from src.coevo.ids import HEX_64 as _HEX_64
 from src.coevo.powershell import locked_powershell_executable as _shared_locked_powershell
 from typing import Any, Mapping, Protocol
 
@@ -60,7 +61,7 @@ STORE_HELPER_SHA256 = "2dc55768b97c185ee62039b86eb2f6702034151235d89caffd8e4284d
 STORE_HELPER_SIZE = 16443
 HANDLE_PREFIX = "CoevoPrivateKey-"
 HANDLE_RE = re.compile(r"^CoevoPrivateKey-[0-9a-fA-F]{32}$")
-PUBLIC_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
+PUBLIC_DIGEST_RE = _HEX_64
 CREATION_AUDIT_ID_RE = re.compile(r"^[0-9a-fA-F-]{36}$")
 ALGORITHM_OID_RE = re.compile(r"^[0-9.]+$")
 

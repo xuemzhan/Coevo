@@ -60,6 +60,7 @@ _MAX_INPUT_BYTES: Final[int] = 64 * 1024
 from src.coevo.timefmt import is_iso_utc_z, now_utc_iso_z
 from src.coevo.canon import canonical_json_bytes
 from src.coevo.jsonutil import reject_duplicate_pairs
+from src.coevo.ids import is_hex_64
 
 
 class CngKekError(RuntimeError):
@@ -101,9 +102,7 @@ class CngKekReference:
 
     def __post_init__(self) -> None:
         _validate_kek_name(self.kek_name)
-        if not isinstance(self.public_sha256, str) or not re.fullmatch(
-            r"[0-9a-f]{64}", self.public_sha256
-        ):
+        if not isinstance(self.public_sha256, str) or not is_hex_64(self.public_sha256):
             raise CngKekValidationError("public_sha256 must be 64-char lowercase hex")
         if not is_iso_utc_z(self.created_at):
             raise CngKekValidationError("created_at must be ISO-8601 UTC Z")
@@ -313,9 +312,7 @@ class CngWrappedKeyRegistry:
         _validate_kek_name(kek_name)
         if role not in {"sender", "recipient"}:
             raise CngKekValidationError("role must be sender or recipient")
-        if not isinstance(wrapped_sha256, str) or not re.fullmatch(
-            r"[0-9a-f]{64}", wrapped_sha256
-        ):
+        if not isinstance(wrapped_sha256, str) or not is_hex_64(wrapped_sha256):
             raise CngKekValidationError("wrapped_sha256 must be 64-char lowercase hex")
         entry_id = uuid.uuid4().hex
         entry = {

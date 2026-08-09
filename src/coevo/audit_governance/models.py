@@ -71,6 +71,7 @@ _SAFE_ID = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_.\-]{0,63}$")
 
 # ISO-8601 UTC 'Z' -- strict format used everywhere else (US-8 / US-9 / US-13).
 from src.coevo.timefmt import is_iso_utc_z
+from src.coevo.ids import is_hex_64
 
 # Result codes that mirror what audit_log.py's append_record already uses,
 # plus the explicit "blocked" code introduced for AC-1 interception.
@@ -440,7 +441,7 @@ class AuditExportPayload:
         if (
             not isinstance(self.digest_hex, str)
             or len(self.digest_hex) != 64
-            or not re.fullmatch(r"[0-9a-f]{64}", self.digest_hex)
+            or not is_hex_64(self.digest_hex)
         ):
             raise AuditEventValidationError(
                 f"digest_hex must be 64-char lowercase hex; got {self.digest_hex!r}"

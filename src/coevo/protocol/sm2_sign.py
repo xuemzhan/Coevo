@@ -41,10 +41,10 @@ from __future__ import annotations
 import base64
 import binascii
 import json
-import re
 from dataclasses import dataclass
 from typing import Any, Final, Mapping
 from src.coevo.timefmt import now_utc_iso_z
+from src.coevo.ids import HEX_64 as _HEX_64
 
 from .agent_package import AgentPackageError
 
@@ -114,7 +114,7 @@ def _ascii_digit_only(value: Any, *, path: str) -> None:
             )
 
 
-_HEX_RE = re.compile(r"^[0-9a-f]{64}$")
+_HEX_RE = _HEX_64
 
 
 def compute_sm3_digest(data: bytes) -> str:
