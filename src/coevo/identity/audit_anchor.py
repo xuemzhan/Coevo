@@ -52,6 +52,7 @@ class FreshnessAuthority(Protocol):
 
 class WindowsCertificateSigner:
     def _run(self, action: str, content: bytes, signature: bytes | None = None) -> bytes:
+        """Run one audit-signing helper action over head bytes and return the produced bytes (fail-closed)."""
         with tempfile.TemporaryDirectory(prefix="coevo-audit-sign-") as temporary:
             head = Path(temporary) / "head.json"
             signed = Path(temporary) / "head.p7s"
@@ -84,6 +85,7 @@ class WindowsFreshnessAuthority:
 
     @classmethod
     def _validate_marker(cls, marker: dict) -> None:
+        """Validate a freshness marker shape (fail-closed)."""
         if set(marker) != cls.MARKER_FIELDS:
             raise AuditAnchorError("identity freshness marker fields are invalid")
         try:
@@ -102,6 +104,7 @@ class WindowsFreshnessAuthority:
             raise AuditAnchorError("identity freshness key public digest is invalid")
 
     def _arguments(self, action: str, marker: dict) -> list[str]:
+        """Build the bounded helper argument list for a freshness operation."""
         args = [
             _powershell_executable(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(FRESHNESS_SCRIPT),
             "-Action", action, "-StoreId", marker["store_id"], "-Generation", str(marker["generation"]),
@@ -115,12 +118,14 @@ class WindowsFreshnessAuthority:
         return args
 
     def _run(self, arguments: list[str]) -> str:
+        """Run a bounded PowerShell subprocess and return trimmed stdout (fail-closed)."""
         process = subprocess.run(arguments, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=40)
         if process.returncode:
             raise AuditAnchorError("identity freshness operation failed")
         return process.stdout.strip()
 
     def _paths(self, marker: dict) -> tuple[Path, Path, Path]:
+        """Resolve the three retirement artifact paths for a marker."""
         self._validate_marker(marker)
         base = self.retirement_root / marker["store_id"] / f'{marker["generation"]}-{marker["transition_id"]}'
         return base.with_suffix(".json"), base.with_suffix(".main.p7s"), base.with_suffix(".survivor.p7s")
@@ -142,6 +147,7 @@ class WindowsFreshnessAuthority:
         return marker
 
     def verify_marker(self, marker: dict) -> None:
+        """Verify a stored freshness marker (signature + binding; fail-closed)."""
         self._validate_marker(marker)
         if self._paths(marker)[0].exists():
             raise AuditAnchorError("identity freshness marker is retired")
@@ -156,6 +162,7 @@ class WindowsFreshnessAuthority:
         self._run(self._arguments("VerifyRetired", marker))
 
     def _signature(self, action: str, content: bytes, marker: dict, signature: bytes | None = None) -> bytes:
+        """Compute the marker signature bytes."""
         with tempfile.TemporaryDirectory(prefix="coevo-marker-sign-") as temporary:
             head = Path(temporary) / "head.json"
             signed = Path(temporary) / "head.p7s"
@@ -260,6 +267,7 @@ class SignedAuditAnchor:
         return (self.head, self.signature, self.marker_signature, self.pending_head, self.pending_signature, self.pending_new_signature, self.pending_old_signature)
 
     def _decode_main(self, head: Path, signature: Path) -> tuple[bytes, dict]:
+        """Decode the official anchor main artifact (fail-closed)."""
         if not head.is_file() or not signature.is_file():
             raise AuditAnchorError("identity audit anchor is incomplete")
         raw = head.read_bytes(); self.signer.verify(raw, signature.read_bytes())
@@ -272,6 +280,7 @@ class SignedAuditAnchor:
         return raw, item
 
     def _read_official(self) -> tuple[bytes, dict]:
+        """Read and validate the official anchor state."""
         raw, item = self._decode_main(self.head, self.signature); marker = item.get("marker")
         if not isinstance(marker, dict) or not self.marker_signature.is_file():
             raise AuditAnchorError("identity audit marker is missing")
@@ -279,6 +288,7 @@ class SignedAuditAnchor:
         return raw, item
 
     def _read_pending(self, *, require_new_marker: bool = True) -> tuple[bytes, dict]:
+        """Read and validate the pending anchor state (if any)."""
         raw, item = self._decode_main(self.pending_head, self.pending_signature); marker = item.get("marker")
         if not isinstance(marker, dict) or not self.pending_new_signature.is_file():
             raise AuditAnchorError("pending new marker proof is incomplete")
@@ -300,6 +310,7 @@ class SignedAuditAnchor:
         return item.get("checkpoint") == checkpoint
 
     def _tombstone(self, status: str, target: dict, survivor: dict | None, transition_head: bytes) -> dict:
+        """Build the tombstone payload for a retired generation."""
         return {
             "schema_version": "1.0", "status": status, "store_id": target["store_id"],
             "target_marker": target, "survivor_marker": survivor,
@@ -308,6 +319,7 @@ class SignedAuditAnchor:
         }
 
     def _complete_retirement(self, tombstone: dict) -> None:
+        """Atomically complete a generation retirement (tombstone + cleanup)."""
         target = tombstone.get("target_marker"); survivor = tombstone.get("survivor_marker")
         if not isinstance(target, dict) or (survivor is not None and not isinstance(survivor, dict)):
             raise AuditAnchorError("retirement tombstone marker is invalid")

@@ -83,6 +83,7 @@ def _sha256_bytes(data: bytes) -> str:
 
 
 def _validate_kek_name(name: str) -> str:
+    """Validate a KEK name (bounded safe name; fail-closed)."""
     if not isinstance(name, str) or not KEK_NAME_RE.fullmatch(name):
         raise CngKekValidationError(
             f"kek_name must match {KEK_PREFIX}<32-hex>; got {name!r}"
@@ -108,6 +109,7 @@ class CngKekReference:
             raise CngKekValidationError("created_at must be ISO-8601 UTC Z")
 
     def to_mapping(self) -> dict[str, str]:
+        """Project the KEK reference into a stable string mapping."""
         return {
             "kek_name": self.kek_name,
             "public_sha256": self.public_sha256,
@@ -135,6 +137,7 @@ class CngProtectedKeyHandle:
 
 
 def _locked_powershell() -> str:
+    """Return the locked PowerShell executable path (hash-verified)."""
     return _shared_locked_powershell(
         Path(__file__).resolve().parents[3] / "docs" / "dependencies" / "toolchain-lock.json",
         error_factory=CngKekHelperError,
@@ -159,6 +162,7 @@ class CngKekStore:
             raise CngKekHelperError("CNG KEK helper failed the locked integrity check")
 
     def _run(self, action: str, kek_name: str, *, input_base64: str | None = None) -> dict:
+        """Run one CNG helper action with a bounded JSON body and return the parsed result (fail-closed)."""
         body = json.dumps(
             {
                 "action": action,
@@ -372,6 +376,7 @@ class CngWrappedKeyRegistry:
         return tuple(state.values())
 
     def _append(self, entry: dict[str, Any]) -> str:
+        """Append one registry entry and persist atomically (hash-chain binding)."""
         data = self._read()
         self._verify_chain(data["entries"])
         previous = data["entries"][-1]["entry_hash"] if data["entries"] else "0" * 64
@@ -384,6 +389,7 @@ class CngWrappedKeyRegistry:
         return entry["entry_hash"]
 
     def _read(self) -> dict[str, Any]:
+        """Read and validate the registry rows (fail-closed on tampering)."""
         try:
             raw = self._path.read_bytes()
         except OSError as exc:
@@ -404,6 +410,7 @@ class CngWrappedKeyRegistry:
         return data
 
     def _write(self, data: dict[str, Any]) -> None:
+        """Atomically write the registry rows to disk."""
         body = canonical_json_bytes(data, ensure_ascii=False)
         self._path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self._path.with_name(f"{self._path.name}.{uuid.uuid4().hex}.tmp")
@@ -421,6 +428,7 @@ class CngWrappedKeyRegistry:
                     pass
 
     def _verify_chain(self, entries: list[dict[str, Any]]) -> None:
+        """Verify the registry hash chain end-to-end (fail-closed)."""
         previous = "0" * 64
         for entry in entries:
             if not isinstance(entry, dict) or set(entry) != self._ALLOWED_ENTRY_FIELDS:

@@ -231,6 +231,7 @@ class EnvelopeHeader:
 
     @staticmethod
     def _require_text(value: Any, *, name: str, maximum: int, pattern: re.Pattern | None = None) -> str:
+        """Require a bounded text field (fail-closed)."""
         if not isinstance(value, str):
             raise AgentPackageEnvelopeError(f"{name} must be a string")
         if not value:
@@ -247,6 +248,7 @@ class EnvelopeHeader:
 
     @staticmethod
     def _require_nonce(value: Any, *, name: str, maximum: int) -> str:
+        """Require a bounded nonce field (fail-closed)."""
         if not isinstance(value, str):
             raise AgentPackageEnvelopeError(f"{name} must be a string")
         if len(value) > maximum:
@@ -265,6 +267,7 @@ class EnvelopeHeader:
 
     @staticmethod
     def _require_int(value: Any, *, name: str, minimum: int = 0, maximum: int = (1 << 63) - 1) -> int:
+        """Require an integer field within bounds (fail-closed)."""
         if isinstance(value, bool) or not isinstance(value, int):
             raise AgentPackageEnvelopeError(f"{name} must be a non-negative integer")
         if value < minimum or value > maximum:
@@ -273,6 +276,7 @@ class EnvelopeHeader:
 
     @staticmethod
     def from_mapping(payload: Mapping[str, Any]) -> "EnvelopeHeader":
+        """Build an EnvelopeHeader from a mapping with strict field validation (fail-closed)."""
         if not isinstance(payload, Mapping):
             raise AgentPackageEnvelopeError("envelope payload must be an object")
         required = {
@@ -378,6 +382,7 @@ class EnvelopeHeader:
 
     @staticmethod
     def _require_uuid_string(value: Any, *, name: str) -> str:
+        """Require a UUID-formatted string (fail-closed)."""
         text = EnvelopeHeader._require_text(value, name=name, maximum=64)
         try:
             normalised = str(uuid.UUID(text))
@@ -389,6 +394,7 @@ class EnvelopeHeader:
 
     @staticmethod
     def _require_instant(value: Any, *, name: str, must_be_future_safe: bool) -> str:
+        """Require an ISO-8601 UTC instant (fail-closed)."""
         text = EnvelopeHeader._require_text(value, name=name, maximum=64)
         if not INSTANT_RE.fullmatch(text):
             raise AgentPackageEnvelopeError(
@@ -427,6 +433,7 @@ class FixedHeader:
 
 
 def _reserved_must_be_zero(chunk: bytes, *, error: type[AgentPackageError]) -> bytes:
+    """Require reserved header bytes to be zero (fail-closed)."""
     if any(byte != 0 for byte in chunk):
         raise error("reserved field must be zero")
     return chunk

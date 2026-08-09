@@ -138,6 +138,7 @@ class PackageImportService:
             result: str,
             revision: str,
         ) -> ProcessedPackageRecord:
+            """Build the committed ProcessedPackageRecord for the import outcome."""
             return ProcessedPackageRecord(
                 package=ProcessedPackage(
                     package_id=env.package_id,

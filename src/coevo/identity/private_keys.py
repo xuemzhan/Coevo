@@ -231,6 +231,7 @@ class PrivateKeyStore(Protocol):
         self, reference: PrivateKeyReference, payload: bytes, signature: bytes,
         *, parent_pinned_thumbprint: str
     ) -> bool:
+        """Verify a signature with the stored key (fail-closed)."""
         ...
 
     def destroy(self, reference: PrivateKeyReference) -> None:
@@ -244,6 +245,7 @@ class PrivateKeyStore(Protocol):
 
 
 def _powershell_executable() -> str:
+    """Resolve the locked PowerShell executable path."""
     return _shared_locked_powershell(
         TOOLCHAIN_LOCK,
         error_factory=PrivateKeyHandleError,
@@ -276,6 +278,7 @@ class WindowsPrivateKeyStore:
             raise PrivateKeyHandleError("private-key helper failed the locked integrity check")
 
     def _run(self, action: str, **arguments: Any) -> dict:
+        """Run one protected-key helper action with bounded JSON and return parsed output (fail-closed)."""
         body = json.dumps({"action": action, "arguments": arguments}, separators=(",", ":"))
         process = subprocess.run(
             [
@@ -302,6 +305,7 @@ class WindowsPrivateKeyStore:
         return result
 
     def store(self, certificate_id: str, payload: Mapping[str, Any], *, parent_pinned_thumbprint: str | None = None) -> PrivateKeyReference:
+        """Store a protected key via the CNG helper and return the reference."""
         sanitized = validate_handle_payload(dict(payload))
         sanitized["certificate_id"] = certificate_id
         result = self._run("Store", payload=sanitized, parent_pinned_thumbprint=parent_pinned_thumbprint)
@@ -392,6 +396,7 @@ class WindowsPrivateKeyStore:
 
 
 def _reference_from_helper(result: dict, certificate_id: str) -> PrivateKeyReference:
+    """Build a PrivateKeyReference from the helper response (fail-closed)."""
     reference = result.get("reference")
     if not isinstance(reference, dict):
         raise PrivateKeyHandleError("private-key helper did not return a reference")
@@ -422,6 +427,7 @@ class PrivateKeyService:
 
     def _record(self, *, action: str, actor_id: str, reference: PrivateKeyReference | None,
                 request_id: str | None, result: str, **extra: Any) -> None:
+        """Append one hash-chained audit event to the in-memory trail."""
         event: dict[str, Any] = {
             "action": action,
             "actor_id": actor_id,

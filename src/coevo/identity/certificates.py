@@ -40,6 +40,7 @@ class InspectedCertificate:
 
 
 def _instant(value: object) -> datetime:
+    """Fail-closed validation of an ISO instant (certificate fields)."""
     if not isinstance(value, str):
         raise CertificateError("certificate helper returned an invalid timestamp")
     try:

@@ -93,6 +93,7 @@ def audit_identifier(value: Any) -> str:
 
 
 def _text(name: str, value: Any, maximum: int = 128) -> str:
+    """Fail-closed validation of a text field value."""
     if not isinstance(value, str):
         raise ValidationError(f"invalid {name}")
     normalized = unicodedata.normalize("NFC", value.strip())
@@ -102,6 +103,7 @@ def _text(name: str, value: Any, maximum: int = 128) -> str:
 
 
 def _object(name: str, value: Any, allowed: set[str]) -> Mapping[str, Any]:
+    """Fail-closed validation of an object field value."""
     if not isinstance(value, Mapping):
         raise ValidationError(f"{name} must be an object")
     unknown = set(value) - allowed
@@ -113,6 +115,7 @@ def _object(name: str, value: Any, allowed: set[str]) -> Mapping[str, Any]:
 
 
 def _instant(value: str) -> datetime:
+    """Fail-closed validation of an ISO instant."""
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except (AttributeError, ValueError) as exc:
@@ -136,6 +139,7 @@ def assert_certificate_usable(certificate: TrustedCertificate, trusted_time: dat
 
 
 def _digestable(value: Any) -> Any:
+    """Fail-closed validation of a digestable value."""
     if isinstance(value, Mapping):
         return {str(k): _digestable(v) for k, v in sorted(value.items(), key=lambda item: str(item[0]))}
     if isinstance(value, (list, tuple)):

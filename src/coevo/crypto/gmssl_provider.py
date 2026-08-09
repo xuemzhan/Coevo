@@ -101,6 +101,7 @@ class GmsslPrototypeProvider:
         return self._invoke(2, handle.profile, data)[0]
 
     def verify(self, handle: GmsslPrototypeHandle, data: bytes, signature: bytes) -> bool:
+        """Verify an SM2 signature over data with the sender handle (fail-closed)."""
         self._require(handle, "sender")
         result = self._invoke(3, handle.profile, data, signature)
         return len(result) == 1 and result[0] == b"\x01"
@@ -202,6 +203,7 @@ class GmsslPrototypeProvider:
         *frames: bytes,
         retries: int = 2,
     ) -> tuple[bytes, ...]:
+        """Invoke the GmSSL helper subprocess with bounded request frames and a bounded retry policy (fail-closed)."""
         if not _SAFE.fullmatch(profile) or not 1 <= len(frames) <= 8:
             raise GmsslPrototypeError("invalid provider request")
         if not isinstance(retries, int) or not 0 <= retries <= 3:
@@ -271,6 +273,7 @@ class GmsslPrototypeProvider:
 
     @staticmethod
     def _decode(data: bytes) -> tuple[bytes, ...]:
+        """Decode a bounded helper response frame (fail-closed)."""
         if not data.startswith(_REPLY) or len(data) < len(_REPLY) + 1:
             raise GmsslPrototypeError("invalid crypto helper response")
         cursor = len(_REPLY)

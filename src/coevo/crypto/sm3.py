@@ -58,18 +58,21 @@ def _p1(value: int) -> int:
 
 
 def _ff(round_index: int, x: int, y: int, z: int) -> int:
+    """SM3 boolean function FF (spec 4.2)."""
     if round_index < 16:
         return x ^ y ^ z
     return (x & y) | (x & z) | (y & z)
 
 
 def _gg(round_index: int, x: int, y: int, z: int) -> int:
+    """SM3 boolean function GG (spec 4.2)."""
     if round_index < 16:
         return x ^ y ^ z
     return (x & y) | ((~x) & z)
 
 
 def _compress(state: list[int], block: bytes) -> None:
+    """SM3 compression function over a 512-bit message block (spec 5.3)."""
     words = [
         int.from_bytes(block[offset : offset + 4], "big")
         for offset in range(0, 64, 4)

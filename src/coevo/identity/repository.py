@@ -104,6 +104,7 @@ class IdentityRepository:
             )
 
     def _validate_schema(self) -> None:
+        """Validate the repository schema on open (fail-closed)."""
         tables = {row[0] for row in self.connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         if not self.REQUIRED_TABLES.issubset(tables):
             raise AuditAnchorError("identity store schema is incomplete")
@@ -118,6 +119,7 @@ class IdentityRepository:
         self.connection.close()
 
     def _insert_audit(self, actor_id: str, action: str, request_id: str, result: str, target: dict, payload_digest: str | None) -> None:
+        """Insert one audit row under the hash chain (fail-closed)."""
         previous = self.connection.execute("SELECT event_hash FROM identity_audit_events ORDER BY sequence_no DESC LIMIT 1").fetchone()
         prev_hash = previous[0] if previous else "0" * 64
         event = {
@@ -137,6 +139,7 @@ class IdentityRepository:
         return {"bytes_sha256": hashlib.sha256(value).hexdigest(), "length": len(value)} if isinstance(value, bytes) else value
 
     def _business_digest(self) -> str:
+        """Canonical digest over the business payload."""
         state: dict[str, list[dict[str, Any]]] = {}
         for table, ordering in self.BUSINESS_TABLES.items():
             rows = self.connection.execute(f"SELECT * FROM {table} ORDER BY {ordering}").fetchall()
@@ -144,6 +147,7 @@ class IdentityRepository:
         return canonical_digest(state, ensure_ascii=False)
 
     def _checkpoint(self) -> dict:
+        """Persist a checkpoint row atomically."""
         metadata = self.connection.execute("SELECT store_id,schema_version FROM identity_metadata WHERE singleton=1").fetchone()
         tail = self.connection.execute("SELECT sequence_no,event_hash FROM identity_audit_events ORDER BY sequence_no DESC LIMIT 1").fetchone()
         count = self.connection.execute("SELECT COUNT(*) FROM identity_audit_events").fetchone()[0]
@@ -154,6 +158,7 @@ class IdentityRepository:
         }
 
     def _internal_audit_valid(self) -> bool:
+        """Revalidate the internal audit chain (fail-closed)."""
         previous = "0" * 64
         for row in self.connection.execute("SELECT * FROM identity_audit_events ORDER BY sequence_no"):
             event = {key: row[key] for key in ("event_id", "occurred_at", "actor_id", "action", "request_id", "result", "target_summary", "payload_digest", "prev_hash")}
@@ -164,6 +169,7 @@ class IdentityRepository:
         return True
 
     def _recover_and_require_consistent(self) -> None:
+        """Recover pending state and require a consistent chain before serving."""
         if not self._internal_audit_valid():
             raise AuditAnchorError("identity audit hash chain is invalid")
         checkpoint = self._checkpoint()
@@ -176,6 +182,7 @@ class IdentityRepository:
             self.anchor.abort_pending()
 
     def _commit_with_anchor(self) -> None:
+        """Commit with the signed anchor and verify it atomically."""
         committed = False
         try:
             self.anchor.prepare(self._checkpoint())

@@ -97,6 +97,7 @@ def _registry_for(
     recipient_cert_id: str,
     project_id: str,
 ) -> list[ProcessedPackage]:
+    """Return the bounded replay registry for a scope (fail-closed)."""
     return [
         r
         for r in registry

@@ -157,6 +157,7 @@ def _validate_record(record: ProcessedPackageRecord) -> None:
 
 
 def _validate_iso_z(value: object, name: str) -> None:
+    """Fail-closed ISO-8601 Z validation."""
     if not isinstance(value, str) or not value:
         raise PackageStoreDbError(f"{name} must be a non-empty string")
     if len(value.encode("utf-8")) > _FIELD_MAX_BYTES:
@@ -175,6 +176,7 @@ def _record_hash(
     seq: int,
     record: ProcessedPackageRecord,
 ) -> str:
+    """Canonical digest over a stored record (hash-chain input)."""
     package = record.package
     payload = "|".join(
         (
@@ -265,6 +267,7 @@ class PackageStoreDb:
             raise
 
     def close(self) -> None:
+        """Close the database connection (idempotent)."""
         if self._closed:
             return
         self._connection.close()
@@ -431,12 +434,14 @@ class PackageStoreDb:
 
     @staticmethod
     def _verify_integrity(connection: sqlite3.Connection) -> None:
+        """Verify the database integrity gate before reads."""
         row = connection.execute("PRAGMA integrity_check").fetchone()
         if row is None or row[0] != "ok":
             raise PackageStoreDbIntegrityError("SQLite integrity_check failed")
 
     @staticmethod
     def _verify_schema(connection: sqlite3.Connection) -> None:
+        """Validate the database schema (fail-closed)."""
         rows = connection.execute(
             "SELECT type, name, sql FROM sqlite_master "
             "WHERE type IN ('table', 'view', 'trigger', 'index') "
@@ -497,6 +502,7 @@ class PackageStoreDb:
 
     @staticmethod
     def _verify_chain(connection: sqlite3.Connection) -> None:
+        """Verify the record hash chain end-to-end (fail-closed)."""
         rows = connection.execute(
             "SELECT seq, package_id, package_digest, sender_cert_id, "
             "recipient_cert_id, project_id, sequence_no, package_type, "
@@ -535,6 +541,7 @@ class PackageStoreDb:
 
 
 def _row_to_record(row: tuple) -> ProcessedPackageRecord:
+    """Decode a stored row into a ProcessedPackageRecord (fail-closed)."""
     from .replay_detector import ProcessedPackage
 
     (

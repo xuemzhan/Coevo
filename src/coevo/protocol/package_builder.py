@@ -435,6 +435,7 @@ def open_encrypted_package(
         recipient_handle, sealed, associated_data=encode_envelope(package.envelope)
     )
     def unique(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        """Deterministically deduplicate entries preserving first-seen order."""
         result: dict[str, Any] = {}
         for key, value in pairs:
             if key in result:
