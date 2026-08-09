@@ -5614,4 +5614,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-26 closure (task_decomposition/agent._validate phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-26` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-25]). User instruction: continue P2; no full gate (waiver recorded).
+- Delivery: TaskDecompositionAgent._validate (108 lines, cc~21) decomposed by pure migration into module-level _parse_task (single task entry: dict check / missing field / SAFE_ID / string byte caps / ISO-8601 Z window / acceptance_criteria) and _parse_edge (single edge entry: dict check / missing field / SAFE_ID / self-loop / unknown reference); _validate is now a 33-line linear orchestration (bounds -> known_packages -> tasks -> known ids -> edges -> dedup + construct). Error messages, check order and fail-closed semantics byte-identical; _validate signature unchanged. Guard test tests/unit/test_framework_optimize27.py. Two migration leftovers (tasks.append / edges.append) were converted to return; tests red then green.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 60 tests green (task_decomposition suite 50 + guard 4 + agent 6); full quality waived per user instruction.
+- Security: model-output parsing security path reviewed (SAFE_ID, byte caps, ISO window, unknown-reference fail-closed); pure structural migration.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

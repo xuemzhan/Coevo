@@ -1688,7 +1688,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-26
     story: ENG-BASE
     title: TaskDecompositionAgent._validate（108 行/cc~21）纯迁移式拆分为模块级 _parse_task/_parse_edge 两个单条目校验助手，_validate 收敛为约 35 行线性编排，错误消息与失败关闭语义逐字节不变；守卫 test_framework_optimize27.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-25]
     acceptance_tests:
       - tests/unit/test_framework_optimize27.py
