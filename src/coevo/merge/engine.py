@@ -20,7 +20,7 @@ import logging
 from dataclasses import dataclass, replace
 from src.coevo.protocol.import_service import ImportOutcome
 from src.coevo.protocol.import_transaction import ImportStep
-from src.coevo.protocol.processed_package_store import AgentPackageStoreDuplicateError, ProcessedPackageRecord, ProcessedPackageStore
+from src.coevo.protocol.processed_package_store import AgentPackageStoreDuplicateError, ProcessedPackage, ProcessedPackageRecord, ProcessedPackageStore
 from src.coevo.report import ReportManifest, ReportStatus
 from src.coevo.task_decomposition import ProjectBaseline
 from .receipt import BASELINE_DIGEST_ALGORITHM, BASELINE_SCHEMA, MergeCommitReceipt, MergeCommitReceiptError, MergeCommitReceiptStore, ReceiptSigningAuthority, append_signed_receipt, build_signed_merge_commit_receipt
@@ -116,6 +116,105 @@ class MergeEngine:
         7. P2 -- register the new ProcessedPackageRecord in the
            store atomically and emit it via ``record.store_post``.
         """
+        self._validate_merge_inputs(
+            import_outcome=import_outcome,
+            report=report,
+            baseline=baseline,
+            store=store,
+            decided_at=decided_at,
+        )
+
+        rejection = self._import_binding_rejection(
+            import_outcome=import_outcome,
+            report=report,
+            baseline=baseline,
+            store=store,
+            decided_at=decided_at,
+        )
+        if rejection is not None:
+            return rejection
+        rec_pkg = import_outcome.record.package
+
+        rejection = self._duplicate_rejection(
+            rec_pkg=rec_pkg,
+            baseline=baseline,
+            store=store,
+            report=report,
+            decided_at=decided_at,
+            import_outcome=import_outcome,
+        )
+        if rejection is not None:
+            return rejection
+
+        rejection = self._revision_rejection(
+            report=report,
+            baseline=baseline,
+            store=store,
+            decided_at=decided_at,
+            import_outcome=import_outcome,
+        )
+        if rejection is not None:
+            return rejection
+
+        rejection = self._decision_maker_rejection(
+            rec_pkg=rec_pkg,
+            authorized_recipient_certs=authorized_recipient_certs,
+            baseline=baseline,
+            store=store,
+            report=report,
+            decided_at=decided_at,
+            import_outcome=import_outcome,
+        )
+        if rejection is not None:
+            return rejection
+        decision_maker = rec_pkg.recipient_cert_id
+
+        # ----- versions (P4 explicit revisions) -----
+        base_version = _master_revision(baseline.project_id, baseline.version)
+        current_version = base_version
+        merged_version = _master_revision(baseline.project_id, baseline.version + 1)
+
+        # ----- per-field merge (AC-4 / AC-5 / AC-7 / P3) -----
+        field_merges, has_conflict = self._merge_fields(report=report, baseline=baseline)
+
+        # P3: any HOLD -> accepted=False (no version bump)
+        if has_conflict:
+            return self._rejected_proposal(
+                baseline=baseline,
+                report=report,
+                base_version=base_version,
+                current_version=current_version,
+                field_merges=field_merges,
+                decided_at=decided_at,
+                decision_maker=decision_maker,
+                store=store,
+            )
+
+        # ----- AC-8 / P2: build new baseline + register record -----
+        return self._commit_proposal(
+            baseline=baseline,
+            report=report,
+            rec_pkg=rec_pkg,
+            import_outcome=import_outcome,
+            base_version=base_version,
+            current_version=current_version,
+            merged_version=merged_version,
+            field_merges=field_merges,
+            decided_at=decided_at,
+            decision_maker=decision_maker,
+            store=store,
+        )
+
+    def _validate_merge_inputs(
+        self,
+        *,
+        import_outcome: ImportOutcome,
+        report: ReportManifest,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        decided_at: str,
+    ) -> None:
+        """Type/shape validation before any merge decision (fail-closed)."""
         # ----- type / shape validation -----
         if not isinstance(import_outcome, ImportOutcome):
             raise MergeError("import_outcome must be ImportOutcome")
@@ -130,6 +229,18 @@ class MergeEngine:
                 "decided_at must be a non-empty ISO-8601 string"
             )
 
+    def _import_binding_rejection(
+        self,
+        *,
+        import_outcome: ImportOutcome,
+        report: ReportManifest,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        decided_at: str,
+    ) -> MergeProposal | None:
+        """P1: import_outcome must be COMMITTED and bind to the report.
+        
+        Returns the first rejection proposal, or None when the binding is OK."""
         # ----- P1: import_outcome must be COMMITTED and bind to the report -----
         if import_outcome.transaction is None:
             return self._reject(
@@ -213,7 +324,19 @@ class MergeEngine:
                 ),
                 import_outcome=import_outcome,
             )
+        return None
 
+    def _duplicate_rejection(
+        self,
+        *,
+        rec_pkg: ProcessedPackage,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        report: ReportManifest,
+        decided_at: str,
+        import_outcome: ImportOutcome,
+    ) -> MergeProposal | None:
+        """P2: replay / duplicate gate (AC-2). Returns the first rejection or None."""
         # ----- P2: replay / duplicate gate -----
         if store.get(rec_pkg.package_id) is not None:
             return self._reject(
@@ -235,7 +358,21 @@ class MergeEngine:
                 ),
                 import_outcome=import_outcome,
             )
+        return None
 
+    def _revision_rejection(
+        self,
+        *,
+        report: ReportManifest,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        decided_at: str,
+        import_outcome: ImportOutcome,
+    ) -> MergeProposal | None:
+        """AC-3: project_id match + base_revision must equal current master revision.
+        
+        Mismatch emits a HOLD-with-conflict proposal; strict-reject remains for
+        malformed inputs. Returns the first rejection/hold or None."""
         # ----- AC-3: project_id match -----
         if report.project_id != baseline.project_id:
             return self._reject(
@@ -264,7 +401,24 @@ class MergeEngine:
                 ),
                 import_outcome=import_outcome,
             )
+        return None
 
+    def _decision_maker_rejection(
+        self,
+        *,
+        rec_pkg: ProcessedPackage,
+        authorized_recipient_certs: "frozenset[str] | None",
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        report: ReportManifest,
+        decided_at: str,
+        import_outcome: ImportOutcome,
+    ) -> MergeProposal | None:
+        """Round-2 P4: derive decision_maker from the verified ImportOutcome.
+        
+        The decision maker is NEVER taken from the engine ctor; when a project
+        allow-list was supplied the recipient_cert_id must be in it. Returns the
+        first rejection or None."""
         # ----- decision_maker authority (Round-2 P4 / mandatory constraint 8.4) -----
         # decision_maker is derived from the verified ImportOutcome,
         # NEVER from the engine ctor. If a project-level allow-list
@@ -293,12 +447,18 @@ class MergeEngine:
                     ),
                     import_outcome=import_outcome,
                 )
+        return None
 
-        # ----- versions (P4 explicit revisions) -----
-        base_version = _master_revision(baseline.project_id, baseline.version)
-        current_version = base_version
-        merged_version = _master_revision(baseline.project_id, baseline.version + 1)
-
+    def _merge_fields(
+        self,
+        *,
+        report: ReportManifest,
+        baseline: ProjectBaseline,
+    ) -> tuple[tuple[FieldMerge, ...], bool]:
+        """AC-4 / AC-5 / AC-7 / P3: compute per-field decisions.
+        
+        Returns (field_merges, has_conflict). submitted_at is metadata only and
+        never drives a field decision. A HOLD anywhere sets has_conflict=True."""
         # ----- per-field merge (AC-4 / AC-5 / AC-7 / P3) -----
         field_merges: list[FieldMerge] = []
         has_conflict = False
@@ -383,34 +543,62 @@ class MergeEngine:
             )
             field_merges.append(fm)
             has_conflict = True
+        return tuple(field_merges), has_conflict
 
-        # P3: any HOLD -> accepted=False (no version bump)
-        if has_conflict:
-            record = MergeRecord(
-                project_id=baseline.project_id,
-                reporter_package_id=report.package_id,
-                base_revision=report.base_revision,
-                base_version=base_version,
-                current_version=current_version,
-                merged_version=current_version,
-                status=report.status,
-                field_merges=tuple(field_merges),
-                decided_at=decided_at,
-                decision_maker=decision_maker,
-                has_conflict=True,
-                store_post=store,
-            )
-            return MergeProposal(
-                new_baseline=baseline,
-                record=record,
-                accepted=False,
-                rejection_reason=(
-                    "merge record contains HOLD decisions; refusing "
-                    "to update project master revision until all "
-                    "fields are accepted by the project owner (AC-6 + P3)"
-                ),
-            )
+    def _rejected_proposal(
+        self,
+        *,
+        baseline: ProjectBaseline,
+        report: ReportManifest,
+        base_version: str,
+        current_version: str,
+        field_merges: tuple[FieldMerge, ...],
+        decided_at: str,
+        decision_maker: str,
+        store: ProcessedPackageStore,
+    ) -> MergeProposal:
+        """P3: any HOLD -> accepted=False, no version bump."""
+        record = MergeRecord(
+            project_id=baseline.project_id,
+            reporter_package_id=report.package_id,
+            base_revision=report.base_revision,
+            base_version=base_version,
+            current_version=current_version,
+            merged_version=current_version,
+            status=report.status,
+            field_merges=tuple(field_merges),
+            decided_at=decided_at,
+            decision_maker=decision_maker,
+            has_conflict=True,
+            store_post=store,
+        )
+        return MergeProposal(
+            new_baseline=baseline,
+            record=record,
+            accepted=False,
+            rejection_reason=(
+                "merge record contains HOLD decisions; refusing "
+                "to update project master revision until all "
+                "fields are accepted by the project owner (AC-6 + P3)"
+            ),
+        )
 
+    def _commit_proposal(
+        self,
+        *,
+        baseline: ProjectBaseline,
+        report: ReportManifest,
+        rec_pkg: ProcessedPackage,
+        import_outcome: ImportOutcome,
+        base_version: str,
+        current_version: str,
+        merged_version: str,
+        field_merges: tuple[FieldMerge, ...],
+        decided_at: str,
+        decision_maker: str,
+        store: ProcessedPackageStore,
+    ) -> MergeProposal:
+        """AC-8 / P2: build the new baseline and register the record atomically."""
         # ----- AC-8 / P2: build new baseline + register record -----
         new_baseline = ProjectBaseline(
             project_id=baseline.project_id,
