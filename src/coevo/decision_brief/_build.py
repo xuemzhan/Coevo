@@ -101,45 +101,16 @@ def _clone_confirmation(item: RiskConfirmation) -> RiskConfirmation:
         report=_clone_risk_report(item.report),
     )
 
-def _build_content(
-    receipt: MergeCommitReceipt,
-    report: RiskReport,
-    brief_type: BriefType,
+def _type_parameters(
     *,
-    period_start: str | None = None,
-    period_end: str | None = None,
-    topic_risk_ids: tuple[str, ...] | None = None,
-) -> BriefContent:
-    """Build the four-section brief content for the three brief types (STAGE/PERIODIC/RISK_TOPIC); AC-5 type parameters fail closed on malformed or cross-type misuse."""
-    from .models import (
-        BriefConclusion,
-        BriefContent,
-        BriefSourceKind,
-        BriefType,
-        DecisionBriefValidationError,
-        HIGH_RISK_MIN_SEVERITY,
-        SourceReference,
-        _parse_utc,
-        _stable_sources,
-    )
-    result = SourceReference(BriefSourceKind.RESULT_PACKAGE, receipt.package_id)
-    receipt_source = SourceReference(BriefSourceKind.MERGE_RECEIPT, receipt.receipt_id)
-    task = SourceReference(BriefSourceKind.TASK, receipt.task_id)
-    changes = [BriefConclusion(
-        conclusion_id="change.master_revision",
-        text=f"Confirmed project master changed from {receipt.current_revision} to {receipt.merged_revision}.",
-        sources=_stable_sources((result, receipt_source)),
-    )]
-    if receipt.completed_task_id is not None:
-        changes.append(BriefConclusion(
-            conclusion_id="change.completed_task",
-            text=f"Task {receipt.completed_task_id} is confirmed complete.",
-            sources=_stable_sources((
-                SourceReference(BriefSourceKind.TASK, receipt.completed_task_id),
-                result,
-                receipt_source,
-            )),
-        ))
+    brief_type: BriefType,
+    period_start: str | None,
+    period_end: str | None,
+    topic_risk_ids: tuple[str, ...] | None,
+    report: RiskReport,
+) -> frozenset[str] | None:
+    """AC-5 type-specific parameters: fail closed on malformed values and cross-type misuse; returns the topic set."""
+    from .models import BriefType, DecisionBriefValidationError, _parse_utc
     # AC-5 type-specific parameters: fail closed on malformed values and
     # cross-type misuse. When omitted, the brief keeps the US-13-AC-1
     # label-only shape (backward compatible).
@@ -195,7 +166,19 @@ def _build_content(
         raise DecisionBriefValidationError(
             "STAGE briefs do not accept period or topic parameters"
         )
-    severe = tuple(risk for risk in report.risks if risk.severity >= HIGH_RISK_MIN_SEVERITY)
+    return topic_set
+
+
+def _content_title(
+    *,
+    brief_type: BriefType,
+    receipt: MergeCommitReceipt,
+    period_start: str | None,
+    period_end: str | None,
+    topic_set: frozenset[str] | None,
+) -> str:
+    """Build the deterministic brief title for the given type (label + type suffix)."""
+    from .models import BriefType
     label = {
         BriefType.STAGE: "Stage decision brief",
         BriefType.PERIODIC: "Periodic decision report",
@@ -204,6 +187,89 @@ def _build_content(
     title = f"{label}: {receipt.snapshot.baseline.title}"
     if brief_type is BriefType.PERIODIC and period_start is not None:
         title = f"{title} ({period_start} -> {period_end})"
+    if brief_type is BriefType.RISK_TOPIC and topic_set is not None:
+        title = f"{title} [{', '.join(sorted(topic_set))}]"
+    return title
+
+
+def _progress_text(
+    *,
+    brief_type: BriefType,
+    receipt: MergeCommitReceipt,
+    period_start: str | None,
+    period_end: str | None,
+) -> str:
+    """Build the deterministic progress text for the given type."""
+    from .models import BriefType
+    progress_text = (
+        f"Project {receipt.project_id} is confirmed at {receipt.merged_revision}; "
+        f"latest task status is {receipt.report_status.value}."
+    )
+    if brief_type is BriefType.PERIODIC and period_start is not None:
+        progress_text = (
+            f"Project {receipt.project_id} confirmed at {receipt.merged_revision} "
+            f"for report period {period_start} to {period_end}; "
+            f"latest task status is {receipt.report_status.value}."
+        )
+    return progress_text
+
+
+def _build_content(
+    receipt: MergeCommitReceipt,
+    report: RiskReport,
+    brief_type: BriefType,
+    *,
+    period_start: str | None = None,
+    period_end: str | None = None,
+    topic_risk_ids: tuple[str, ...] | None = None,
+) -> BriefContent:
+    """Build the four-section brief content for the three brief types (STAGE/PERIODIC/RISK_TOPIC); AC-5 type parameters fail closed on malformed or cross-type misuse."""
+    from .models import (
+        BriefConclusion,
+        BriefContent,
+        BriefSourceKind,
+        BriefType,
+        DecisionBriefValidationError,
+        HIGH_RISK_MIN_SEVERITY,
+        SourceReference,
+        _parse_utc,
+        _stable_sources,
+    )
+    result = SourceReference(BriefSourceKind.RESULT_PACKAGE, receipt.package_id)
+    receipt_source = SourceReference(BriefSourceKind.MERGE_RECEIPT, receipt.receipt_id)
+    task = SourceReference(BriefSourceKind.TASK, receipt.task_id)
+    changes = [BriefConclusion(
+        conclusion_id="change.master_revision",
+        text=f"Confirmed project master changed from {receipt.current_revision} to {receipt.merged_revision}.",
+        sources=_stable_sources((result, receipt_source)),
+    )]
+    if receipt.completed_task_id is not None:
+        changes.append(BriefConclusion(
+            conclusion_id="change.completed_task",
+            text=f"Task {receipt.completed_task_id} is confirmed complete.",
+            sources=_stable_sources((
+                SourceReference(BriefSourceKind.TASK, receipt.completed_task_id),
+                result,
+                receipt_source,
+            )),
+        ))
+    topic_set = _type_parameters(
+        brief_type=brief_type, period_start=period_start, period_end=period_end,
+        topic_risk_ids=topic_risk_ids, report=report,
+    )
+    title = _content_title(
+        brief_type=brief_type, receipt=receipt,
+        period_start=period_start, period_end=period_end, topic_set=topic_set,
+    )
+    progress = (BriefConclusion(
+        conclusion_id="progress.confirmed",
+        text=_progress_text(
+            brief_type=brief_type, receipt=receipt,
+            period_start=period_start, period_end=period_end,
+        ),
+        sources=_stable_sources((task, result, receipt_source)),
+    ),)
+    severe = tuple(risk for risk in report.risks if risk.severity >= HIGH_RISK_MIN_SEVERITY)
     if brief_type is BriefType.RISK_TOPIC and topic_set is not None:
         title = f"{title} [{', '.join(sorted(topic_set))}]"
     progress_text = (

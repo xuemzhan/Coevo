@@ -60,7 +60,19 @@ class ExtractionGuardTests(unittest.TestCase):
             for node in tree.body
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         ]
-        self.assertEqual(MOVED, tuple(node.name for node in funcs))
+        # The 13 migrated helpers plus the FRAMEWORK-OPTIMIZE-38 phase helpers
+        # (_type_parameters / _content_title / _progress_text) all follow the
+        # same per-function lazy-import contract.
+        self.assertEqual(
+            MOVED[:4]
+            + (
+                "_type_parameters",
+                "_content_title",
+                "_progress_text",
+            )
+            + MOVED[4:],
+            tuple(node.name for node in funcs),
+        )
         for fn in funcs:
             imports = [
                 node
