@@ -5642,4 +5642,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-28 closure (comment strengthening: docstring completion; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-28` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-27]). User instruction: continue strengthening code comments; no full gate (waiver recorded).
+- Delivery: completed docstrings for 70 functions across the three refactored domains ? decision_brief (_build/_util/models, 30, including the OPTIMIZE-20 _build.py migration gap), merge (engine/receipt/repository/models, 32), orchestrator/_real_chain (8). Each docstring documents fail-closed semantics, hash-chain bindings and return/exception contracts. Pure comments, zero behavior change. merge/models.py includes a one-time line-ending normalization (CRLF->LF; content verified identical except the single docstring line via `git diff --ignore-space-at-eol`). Guard test tests/unit/test_framework_optimize29.py asserts all 70 required functions carry non-empty docstrings.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 136 tests green (decision_brief + merge + orchestrator + existing framework guards); full quality waived per user instruction.
+- Security: comments only; no logic change; docstrings match existing fail-closed semantics.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

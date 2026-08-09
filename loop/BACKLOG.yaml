@@ -1710,7 +1710,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-28
     story: ENG-BASE
     title: decision_brief/merge/orchestrator 三域 70 个函数 docstring 补全（失败关闭/哈希链/回执绑定契约，纯注释零行为变化），补齐 OPTIMIZE-20 _build.py 迁移缺口；守卫 test_framework_optimize29.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-27]
     acceptance_tests:
       - tests/unit/test_framework_optimize29.py
