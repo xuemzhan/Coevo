@@ -5404,4 +5404,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-33 closure (64-hex regex convergence + \Z tightening; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-33` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-32]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: converged 4 local `[0-9a-f]{64}` regex copies onto the shared leaf ids.HEX_64 / is_hex_64 (identity/private_keys PUBLIC_DIGEST_RE, protocol/sm2_sign _HEX_RE with the now-unused `import re` removed, audit_governance/models digest_hex fullmatch, crypto/cng_handle two fullmatch sites). Tightened the shared pattern from `$` to `\Z` anchoring: a trailing newline is now rejected (fail-closed strengthening, matching the existing fullmatch-site semantics). Documented behavior delta: `"a"*64 + "\n"` now fails validation. Updated test_framework_optimize13 pattern pin and consolidation guard (4 new modules); new guard test test_framework_optimize34.py.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 176 tests green (guard + private_key_handles + identity_validation + audit_governance + cng_handle + report + progress_capture + framework a2a/plan/memory + sm2 related); full quality waived per user instruction.
+- Security: validation tightening is fail-closed strengthening; behavior delta recorded above.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

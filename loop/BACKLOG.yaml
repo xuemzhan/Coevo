@@ -1762,7 +1762,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-33
     story: ENG-BASE
     title: 4 处本地 64-hex 正则副本收敛到 ids.HEX_64/is_hex_64，共享正则 $→\Z 收紧（拒绝尾部换行，失败关闭强化，行为差异记录在案）；更新 OPTIMIZE-13 守卫 + 新增守卫 test_framework_optimize34.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-32]
     acceptance_tests:
       - tests/unit/test_framework_optimize34.py
