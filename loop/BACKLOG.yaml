@@ -1736,3 +1736,14 @@ items:
       - tests/unit/test_framework_optimize31.py
     security_review: false
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-31（2026-08-09 用户指令"继续优化"；_score_candidate 阶段化拆分） ----------
+  - id: FRAMEWORK-OPTIMIZE-31
+    story: ENG-BASE
+    title: talent/recommender._score_candidate（123 行）按评分算法五阶段纯迁移式拆分为 5 个模块级助手（skill/credential/window/load/tie-break），_score_candidate 收敛为约 35 行编排，权重与 reason/alert 语义逐字节不变；守卫 test_framework_optimize32.py
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-30]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize32.py
+      - tests/unit/test_talent_recommender.py
+    security_review: false
+    protocol_review: false
