@@ -108,6 +108,7 @@ class RealChainOutcome:
 
 
 def _event_and_project_digests(event: Any, project_input: Mapping[str, Any]) -> tuple[str, str, PackagePreview]:
+    """Compute the canonical event digest and project-input digest used for confirmation binding."""
     from . import OrchestratorValidationError
 
     if not isinstance(project_input, dict):
@@ -155,6 +156,7 @@ def _event_and_project_digests(event: Any, project_input: Mapping[str, Any]) -> 
 
 
 def _validate_fixed_chain(registry: Any, chain: Any) -> None:
+    """Validate the fixed chain shape (three real steps + human gate + package build) before dispatch."""
     from . import (
         AgentCapability, FailurePolicy, OrchestrationStepKind, OrchestratorValidationError,
     )
@@ -194,6 +196,7 @@ def _validate_fixed_chain(registry: Any, chain: Any) -> None:
 
 def _trace(event_id: str, step: Any, result: Any, now: str, detail: str,
            *, confirmed_by: str = "") -> Any:
+    """Build one OrchestrationTrace record deterministically."""
     from . import OrchestrationTrace
     return OrchestrationTrace(
         trace_id=f"tr.{event_id}.s{step.step_index}.real",
@@ -208,6 +211,7 @@ def _trace(event_id: str, step: Any, result: Any, now: str, detail: str,
 
 
 def _report(chain: Any, event: Any, workspace: Any, traces: list[Any], outcome: Any, now: str) -> Any:
+    """Build the OrchestrationReport for the current trace."""
     from . import OrchestrationReport
     return OrchestrationReport(
         trace_id=f"rpt.{event.event_id}.{chain.chain_id}",
@@ -226,6 +230,7 @@ def _outcome(chain: Any, event: Any, workspace: Any, report: Any,
              project_digest: str, confirmation_digest: str = "",
              package_preview: PackagePreview | None = None,
              store_id: str = "") -> RealChainOutcome:
+    """Build the RealChainOutcome with the given report and summaries."""
     return RealChainOutcome(
         chain.chain_id, event.event_id, workspace.project_id,
         tuple(summaries["flow"]), tuple(summaries["baseline"]),
@@ -310,6 +315,7 @@ def _finish_resume_escalated(
 
 
 def project_baseline_to_requirements(baseline: Any) -> tuple[TaskRequirement, ...]:
+    """Project the merged baseline into talent-recommendation requirements."""
     from src.coevo.talent.models import AvailabilityWindow
     return tuple(
         TaskRequirement(
@@ -353,6 +359,7 @@ def dispatch_real_chain(registry: Any, chain: Any, event: Any, *, workspace: Any
     summaries = {"flow": [], "baseline": [], "talent": [], "package": []}
 
     def invoke(index: int) -> Any:
+        """Invoke one real facade step (flow understanding / baseline / talent recommendation) by index."""
         if index == 0:
             raw = dict(project_input)
             raw["format"] = "canonical"
@@ -456,6 +463,7 @@ def confirm_real_chain(held: RealChainOutcome, *, preview: PackagePreview,
     })
 
     def build() -> RealChainOutcome:
+        """Build the confirmed-pending-package outcome after authorized human confirmation."""
         prior = held.orch_report.trace[-1]
         confirmed = OrchestrationTrace(
             prior.trace_id, prior.step_index, prior.agent_id, OrchestrationStepResult.OK,

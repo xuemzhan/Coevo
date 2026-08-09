@@ -739,6 +739,7 @@ class MergeEngine:
                 previous_id: str | None,
                 previous_hash: str,
             ) -> MergeCommitReceipt:
+                """Build the signed merge-commit receipt for the repository commit callback (binds baseline/import/decision facts)."""
                 return build_signed_merge_commit_receipt(
                 authority=receipt_authority,
                 trusted_time=trusted_time,
@@ -917,6 +918,7 @@ class MergeEngine:
         store: ProcessedPackageStore,
         reason: str,
     ) -> MergeProposal:
+        """Roll a provisional receipt commit back to the pre-commit state (no version bump, conflict flagged)."""
         record = replace(
             proposal.record,
             merged_version=proposal.record.current_version,
@@ -960,6 +962,7 @@ class MergeEngine:
         reason: str,
         import_outcome: "ImportOutcome | None" = None,
     ) -> MergeProposal:
+        """Build a fail-closed rejection proposal (decision_maker derived only from the verified import record)."""
         base_version = _master_revision(baseline.project_id, baseline.version)
         dm = ""
         if (
@@ -1028,6 +1031,7 @@ class MergeEngine:
         submitted_value: object,
         report: ReportManifest,
     ) -> FieldMerge | None:
+        """Three-way merge decision for a text field (ACCEPT normally, HOLD when at risk/blocked)."""
         if not submitted_value or submitted_value == "no change":
             return None
         decision = MergeDecision.ACCEPT
@@ -1052,6 +1056,7 @@ class MergeEngine:
         submitted_value: object,
         report: ReportManifest,
     ) -> FieldMerge | None:
+        """Three-way merge decision for the status field."""
         if submitted_value is None:
             return None
         decision = MergeDecision.ACCEPT
@@ -1078,6 +1083,7 @@ class MergeEngine:
         report: ReportManifest,
         hold_when_at_risk: bool,
     ) -> FieldMerge | None:
+        """Three-way merge decision for a string-list field (optional HOLD when at risk/blocked)."""
         if not submitted_value:
             return None
         decision = MergeDecision.ACCEPT

@@ -20,6 +20,7 @@ def _latest_receipt(
     repository: MergeReceiptRepository,
     trusted_time: dt.datetime,
 ) -> MergeCommitReceipt:
+    """Locate the latest verified project receipt bound to the given receipt id (single-pass O(n) scan; fail-closed on absence or stale binding)."""
     from .models import DecisionBriefValidationError, _safe_string
     _safe_string(receipt_id, field="receipt_id", max_bytes=1024)
     if type(repository) is not MergeReceiptRepository:
@@ -48,6 +49,7 @@ def _validate_bound_risk(
     report: RiskReport,
     trusted_time: dt.datetime,
 ) -> None:
+    """Validate that the risk report binds to the receipt (project/package match) and that its analysis time sits inside trusted bounds."""
     from .models import DecisionBriefValidationError, _parse_utc, _validate_risk_report
     _validate_risk_report(report)
     if report.project_id != receipt.project_id:
@@ -60,6 +62,7 @@ def _validate_bound_risk(
         raise DecisionBriefValidationError("risk analysis time is outside trusted bounds")
 
 def _clone_risk_report(report: RiskReport) -> RiskReport:
+    """Return a detached deep copy of the risk report (exact type check first; fail-closed)."""
     from .models import _validate_risk_report
     _validate_risk_report(report)
     risks = tuple(Risk(
@@ -84,6 +87,7 @@ def _clone_risk_report(report: RiskReport) -> RiskReport:
     )
 
 def _clone_confirmation(item: RiskConfirmation) -> RiskConfirmation:
+    """Return a detached copy of a risk confirmation with fresh payload/signature bytes."""
     from .models import RiskConfirmation
     return RiskConfirmation(
         confirmation_id=item.confirmation_id,
@@ -106,6 +110,7 @@ def _build_content(
     period_end: str | None = None,
     topic_risk_ids: tuple[str, ...] | None = None,
 ) -> BriefContent:
+    """Build the four-section brief content for the three brief types (STAGE/PERIODIC/RISK_TOPIC); AC-5 type parameters fail closed on malformed or cross-type misuse."""
     from .models import (
         BriefConclusion,
         BriefContent,
@@ -244,6 +249,7 @@ def _build_content(
     )
 
 def _risk_conclusion(risk: Risk, *, pending: bool) -> BriefConclusion:
+    """Build one conclusion entry for a risk (pending decision or high-risk item) with stable source binding."""
     from .models import (
         BriefConclusion,
         BriefSourceKind,
@@ -270,6 +276,7 @@ def _risk_conclusion(risk: Risk, *, pending: bool) -> BriefConclusion:
     )
 
 def _make_version(**values: object) -> BriefVersion:
+    """Construct a BriefVersion with computed content/version digests; fail-closed on non-BriefContent input (explicit check, survives python -O)."""
     from .models import (
         BriefContent,
         BriefVersion,
@@ -300,6 +307,7 @@ def _make_version(**values: object) -> BriefVersion:
     )
 
 def _validate_stored_brief(brief: DecisionBrief) -> None:
+    """Validate a stored DecisionBrief end-to-end: shape, revision sequence, content hash chain and WPS request binding (fail-closed)."""
     from .models import (
         BriefContent,
         BriefType,
@@ -355,6 +363,7 @@ def _validate_stored_brief(brief: DecisionBrief) -> None:
         raise DecisionBriefValidationError("stored WPS request binding is invalid")
 
 def _validate_content_model(content: object) -> None:
+    """Validate the stored brief content model shape and rebuild it to prove constructibility."""
     from .models import (
         BriefConclusion,
         BriefContent,
@@ -388,12 +397,14 @@ def _validate_content_model(content: object) -> None:
     )
 
 def _clone_content(content: BriefContent) -> BriefContent:
+    """Return a detached copy of brief content (validates the model first)."""
     from .models import BriefConclusion, BriefContent, SourceReference
     _validate_content_model(content)
 
     def clone_section(
         section: tuple[BriefConclusion, ...],
     ) -> tuple[BriefConclusion, ...]:
+        """Rebuild one conclusion section as detached tuples."""
         return tuple(BriefConclusion(
             conclusion_id=item.conclusion_id,
             text=item.text,
@@ -410,6 +421,7 @@ def _clone_content(content: BriefContent) -> BriefContent:
     )
 
 def _clone_brief(brief: DecisionBrief) -> DecisionBrief:
+    """Return a detached deep copy of a DecisionBrief (validates the stored model first)."""
     from .models import BriefVersion, DecisionBrief, WpsDocumentRequest
     _validate_stored_brief(brief)
     versions = tuple(BriefVersion(
@@ -448,6 +460,7 @@ def _clone_brief(brief: DecisionBrief) -> DecisionBrief:
     )
 
 def _brief_id(receipt: MergeCommitReceipt, brief_type: BriefType) -> str:
+    """Deterministic brief id: sha256(receipt_id + NUL + brief_type) truncated to 24 hex chars."""
     from .models import BriefType
     digest = hashlib.sha256(
         f"{receipt.receipt_id}\0{brief_type.value}".encode("utf-8")
@@ -455,6 +468,7 @@ def _brief_id(receipt: MergeCommitReceipt, brief_type: BriefType) -> str:
     return f"brief.{brief_type.value}.{digest}"
 
 def _validate_docx(payload: bytes) -> None:
+    """Validate a controlled DOCX template package: ZIP entry limits, safe paths, macro-free, bounded expansion (fail-closed)."""
     from .models import (
         DecisionBriefValidationError,
         MAX_TEMPLATE_UNCOMPRESSED_BYTES,

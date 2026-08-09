@@ -74,6 +74,7 @@ class MergeReceiptRepository:
         cls, database: str | Path, verification_authority: ReceiptSigningAuthority,
         signer: Signer | None = None, freshness: FreshnessAuthority | None = None,
     ) -> "MergeReceiptRepository":
+        """Create (or reopen) the receipt database and return a new repository."""
         return cls(database, verification_authority, signer, freshness, create=True)
 
     @classmethod
@@ -81,6 +82,7 @@ class MergeReceiptRepository:
         cls, database: str | Path, verification_authority: ReceiptSigningAuthority,
         signer: Signer | None = None, freshness: FreshnessAuthority | None = None,
     ) -> "MergeReceiptRepository":
+        """Open an existing receipt database and return a new repository."""
         return cls(database, verification_authority, signer, freshness, create=False)
 
     def __init__(
@@ -138,6 +140,7 @@ class MergeReceiptRepository:
         self.connection.close()
 
     def _cleanup_failed_create(self) -> None:
+        """Best-effort remove a partially created database after a failed create."""
         try:
             if self.anchor.pending_head.exists():
                 self.anchor.abort_pending()
@@ -148,6 +151,7 @@ class MergeReceiptRepository:
         self.database.unlink(missing_ok=True)
 
     def _validate_schema(self) -> None:
+        """Validate the database schema on open (fail-closed)."""
         tables = {
             row[0] for row in self.connection.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"
@@ -162,6 +166,7 @@ class MergeReceiptRepository:
             raise MergeReceiptRepositoryError("receipt store schema is unsupported")
 
     def _checkpoint(self) -> dict[str, object]:
+        """Persist a checkpoint row atomically."""
         tail = self.connection.execute(
             "SELECT store_sequence,receipt_id,receipt_hash FROM merge_receipts "
             "ORDER BY store_sequence DESC LIMIT 1"
@@ -181,6 +186,7 @@ class MergeReceiptRepository:
             self.anchor.abort_pending()
 
     def _recover(self) -> None:
+        """Replay/recover pending state after a crash before serving reads."""
         self.anchor.recover(self._checkpoint())
         if not self.anchor.verify(self._checkpoint()):
             raise MergeReceiptRepositoryError("receipt store checkpoint is invalid")
@@ -291,6 +297,7 @@ class MergeReceiptRepository:
         raise MergeReceiptRepositoryError("receipt is absent")
 
     def verified_history(self, *, trusted_time: datetime) -> tuple[MergeCommitReceipt, ...]:
+        """Return the verified receipt history under the trusted-time freshness policy."""
         with self.anchor.locked():
             self._recover()
             return self._verify_history(trusted_time)
@@ -434,6 +441,7 @@ def _validate_row_shape(row: sqlite3.Row) -> None:
 
 
 def _decode_receipt(receipt_id: str, payload: bytes, signature: bytes) -> MergeCommitReceipt:
+    """Decode a stored receipt row back into a MergeCommitReceipt (fail-closed)."""
     try:
         # Row-level precheck (US-11-AC-1 Round-2 fix). The strict
         # receipt_id / signature / hash format is enforced at the
@@ -501,6 +509,7 @@ def _decode_receipt(receipt_id: str, payload: bytes, signature: bytes) -> MergeC
 
 
 def _decode_baseline(value: dict) -> ProjectBaseline:
+    """Decode a stored baseline row (fail-closed)."""
     baseline_keys = {
         "project_id", "version", "created_at", "title", "process_flow_ref",
         "objective", "plan_start", "plan_end", "responsible_units",
@@ -560,6 +569,7 @@ def _decode_baseline(value: dict) -> ProjectBaseline:
 
 
 def _decode_override(value: object, *, index: int) -> Override:
+    """Decode a stored override row (fail-closed)."""
     path = f"baseline.overrides[{index}]"
     _require_exact_mapping(
         value, {"target_path", "original_value", "edited_value", "reason"}, path,
@@ -585,6 +595,7 @@ def _decode_override(value: object, *, index: int) -> Override:
 
 
 def _require_exact_mapping(value: object, keys: set[str], path: str) -> None:
+    """Require an exact one-to-one mapping from a row (fail-closed)."""
     if type(value) is not dict:
         raise MergeReceiptRepositoryError(f"{path} must be an exact object")
     if set(value) != keys or any(type(key) is not str for key in value):

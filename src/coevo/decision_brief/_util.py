@@ -29,6 +29,7 @@ def _is_link_or_reparse(
     *,
     error_factory: Callable[[str], Exception],
 ) -> bool:
+    """Detect symbolic-link/reparse-point semantics for a Path (used by template path guards)."""
     try:
         info = path.lstat()
     except OSError as exc:
@@ -43,6 +44,7 @@ def _safe_string(
     max_bytes: int,
     error_factory: Callable[[str], Exception],
 ) -> None:
+    """Fail-closed bounds check for a string field (type, non-empty, byte cap)."""
     if not isinstance(value, str) or not value.strip() or any(ord(c) < 32 for c in value):
         raise error_factory(f"{field} must be a non-empty safe string")
     if len(value.encode("utf-8")) > max_bytes:
@@ -55,6 +57,7 @@ def _digest(
     field: str,
     error_factory: Callable[[str], Exception],
 ) -> None:
+    """Validate a lowercase SHA-256 hex digest (fail-closed)."""
     if (
         not isinstance(value, str)
         or len(value) != 64
@@ -71,6 +74,7 @@ def _parse_utc(
     not_utc_message: str,
     invalid_message: str,
 ) -> "object":
+    """Parse an ISO-8601 UTC string into a timezone-aware datetime (fail-closed on non-UTC or malformed input)."""
     return parse_iso_utc(
         value,
         error_factory=error_factory,
@@ -85,6 +89,7 @@ def _encode_json(
     max_bytes: int,
     error_factory: Callable[[str], Exception],
 ) -> bytes:
+    """Encode a value to canonical JSON bytes under a byte budget (fail-closed)."""
     try:
         payload = json.dumps(
             value, ensure_ascii=False, sort_keys=True, separators=(",", ":")

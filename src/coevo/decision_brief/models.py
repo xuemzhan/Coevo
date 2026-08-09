@@ -313,6 +313,7 @@ class DecisionBrief:
 
 
 def _validate_risk_report(report: object) -> None:
+    """Validate a RiskReport shape and policy caps before use (fail-closed)."""
     if type(report) is not RiskReport:
         raise DecisionBriefValidationError("risk report must be exact RiskReport")
     if len(report.risks) > MAX_RISK_COUNT:
@@ -372,6 +373,7 @@ def _validate_risk_report(report: object) -> None:
     _encode_json(report.to_dict(), max_bytes=MAX_RISK_REPORT_BYTES)
 
 def _risk_digest(report: RiskReport) -> str:
+    """Deterministic SHA-256 digest over the canonical risk report."""
     _validate_risk_report(report)
     return hashlib.sha256(
         _encode_json(report.to_dict(), max_bytes=MAX_RISK_REPORT_BYTES)
@@ -379,6 +381,7 @@ def _risk_digest(report: RiskReport) -> str:
 
 
 def _version_digest(version: BriefVersion) -> str:
+    """Deterministic digest of a BriefVersion (hash-chain link)."""
     return _version_digest_values(
         revision=version.revision,
         created_at=version.created_at,
@@ -391,6 +394,7 @@ def _version_digest(version: BriefVersion) -> str:
     )
 
 def _version_digest_values(**values: object) -> str:
+    """Digest over explicit version field values (canonical ordering)."""
     return hashlib.sha256(_encode_json({
         "domain": BRIEF_DOMAIN,
         "schema_version": BRIEF_SCHEMA,
@@ -398,11 +402,13 @@ def _version_digest_values(**values: object) -> str:
     }, max_bytes=32 * 1024)).hexdigest()
 
 def _content_digest(content: BriefContent) -> str:
+    """Digest of brief content (hash-chain input)."""
     return hashlib.sha256(
         _encode_json(_content_plain(content), max_bytes=MAX_BRIEF_CONTENT_BYTES)
     ).hexdigest()
 
 def _content_plain(content: BriefContent) -> dict[str, object]:
+    """Detached plain projection of brief content for canonical hashing."""
     names = ("overall_progress", "important_changes", "high_risk_items", "pending_decisions")
     return {
         "title": content.title,
@@ -427,6 +433,7 @@ def _stable_sources(sources: tuple[SourceReference, ...]) -> tuple[SourceReferen
     return tuple(sorted(set(sources), key=_source_sort_key))
 
 def _content_sources(content: BriefContent) -> tuple[SourceReference, ...]:
+    """All source references used by the content sections (stable order)."""
     return tuple(
         source
         for section in content.sections
@@ -438,6 +445,7 @@ def _source_sort_key(source: SourceReference) -> tuple[str, str]:
     return source.kind.value, source.reference_id
 
 def _validate_template_ref(value: object) -> None:
+    """Validate a template reference path (safe relative, bounded; fail-closed)."""
     _safe_string(value, field="template_ref", max_bytes=1024)
     if "\\" in value or ":" in value or value.startswith("/"):
         raise DecisionBriefValidationError("template_ref must be relative POSIX path")
@@ -455,6 +463,7 @@ def _is_link_or_reparse(path: Path) -> bool:
     return _util_is_link_or_reparse(path, error_factory=DecisionBriefValidationError)
 
 def _safe_string(value: object, *, field: str, max_bytes: int) -> None:
+    """Thin wrapper delegating to _util._safe_string with DecisionBriefValidationError semantics."""
     _util_safe_string(
         value,
         field=field,
@@ -466,6 +475,7 @@ def _digest(value: object, *, field: str) -> None:
     _util_digest(value, field=field, error_factory=DecisionBriefValidationError)
 
 def _parse_utc(value: object, *, field: str) -> dt.datetime:
+    """Thin wrapper delegating to _util._parse_utc with DecisionBriefValidationError semantics."""
     return _util_parse_utc(
         value,
         field=field,
@@ -475,6 +485,7 @@ def _parse_utc(value: object, *, field: str) -> dt.datetime:
     )
 
 def _encode_json(value: object, *, max_bytes: int) -> bytes:
+    """Thin wrapper delegating to _util._encode_json with DecisionBriefValidationError semantics."""
     return _util_encode_json(
         value, max_bytes=max_bytes, error_factory=DecisionBriefValidationError
     )

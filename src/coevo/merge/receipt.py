@@ -296,11 +296,13 @@ class MergeCommitReceiptStore:
         return tuple(self._by_project.get(project_id, ()))
 
     def _append(self, receipt: MergeCommitReceipt, *, _seal) -> "MergeCommitReceiptStore":
+        """Append a receipt to the sealed store (sealed construction guard)."""
         if _seal is not _STORE_SEAL or type(receipt) is not MergeCommitReceipt:
             raise MergeCommitReceiptError("receipt append is sealed")
         return type(self)(self._receipts + (receipt,), _seal=_STORE_SEAL)
 
     def _validate_history(self) -> None:
+        """Revalidate the whole receipt chain on every store read: sequence, previous hash, signature (fail-closed)."""
         ids: set[str] = set()
         packages: set[str] = set()
         digests: set[str] = set()
@@ -349,6 +351,7 @@ def append_signed_receipt(
 
 
 def _validate_receipt(receipt: MergeCommitReceipt) -> None:
+    """Validate a MergeCommitReceipt end-to-end: shape, signed fields, digest bindings (fail-closed)."""
     if type(receipt.payload) is not bytes or type(receipt.signature) is not bytes or not receipt.signature:
         raise MergeCommitReceiptError("receipt payload/signature must be exact non-empty bytes")
     if type(receipt.snapshot) is not FrozenBaselineSnapshot:
@@ -424,6 +427,7 @@ def _validate_receipt(receipt: MergeCommitReceipt) -> None:
 
 
 def _signed_fields(receipt: MergeCommitReceipt, *, include_snapshot_payload: bool) -> dict[str, object]:
+    """Collect the canonical signed field values of a receipt (order-stable)."""
     result = {
         "domain": RECEIPT_DOMAIN, "schema_version": RECEIPT_SCHEMA,
         "signature_algorithm": receipt.signature_algorithm,
@@ -455,6 +459,7 @@ def _signed_fields(receipt: MergeCommitReceipt, *, include_snapshot_payload: boo
 
 
 def _freeze_value(value: object, *, path: str) -> object:
+    """Detach and bound a value before signing (no aliasing, no cycles, bounded size)."""
     value_type = type(value)
     if value_type in _DOMAIN_TYPES:
         return {
@@ -482,6 +487,7 @@ def _freeze_value(value: object, *, path: str) -> object:
 
 
 def _copy_domain_value(value: object, *, path: str) -> object:
+    """Deep-copy a domain value while keeping identity/digest semantics (bounded)."""
     value_type = type(value)
     if value_type in _DOMAIN_TYPES:
         copied_fields = {}
@@ -533,6 +539,7 @@ def _normalize_canonical_plain(
     active: set[int] = set()
 
     def charge_utf8(size: int) -> None:
+        """Charge UTF-8 bytes against the canonical total budget (fail-closed)."""
         if state["utf8"] > max_total_utf8 - size:
             raise MergeCommitReceiptError(
                 "canonical value exceeds total UTF-8 limit"
@@ -540,6 +547,7 @@ def _normalize_canonical_plain(
         state["utf8"] += size
 
     def normalize(item: object, *, item_path: str, depth: int) -> object:
+        """Normalize one canonical value node under depth/node/string budgets (cycle-safe)."""
         if depth > _CANONICAL_MAX_DEPTH:
             raise MergeCommitReceiptError(
                 f"{item_path} exceeds maximum nesting depth"
@@ -609,12 +617,14 @@ def _normalize_canonical_plain(
 
 
 def _canonical_plain(value: object) -> object:
+    """Canonical plain projection of a receipt (hashing input)."""
     return _normalize_canonical_plain(
         value, path="signed_fields", max_total_utf8=_RECEIPT_MAX_BYTES,
     )
 
 
 def _encode(value: object, *, max_bytes: int) -> bytes:
+    """Encode a canonical value to bytes under a bounded budget."""
     if type(max_bytes) is not int or max_bytes < 0:
         raise MergeCommitReceiptError("encoded JSON budget is invalid")
     _guard_integer_materialization(value, max_bytes=max_bytes)
@@ -633,10 +643,12 @@ def _encode(value: object, *, max_bytes: int) -> bytes:
 
 
 def _guard_integer_materialization(value: object, *, max_bytes: int) -> None:
+    """Verify every int in a value fits the encoded JSON budget without materializing it (fail-closed, cycle-safe)."""
     remaining = max_bytes
     active: set[int] = set()
 
     def visit(item: object) -> None:
+        """Walk a value and charge integer digit budgets without materializing huge ints (cycle-safe)."""
         nonlocal remaining
         item_type = type(item)
         if item_type is int:
@@ -666,6 +678,7 @@ def _guard_integer_materialization(value: object, *, max_bytes: int) -> None:
 
 
 def _parse_utc(value: str, field: str) -> dt.datetime:
+    """Parse an ISO-8601 UTC string into an aware datetime (fail-closed)."""
     from src.coevo.timefmt import parse_iso_utc
 
     return parse_iso_utc(
@@ -677,6 +690,7 @@ def _parse_utc(value: str, field: str) -> dt.datetime:
 
 
 def _revision_number(revision: str, project_id: str) -> int:
+    """Parse a master revision into its numeric version component."""
     prefix = f"{project_id}-R"
     suffix = revision[len(prefix):] if revision.startswith(prefix) else ""
     if len(suffix) < 4 or not suffix.isdigit():

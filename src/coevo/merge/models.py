@@ -84,6 +84,7 @@ class FieldMerge:
             # convert recursively so the round-trip is exact
             # (to_dict() -> json.dumps -> json.loads yields a
             # structurally equal dict).
+            """Project the model into a JSON-safe dict (deterministic ordering)."""
             if _is_missing(value):
                 return None  # explicit null = "no value"
             if isinstance(value, enum.Enum):
