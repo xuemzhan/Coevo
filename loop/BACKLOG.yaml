@@ -1790,3 +1790,13 @@ items:
       - tests/unit/test_engineering_baseline.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-36（2026-08-09 用户指令"继续优化"；sm2-test-pki helper stdin BOM 健壮性） ----------
+  - id: FRAMEWORK-OPTIMIZE-36
+    story: ENG-BASE
+    title: 根因修复——CP65001 下 .NET StandardInput StreamWriter 预写 UTF-8 BOM 导致 COEVOPKI/2 帧双重 BOM → GMH-E-MAGIC；generate-sm2-test-pki.ps1 顶部钉无 BOM 编码（CP936）+ toolchain-lock launcher 重哈希
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-35]
+    acceptance_tests:
+      - tests/integration/test_sm2_test_pki_generation.py
+    security_review: true
+    protocol_review: false

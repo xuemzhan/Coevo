@@ -12,6 +12,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+# Pin the console encodings to a BOM-free code page before the helper launch:
+# under code page 65001 (UTF-8), .NET's Process.StandardInput StreamWriter emits
+# a UTF-8 BOM preamble into the redirected stdin pipe, corrupting the binary
+# COEVOPKI/2 frame (double BOM -> GMH-E-MAGIC). CP936 has no BOM preamble.
+[Console]::OutputEncoding = [Text.Encoding]::GetEncoding(936)
+[Console]::InputEncoding = [Text.Encoding]::GetEncoding(936)
 . (Join-Path $PSScriptRoot 'windows-native-security.ps1')
 
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path

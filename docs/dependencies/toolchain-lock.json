@@ -46,8 +46,8 @@
         "source_sha256": "82b33f092fe1548cf9caacc64d0312e2f46b19daefaf33e960b1b283efc86262",
         "launcher": {
           "path": "scripts/generate-sm2-test-pki.ps1",
-          "size": 11208,
-          "sha256": "ca6f65f9e070e079ec953eb8e081b4b732b3401a0a297fcbe5638929793b21fc"
+          "size": 11642,
+          "sha256": "26cd84230bbdf09dd92835c382cbb1ed171f3de1739ee586f9c235b288cf62ee"
         },
         "compile_command": "csc.exe /nologo /noconfig /nostdlib+ /reference:<locked-mscorlib> /reference:<locked-System> /target:exe /platform:x64 /optimize+ /debug- /checked+ /out:<create-new-runtime-helper> <locked-source>",
         "build_output_is_deterministic": false,

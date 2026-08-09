@@ -5433,4 +5433,12 @@ security-reviewer 双签门禁。
 - Security: tamper-detection assertions unchanged; only the restore source is hardened.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-36 closure (sm2-test-pki helper stdin BOM robustness; full-gate re-run)
+- Work item: `FRAMEWORK-OPTIMIZE-36` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-35]). User instruction: continue optimizing; root-caused during the full-gate closure run.
+- Root cause: under console code page 65001 (UTF-8), .NET Framework's Process.StandardInput StreamWriter emits a UTF-8 BOM preamble into the redirected stdin pipe; the launcher's BaseStream.Write then appends the COEVOPKI/2 frame, producing a DOUBLE BOM that shifts the 11-byte magic and fails the helper check (GMH-E-MAGIC). CP936 has no BOM preamble, which is why the failure was environment/codepage dependent (7 integration tests in test_sm2_test_pki_generation failed). Empirically reproduced: chcp 65001 -> double BOM; chcp 936 -> clean 37-byte frame.
+- Fix: scripts/generate-sm2-test-pki.ps1 pins [Console]::OutputEncoding/InputEncoding to BOM-free CP936 before launching the helper (with an explanatory comment); docs/dependencies/toolchain-lock.json launcher size/sha256 re-hashed (11208 -> 11642); helper source and protocol untouched.
+- Verification: chcp-65001 reproduction before/after; tests/integration/test_sm2_test_pki_generation full class green (25 tests, 1 skipped); full quality exit=0 fingerprint=`f742f64aa8dce72c` (unit 1365 + integration + Go + security + e2e 14, audit fully-sealed).
+- Security: locked script + toolchain lock updated; encoding pin only, tamper-detection assertions and the protocol frame unchanged.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
