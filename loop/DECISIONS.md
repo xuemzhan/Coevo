@@ -5607,4 +5607,11 @@ security-reviewer 双签门禁。
 - Security: orchestration failure policy reviewed (human-confirmation gate, registry-miss fails closed, retry capped at one, escalation to human); pure structural migration.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-26 registration (task_decomposition/agent._validate phase decomposition; incremental gate)
+- User instruction: continue P2; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-26` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-25]): TaskDecompositionAgent._validate (108 lines, cc~21, highest complexity density in repo) is split by pure migration into module-level _parse_task (single task entry) and _parse_edge (single edge entry); _validate becomes a ~35-line linear orchestration (bounds -> known_packages -> tasks -> known ids -> edges -> dedup + construct); error messages, check order and fail-closed semantics stay byte-identical; _validate signature unchanged (unused project_input parameter is a pre-existing interface, not cleaned out of scope); guard test test_framework_optimize27.py.
+- Security review: required (model-output parsing is security-critical: SAFE_ID, byte caps, ISO window, unknown-reference fail-closed); pure migration.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
