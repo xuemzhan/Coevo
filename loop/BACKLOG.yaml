@@ -1699,7 +1699,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-27
     story: ENG-BASE
     title: _real_chain.resume_real_chain（148 行/cc~19）验证门序列纯迁移式拆分为 4 个模块级助手（_validate_resume_context/_verify_resume_bindings/_require_package_agent/_begin_resume），resume_real_chain 收敛为约 95 行编排（保留加密包构建路径），错误消息与失败关闭语义逐字节不变；守卫 test_framework_optimize28.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-26]
     acceptance_tests:
       - tests/unit/test_framework_optimize28.py

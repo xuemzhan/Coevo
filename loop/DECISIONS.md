@@ -5628,4 +5628,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-27 closure (resume_real_chain phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-27` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-26]). User instruction: continue; no full gate (waiver recorded).
+- Delivery: _real_chain.resume_real_chain (148 lines, cc~19) split its validation-gate sequence by pure migration into 4 module-level helpers (_validate_resume_context: confirmed outcome/store binding/fixed chain/types/ISO time/context match/base_revision; _verify_resume_bindings: event digest recompute + stored-state comparison; _require_package_agent: step-4 package agent capability gate with record_attempt; _begin_resume: preview presence + resume_digest + atomic begin). resume_real_chain is now a 103-line orchestration keeping the local import block and the encrypted-package build/escalation path. Check order, error messages and fail-closed semantics byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize28.py.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 40 tests green (test_orchestrator 26 + guard 4 + integration test_orchestrator_real_facade_chain 10); full quality waived per user instruction.
+- Security: US-5 package-build security path reviewed (confirmed-state binding, event digest recompute, store consistency, package-agent capability gate, failure escalates to human); pure structural migration.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
