@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ENG-BASE",
-  "current_item": "FRAMEWORK-OPTIMIZE-37",
-  "phase": "decide",
-  "status": "done",
+  "current_item": "FRAMEWORK-OPTIMIZE-38",
+  "phase": "plan",
+  "status": "in-progress",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "05159ee",
   "blocking_issue": "",
-  "updated_at": "2026-08-09T12:54:56.860876Z"
+  "updated_at": "2026-08-09T13:14:23.991980Z"
 }

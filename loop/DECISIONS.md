@@ -5449,4 +5449,11 @@ security-reviewer 双签门禁。
 - Security: production-relevant crypto path + toolchain lock updated; encoding pin only.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-38 registration (_build_content phase decomposition; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-38` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-37]): decision_brief/_build._build_content (145 lines, cc~19, now the highest-complexity large function in the repo) is split by pure migration into 3 module-level phase helpers (_type_parameters / _content_title / _progress_text) following the three-brief-type branches; _build_content becomes a ~70-line assembly orchestration; check order, error messages, title/progress text and risk fields stay byte-identical; per-function lazy imports kept; guard test test_framework_optimize38.py.
+- Security review: not required (pure structural migration; brief content semantics unchanged).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
