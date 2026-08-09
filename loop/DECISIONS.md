@@ -5397,4 +5397,11 @@ security-reviewer 双签门禁。
 - Security: pure structural migration; risk-decision semantics unchanged.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-33 registration (64-hex regex convergence + \Z tightening; incremental gate)
+- User instruction: continue optimizing; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-33` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-32]): converge 4 local `[0-9a-f]{64}` regex copies (identity/private_keys PUBLIC_DIGEST_RE, protocol/sm2_sign _HEX_RE, audit_governance/models digest_hex fullmatch, crypto/cng_handle two fullmatch sites) onto the shared leaf ids.HEX_64 / is_hex_64, and tighten the shared pattern from `$` to `\Z` anchoring (rejects trailing newline; matches the existing fullmatch-site semantics). Documented behavior change: trailing newline is now rejected (fail-closed strengthening). Update test_framework_optimize13 pattern pin + consolidation guard; new guard test test_framework_optimize34.py.
+- Security review: required (validation tightening is fail-closed strengthening; behavior delta recorded).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
