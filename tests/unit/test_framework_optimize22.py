@@ -29,6 +29,9 @@ ALLOWED_UNUSED = {
         "_validate_docx",
         "_validate_stored_brief",
     },
+    # Package-level re-export: src/coevo/app/__init__.py imports
+    # now_utc_iso_z from demo_support and re-exports it for consumers.
+    "src/coevo/app/demo_support.py": {"now_utc_iso_z"},
 }
 
 

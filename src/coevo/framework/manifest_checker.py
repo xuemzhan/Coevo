@@ -44,6 +44,7 @@ from src.coevo.canon import canonical_json_bytes
 from src.coevo.jsonutil import reject_duplicate_pairs
 from src.coevo.crypto.contract import ProviderScope
 from src.coevo.framework.capability import (
+    CapabilityEntry,
     CapabilityKind,
     CapabilityValidationError,
     manifest_capability_allowed,
@@ -308,6 +309,32 @@ def _validate(
     cert_resolver: CertificateResolver,
     signature_verifier: SignatureVerifier,
 ) -> AgentManifest:
+    agent_id, display_name, semantic_version = _validate_metadata(parsed)
+    capability, rhc, capability_entry = _validate_spec(parsed)
+    crypto_scope = _validate_security(parsed, capability_entry)
+    redact = _validate_audit(parsed)
+    profile, version = _require_policy(parsed, policy_registry)
+    declared = _compute_spec_hash(parsed)
+    _verify_policy_binding(parsed, declared, cert_resolver, signature_verifier)
+
+    if not isinstance(inp.trusted_anchor_pubkey, bytes) or not inp.trusted_anchor_pubkey:
+        raise _InvalidManifest("trusted_anchor_pubkey must be non-empty bytes")
+
+    return AgentManifest(
+        agent_id=agent_id,
+        display_name=display_name,
+        semantic_version=semantic_version,
+        capability=capability,
+        requires_human_confirmation=rhc,
+        crypto_scope=crypto_scope,
+        redact_in_audit=redact,
+        policy_profile=profile,
+        policy_version=version,
+        spec_hash=declared,
+    )
+
+def _validate_metadata(parsed: dict[str, Any]) -> tuple[str, str, str]:
+    """Validate the metadata section; returns (agent_id, display_name, semantic_version)."""
     metadata = parsed.get("metadata")
     if not isinstance(metadata, dict):
         raise _InvalidManifest("metadata must be an object")
@@ -322,7 +349,12 @@ def _validate(
         raise _InvalidManifest(
             f"semantic_version must be semver (L7): {semantic_version!r}"
         )
+    return agent_id, display_name, semantic_version
 
+def _validate_spec(
+    parsed: dict[str, Any],
+) -> tuple[str, bool, CapabilityEntry]:
+    """Validate the spec section; returns (capability, requires_human_confirmation, entry)."""
     spec = parsed.get("spec")
     if not isinstance(spec, dict):
         raise _InvalidManifest("spec must be an object")
@@ -340,7 +372,13 @@ def _validate(
     rhc = spec.get("requires_human_confirmation", True)
     if not isinstance(rhc, bool):
         raise _InvalidManifest("spec.requires_human_confirmation must be a bool")
+    return capability, rhc, capability_entry
 
+def _validate_security(
+    parsed: dict[str, Any],
+    capability_entry: CapabilityEntry,
+) -> ProviderScope:
+    """Validate the security section; returns the resolved crypto scope."""
     security = parsed.get("security")
     if not isinstance(security, dict):
         raise _InvalidManifest("security must be an object")
@@ -358,7 +396,10 @@ def _validate(
         raise _InvalidManifest(
             "CRYPTO_PROXY requires crypto_scope approved-product"
         )
+    return crypto_scope
 
+def _validate_audit(parsed: dict[str, Any]) -> tuple[str, ...]:
+    """Validate the audit section; returns the redact-in-audit tuple."""
     audit = parsed.get("audit", {})
     if audit is None:
         audit = {}
@@ -376,7 +417,13 @@ def _validate(
             + ", ".join(outside)
         )
     redact = tuple(redact_raw)
+    return redact
 
+def _require_policy(
+    parsed: dict[str, Any],
+    policy_registry: PolicyRegistry,
+) -> tuple[str, str]:
+    """Require the declared policy profile/version to exist in the deployment registry."""
     profile = _require_str(parsed, "policy_profile", "policy_profile")
     version = _require_str(parsed, "policy_version", "policy_version")
     try:
@@ -388,7 +435,10 @@ def _validate(
             f"policy_profile {profile!r} version {version!r} "
             "not present in the deployment policy registry"
         )
+    return profile, version
 
+def _compute_spec_hash(parsed: dict[str, Any]) -> str:
+    """Return the canonical spec_hash after stripping self-referential fields."""
     declared = _declared_spec_hash(parsed)
     computed = hashlib.sha256(
         canonical_json_bytes(_strip_self_referential(parsed))
@@ -398,7 +448,15 @@ def _validate(
             "spec_hash does not match the canonical manifest bytes "
             "(excluding self-referential fields)"
         )
+    return declared
 
+def _verify_policy_binding(
+    parsed: dict[str, Any],
+    declared: str,
+    cert_resolver: CertificateResolver,
+    signature_verifier: SignatureVerifier,
+) -> None:
+    """Verify the policy_ref three-part binding (F8): spec_hash + cert fingerprint + SM2 signature."""
     policy_ref = parsed.get("policy_ref")
     if not isinstance(policy_ref, dict):
         raise _InvalidManifest("policy_ref must be an object")
@@ -434,19 +492,3 @@ def _validate(
         raise _InvalidManifest(f"signature verification failed: {exc}") from exc
     if not signature_ok:
         raise _InvalidManifest("policy_ref signature verification failed")
-
-    if not isinstance(inp.trusted_anchor_pubkey, bytes) or not inp.trusted_anchor_pubkey:
-        raise _InvalidManifest("trusted_anchor_pubkey must be non-empty bytes")
-
-    return AgentManifest(
-        agent_id=agent_id,
-        display_name=display_name,
-        semantic_version=semantic_version,
-        capability=capability,
-        requires_human_confirmation=rhc,
-        crypto_scope=crypto_scope,
-        redact_in_audit=redact,
-        policy_profile=profile,
-        policy_version=version,
-        spec_hash=declared,
-    )
