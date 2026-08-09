@@ -1673,3 +1673,14 @@ items:
       - tests/unit/test_merge_engine.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-25（2026-08-09 用户指令"继续"；dispatch_event AGENT_CALL 分支提取） ----------
+  - id: FRAMEWORK-OPTIMIZE-25
+    story: ENG-BASE
+    title: Orchestrator.dispatch_event（170 行）的 AGENT_CALL 分支（约 85 行）提取为模块级纯函数 _dispatch_agent_step + 冻结 _AgentStepResult（outcome/next_id_seed/stop），dispatch_event 收敛为约 85 行循环编排，trace detail 与失败关闭语义逐字节不变；守卫 test_framework_optimize26.py
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-24]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize26.py
+      - tests/unit/test_orchestrator.py
+    security_review: true
+    protocol_review: false

@@ -5593,4 +5593,11 @@ security-reviewer 双签门禁。
 - Security: receipt-chain security path reviewed (signer binding, field-decision allow-list, CAS atomic commit); pure structural migration.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-25 registration (dispatch_event AGENT_CALL branch extraction; incremental gate)
+- User instruction: continue; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-25` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-24]): Orchestrator.dispatch_event (170 lines, cc~16) extracts its AGENT_CALL branch (~85 lines: confirm hold / registry miss / AVAILABLE / RETRY capped at one / SKIP / ESCALATE) into a module-level pure function _dispatch_agent_step with a frozen _AgentStepResult(outcome, next_id_seed, stop); dispatch_event becomes a ~85-line loop orchestration; decision order, trace detail strings and fail-closed semantics stay byte-identical; import surface unchanged; guard test test_framework_optimize26.py.
+- Security review: required (orchestration failure policy is security-relevant: human-confirmation gate, allow-list miss fails closed, retry capped at one, escalation to human); pure migration.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
