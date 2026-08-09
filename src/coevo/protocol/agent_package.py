@@ -351,6 +351,11 @@ class EnvelopeHeader:
                 maximum=64, pattern=CLIENT_VERSION_RE,
             ),
         )
+        EnvelopeHeader._validate_cross_fields(envelope)
+        return envelope
+    @staticmethod
+    def _validate_cross_fields(envelope: "EnvelopeHeader") -> None:
+        """Validate cross-field envelope invariants after construction (fail-closed)."""
         if envelope.package_type not in PACKAGE_TYPES:
             raise AgentPackageEnvelopeError(
                 f"package_type {envelope.package_type!r} is not in the protocol enum"
@@ -378,7 +383,6 @@ class EnvelopeHeader:
             raise AgentPackageEnvelopeError(
                 "payload_length exceeds the protocol's 1 TiB hard limit"
             )
-        return envelope
 
     @staticmethod
     def _require_uuid_string(value: Any, *, name: str) -> str:
