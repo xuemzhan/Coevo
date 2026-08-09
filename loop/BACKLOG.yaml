@@ -1804,7 +1804,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-37
     story: ENG-BASE
     title: OPTIMIZE-36 同类扫描收口——invoke-gmssl-crypto.ps1 同样被 CP65001 StreamWriter BOM 破坏 COEVOCRYPTO/1 帧（GCP-E-MAGIC，e2e 实测失败）；同款编码钉 + toolchain-lock launcher 重哈希
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-36]
     acceptance_tests:
       - tests/e2e/test_return_chain.py
