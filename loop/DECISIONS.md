@@ -5390,4 +5390,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-32 closure (_analyze risk-rule phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-32` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-31]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: RiskAnalyzer._analyze (120 lines, the deferred P2 item) extracted its six risk rules into module-level pure functions returning Risk | None (_deadline_overrun_risk / _evidence_shortfall_risk / _long_silence_risk / _predecessor_unfinished_risk / _status_bloom_risk / _coordination_risk) plus _validated_completed_task_ids (authoritative-receipt context); _analyze is now a 96-line rule orchestration keeping the original coordination computation order (before the coordination rule appends). Rule order, risk fields (severity/due/affected/text) byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize33.py. analyzer.py includes a one-time line-ending normalization (CRLF->LF; content verified by the green risk-analyzer suite).
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 12 unit tests green (test_risk_analyzer 8 + guard 4) + integration test_merge_risk_receipt_chain 3; full quality waived per user instruction.
+- Security: pure structural migration; risk-decision semantics unchanged.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 

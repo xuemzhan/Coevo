@@ -1751,7 +1751,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-32
     story: ENG-BASE
     title: risk/analyzer._analyze（120 行，P2 挂起项）六条风险规则抽为模块级纯函数 -> Risk | None（deadline/evidence/silence/predecessor/status-bloom/coordination），_analyze 收敛为约 65 行编排，判定顺序与风险字段逐字节不变；守卫 test_framework_optimize33.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-31]
     acceptance_tests:
       - tests/unit/test_framework_optimize33.py
