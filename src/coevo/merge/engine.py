@@ -665,21 +665,9 @@ class MergeEngine:
         authorized_recipient_certs: "frozenset[str] | None" = None,
     ) -> MergeCommitOutcome:
         """Atomically merge and register an authoritative content receipt."""
-        if (
-            type(self._receipt_repository) is not MergeReceiptRepository
-            or type(self._receipt_authority) is not ReceiptSigningAuthority
-        ):
-            raise MergeError("merge engine lacks the system receipt composition")
-        receipt_repository = self._receipt_repository
-        receipt_authority = self._receipt_authority
-        prior_history = receipt_repository.verified_history(
-            trusted_time=dt.datetime.fromisoformat(
-                decided_at.removesuffix("Z") + "+00:00"
-            )
+        receipt_repository, receipt_authority, receipt_store = (
+            self._receipt_context(decided_at=decided_at)
         )
-        receipt_store = MergeCommitReceiptStore.empty()
-        for historical in prior_history:
-            receipt_store = append_signed_receipt(receipt_store, historical)
         proposal = self.merge(
             import_outcome=import_outcome,
             report=report,
@@ -693,76 +681,44 @@ class MergeEngine:
                 proposal=proposal, receipt=None, receipt_store=receipt_store,
             )
 
-        imported_record = import_outcome.record
-        transaction = import_outcome.transaction
-        if (
-            imported_record is None
-            or imported_record.result != "committed"
-            or imported_record.package_type != report.package_type
-            or imported_record.revision != report.base_revision
-            or imported_record.package.sequence_no != report.sequence_no
-            or transaction.package_id != report.package_id
-            or transaction.project_id != report.project_id
-            or transaction.base_revision != report.base_revision
-            or transaction.current_revision != report.base_revision
-        ):
-            return self._reject_receipt_commit(
-                proposal=proposal,
-                baseline=baseline,
-                store=store,
-                receipt_store=receipt_store,
-                reason="authoritative import facts do not bind to the report",
-            )
+        rejection = self._receipt_binding_rejection(
+            proposal=proposal,
+            import_outcome=import_outcome,
+            report=report,
+            baseline=baseline,
+            store=store,
+            receipt_store=receipt_store,
+        )
+        if rejection is not None:
+            return rejection
 
-        if (
-            not isinstance(proposal.record.field_merges, tuple)
-            or any(
-                not isinstance(field_merge, FieldMerge)
-                or field_merge.decision
-                not in (MergeDecision.ACCEPT, MergeDecision.MANUAL)
-                for field_merge in proposal.record.field_merges
-            )
-        ):
-            return self._reject_receipt_commit(
-                proposal=proposal,
-                baseline=baseline,
-                store=store,
-                receipt_store=receipt_store,
-                reason="committed merge contains an untrusted field decision",
-            )
+        rejection = self._field_decision_rejection(
+            proposal=proposal,
+            baseline=baseline,
+            store=store,
+            receipt_store=receipt_store,
+        )
+        if rejection is not None:
+            return rejection
 
         status_merges = tuple(
             merge for merge in proposal.record.field_merges
             if isinstance(merge, FieldMerge) and merge.field_path == "status"
         )
-        baseline_task_ids = {
-            task.task_id
-            for work_package in proposal.new_baseline.work_packages
-            for task in work_package.tasks
-        }
-        if (
-            len(status_merges) != 1
-            or status_merges[0].decision
-            not in (MergeDecision.ACCEPT, MergeDecision.MANUAL)
-            or status_merges[0].submitted_value is not report.status
-            or report.task_id not in baseline_task_ids
-            or proposal.record.reporter_package_id != report.package_id
-            or proposal.record.status is not report.status
-            or proposal.record.decision_maker
-            != imported_record.package.recipient_cert_id
-        ):
-            return self._reject_receipt_commit(
-                proposal=proposal,
-                baseline=baseline,
-                store=store,
-                receipt_store=receipt_store,
-                reason=(
-                    "committed merge lacks one accepted status field "
-                    "or references an unknown task"
-                ),
-            )
+        rejection = self._status_task_rejection(
+            proposal=proposal,
+            report=report,
+            imported_record=import_outcome.record,
+            status_merges=status_merges,
+            baseline=baseline,
+            store=store,
+            receipt_store=receipt_store,
+        )
+        if rejection is not None:
+            return rejection
 
-        package = imported_record.package
+        imported_record = import_outcome.record
+        package = import_outcome.record.package
         if receipt_authority.signer_certificate_id != package.recipient_cert_id:
             return self._reject_receipt_commit(
                 proposal=proposal, baseline=baseline, store=store,
@@ -827,6 +783,129 @@ class MergeEngine:
             receipt=receipt,
             receipt_store=committed_receipts,
         )
+
+    def _receipt_context(
+        self,
+        *,
+        decided_at: str,
+    ) -> tuple[MergeReceiptRepository, ReceiptSigningAuthority, MergeCommitReceiptStore]:
+        """Return (repository, authority, store) after the receipt composition type gate."""
+        if (
+            type(self._receipt_repository) is not MergeReceiptRepository
+            or type(self._receipt_authority) is not ReceiptSigningAuthority
+        ):
+            raise MergeError("merge engine lacks the system receipt composition")
+        receipt_repository = self._receipt_repository
+        receipt_authority = self._receipt_authority
+        prior_history = receipt_repository.verified_history(
+            trusted_time=dt.datetime.fromisoformat(
+                decided_at.removesuffix("Z") + "+00:00"
+            )
+        )
+        receipt_store = MergeCommitReceiptStore.empty()
+        for historical in prior_history:
+            receipt_store = append_signed_receipt(receipt_store, historical)
+        return receipt_repository, receipt_authority, receipt_store
+
+    def _receipt_binding_rejection(
+        self,
+        *,
+        proposal: MergeProposal,
+        import_outcome: ImportOutcome,
+        report: ReportManifest,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        receipt_store: MergeCommitReceiptStore,
+    ) -> MergeCommitOutcome | None:
+        """Require the authoritative import facts to bind to the report."""
+        imported_record = import_outcome.record
+        transaction = import_outcome.transaction
+        if (
+            imported_record is None
+            or imported_record.result != "committed"
+            or imported_record.package_type != report.package_type
+            or imported_record.revision != report.base_revision
+            or imported_record.package.sequence_no != report.sequence_no
+            or transaction.package_id != report.package_id
+            or transaction.project_id != report.project_id
+            or transaction.base_revision != report.base_revision
+            or transaction.current_revision != report.base_revision
+        ):
+            return self._reject_receipt_commit(
+                proposal=proposal,
+                baseline=baseline,
+                store=store,
+                receipt_store=receipt_store,
+                reason="authoritative import facts do not bind to the report",
+            )
+        return None
+
+    def _field_decision_rejection(
+        self,
+        *,
+        proposal: MergeProposal,
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        receipt_store: MergeCommitReceiptStore,
+    ) -> MergeCommitOutcome | None:
+        """Require every committed field decision to be ACCEPT or MANUAL."""
+        if (
+            not isinstance(proposal.record.field_merges, tuple)
+            or any(
+                not isinstance(field_merge, FieldMerge)
+                or field_merge.decision
+                not in (MergeDecision.ACCEPT, MergeDecision.MANUAL)
+                for field_merge in proposal.record.field_merges
+            )
+        ):
+            return self._reject_receipt_commit(
+                proposal=proposal,
+                baseline=baseline,
+                store=store,
+                receipt_store=receipt_store,
+                reason="committed merge contains an untrusted field decision",
+            )
+        return None
+
+    def _status_task_rejection(
+        self,
+        *,
+        proposal: MergeProposal,
+        report: ReportManifest,
+        imported_record: ProcessedPackageRecord,
+        status_merges: tuple[FieldMerge, ...],
+        baseline: ProjectBaseline,
+        store: ProcessedPackageStore,
+        receipt_store: MergeCommitReceiptStore,
+    ) -> MergeCommitOutcome | None:
+        """Require exactly one accepted status merge bound to a known task."""
+        baseline_task_ids = {
+            task.task_id
+            for work_package in proposal.new_baseline.work_packages
+            for task in work_package.tasks
+        }
+        if (
+            len(status_merges) != 1
+            or status_merges[0].decision
+            not in (MergeDecision.ACCEPT, MergeDecision.MANUAL)
+            or status_merges[0].submitted_value is not report.status
+            or report.task_id not in baseline_task_ids
+            or proposal.record.reporter_package_id != report.package_id
+            or proposal.record.status is not report.status
+            or proposal.record.decision_maker
+            != imported_record.package.recipient_cert_id
+        ):
+            return self._reject_receipt_commit(
+                proposal=proposal,
+                baseline=baseline,
+                store=store,
+                receipt_store=receipt_store,
+                reason=(
+                    "committed merge lacks one accepted status field "
+                    "or references an unknown task"
+                ),
+            )
+        return None
 
     # ----- internal helpers -----
 
