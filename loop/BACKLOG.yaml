@@ -1783,7 +1783,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-35
     story: ENG-BASE
     title: 关闭 DECISIONS 记录的已知门禁 flakiness——test_local_toolchain_security tamper 测试复原源改为 git HEAD 纯净 blob（finally 无条件写回），污染基线无法自我延续，test_engineering_baseline 不再偶发失败
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-34]
     acceptance_tests:
       - tests/security/test_local_toolchain_security.py
