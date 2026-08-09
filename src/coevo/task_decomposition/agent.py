@@ -141,6 +141,97 @@ def _project_json(project_input: Mapping[str, Any]) -> str:
     return project
 
 
+def _parse_task(
+    raw: object,
+    *,
+    known_packages: frozenset[str],
+) -> SuggestionTask:
+        """Validate and build one suggested task entry (fail-closed)."""
+        if not isinstance(raw, dict):
+            raise ModelValidationError("task entry must be an object")
+        try:
+            work_package_id = raw["work_package_id"]
+            task_id = raw["task_id"]
+            title = raw["title"]
+            role = raw["responsible_role"]
+            plan_start = raw["plan_start"]
+            plan_end = raw["plan_end"]
+            deliverable_title = raw["deliverable_title"]
+            criteria = raw["acceptance_criteria"]
+        except KeyError as exc:
+            raise ModelValidationError(
+                f"task entry missing field {exc.args[0]!r}"
+            ) from exc
+        if not _SAFE_ID.fullmatch(work_package_id) or work_package_id not in known_packages:
+            raise ModelValidationError(
+                f"unknown or unsafe work_package_id {work_package_id!r}"
+            )
+        if not _SAFE_ID.fullmatch(task_id):
+            raise ModelValidationError(f"unsafe task_id {task_id!r}")
+        for value, name in (
+            (title, "title"),
+            (role, "responsible_role"),
+            (deliverable_title, "deliverable_title"),
+        ):
+            if (
+                not isinstance(value, str)
+                or not value.strip()
+                or len(value.encode("utf-8")) > _MAX_STRING_BYTES
+            ):
+                raise ModelValidationError(f"invalid {name}")
+        if not is_iso_utc_z(plan_start) or not is_iso_utc_z(plan_end):
+            raise ModelValidationError("task window must be ISO-8601 Z")
+        if plan_end < plan_start:
+            raise ModelValidationError("task window is inverted")
+        if (
+            not isinstance(criteria, list)
+            or not criteria
+            or len(criteria) > _MAX_ACCEPTANCE_ITEMS
+            or any(
+                not isinstance(item, str) or not item.strip()
+                for item in criteria
+            )
+        ):
+            raise ModelValidationError("invalid acceptance_criteria")
+        return SuggestionTask(
+            work_package_id=work_package_id,
+            task_id=task_id,
+            title=title,
+            responsible_role=role,
+            plan_start=plan_start,
+            plan_end=plan_end,
+            deliverable_title=deliverable_title,
+            acceptance_criteria=tuple(criteria),
+        )
+
+
+def _parse_edge(
+    raw: object,
+    *,
+    tasks: tuple[SuggestionTask, ...],
+    known_ids: frozenset[str],
+) -> SuggestionEdge:
+        """Validate and build one suggested edge entry (fail-closed)."""
+        if not isinstance(raw, dict):
+            raise ModelValidationError("edge entry must be an object")
+        try:
+            pred = raw["predecessor_task_id"]
+            succ = raw["successor_task_id"]
+        except KeyError as exc:
+            raise ModelValidationError(
+                f"edge entry missing field {exc.args[0]!r}"
+            ) from exc
+        if not _SAFE_ID.fullmatch(pred) or not _SAFE_ID.fullmatch(succ):
+            raise ModelValidationError("edge ids must be safe-ids")
+        if pred == succ:
+            raise ModelValidationError("edge cannot be a self-loop")
+        suggested = {task.task_id for task in tasks}
+        if pred not in known_ids | suggested or succ not in known_ids | suggested:
+            raise ModelValidationError(
+                "edge references an unknown task id"
+            )
+        return SuggestionEdge(pred, succ)
+
 class TaskDecompositionAgent:
     """Model-assisted task-decomposition suggestion facade."""
 
@@ -271,98 +362,23 @@ class TaskDecompositionAgent:
             raise ModelValidationError(
                 "candidate_edges must be a bounded list"
             )
-        known_packages = {
+        known_packages = frozenset(
             f"wp.{understanding.graph.stage_id_for_node(m.node.node_id)}"
             for m in understanding.mapped.nodes
-        }
-        tasks: list[SuggestionTask] = []
-        for raw in raw_tasks:
-            if not isinstance(raw, dict):
-                raise ModelValidationError("task entry must be an object")
-            try:
-                work_package_id = raw["work_package_id"]
-                task_id = raw["task_id"]
-                title = raw["title"]
-                role = raw["responsible_role"]
-                plan_start = raw["plan_start"]
-                plan_end = raw["plan_end"]
-                deliverable_title = raw["deliverable_title"]
-                criteria = raw["acceptance_criteria"]
-            except KeyError as exc:
-                raise ModelValidationError(
-                    f"task entry missing field {exc.args[0]!r}"
-                ) from exc
-            if not _SAFE_ID.fullmatch(work_package_id) or work_package_id not in known_packages:
-                raise ModelValidationError(
-                    f"unknown or unsafe work_package_id {work_package_id!r}"
-                )
-            if not _SAFE_ID.fullmatch(task_id):
-                raise ModelValidationError(f"unsafe task_id {task_id!r}")
-            for value, name in (
-                (title, "title"),
-                (role, "responsible_role"),
-                (deliverable_title, "deliverable_title"),
-            ):
-                if (
-                    not isinstance(value, str)
-                    or not value.strip()
-                    or len(value.encode("utf-8")) > _MAX_STRING_BYTES
-                ):
-                    raise ModelValidationError(f"invalid {name}")
-            if not is_iso_utc_z(plan_start) or not is_iso_utc_z(plan_end):
-                raise ModelValidationError("task window must be ISO-8601 Z")
-            if plan_end < plan_start:
-                raise ModelValidationError("task window is inverted")
-            if (
-                not isinstance(criteria, list)
-                or not criteria
-                or len(criteria) > _MAX_ACCEPTANCE_ITEMS
-                or any(
-                    not isinstance(item, str) or not item.strip()
-                    for item in criteria
-                )
-            ):
-                raise ModelValidationError("invalid acceptance_criteria")
-            tasks.append(
-                SuggestionTask(
-                    work_package_id=work_package_id,
-                    task_id=task_id,
-                    title=title,
-                    responsible_role=role,
-                    plan_start=plan_start,
-                    plan_end=plan_end,
-                    deliverable_title=deliverable_title,
-                    acceptance_criteria=tuple(criteria),
-                )
-            )
-        known_ids = {
+        )
+        tasks = tuple(
+            _parse_task(raw, known_packages=known_packages)
+            for raw in raw_tasks
+        )
+        known_ids = frozenset(
             m.node.node_id for m in understanding.mapped.nodes
-        }
-        edges: list[SuggestionEdge] = []
-        for raw in raw_edges:
-            if not isinstance(raw, dict):
-                raise ModelValidationError("edge entry must be an object")
-            try:
-                pred = raw["predecessor_task_id"]
-                succ = raw["successor_task_id"]
-            except KeyError as exc:
-                raise ModelValidationError(
-                    f"edge entry missing field {exc.args[0]!r}"
-                ) from exc
-            if not _SAFE_ID.fullmatch(pred) or not _SAFE_ID.fullmatch(succ):
-                raise ModelValidationError("edge ids must be safe-ids")
-            if pred == succ:
-                raise ModelValidationError("edge cannot be a self-loop")
-            suggested = {task.task_id for task in tasks}
-            if pred not in known_ids | suggested or succ not in known_ids | suggested:
-                raise ModelValidationError(
-                    "edge references an unknown task id"
-                )
-            edges.append(SuggestionEdge(pred, succ))
-        # de-duplicate edges deterministically
-        edges = list(dict.fromkeys(edges))
+        )
+        edges = list(dict.fromkeys(
+            _parse_edge(raw, tasks=tasks, known_ids=known_ids)
+            for raw in raw_edges
+        ))
         return ModelTaskSuggestion(
-            tasks=tuple(tasks),
+            tasks=tasks,
             candidate_edges=tuple(edges),
         )
 
