@@ -5565,4 +5565,11 @@ security-reviewer 双签门禁。
 - Security: security-critical merge path reviewed; pure structural migration, no decision order or reason string changed.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-23 registration (manifest_checker._validate phase decomposition; incremental gate)
+- User instruction: continue; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-23` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-22]): framework/manifest_checker._validate (150 lines, cc~33) is split by pure migration into 7 module-level private phase helpers (_validate_metadata / _validate_spec / _validate_security / _validate_audit / _require_policy / _compute_spec_hash / _verify_policy_binding); _validate() becomes a linear orchestration (~40 lines); check order, error message strings and fail-closed semantics stay byte-identical; import surface unchanged; guard test test_framework_optimize24.py.
+- Security review: required (deployment-point manifest security path: capability allow-list, certificate fingerprint binding, SM2 verification, policy registry); pure migration.
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
