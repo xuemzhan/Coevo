@@ -95,26 +95,14 @@ def score_candidate(
     )
 
 
-def _score_candidate(
-    talent: Talent,
+def _match_skills(
     requirement: TaskRequirement,
-    *,
     skill_values: frozenset[str],
-    credential_values: frozenset[str],
-) -> tuple[float, tuple[RecommendationReason, ...], tuple[LoadAlert, ...]]:
-    """Scoring core with pre-computed candidate indexes.
-
-    ``skill_values`` / ``credential_values`` are hoisted out of the
-    per-requirement loop so a full ``recommend(pool, requirements)``
-    run pays O(tags + credentials) per talent exactly once instead of
-    once per requirement (this is the dominant cost when scoring a
-    large pool against many task slots).
-    """
-    reasons: list[RecommendationReason] = []
-    alerts: list[LoadAlert] = []
+    reasons: list[RecommendationReason],
+) -> float:
+    """Score the required-skill matches (case-sensitive exact match; +_W_SKILL each)."""
     score = 0.0
 
-    # Skill match
     for required in requirement.required_skill_tags:
         if required in skill_values:
             score += _W_SKILL
@@ -125,8 +113,17 @@ def _score_candidate(
                     detail=f"matched skill tag {required!r}",
                 )
             )
+    return score
 
-    # Credential match
+
+def _match_credentials(
+    requirement: TaskRequirement,
+    credential_values: frozenset[str],
+    reasons: list[RecommendationReason],
+) -> float:
+    """Score the required-credential matches (+_W_CREDENTIAL each)."""
+    score = 0.0
+
     for required in requirement.required_credentials:
         if required in credential_values:
             score += _W_CREDENTIAL
@@ -137,8 +134,18 @@ def _score_candidate(
                     detail=f"matched credential {required!r}",
                 )
             )
+    return score
 
-    # Window fit
+
+def _window_fit(
+    talent: Talent,
+    requirement: TaskRequirement,
+    reasons: list[RecommendationReason],
+    alerts: list[LoadAlert],
+) -> float:
+    """Score the requested-window fit and emit WINDOW_CONFLICT alerts (full/partial/none)."""
+    score = 0.0
+
     if requirement.window.end <= talent.availability.start or \
             talent.availability.end <= requirement.window.start:
         # No overlap
@@ -176,8 +183,17 @@ def _score_candidate(
                 detail="availability window partially overlaps requested window",
             )
         )
+    return score
 
-    # Load headroom
+
+def _load_headroom(
+    talent: Talent,
+    reasons: list[RecommendationReason],
+    alerts: list[LoadAlert],
+) -> float:
+    """Score load headroom and emit AT_CAPACITY/OVER_CAPACITY alerts (fail-closed)."""
+    score = 0.0
+
     if talent.current_task_count >= talent.max_parallel_tasks:
         alerts.append(
             LoadAlert(
@@ -204,9 +220,14 @@ def _score_candidate(
                 ),
             )
         )
+    return score
 
-    # Tie-break: deterministic, score-neutral (recorded for audit
-    # but contributes 0 to the final score).
+
+def _tie_break(
+    talent: Talent,
+    reasons: list[RecommendationReason],
+) -> None:
+    """Append the deterministic, score-neutral tie-break reason (audit only)."""
     if talent.skill_tags:
         first_tag = min(tag.value for tag in talent.skill_tags)
         reasons.append(
@@ -216,6 +237,38 @@ def _score_candidate(
                 detail=f"deterministic tie-break key {first_tag!r}",
             )
         )
+
+
+def _score_candidate(
+    talent: Talent,
+    requirement: TaskRequirement,
+    *,
+    skill_values: frozenset[str],
+    credential_values: frozenset[str],
+) -> tuple[float, tuple[RecommendationReason, ...], tuple[LoadAlert, ...]]:
+    """Scoring core with pre-computed candidate indexes.
+
+    ``skill_values`` / ``credential_values`` are hoisted out of the
+    per-requirement loop so a full ``recommend(pool, requirements)``
+    run pays O(tags + credentials) per talent exactly once instead of
+    once per requirement (this is the dominant cost when scoring a
+    large pool against many task slots).
+    """
+    reasons: list[RecommendationReason] = []
+    alerts: list[LoadAlert] = []
+    score = 0.0
+
+    # Skill match
+    score += _match_skills(requirement, skill_values, reasons)
+    # Credential match
+    score += _match_credentials(requirement, credential_values, reasons)
+    # Window fit
+    score += _window_fit(talent, requirement, reasons, alerts)
+    # Load headroom
+    score += _load_headroom(talent, reasons, alerts)
+    # Tie-break: deterministic, score-neutral (recorded for audit
+    # but contributes 0 to the final score).
+    _tie_break(talent, reasons)
 
     return score, tuple(reasons), tuple(alerts)
 
