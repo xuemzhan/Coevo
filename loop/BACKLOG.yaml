@@ -1826,7 +1826,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-39
     story: ENG-BASE
     title: ProgressCaptureService.revise（109 行）内 text/kind/confidence 三块同构 ItemOverride 构造去重为共享助手 _apply_override，判定顺序与 override 语义逐字节不变；守卫 test_framework_optimize39.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-38]
     acceptance_tests:
       - tests/unit/test_framework_optimize39.py

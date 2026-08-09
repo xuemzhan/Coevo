@@ -5470,4 +5470,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-39 closure (revise field-override dedup; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-39` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-38]). User instruction: continue optimizing; no full gate (waiver recorded).
+- Delivery: ProgressCaptureService.revise (109 lines) deduplicated its three isomorphic per-field override blocks (text/kind/confidence) into the module-level helper _apply_override(overrides, *, target_path, original_value, edited_value, reason, now) -> (overrides + (ItemOverride(...),), edited_value); revise is now a 94-line per-field flow; the ProgressItemKind type check stays at the kind call site; check order, override fields and error semantics byte-identical. Guard test tests/unit/test_framework_optimize39.py (revise <= 100 lines, helper called 3x, no ItemOverride construction left in revise).
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 35 tests green (test_progress_capture 29 + guard 4 + unused-import guard 2); full quality waived per user instruction.
+- Security: pure dedup extraction; override semantics unchanged.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
