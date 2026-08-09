@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from src.coevo.workspace.models import WorkspaceEntry
 from ._real_chain import REAL_EXECUTION_MODE, PackagePreview, RealChainExecutor, RealChainOutcome, confirm_real_chain, dispatch_real_chain, recover_real_chain, resume_real_chain
 from .real_chain_store import RealChainStore
@@ -40,6 +41,137 @@ def _append_trace(
         detail=detail,
         recorded_at=now,
     ))
+
+
+@dataclass(frozen=True)
+class _AgentStepResult:
+    """Outcome of dispatching one AGENT_CALL step (AC-5 / failure policy)."""
+
+    outcome: OrchestrationOutcome
+    next_id_seed: int
+    stop: bool
+
+
+def _dispatch_agent_step(
+    *,
+    registry: AgentRegistry,
+    event: OrchestrationEvent,
+    step: OrchestrationStep,
+    trace_id: str,
+    trace: list[OrchestrationTrace],
+    now: str,
+    outcome: OrchestrationOutcome,
+    next_id_seed: int,
+) -> _AgentStepResult:
+    """Dispatch one AGENT_CALL step; returns (outcome, next_id_seed, stop).
+
+    AC-5: requires_human_confirmation from EITHER the step OR the
+    registered AgentSpec triggers a hold. Agent-not-AVAILABLE applies
+    the step failure policy (RETRY capped at one retry per step; SKIP
+    advances; ESCALATE_HUMAN ends as ESCALATED; registry miss fails).
+    """
+    reg = registry.get(step.agent_id)
+    # AC-5: requires_human_confirmation from EITHER the step
+    # OR the registered AgentSpec triggers a hold.
+    spec_requires_confirm = (
+        reg is not None and reg.spec.requires_human_confirmation
+    )
+    if step.requires_human_confirmation or spec_requires_confirm:
+        _append_trace(
+            trace, trace_id=trace_id, step=step,
+            result=OrchestrationStepResult.HELD_AT_CONFIRM,
+            detail=f"agent {step.agent_id} requires human confirmation",
+            now=now, requires_human_confirmation=True,
+        )
+        return _AgentStepResult(
+            outcome=OrchestrationOutcome.HELD_AT_CONFIRM,
+            next_id_seed=next_id_seed,
+            stop=True,
+        )
+
+    if reg is None:
+        _append_trace(
+            trace, trace_id=trace_id, step=step,
+            result=OrchestrationStepResult.FAILED,
+            detail=f"agent {step.agent_id!r} not in registry",
+            now=now,
+        )
+        return _AgentStepResult(
+            outcome=OrchestrationOutcome.FAILED,
+            next_id_seed=next_id_seed,
+            stop=True,
+        )
+
+    if reg.status == AgentStatus.AVAILABLE:
+        _append_trace(
+            trace, trace_id=trace_id, step=step,
+            result=OrchestrationStepResult.OK,
+            detail=f"agent {step.agent_id} executed",
+            now=now,
+        )
+        return _AgentStepResult(
+            outcome=outcome, next_id_seed=next_id_seed, stop=False,
+        )
+
+    # Agent not AVAILABLE: apply on_failure policy.
+    if step.on_failure == FailurePolicy.RETRY:
+        # One retry attempt; if still not AVAILABLE, fall
+        # through to ESCALATE_HUMAN at the bottom.
+        retried_id = _make_trace_id(event.event_id, step.step_index, next_id_seed)
+        next_id_seed += 1
+        reg2 = registry.get(step.agent_id)
+        if reg2 is not None and reg2.status == AgentStatus.AVAILABLE:
+            _append_trace(
+                trace, trace_id=retried_id, step=step,
+                result=OrchestrationStepResult.RETRIED,
+                detail=f"agent {step.agent_id} retried successfully",
+                now=now,
+            )
+            return _AgentStepResult(
+                outcome=outcome, next_id_seed=next_id_seed, stop=False,
+            )
+        # Retry did not help -> escalate.
+        _append_trace(
+            trace, trace_id=trace_id, step=step,
+            result=OrchestrationStepResult.ESCALATED,
+            detail=(
+                f"agent {step.agent_id} not available after retry; "
+                f"escalating to human"
+            ),
+            now=now,
+        )
+        return _AgentStepResult(
+            outcome=OrchestrationOutcome.ESCALATED,
+            next_id_seed=next_id_seed,
+            stop=True,
+        )
+
+    if step.on_failure == FailurePolicy.SKIP:
+        _append_trace(
+            trace, trace_id=trace_id, step=step,
+            result=OrchestrationStepResult.SKIPPED,
+            detail=f"agent {step.agent_id} skipped",
+            now=now,
+        )
+        return _AgentStepResult(
+            outcome=outcome, next_id_seed=next_id_seed, stop=False,
+        )
+
+    # ESCALATE_HUMAN
+    _append_trace(
+        trace, trace_id=trace_id, step=step,
+        result=OrchestrationStepResult.ESCALATED,
+        detail=(
+            f"agent {step.agent_id} not available (status="
+            f"{reg.status.value}); escalating to human"
+        ),
+        now=now,
+    )
+    return _AgentStepResult(
+        outcome=OrchestrationOutcome.ESCALATED,
+        next_id_seed=next_id_seed,
+        stop=True,
+    )
 
 class Orchestrator:
     """Pure-function orchestrator facade (US-4 AC-3..AC-7)."""
@@ -101,90 +233,21 @@ class Orchestrator:
 
             # Step dispatch.
             if step.kind == OrchestrationStepKind.AGENT_CALL:
-                reg = registry.get(step.agent_id)
-                # AC-5: requires_human_confirmation from EITHER the step
-                # OR the registered AgentSpec triggers a hold.
-                spec_requires_confirm = (
-                    reg is not None and reg.spec.requires_human_confirmation
-                )
-                if step.requires_human_confirmation or spec_requires_confirm:
-                    outcome = OrchestrationOutcome.HELD_AT_CONFIRM
-                    _append_trace(
-                        trace, trace_id=trace_id, step=step,
-                        result=OrchestrationStepResult.HELD_AT_CONFIRM,
-                        detail=f"agent {step.agent_id} requires human confirmation",
-                        now=now, requires_human_confirmation=True,
-                    )
-                    break
-
-                if reg is None:
-                    outcome = OrchestrationOutcome.FAILED
-                    _append_trace(
-                        trace, trace_id=trace_id, step=step,
-                        result=OrchestrationStepResult.FAILED,
-                        detail=f"agent {step.agent_id!r} not in registry",
-                        now=now,
-                    )
-                    break
-
-                if reg.status == AgentStatus.AVAILABLE:
-                    _append_trace(
-                        trace, trace_id=trace_id, step=step,
-                        result=OrchestrationStepResult.OK,
-                        detail=f"agent {step.agent_id} executed",
-                        now=now,
-                    )
-                    continue
-
-                # Agent not AVAILABLE: apply on_failure policy.
-                if step.on_failure == FailurePolicy.RETRY:
-                    # One retry attempt; if still not AVAILABLE, fall
-                    # through to ESCALATE_HUMAN at the bottom.
-                    retried_id = _make_trace_id(event.event_id, step.step_index, next_id_seed)
-                    next_id_seed += 1
-                    reg2 = registry.get(step.agent_id)
-                    if reg2 is not None and reg2.status == AgentStatus.AVAILABLE:
-                        _append_trace(
-                            trace, trace_id=retried_id, step=step,
-                            result=OrchestrationStepResult.RETRIED,
-                            detail=f"agent {step.agent_id} retried successfully",
-                            now=now,
-                        )
-                        continue
-                    # Retry didn't help -> escalate.
-                    outcome = OrchestrationOutcome.ESCALATED
-                    _append_trace(
-                        trace, trace_id=trace_id, step=step,
-                        result=OrchestrationStepResult.ESCALATED,
-                        detail=(
-                            f"agent {step.agent_id} not available after retry; "
-                            f"escalating to human"
-                        ),
-                        now=now,
-                    )
-                    break
-
-                if step.on_failure == FailurePolicy.SKIP:
-                    _append_trace(
-                        trace, trace_id=trace_id, step=step,
-                        result=OrchestrationStepResult.SKIPPED,
-                        detail=f"agent {step.agent_id} skipped",
-                        now=now,
-                    )
-                    continue
-
-                # ESCALATE_HUMAN
-                outcome = OrchestrationOutcome.ESCALATED
-                _append_trace(
-                    trace, trace_id=trace_id, step=step,
-                    result=OrchestrationStepResult.ESCALATED,
-                    detail=(
-                        f"agent {step.agent_id} not available (status="
-                        f"{reg.status.value}); escalating to human"
-                    ),
+                result = _dispatch_agent_step(
+                    registry=registry,
+                    event=event,
+                    step=step,
+                    trace_id=trace_id,
+                    trace=trace,
                     now=now,
+                    outcome=outcome,
+                    next_id_seed=next_id_seed,
                 )
-                break
+                outcome = result.outcome
+                next_id_seed = result.next_id_seed
+                if result.stop:
+                    break
+                continue
 
             if step.kind == OrchestrationStepKind.HUMAN_CONFIRM:
                 outcome = OrchestrationOutcome.HELD_AT_CONFIRM
