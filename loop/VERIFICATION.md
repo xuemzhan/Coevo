@@ -1,2018 +1,3 @@
-## 2026-08-08T00:52:46.064927Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T00:56:47.273288Z — target=`lint` fingerprint=`252ad24e526f6728`
-- exit_code: `0`
-```text
-尾部换行收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"；越权代理误记\"全量门禁\"已更正）：cockpit / crypto / knowledge_base / audit_governance / orchestrator / progress_capture / talent / task_decomposition 共 11 处 ISO 正则 `$` 改 `\\Z`（消除 Python 末尾换行前匹配，与 GAPS-3/GAPS-4 同类），锚定回归测试 test_iso_anchor_regression.py；完整\"统一到共享构造器\"留作架构层后续",
-      "code": [
-        "src/coevo/cockpit/models.py",
-        "src/coevo/cockpit/sessions.py",
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/knowledge_base/models.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/progress_capture/models.py",
-        "src/coevo/progress_capture/watcher.py",
-        "src/coevo/talent/models.py",
-        "src/coevo/task_decomposition/agent.py",
-        "src/coevo/task_decomposition/baseline.py"
-      ],
-      "tests": [
-        "tests/unit/test_iso_anchor_regression.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-GAPS-6",
-      "title": "共享 ISO 校验构造器全仓落地（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z：`\\Z` 锚定拒尾部换行、小数秒、日历校验、非字符串 fail-closed），root_modules 登记；framework/validation.py 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，去 11 处正则副本与包级 _ISO 再导出；锚定测试改测共享构造器",
-      "code": [
-        "src/coevo/timefmt.py",
-        "src/coevo/framework/validation.py",
-        "src/coevo/cockpit/models.py",
-        "src/coevo/cockpit/sessions.py",
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/knowledge_base/models.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/orchestrator/service.py",
-        "src/coevo/orchestrator/_real_chain.py",
-        "src/coevo/progress_capture/models.py",
-        "src/coevo/progress_capture/watcher.py",
-        "src/coevo/talent/models.py",
-        "src/coevo/task_decomposition/agent.py",
-        "src/coevo/task_decomposition/baseline.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_gaps6.py",
-        "tests/unit/test_iso_anchor_regression.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/timefmt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_gaps6.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-DOCS-1",
-      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
-      "code": [
-        "README.md",
-        "docs/README.md",
-        "docs/code-guide.md",
-        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
-      ],
-      "tests": [
-        "tests/unit/test_framework_docs.py",
-        "tests/unit/test_module_docs.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/code-guide.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_docs.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_module_docs.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T00:57:42.699717Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:00:21.194303Z — target=`lint` fingerprint=`252ad24e526f6728`
-- exit_code: `0`
-```text
-         "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-GAPS-6",
-      "title": "共享 ISO 校验构造器全仓落地（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z：`\\Z` 锚定拒尾部换行、小数秒、日历校验、非字符串 fail-closed），root_modules 登记；framework/validation.py 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，去 11 处正则副本与包级 _ISO 再导出；锚定测试改测共享构造器",
-      "code": [
-        "src/coevo/timefmt.py",
-        "src/coevo/framework/validation.py",
-        "src/coevo/cockpit/models.py",
-        "src/coevo/cockpit/sessions.py",
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/knowledge_base/models.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/orchestrator/service.py",
-        "src/coevo/orchestrator/_real_chain.py",
-        "src/coevo/progress_capture/models.py",
-        "src/coevo/progress_capture/watcher.py",
-        "src/coevo/talent/models.py",
-        "src/coevo/task_decomposition/agent.py",
-        "src/coevo/task_decomposition/baseline.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_gaps6.py",
-        "tests/unit/test_iso_anchor_regression.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/timefmt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_gaps6.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-DOCS-1",
-      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
-      "code": [
-        "README.md",
-        "docs/README.md",
-        "docs/code-guide.md",
-        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
-      ],
-      "tests": [
-        "tests/unit/test_framework_docs.py",
-        "tests/unit/test_module_docs.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/code-guide.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_docs.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_module_docs.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "QUALITY-GATE-ENCODING-1",
-      "title": "质量门禁输出编码修复（2026-08-08，用户指令“继续开发”）：quality_gate 子进程强制 UTF-8（gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env），消除 VERIFICATION.md 门禁记录乱码根因（Windows 控制台 GBK 输出经 errors=replace 不可逆破坏）；历史乱码记录已清理（截除备份）；补回归测试 test_quality_gate_encoding.py；仅 stdlib 离线",
-      "code": [
-        "scripts/quality_gate.py",
-        "tests/unit/test_quality_gate_encoding.py"
-      ],
-      "tests": [
-        "tests/unit/test_quality_gate_encoding.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/quality_gate.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:09:49.115329Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:10:01.258924Z — target=`lint` fingerprint=`252ad24e526f6728`
-- exit_code: `0`
-```text
-s": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-GAPS-6",
-      "title": "共享 ISO 校验构造器全仓落地（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z：`\\Z` 锚定拒尾部换行、小数秒、日历校验、非字符串 fail-closed），root_modules 登记；framework/validation.py 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，去 11 处正则副本与包级 _ISO 再导出；锚定测试改测共享构造器",
-      "code": [
-        "src/coevo/timefmt.py",
-        "src/coevo/framework/validation.py",
-        "src/coevo/cockpit/models.py",
-        "src/coevo/cockpit/sessions.py",
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/knowledge_base/models.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/orchestrator/service.py",
-        "src/coevo/orchestrator/_real_chain.py",
-        "src/coevo/progress_capture/models.py",
-        "src/coevo/progress_capture/watcher.py",
-        "src/coevo/talent/models.py",
-        "src/coevo/task_decomposition/agent.py",
-        "src/coevo/task_decomposition/baseline.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_gaps6.py",
-        "tests/unit/test_iso_anchor_regression.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/timefmt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_gaps6.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-DOCS-1",
-      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
-      "code": [
-        "README.md",
-        "docs/README.md",
-        "docs/code-guide.md",
-        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
-      ],
-      "tests": [
-        "tests/unit/test_framework_docs.py",
-        "tests/unit/test_module_docs.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/code-guide.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_docs.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_module_docs.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "QUALITY-GATE-ENCODING-1",
-      "title": "质量门禁输出编码修复（2026-08-08，用户指令“继续开发”）：quality_gate 子进程强制 UTF-8（gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env），消除 VERIFICATION.md 门禁记录乱码根因（Windows 控制台 GBK 输出经 errors=replace 不可逆破坏）；历史乱码记录已清理（截除备份）；锁定脚本链同步（quality_gate.py 哈希 → python-script-lock.tsv → toolchain-lock script_inventory/source_sha256 → make.cs ScriptInventorySha256）；补回归测试；仅 stdlib 离线",
-      "code": [
-        "scripts/quality_gate.py",
-        "docs/dependencies/python-script-lock.tsv",
-        "docs/dependencies/toolchain-lock.json",
-        "scripts/tool-shims/make.cs",
-        "tests/unit/test_quality_gate_encoding.py"
-      ],
-      "tests": [
-        "tests/unit/test_quality_gate_encoding.py",
-        "tests/security/test_local_toolchain_security.py",
-        "tests/integration/test_dev_environment_entry.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/quality_gate.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/python-script-lock.tsv",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "scripts/tool-shims/make.cs",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_dev_environment_entry.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:19:07.025620Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:19:20.570496Z — target=`lint` fingerprint=`252ad24e526f6728`
-- exit_code: `0`
-```text
-s": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-GAPS-6",
-      "title": "共享 ISO 校验构造器全仓落地（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：新增依赖无关叶模块 src/coevo/timefmt.py（is_iso_utc_z：`\\Z` 锚定拒尾部换行、小数秒、日历校验、非字符串 fail-closed），root_modules 登记；framework/validation.py 由 timefmt 导入并再导出；10 个产品模块 + 框架族统一引用共享构造器，去 11 处正则副本与包级 _ISO 再导出；锚定测试改测共享构造器",
-      "code": [
-        "src/coevo/timefmt.py",
-        "src/coevo/framework/validation.py",
-        "src/coevo/cockpit/models.py",
-        "src/coevo/cockpit/sessions.py",
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/knowledge_base/models.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/orchestrator/service.py",
-        "src/coevo/orchestrator/_real_chain.py",
-        "src/coevo/progress_capture/models.py",
-        "src/coevo/progress_capture/watcher.py",
-        "src/coevo/talent/models.py",
-        "src/coevo/task_decomposition/agent.py",
-        "src/coevo/task_decomposition/baseline.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_gaps6.py",
-        "tests/unit/test_iso_anchor_regression.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/timefmt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_gaps6.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-DOCS-1",
-      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
-      "code": [
-        "README.md",
-        "docs/README.md",
-        "docs/code-guide.md",
-        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
-      ],
-      "tests": [
-        "tests/unit/test_framework_docs.py",
-        "tests/unit/test_module_docs.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/code-guide.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_docs.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_module_docs.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "QUALITY-GATE-ENCODING-1",
-      "title": "质量门禁输出编码修复（2026-08-08，用户指令“继续开发”）：quality_gate 子进程强制 UTF-8（gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env），消除 VERIFICATION.md 门禁记录乱码根因（Windows 控制台 GBK 输出经 errors=replace 不可逆破坏）；历史乱码记录已清理（截除备份）；锁定脚本链同步（quality_gate.py 哈希 → python-script-lock.tsv → toolchain-lock script_inventory/source_sha256 → make.cs ScriptInventorySha256）；补回归测试；仅 stdlib 离线",
-      "code": [
-        "scripts/quality_gate.py",
-        "docs/dependencies/python-script-lock.tsv",
-        "docs/dependencies/toolchain-lock.json",
-        "scripts/tool-shims/make.cs",
-        "tests/unit/test_quality_gate_encoding.py"
-      ],
-      "tests": [
-        "tests/unit/test_quality_gate_encoding.py",
-        "tests/security/test_local_toolchain_security.py",
-        "tests/integration/test_dev_environment_entry.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/quality_gate.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/python-script-lock.tsv",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "scripts/tool-shims/make.cs",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_dev_environment_entry.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:27:47.479377Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:28:00.115819Z — target=`lint` fingerprint=`252ad24e526f6728`
-- exit_code: `0`
-```text
-   ],
-      "tests": [
-        "tests/unit/test_framework_gaps6.py",
-        "tests/unit/test_iso_anchor_regression.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/timefmt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_gaps6.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_iso_anchor_regression.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-DOCS-1",
-      "title": "框架层文档治理收口（2026-08-08，用户指令\"继续开发，先不要全量门禁\"）：README 核心能力表加 US-16 行与框架层说明、架构树加 `framework/` + `timefmt.py`、文档索引加 `docs/framework/` 与 `docs/plans/distributed-agent-framework/`、当前状态加框架层 bullet；docs/code-guide.md 新增 framework/ 与 timefmt.py 引导节（模块职责 + 关键入口）；docs/README.md 索引登记 docs/framework/；新增文档治理守卫测试（README/code-guide/docs 索引覆盖断言 + docs/framework 文件存在断言）",
-      "code": [
-        "README.md",
-        "docs/README.md",
-        "docs/code-guide.md",
-        "docs/plans/FRAMEWORK-DOCS-1-slice.md"
-      ],
-      "tests": [
-        "tests/unit/test_framework_docs.py",
-        "tests/unit/test_module_docs.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/README.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/code-guide.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/plans/FRAMEWORK-DOCS-1-slice.md",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_docs.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_module_docs.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "QUALITY-GATE-ENCODING-1",
-      "title": "质量门禁输出编码修复（2026-08-08，用户指令“继续开发”）：quality_gate 子进程强制 UTF-8（gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env），消除 VERIFICATION.md 门禁记录乱码根因（Windows 控制台 GBK 输出经 errors=replace 不可逆破坏）；历史乱码记录已清理（截除备份）；锁定脚本链同步（quality_gate.py 哈希 → python-script-lock.tsv → toolchain-lock script_inventory/source_sha256 → make.cs ScriptInventorySha256）；补回归测试；仅 stdlib 离线",
-      "code": [
-        "scripts/quality_gate.py",
-        "docs/dependencies/python-script-lock.tsv",
-        "docs/dependencies/toolchain-lock.json",
-        "scripts/tool-shims/make.cs",
-        "tests/unit/test_quality_gate_encoding.py"
-      ],
-      "tests": [
-        "tests/unit/test_quality_gate_encoding.py",
-        "tests/security/test_local_toolchain_security.py",
-        "tests/integration/test_dev_environment_entry.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/quality_gate.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/python-script-lock.tsv",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "scripts/tool-shims/make.cs",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_dev_environment_entry.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-1",
-      "title": "基于框架优化原应用实现（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：AgentRegistry.by_capability 惰性能力索引（O(V)→摊销 O(1)，注册顺序语义不变，register/set_status 新实例经 __post_init__ 自动失效）；build_registration_manifest 去除 json 双重序列化（结构化剥离自指字段，wire 字节不变并字节级回归锁定 sha256=00ff9ada…）；chain_to_plan 用 dataclasses.replace 一次成型 plan_id（节点/边冻结复用）；demo 注册装配收敛到 demo_support.register_demo_agents（显式非生产，仍强制 guard_registration）+ pipeline 组合根复用模块级 allow-all RBAC/scope 检查器；纯函数 stdlib + L17",
-      "code": [
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/framework/integration.py",
-        "src/coevo/app/demo_support.py",
-        "src/coevo/app/pipeline.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize1.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/integration.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/pipeline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize1.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:37:15.855873Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:37:26.491979Z — target=`lint` fingerprint=`252ad24e526f6728`
-- exit_code: `0`
-```text
-s": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_docs.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_module_docs.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "QUALITY-GATE-ENCODING-1",
-      "title": "质量门禁输出编码修复（2026-08-08，用户指令“继续开发”）：quality_gate 子进程强制 UTF-8（gate_env：PYTHONIOENCODING=utf-8 + PYTHONUTF8=1，复制不污染父环境；两个 subprocess.run 均改用 gate_env），消除 VERIFICATION.md 门禁记录乱码根因（Windows 控制台 GBK 输出经 errors=replace 不可逆破坏）；历史乱码记录已清理（截除备份）；锁定脚本链同步（quality_gate.py 哈希 → python-script-lock.tsv → toolchain-lock script_inventory/source_sha256 → make.cs ScriptInventorySha256）；补回归测试；仅 stdlib 离线",
-      "code": [
-        "scripts/quality_gate.py",
-        "docs/dependencies/python-script-lock.tsv",
-        "docs/dependencies/toolchain-lock.json",
-        "scripts/tool-shims/make.cs",
-        "tests/unit/test_quality_gate_encoding.py"
-      ],
-      "tests": [
-        "tests/unit/test_quality_gate_encoding.py",
-        "tests/security/test_local_toolchain_security.py",
-        "tests/integration/test_dev_environment_entry.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/quality_gate.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/python-script-lock.tsv",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "scripts/tool-shims/make.cs",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_quality_gate_encoding.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_dev_environment_entry.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-1",
-      "title": "基于框架优化原应用实现（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：AgentRegistry.by_capability 惰性能力索引（O(V)→摊销 O(1)，注册顺序语义不变，register/set_status 新实例经 __post_init__ 自动失效）；build_registration_manifest 去除 json 双重序列化（结构化剥离自指字段，wire 字节不变并字节级回归锁定 sha256=00ff9ada…）；chain_to_plan 用 dataclasses.replace 一次成型 plan_id（节点/边冻结复用）；demo 注册装配收敛到 demo_support.register_demo_agents（显式非生产，仍强制 guard_registration）+ pipeline 组合根复用模块级 allow-all RBAC/scope 检查器；纯函数 stdlib + L17",
-      "code": [
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/framework/integration.py",
-        "src/coevo/app/demo_support.py",
-        "src/coevo/app/pipeline.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize1.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/integration.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/pipeline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize1.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-2",
-      "title": "共享时间生成器全仓落地（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：timefmt 新增 now_utc_iso_z（依赖无关叶子模块，格式与既有副本完全一致含微秒与尾随 Z），收敛 13 处私有副本（knowledge_base/audit_governance/cockpit/demo_support/task_flow/protocol×4/progress_capture/task_decomposition/talent/crypto）与 3 处直接内联（identity×3）；公开导出名（cockpit.sessions/demo_support）保留 API 仅改来源；行为与 wire 字节不变；全仓源码守卫防回归；stdlib only",
-      "code": [
-        "src/coevo/timefmt.py",
-        "src/coevo/app/demo_support.py",
-        "src/coevo/audit_governance/stream_store.py",
-        "src/coevo/cockpit/sessions.py",
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/identity/audit_anchor.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/knowledge_base/store.py",
-        "src/coevo/progress_capture/watcher.py",
-        "src/coevo/protocol/import_service.py",
-        "src/coevo/protocol/package_store_db.py",
-        "src/coevo/protocol/sm2_keywrap.py",
-        "src/coevo/protocol/sm2_sign.py",
-        "src/coevo/talent/store.py",
-        "src/coevo/task_decomposition/baseline.py",
-        "src/coevo/task_flow/parser.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize2.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/timefmt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/stream_store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/sm2_keywrap.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/sm2_sign.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_flow/parser.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize2.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:46:05.971369Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:46:18.167426Z — target=`lint` fingerprint=`252ad24e526f6728`
-- exit_code: `0`
-```text
-     "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_dev_environment_entry.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-1",
-      "title": "基于框架优化原应用实现（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：AgentRegistry.by_capability 惰性能力索引（O(V)→摊销 O(1)，注册顺序语义不变，register/set_status 新实例经 __post_init__ 自动失效）；build_registration_manifest 去除 json 双重序列化（结构化剥离自指字段，wire 字节不变并字节级回归锁定 sha256=00ff9ada…）；chain_to_plan 用 dataclasses.replace 一次成型 plan_id（节点/边冻结复用）；demo 注册装配收敛到 demo_support.register_demo_agents（显式非生产，仍强制 guard_registration）+ pipeline 组合根复用模块级 allow-all RBAC/scope 检查器；纯函数 stdlib + L17",
-      "code": [
-        "src/coevo/orchestrator/models.py",
-        "src/coevo/framework/integration.py",
-        "src/coevo/app/demo_support.py",
-        "src/coevo/app/pipeline.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize1.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/integration.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/pipeline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize1.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-2",
-      "title": "共享时间生成器全仓落地（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：timefmt 新增 now_utc_iso_z（依赖无关叶子模块，格式与既有副本完全一致含微秒与尾随 Z），收敛 13 处私有副本（knowledge_base/audit_governance/cockpit/demo_support/task_flow/protocol×4/progress_capture/task_decomposition/talent/crypto）与 3 处直接内联（identity×3）；公开导出名（cockpit.sessions/demo_support）保留 API 仅改来源；行为与 wire 字节不变；全仓源码守卫防回归；stdlib only",
-      "code": [
-        "src/coevo/timefmt.py",
-        "src/coevo/app/demo_support.py",
-        "src/coevo/audit_governance/stream_store.py",
-        "src/coevo/cockpit/sessions.py",
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/identity/audit_anchor.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/knowledge_base/store.py",
-        "src/coevo/progress_capture/watcher.py",
-        "src/coevo/protocol/import_service.py",
-        "src/coevo/protocol/package_store_db.py",
-        "src/coevo/protocol/sm2_keywrap.py",
-        "src/coevo/protocol/sm2_sign.py",
-        "src/coevo/talent/store.py",
-        "src/coevo/task_decomposition/baseline.py",
-        "src/coevo/task_flow/parser.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize2.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/timefmt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/stream_store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/cockpit/sessions.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/sm2_keywrap.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/sm2_sign.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/baseline.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/task_flow/parser.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize2.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-3",
-      "title": "共享 canonical JSON 序列化与摘要（2026-08-08，用户指令\"基于框架，优化原来系统应用的代码实现，包括数据结构、算法与模块架构，不做全量门禁\"）：新增根级叶子 src/coevo/canon.py（canonical_json_bytes / canonical_digest，stdlib only），收敛框架内部重复（integration._canonical / manifest_checker._canonical_bytes 字节语义相同）与 identity 5 处 digest 内联（repository 事件哈希链 2 + business digest 1、validation bundle digest 1、private_keys 审计链 1）；ensure_ascii 语义逐点保留（business digest=False）、digest 逐位不变；root_modules.md 登记；全仓源码守卫防回归",
-      "code": [
-        "src/coevo/canon.py",
-        "src/coevo/framework/integration.py",
-        "src/coevo/framework/manifest_checker.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/identity/validation.py",
-        "src/coevo/identity/private_keys.py",
-        "docs/modules/root_modules.md"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize3.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/canon.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/integration.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/manifest_checker.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/modules/root_modules.md",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize3.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-## 2026-08-08T01:54:00.078811Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
 ## 2026-08-08T01:54:08.311997Z — target=`lint` fingerprint=`252ad24e526f6728`
 - exit_code: `0`
 ```text
@@ -2282,6 +267,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T02:05:34.626445Z — target=`quality` fingerprint=`34d637f035600903`
 - exit_code: `0`
 ```text
@@ -2355,6 +341,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T02:19:52.702287Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -2363,6 +350,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2635,6 +623,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T02:32:03.133525Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -2643,6 +632,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2916,6 +906,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T02:41:58.204220Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -2924,6 +915,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3187,6 +1179,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T03:02:37.745394Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -3195,6 +1188,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3448,6 +1442,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T03:11:41.408897Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -3456,6 +1451,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3709,6 +1705,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T03:19:24.632290Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -3717,6 +1714,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3971,6 +1969,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T03:28:00.638710Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -3979,6 +1978,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4233,6 +2233,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T03:36:41.535279Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -4241,6 +2242,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4505,6 +2507,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T03:44:40.084045Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -4513,6 +2516,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4776,6 +2780,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T03:50:58.199980Z — target=`quality` fingerprint=`196179208515746b`
 - exit_code: `1`
 ```text
@@ -4864,6 +2869,7 @@ FAILED (failures=1, errors=1, skipped=3)
 
 
 
+
 ## 2026-08-08T03:55:11.893228Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -4872,6 +2878,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5142,6 +3149,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T04:06:56.478786Z — target=`quality` fingerprint=`196179208515746b`
 - exit_code: `1`
 ```text
@@ -5224,6 +3232,7 @@ FAILED (failures=1, skipped=3)
 
 
 
+
 ## 2026-08-08T04:07:05.395617Z — target=`fmt` fingerprint=`fe39766e2048d2bc`
 - exit_code: `0`
 ```text
@@ -5232,6 +3241,7 @@ $ E:\Workspace\Coevo\.tools\python\3.14.3\python.exe -m compileall -q -f scripts
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5501,6 +3511,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T04:27:01.559533Z — target=`quality` fingerprint=`196179208515746b`
 - exit_code: `1`
 ```text
@@ -5620,6 +3631,7 @@ FAILED (errors=4, skipped=1)
 
 
 
+
 ## 2026-08-08T08:07:29.326619Z — target=`quality` fingerprint=`196179208515746b`
 - exit_code: `1`
 ```text
@@ -5714,6 +3726,7 @@ FAILED (errors=1)
 
 
 
+
 ## 2026-08-08T08:14:42.668136Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -5722,6 +3735,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5804,6 +3818,7 @@ FAILED (failures=2, skipped=1)
 
 
 
+
 ## 2026-08-08T09:04:03.692167Z — target=`quality` fingerprint=`196179208515746b`
 - exit_code: `0`
 ```text
@@ -5870,6 +3885,7 @@ OK
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5961,6 +3977,7 @@ Ran 1242 tests in 241.033s
 FAILED (errors=1, skipped=3)
 
 ```
+
 
 
 
@@ -6212,6 +4229,7 @@ check failed: 1 record file(s) need archiving
 
 
 
+
 ## 2026-08-08T11:03:18.396753Z — target=`quality` fingerprint=`5ab34d173704cd3e`
 - exit_code: `1`
 ```text
@@ -6278,6 +4296,7 @@ Ran 261 tests in 1360.237s
 FAILED (failures=1, skipped=1)
 
 ```
+
 
 
 
@@ -6352,6 +4371,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T12:20:00Z — RECORDS-ARCHIVE-2 独立验证（mvp-verifier 契约，只读沙箱 recarch2-verify，pin=`b7b1cbc`）
 - 审查者：mvp-verifier（独立沙箱实际执行）；结论：PASS。
 - 沙箱内实际执行：
@@ -6363,6 +4383,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T12:22:00Z — RECORDS-ARCHIVE-2 独立安全审查（security-reviewer 契约，只读沙箱 recarch2-sec，pin=`b7b1cbc`）
 - 审查者：security-reviewer（独立沙箱实际执行）；结论：PASS，Critical/High/Medium/Low = 0/0/0/0。
 - 沙箱内实际执行：
@@ -6370,6 +4391,7 @@ audit seal: fully-sealed
   * STRIDE 行为探针 6/6 PASS：未知 kind 与非字符串输入 fail-closed、阈值边界准确、size-trim 不空记录、真实字节计数入理由、归档附加写入不覆盖、lint 含 `archive_records --check`；
   * `review_sandbox check` violations=[]，已 discard。
 - 范围：涉及审计记录归档边界、脚本锁链全链同步、门禁 fail-closed 语义。
+
 
 
 
@@ -6612,6 +4634,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T13:15:11.947438Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `1`
 ```text
@@ -6691,6 +4714,7 @@ FAILED (failures=2, skipped=3)
 
 
 
+
 ## 2026-08-08T13:50:03.126449Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `0`
 ```text
@@ -6761,6 +4785,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:04:25.106330Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -6769,6 +4794,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -7010,6 +5036,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:13:02.426855Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -7018,6 +5045,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -7276,6 +5304,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:20:39.957285Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -7284,6 +5313,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -7530,6 +5560,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:23:15.031454Z — target=`lint` fingerprint=`eb5a3c41818a9be3`
 - exit_code: `0`
 ```text
@@ -7765,6 +5796,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:33:32.473986Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -7773,6 +5805,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8027,6 +6060,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:38:45.980859Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -8035,6 +6069,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8274,6 +6309,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:53:21.717849Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -8282,6 +6318,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8528,6 +6565,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-08T14:57:38.119249Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `1`
 ```text
@@ -8610,6 +6648,7 @@ FAILED (failures=1, skipped=3)
 
 
 
+
 ## 2026-08-08T15:15:05.094292Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `0`
 ```text
@@ -8681,6 +6720,7 @@ audit seal: fully-sealed
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 501404 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260808\verification-20260808.txt; [ok] decisions: nothing to archive
 
 
+
 ## 2026-08-08T15:25:36.542404Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -8689,6 +6729,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-08T15:26:02.798845Z — target=`lint` fingerprint=`5103146e112f2dd1`
@@ -8940,6 +6981,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-08T15:32:08.913950Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -8948,6 +6990,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-08T15:32:35.503121Z — target=`lint` fingerprint=`5103146e112f2dd1`
@@ -9202,6 +7245,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-08T15:36:01.219897Z — target=`lint` fingerprint=`5103146e112f2dd1`
 - exit_code: `0`
 ```text
@@ -9452,6 +7496,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-08T15:41:36.345067Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -9460,6 +7505,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-08T15:42:02.926089Z — target=`lint` fingerprint=`5103146e112f2dd1`
@@ -9712,6 +7758,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-08T15:46:47.415435Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -9720,6 +7767,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-08T15:47:13.450481Z — target=`lint` fingerprint=`5103146e112f2dd1`
@@ -9978,6 +8026,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-08T15:55:12.672906Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -9986,6 +8035,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-08T15:55:40.238523Z — target=`lint` fingerprint=`5103146e112f2dd1`
@@ -10246,6 +8296,7 @@ audit seal: fully-sealed
 
 [gate] records self-trim: [verification] archive 21 section(s): archived 21 old section(s); size 506022 > 500000 bytes; size-trimmed 21 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260808\verification-20260808.txt; [ok] decisions: nothing to archive
 
+
 ## 2026-08-08T16:20:00Z - FRAMEWORK-OPTIMIZE-19 incremental gate record (full quality waived per user instruction)
 ```text
 fmt: exit=0 fingerprint=`8d456a2ce09245c7` (compileall scripts src tests).
@@ -10253,6 +8304,7 @@ lint: exit=0 fingerprint=`5103146e112f2dd1` (validate_opencode + traceability + 
 targeted: 33 tests green - tests/unit/test_framework_optimize20.py (8 new: util behavior, models delegates, re-export surface, util no-domain-import, no local logic copies) + tests/unit/test_decision_brief.py (25).
 traceability: ENG-BASE | FRAMEWORK-OPTIMIZE-19 row added; checked=126 missing=0 (ENG-BASE 83).
 ```
+
 
 ## 2026-08-08T23:06:26.956057Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
@@ -10262,6 +8314,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-08T23:08:01.434393Z — target=`lint` fingerprint=`5103146e112f2dd1`
 - exit_code: `0`
@@ -10512,6 +8565,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-09T00:20:00Z - PERF-SESS-1 incremental gate record (full quality waived per user instruction)
 ```text
 fmt: exit=0 fingerprint=`8d456a2ce09245c7` (compileall scripts src tests).
@@ -10519,6 +8573,7 @@ lint: exit=0 fingerprint=`5103146e112f2dd1` (validate_opencode + traceability + 
 targeted: 38 tests green - tests/unit/test_cockpit_http.py (session manager 12 incl. 2 new: keep-newest eviction, source guard heapq.nsmallest/no sorted).
 traceability: ENG-BASE | PERF-SESS-1 row added; checked=126 missing=0 (ENG-BASE 84).
 ```
+
 
 ## 2026-08-08T23:18:11.021502Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
@@ -10528,6 +8583,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-08T23:18:36.269306Z — target=`lint` fingerprint=`5103146e112f2dd1`
 - exit_code: `0`
@@ -10786,12 +8842,14 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-09T00:40:00Z - full unit-suite regression snapshot (validation milestone)
 ```text
 python -m unittest discover -s tests/unit -v: Ran 1318 tests in 101.091s, OK (skipped=3).
 Validates all optimization iterations (gate stability, archives, governance, GmSSL cache, check_replay, single-source-of-truth leaves, decision_brief util extraction, session micro-opt) with no cross-module regressions.
 Two issues found and fixed: OPTIMIZE-18 guard adapted to the OPTIMIZE-19 delegation chain; decision_brief module doc registered _util.py (commit 47abe20).
 ```
+
 
 ## 2026-08-08T23:31:04.639399Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `0`
@@ -10860,6 +8918,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-08T23:48:26.313189Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -10868,6 +8927,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-08T23:48:54.876123Z — target=`lint` fingerprint=`5103146e112f2dd1`
 - exit_code: `0`
@@ -11119,6 +9179,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-08T23:56:22.648704Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -11127,6 +9188,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-08T23:56:51.727835Z — target=`lint` fingerprint=`5103146e112f2dd1`
 - exit_code: `0`
@@ -11378,6 +9440,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-09T00:02:46.946578Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -11386,6 +9449,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-09T00:03:41.402530Z — target=`lint` fingerprint=`5103146e112f2dd1`
 - exit_code: `0`
@@ -11633,3 +9697,263 @@ secret scan ok
 audit seal: fully-sealed
 
 ```
+
+
+## 2026-08-09T00:08:30.173186Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+
+## 2026-08-09T00:09:03.168030Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+/models.py",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize20.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/_util.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize20.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "PERF-SESS-1",
+      "title": "CockpitSessionManager 会话管理微优化（2026-08-09，用户指令\"继续\"；增量门禁）：sessions.py `validate()` 单次解析 `now` 复用（原 2-3 次 fromisoformat）；`_evict_if_needed()` 改 heapq.nsmallest(excess, ...)（O(n log excess)，正常路径 O(n)），淘汰集合与原 sorted 语义逐位一致",
+      "code": [
+        "src/coevo/cockpit/sessions.py"
+      ],
+      "tests": [
+        "tests/unit/test_cockpit_http.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_cockpit_http.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-20",
+      "title": "decision_brief 域构造/校验助手迁移（2026-08-09，用户指令\"继续优化，不做全量门禁\"）：models.py（约 930 行）中 13 个非 `__post_init__` 依赖助手迁至 `_build.py`（_latest_receipt/_validate_bound_risk/_clone_risk_report/_clone_confirmation/_build_content/_risk_conclusion/_make_version/_validate_stored_brief/_validate_content_model/_clone_content/_clone_brief/_brief_id/_validate_docx），逐函数惰性导入 `.models` 规避 dataclass↔助手循环，models 底部 `from ._build import (...)` 再导出保持导入面不变；随迁出清理 models 不再使用的 zipfile 导入",
+      "code": [
+        "src/coevo/decision_brief/_build.py",
+        "src/coevo/decision_brief/models.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize21.py",
+        "tests/unit/test_decision_brief.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/_build.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/models.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize21.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_decision_brief.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-21",
+      "title": "死导入清理 + BACKLOG 卫生（2026-08-09，用户指令\"继续优化\"；增量门禁）：AST 全仓扫描确认 10 个生产文件共 11 处未使用顶层导入并全部删除（app/demo_support now_utc_iso_z、cockpit/sessions re、decision_brief/_build RiskKind/SourceKind、framework/integration json、framework/memory 与 framework/validation Any、identity/certificates 与 identity/private_keys os、identity/validation json、knowledge_base/models re、progress_capture/watcher Final；纯删除零行为变化）；BACKLOG FRAMEWORK-OPTIMIZE-20 ready→done 补正（RECORDS-2 惯例）；新增全仓静态守卫 tests/unit/test_framework_optimize22.py（AST 扫描 src/coevo 非 `__init__` 模块，允许清单仅覆盖 decision_brief/models 的 14 个有意再导出）",
+      "code": [
+        "src/coevo/app/demo_support.py",
+        "src/coevo/cockpit/sessions.py",
+        "src/coevo/decision_brief/_build.py",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/memory.py",
+        "src/coevo/framework/validation.py",
+        "src/coevo/identity/certificates.py",
+        "src/coevo/identity/private_keys.py",
+        "src/coevo/identity/validation.py",
+        "src/coevo/knowledge_base/models.py",
+        "src/coevo/progress_capture/watcher.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize22.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/app/demo_support.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/sessions.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/_build.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/memory.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/certificates.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/private_keys.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/identity/validation.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/knowledge_base/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/watcher.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize22.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-22",
+      "title": "MergeEngine.merge 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：394 行/复杂度约 33 的全仓最大单体方法按 docstring 算法 1-7 步纯迁移拆为 8 个私有阶段助手（_validate_merge_inputs/_import_binding_rejection/_duplicate_rejection/_revision_rejection/_decision_maker_rejection/_merge_fields/_rejected_proposal/_commit_proposal），merge 收敛为 133 行线性编排；校验顺序、rejection_reason 字符串、失败关闭语义逐字节不变；新增守卫 tests/unit/test_framework_optimize23.py（merge≤200 行、8 助手存在且被调用、关键拒绝标记存活）",
+      "code": [
+        "src/coevo/merge/engine.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize23.py",
+        "tests/unit/test_merge_engine.py",
+        "tests/unit/test_merge_engine_v3.py",
+        "tests/unit/test_merge_commit_receipt.py",
+        "tests/integration/test_merge_risk_receipt_chain.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/merge/engine.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize23.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_merge_engine.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_merge_engine_v3.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_merge_commit_receipt.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_merge_risk_receipt_chain.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```
+
+
+[gate] records self-trim: [verification] archive 15 section(s): archived 15 old section(s); size 500858 > 500000 bytes; size-trimmed 15 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260809\verification-20260809.txt; [ok] decisions: nothing to archive

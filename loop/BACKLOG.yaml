@@ -1654,7 +1654,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-23
     story: ENG-BASE
     title: framework/manifest_checker._validate（150 行/cc~33）按既有校验顺序纯迁移式拆分为 7 个模块级阶段助手（metadata/spec/security/audit/policy registry/spec_hash/policy_ref 验签），_validate 收敛为线性编排，错误消息与失败关闭语义逐字节不变；守卫 test_framework_optimize24.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-22]
     acceptance_tests:
       - tests/unit/test_framework_optimize24.py

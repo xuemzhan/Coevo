@@ -5572,4 +5572,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-23 closure (manifest_checker._validate phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-23` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-22]). User instruction: continue; no full gate (waiver recorded).
+- Delivery: framework/manifest_checker._validate (150 lines, cc~33) decomposed by pure migration into 7 module-level private phase helpers (_validate_metadata / _validate_spec / _validate_security / _validate_audit / _require_policy / _compute_spec_hash / _verify_policy_binding); _validate() is now a 31-line linear orchestration. Check order, error message strings and fail-closed semantics byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize24.py. Also fixed an OPTIMIZE-21 regression found by the expanded regression batch: demo_support.now_utc_iso_z is a package-level re-export consumed by src/coevo/app/__init__.py; the import was restored and the re-export added to the unused-import guard allowlist.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 120 tests green (manifest_checker 32 + guards 8 + optimize14 4 + framework batch 77); full quality waived per user instruction.
+- Security: deployment-point manifest security path reviewed (capability allow-list, cert fingerprint binding, SM2 verification, policy registry); pure structural migration.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
