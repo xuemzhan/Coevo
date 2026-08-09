@@ -1800,3 +1800,14 @@ items:
       - tests/integration/test_sm2_test_pki_generation.py
     security_review: true
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-37（2026-08-09 用户指令"继续优化"；crypto helper stdin BOM 同类收口） ----------
+  - id: FRAMEWORK-OPTIMIZE-37
+    story: ENG-BASE
+    title: OPTIMIZE-36 同类扫描收口——invoke-gmssl-crypto.ps1 同样被 CP65001 StreamWriter BOM 破坏 COEVOCRYPTO/1 帧（GCP-E-MAGIC，e2e 实测失败）；同款编码钉 + toolchain-lock launcher 重哈希
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-36]
+    acceptance_tests:
+      - tests/e2e/test_return_chain.py
+      - tests/unit/test_gmssl_provider_retry.py
+    security_review: true
+    protocol_review: false

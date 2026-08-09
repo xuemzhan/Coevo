@@ -5441,4 +5441,12 @@ security-reviewer 双签门禁。
 - Security: locked script + toolchain lock updated; encoding pin only, tamper-detection assertions and the protocol frame unchanged.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-37 closure (crypto helper stdin BOM robustness; same-class follow-up)
+- Work item: `FRAMEWORK-OPTIMIZE-37` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-36]). User instruction: continue optimizing; found by the same-class scan after OPTIMIZE-36.
+- Root cause: identical to OPTIMIZE-36 ? under console code page 65001, .NET Framework's Process.StandardInput StreamWriter prepends a UTF-8 BOM to the redirected stdin pipe; invoke-gmssl-crypto.ps1's COEVOCRYPTO/1 frame is corrupted (leading BOM -> GCP-E-MAGIC). Confirmed by direct launcher invocation and by tests/e2e/test_return_chain failing with GCP-E-MAGIC; the unit retry test mocks subprocess.run so it did not cover the real path, and gate e2e results were console-CP dependent.
+- Fix: scripts/invoke-gmssl-crypto.ps1 pins [Console]::OutputEncoding/InputEncoding to BOM-free CP936 before the helper launch (same as OPTIMIZE-36; the response is emitted via OpenStandardOutput().Write raw bytes, unaffected); docs/dependencies/toolchain-lock.json gmssl_prototype_provider.helper.launcher re-hashed (8166 -> 8604); protocol frame and tamper checks unchanged.
+- Verification: pre-fix direct call -> GCP-E-MAGIC; post-fix magic passes and tests/e2e/test_return_chain green (10.5s); test_gmssl_provider_retry green; full quality exit=0 fingerprint=`f742f64aa8dce72c` (unit 1365 + integration + Go + security + e2e 14, audit fully-sealed).
+- Security: production-relevant crypto path + toolchain lock updated; encoding pin only.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
