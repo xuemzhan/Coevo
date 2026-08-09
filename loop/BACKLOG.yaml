@@ -1642,7 +1642,7 @@ items:
   - id: FRAMEWORK-OPTIMIZE-22
     story: ENG-BASE
     title: MergeEngine.merge（394 行/cc~33）按 docstring 算法 1-7 步纯迁移式拆分为 8 个阶段助手（校验/P1 绑定/P2 去重/AC-3 版本/决策者白名单/逐字段合并/HOLD 提案/成功提交），merge 收敛为线性编排，rejection_reason 与失败关闭语义逐字节不变；守卫 test_framework_optimize23.py
-    status: ready
+    status: done
     dependencies: [FRAMEWORK-OPTIMIZE-21]
     acceptance_tests:
       - tests/unit/test_framework_optimize23.py

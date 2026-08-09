@@ -5558,4 +5558,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-22 closure (MergeEngine.merge phase decomposition; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-22` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-21]). User instruction: continue; no full gate (waiver recorded).
+- Delivery: MergeEngine.merge (394 lines, cc~33, largest single method in repo) decomposed by pure migration into 8 private phase helpers aligned with the docstring algorithm steps 1-7 (_validate_merge_inputs / _import_binding_rejection / _duplicate_rejection / _revision_rejection / _decision_maker_rejection / _merge_fields / _rejected_proposal / _commit_proposal); merge() is now a 133-line linear orchestration. Check order, rejection_reason strings and fail-closed semantics byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize23.py (merge <= 200 lines, helpers exist and are called, key rejection markers survive).
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 74 tests green (test_merge_engine + test_merge_engine_v3 + test_merge_commit_receipt + guard = 71 unit; integration test_merge_risk_receipt_chain = 3); full quality waived per user instruction.
+- Security: security-critical merge path reviewed; pure structural migration, no decision order or reason string changed.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
