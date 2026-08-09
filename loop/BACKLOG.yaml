@@ -1716,3 +1716,13 @@ items:
       - tests/unit/test_framework_optimize29.py
     security_review: false
     protocol_review: false
+  # ---------- FRAMEWORK-OPTIMIZE-29（2026-08-09 用户指令"继续补全注释"；安全关键域注释强化） ----------
+  - id: FRAMEWORK-OPTIMIZE-29
+    story: ENG-BASE
+    title: crypto/identity/protocol 安全关键域 61 个函数 docstring 补全（失败关闭/哈希链/受控子进程契约，纯注释零行为变化，重名按行号区分）；守卫 test_framework_optimize30.py
+    status: ready
+    dependencies: [FRAMEWORK-OPTIMIZE-28]
+    acceptance_tests:
+      - tests/unit/test_framework_optimize30.py
+    security_review: false
+    protocol_review: false

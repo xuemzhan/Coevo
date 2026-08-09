@@ -5649,4 +5649,11 @@ security-reviewer 双签门禁。
 - Security: comments only; no logic change; docstrings match existing fail-closed semantics.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-29 registration (comment strengthening: security-critical domains crypto/identity/protocol; incremental gate)
+- User instruction: continue completing comments; no full gate (waiver recorded).
+- Decision: register `FRAMEWORK-OPTIMIZE-29` (ENG-BASE, ready, deps=[FRAMEWORK-OPTIMIZE-28]): complete docstrings for 61 functions in the security-critical domains crypto (cng_handle/gmssl_provider/sm3, 14), identity (audit_anchor/repository/private_keys/validation/certificates, 30) and protocol (agent_package/package_store_db/package_builder/import_service/replay_detector, 17), documenting fail-closed semantics, hash-chain bindings, controlled subprocess invocation contracts and return/exception semantics; pure comments, zero behavior change; duplicate names (e.g. audit_anchor `_run`) are disambiguated by line number; guard test test_framework_optimize30.py.
+- Security review: not required (comments only, no logic change).
+- Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
