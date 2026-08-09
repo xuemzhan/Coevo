@@ -248,6 +248,7 @@ class SecurityAuditFacade:
 
 
 def _event_matches(event: AuditEvent, query: AuditQuery) -> bool:
+    """Match an audit event against the export filter (fail-closed)."""
     if query.actor and event.actor != query.actor:
         return False
     if query.source is not None and event.source != query.source:
@@ -268,6 +269,7 @@ def _event_matches(event: AuditEvent, query: AuditQuery) -> bool:
 
 
 def _event_to_export_row(event: AuditEvent) -> dict:
+    """Project one audit event into a deterministic export row."""
     return {
         "ts": event.ts,
         "actor": event.actor,

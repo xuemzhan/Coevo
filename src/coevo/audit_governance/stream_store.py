@@ -146,6 +146,7 @@ class AuditStreamStore:
         return self._append_record(mapping, action="publish")
 
     def _append_record(self, payload: dict[str, Any], *, action: str) -> str:
+        """Append one audit record under the hash chain and persist atomically (fail-closed)."""
         canonical = canonical_json_str(payload, ensure_ascii=False)
         if self._size + len(canonical.encode("utf-8")) > self._max_bytes:
             raise AuditStreamStoreError("audit stream store exceeds size limit")
@@ -191,6 +192,7 @@ class AuditStreamStore:
             return False
 
     def _read_rows(self) -> list[dict[str, Any]]:
+        """Read and decode the audit rows (fail-closed on tampering)."""
         rows: list[dict[str, Any]] = []
         with self._path.open("r", encoding="utf-8") as stream:
             for line in stream:
@@ -207,6 +209,7 @@ class AuditStreamStore:
 
 
 def _chain_hash(record: dict[str, Any]) -> str:
+    """SHA-256 digest over a row canonical payload plus the previous hash."""
     payload = canonical_json_str(
         {
             "schema_version": record["schema_version"],

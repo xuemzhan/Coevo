@@ -51,6 +51,7 @@ def canonical_json_bytes(value: Any) -> bytes:
     ``src.coevo.canon`` leaf (FRAMEWORK-OPTIMIZE-5).
     """
     def validate(item: Any, path: str) -> None:
+        """Validate one canonical-JSON node (finite floats only, bounded recursion; fail-closed)."""
         if item is None or isinstance(item, (str, bool)):
             return
         if isinstance(item, int) and not isinstance(item, bool):
@@ -106,6 +107,7 @@ class RecoveryContext:
 
 
 def _snapshot(outcome: Any) -> str:
+    """Freeze a RealChainOutcome into a detached JSON snapshot (bounded; fail-closed)."""
     if outcome is None:
         return ""
     report = outcome.orch_report
@@ -147,6 +149,7 @@ def _snapshot(outcome: Any) -> str:
 
 
 def _restore(text: str) -> Any:
+    """Rebuild a RealChainOutcome from a stored snapshot (fail-closed)."""
     if not text:
         return None
     from . import (
@@ -282,6 +285,7 @@ class RealChainStore:
         self.connection.executescript(self._SCHEMA_SQL)
 
     def _cleanup_failed_create(self) -> None:
+        """Best-effort remove a partially created database after a failed create."""
         try:
             if self.anchor.pending_head.exists():
                 self.anchor.abort_pending()
@@ -293,12 +297,14 @@ class RealChainStore:
 
     @contextmanager
     def _guard(self) -> Iterator[None]:
+        """Fail-closed guard for connection/state before an operation."""
         with self._lock:
             with self.anchor.locked():
                 yield
 
     @staticmethod
     def _schema_projection_for(connection: sqlite3.Connection) -> dict[str, object]:
+        """Project one record row into the bounded schema projection (fail-closed)."""
         master = [
             dict(row) for row in connection.execute(
                 "SELECT type,name,tbl_name,sql FROM sqlite_master "
@@ -352,6 +358,7 @@ class RealChainStore:
 
     @classmethod
     def _trusted_schema_projection(cls) -> dict[str, object]:
+        """Project a row using only trusted columns."""
         connection = sqlite3.connect(":memory:")
         connection.row_factory = sqlite3.Row
         try:
@@ -364,6 +371,7 @@ class RealChainStore:
         return self._schema_projection_for(self.connection)
 
     def _validate_schema(self) -> None:
+        """Validate the database schema on open (fail-closed)."""
         if self._schema_projection() != self._trusted_schema_projection():
             raise RealChainStoreError("real-chain store schema is not trusted")
         metadata = self.connection.execute(
@@ -376,6 +384,7 @@ class RealChainStore:
             raise RealChainStoreError("real-chain store metadata is invalid")
 
     def _store_id_unlocked(self) -> str:
+        """Return the store id without the guard (caller holds the lock)."""
         row = self.connection.execute(
             "SELECT store_id FROM real_chain_metadata WHERE singleton=1"
         ).fetchone()
@@ -384,6 +393,7 @@ class RealChainStore:
         return row["store_id"]
 
     def _checkpoint(self) -> dict[str, object]:
+        """Persist a checkpoint row atomically."""
         records = [
             dict(row) for row in self.connection.execute(
                 "SELECT event_id,event_digest,project_id,state,held_snapshot,"
@@ -407,12 +417,14 @@ class RealChainStore:
         }
 
     def _recover_unlocked(self) -> None:
+        """Recover pending rows without the guard (caller holds the lock)."""
         checkpoint = self._checkpoint()
         self.anchor.recover(checkpoint)
         if not self.anchor.verify(checkpoint):
             raise RealChainStoreError("real-chain store checkpoint is invalid")
 
     def recover(self) -> None:
+        """Recover interrupted operations and clear the recovery flag (fail-closed)."""
         self._run_checked_transaction(
             require_operable=False,
             on_commit=lambda: setattr(self, "_recovery_required", False),
@@ -464,6 +476,7 @@ class RealChainStore:
             self.anchor.abort_pending()
 
     def _transaction(self, operation: Any, *, event_id: str) -> Any:
+        """Run a DB mutation inside the exclusive lock with atomic commit/rollback."""
         with self._guard():
             self._ensure_operable()
             self.connection.execute("BEGIN IMMEDIATE")
@@ -512,6 +525,7 @@ class RealChainStore:
 
     def _audit(self, event_id: str, action: str, result: str,
                digest: str, now: str) -> None:
+        """Append one audit row (event/digest/operation/result) under the signed chain."""
         row = self.connection.execute(
             "SELECT sequence,entry_hash FROM real_chain_audit ORDER BY sequence DESC LIMIT 1"
         ).fetchone()
@@ -530,6 +544,7 @@ class RealChainStore:
         return self._read(lambda: True)
 
     def _verify_audit_chain_unlocked(self) -> None:
+        """Verify the audit chain hash and signature (caller holds the lock; fail-closed)."""
         previous = "0" * 64
         for expected, entry in enumerate(self._audit_entries_unlocked(), start=1):
             body = {"sequence": entry.sequence, "event_id": entry.event_id,
@@ -542,6 +557,7 @@ class RealChainStore:
             previous = entry.entry_hash
 
     def _mark_interrupted_for_recovery(self) -> None:
+        """Mark in-flight rows RECOVERY_REQUIRED before a crash restart."""
         rows = self._read(lambda: self.connection.execute(
             "SELECT event_id FROM real_chain_records "
             "WHERE state IN ('DISPATCHING','PACKAGE_BUILDING')"
@@ -550,6 +566,7 @@ class RealChainStore:
             return
 
         def operation() -> None:
+            """Mark all in-flight rows as RECOVERY_REQUIRED."""
             rows = self.connection.execute(
                 "SELECT event_id,event_digest,state FROM real_chain_records WHERE state IN ('DISPATCHING','PACKAGE_BUILDING')"
             ).fetchall()
@@ -566,6 +583,7 @@ class RealChainStore:
                        project_id: str, now: str) -> Any | None:
         """Begin a dispatch transaction with replay gate."""
         def operation() -> Any | None:
+            """Insert/update the dispatch row and audit the attempt (idempotent; fail-closed)."""
             row = self.connection.execute(
                 "SELECT * FROM real_chain_records WHERE event_id=?", (event_id,)
             ).fetchone()
@@ -596,6 +614,7 @@ class RealChainStore:
                         outcome: Any, state: str, now: str) -> None:
         """Finish a dispatch as TERMINAL/HELD."""
         def operation() -> None:
+            """Transition the active dispatch row to the given state and audit it."""
             row = self._require(event_id, event_digest)
             if row["state"] != "DISPATCHING":
                 raise RealChainStoreError("dispatch claim is not active")
@@ -608,6 +627,7 @@ class RealChainStore:
 
     def record_attempt(self, event_id: str, event_digest: str,
                        action: str, result: str, now: str) -> None:
+        """Record a dispatch attempt result atomically."""
         self._transaction(lambda: (self._require(event_id, event_digest),
                                    self._audit(event_id, action, result, event_digest, now)),
                           event_id=event_id)
@@ -631,6 +651,7 @@ class RealChainStore:
                 outcome_factory: Any, now: str) -> Any:
         """Confirm a held dispatch with a signed digest."""
         def operation() -> Any:
+            """Apply the confirmation (idempotent; digest conflict fails closed)."""
             row = self._require(event_id, event_digest)
             self._audit(event_id, "confirmation", "attempt", confirmation_digest, now)
             if row["confirmation_digest"]:
@@ -659,6 +680,7 @@ class RealChainStore:
                      resume_digest: str, now: str) -> None:
         """Begin the package-build resume transaction."""
         def operation() -> None:
+            """Transition to PACKAGE_BUILDING after binding the resume digest (fail-closed)."""
             row = self._require(event_id, event_digest)
             self._audit(event_id, "resume", "attempt", resume_digest, now)
             if row["resume_digest"] and row["resume_digest"] != resume_digest:
@@ -682,6 +704,7 @@ class RealChainStore:
                               resume_digest: str, outcome: Any, code: str, now: str) -> None:
         """Finish a failed resume with rollback."""
         def operation() -> None:
+            """Transition to ESCALATED and persist the failure snapshot."""
             row = self._require(event_id, event_digest)
             if row["state"] != "PACKAGE_BUILDING" or row["resume_digest"] != resume_digest:
                 raise RealChainStoreError("package claim does not match")
@@ -697,6 +720,7 @@ class RealChainStore:
                               now: str) -> None:
         """Finish a successful resume with package wire digest."""
         def operation() -> None:
+            """Transition to COMPLETED and persist the success snapshot."""
             row = self._require(event_id, event_digest)
             if row["state"] != "PACKAGE_BUILDING" or row["resume_digest"] != resume_digest:
                 raise RealChainStoreError("package claim does not match")
@@ -710,6 +734,7 @@ class RealChainStore:
     def recovery_context(self, event_id: str) -> RecoveryContext:
         """Return the recovery context for an event."""
         def operation() -> RecoveryContext:
+            """Load the RecoveryContext for an event (fail-closed)."""
             row = self.connection.execute(
                 "SELECT event_id,event_digest,project_id,state FROM real_chain_records WHERE event_id=?",
                 (event_id,),
@@ -722,6 +747,7 @@ class RealChainStore:
     def terminate_recovery(self, event_id: str, actor_digest: str, now: str) -> RecoveryContext:
         """Terminate a recovery and mark it resolved."""
         def operation() -> RecoveryContext:
+            """Require RECOVERY_REQUIRED and terminate recovery atomically."""
             row = self.connection.execute(
                 "SELECT event_id,event_digest,project_id,state FROM real_chain_records WHERE event_id=?",
                 (event_id,),
@@ -736,6 +762,7 @@ class RealChainStore:
         return self._transaction(operation, event_id=event_id)
 
     def _require(self, event_id: str, event_digest: str) -> sqlite3.Row:
+        """Require an exact event row (event_id + digest) and return it (fail-closed)."""
         row = self.connection.execute(
             "SELECT * FROM real_chain_records WHERE event_id=?", (event_id,)
         ).fetchone()
