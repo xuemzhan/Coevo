@@ -5600,4 +5600,11 @@ security-reviewer 双签门禁。
 - Gate scope: incremental (fmt + lint + targeted); full quality waived per user instruction.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-09 - FRAMEWORK-OPTIMIZE-25 closure (dispatch_event AGENT_CALL branch extraction; incremental gate)
+- Work item: `FRAMEWORK-OPTIMIZE-25` (ENG-BASE, deps=[FRAMEWORK-OPTIMIZE-24]). User instruction: continue; no full gate (waiver recorded).
+- Delivery: Orchestrator.dispatch_event (170 lines) extracted its AGENT_CALL branch (~85 lines: confirm hold / registry miss / AVAILABLE / RETRY capped at one / SKIP / ESCALATE) into the module-level pure function _dispatch_agent_step with a frozen _AgentStepResult(outcome, next_id_seed, stop); break/continue semantics are preserved through the returned stop flag; dispatch_event is now a 101-line loop orchestration. Decision order, trace detail strings and fail-closed semantics byte-identical; import surface unchanged. Guard test tests/unit/test_framework_optimize26.py.
+- Verification: fmt exit=0 fingerprint=`8d456a2ce09245c7`; lint exit=0 fingerprint=`5103146e112f2dd1` (audit fully-sealed); targeted 40 tests green (test_orchestrator 26 + guard 4 + integration test_orchestrator_real_facade_chain 10); full quality waived per user instruction.
+- Security: orchestration failure policy reviewed (human-confirmation gate, registry-miss fails closed, retry capped at one, escalation to human); pure structural migration.
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
 
