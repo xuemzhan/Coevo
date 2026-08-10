@@ -1960,3 +1960,12 @@ items:
       - tests/unit/test_review2_8_event_model.py
     security_review: false
     protocol_review: false
+  - id: REVIEW2-9
+    story: REVIEW2
+    title: 第二位架构师审查 P2：断网黑盒证明——真实 cockpit 服务 + 捕获全部 socket connect，走查核心表面，断言 external_requests=0 / loopback_requests=N / missing_local_assets=0 / runtime_downloads=0 / 无外部 URL 引用；契约文档
+    status: done
+    dependencies: [US-7-AC-2]
+    acceptance_tests:
+      - tests/e2e/test_review2_9_offline_blackbox.py
+    security_review: false
+    protocol_review: false

@@ -5621,3 +5621,10 @@ security-reviewer 双签门禁。
 - Security review: 纯新增模型+校验+文档，不改变现有事件/审计语义，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-9 收口（断网黑盒证明；增量门禁豁免）
+- Work item: `REVIEW2-9`（第二位架构师审查 P2：断网黑盒证明）status=done；deps=[US-7-AC-2]。
+- Delivery: `tests/e2e/test_review2_9_offline_blackbox.py`——启动真实 `CockpitHttpServer`（127.0.0.1），在捕获每个 socket connect 目标的前提下走查核心表面（index/静态资源/读 API/被拒写路径），断言 external_requests=0、loopback_requests=8、missing_local_assets=0、runtime_downloads=0、服务字节无外部 URL 引用；契约文档 `docs/architecture/offline-proof.md`（证明程序/指标/进程内捕获局限与受控主机防火墙复核的生产验收/与既有离线测试关系/变更纪律）。
+- Verification: 用户指示不做全量门禁；黑盒 1/1（实测 external=0 loopback=8 missing=0 downloads=0）；离线相关 e2e 6/6 回归（含 offline_baseline、offline_frontend）；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1440 全绿）。
+- Security review: 纯新增 e2e 测试+文档，不引入任何运行时网络行为，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
