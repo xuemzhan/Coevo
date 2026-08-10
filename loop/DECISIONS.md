@@ -5133,6 +5133,13 @@ security-reviewer 双签门禁。
 - Security review: 纯新增 e2e 测试+文档，不引入任何运行时网络行为，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ENG-OPTIMIZE-1 收口（门禁结果 JSON 计数增强；增量门禁豁免）
+- Work item: `ENG-OPTIMIZE-1`（源自第二位架构师审查"质量门禁每阶段输出子测试计数"建议）status=done；deps=[REVIEW2-2]。
+- Delivery: `scripts/quality_gate.py`——`StageResult` 增加 discovered/passed/failed/skipped 字段；`_parse_test_counts` 解析统一测试入口摘要（`discovered=.. passed=.. failed=.. skipped=..`），`_run_one` 对每个阶段（含 e2e 重试）填充计数；`_write_results_json` 将每阶段计数与 totals 写入 `loop/runtime/gate-results/` artifact；哈希锁三轮同步（quality_gate.py 行重哈希 → make.cs ScriptInventorySha256 → toolchain-lock）。守卫测试 3 项（解析/真实阶段计数/artifact 字段）。
+- Verification: 用户指示不做全量门禁；定向 3/3；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`，artifact totals 实测 `discovered=1474 passed=1471 failed=0 skipped=3`；单元 1474 全绿。
+- Security review: 纯门禁产物增强（只读统计），不改审计/测试语义，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

@@ -2015,6 +2015,15 @@ items:
       - tests/unit/test_arch_review_8_records_governance.py
     security_review: false
     protocol_review: false
+  - id: ENG-OPTIMIZE-1
+    story: ENG-OPTIMIZE
+    title: 门禁结果 JSON 增强——每阶段测试计数（discovered/passed/failed/skipped）解析并落入 loop/runtime/gate-results artifact；守卫测试（解析/真实阶段计数/artifact 字段）
+    status: in-progress
+    dependencies: [REVIEW2-2]
+    acceptance_tests:
+      - tests/unit/test_eng_optimize_1_gate_counts.py
+    security_review: false
+    protocol_review: false
   - id: ARCH-REVIEW-4
     story: ARCH-REVIEW
     title: 架构审查 P1-1：子智能体 Agent 契约——七个专业子智能体设计期 Manifest 目录（能力闭集/服务模块/model_binding/人工确认点/工具策略），运行时注册仍经 guard_registration；契约文档 + 单元守卫
