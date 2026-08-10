@@ -24,6 +24,8 @@ class ReleaseCheckTests(unittest.TestCase):
         root = Path(tmp)
         (root / "src" / "coevo").mkdir(parents=True)
         (root / "loop").mkdir(parents=True)
+        (root / "scripts").mkdir(parents=True)
+        (root / "docs" / "architecture").mkdir(parents=True)
         (root / "src" / "coevo" / "version.py").write_text(
             'VERSION: str = "1.2.3"\n', encoding="utf-8"
         )
@@ -34,6 +36,17 @@ class ReleaseCheckTests(unittest.TestCase):
         )
         (root / "loop" / "BACKLOG.yaml").write_text(
             "items:\n  - id: A\n    status: done\n", encoding="utf-8"
+        )
+        # REVIEW2-11: delivery-artifacts check needs a complete fixture.
+        (root / "scripts" / "run_cockpit.py").write_text(
+            "# production runner (no prototype crypto)\n", encoding="utf-8"
+        )
+        (root / "scripts" / "secret_scan.py").write_text(
+            '_FIXTURE_ALLOWED_PREFIXES = ("tests/", "loop/")\n',
+            encoding="utf-8",
+        )
+        (root / "docs" / "architecture" / "win7-compat-branch.md").write_text(
+            "独立发布冻结依赖安全补偿测试计划\n", encoding="utf-8"
         )
         return root
 
@@ -83,6 +96,49 @@ class ReleaseCheckTests(unittest.TestCase):
                 non_done.append(ident)
         self.assertEqual([], [i for i in non_done if i != current], non_done)
         self.assertTrue(current, "STATE must have a current_item")
+
+    def test_delivery_artifacts_real_repo_clean(self):
+        """REVIEW2-11: the tracked tree must carry no forbidden artifacts."""
+        check = release_check.check_delivery_artifacts(ROOT)
+        self.assertTrue(check["ok"], check)
+        self.assertEqual("ok", check["level"])
+
+    def test_delivery_artifacts_detects_forbidden_tracked(self):
+        completed = subprocess.CompletedProcess(
+            [],
+            0,
+            stdout="src/coevo/__pycache__/x.cpython-314.pyc\n"
+                   "loop/private-key-handles-F6DE.json\n",
+            stderr="",
+        )
+        with mock.patch.object(release_check, "_run", return_value=completed):
+            check = release_check.check_delivery_artifacts(ROOT)
+        self.assertFalse(check["ok"])
+        self.assertEqual("critical", check["level"])
+        self.assertIn("__pycache__", check["detail"])
+
+    def test_delivery_artifacts_detects_prototype_in_production_runner(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            scripts = root / "scripts"
+            scripts.mkdir(parents=True)
+            (scripts / "run_cockpit.py").write_text(
+                "from src.coevo.crypto import GmsslPrototypeProvider\n",
+                encoding="utf-8",
+            )
+            (scripts / "secret_scan.py").write_text(
+                '_FIXTURE_ALLOWED_PREFIXES = ("tests/", "loop/")\n',
+                encoding="utf-8",
+            )
+            (root / "docs" / "architecture").mkdir(parents=True)
+            (root / "docs" / "architecture" / "win7-compat-branch.md").write_text(
+                "独立发布冻结依赖安全补偿测试计划\n", encoding="utf-8"
+            )
+            completed = subprocess.CompletedProcess([], 0, stdout="", stderr="")
+            with mock.patch.object(release_check, "_run", return_value=completed):
+                check = release_check.check_delivery_artifacts(root)
+            self.assertFalse(check["ok"])
+            self.assertIn("prototype", check["detail"])
 
     def test_subprocess_checks_and_report(self):
         with tempfile.TemporaryDirectory() as tmp:

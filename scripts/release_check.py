@@ -29,6 +29,11 @@ from typing import Any
 
 
 _VERSION_RE = re.compile(r'^VERSION:\s*str\s*=\s*"(\d+\.\d+\.\d+)"\s*$', re.MULTILINE)
+FORBIDDEN_TRACKED_ARTIFACTS = re.compile(
+    r"(^|/)(__pycache__($|/)|[^/]*\.pyc$|[^/]*\.db(-wal|-shm)?$|"
+    r"[^/]*\.pdb$|helper\.exe$|private-key-handles-[^/]*\.json$)",
+    re.IGNORECASE,
+)
 
 
 def _run(repo_root: Path, command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -165,6 +170,81 @@ def check_backlog(repo_root: Path) -> dict[str, Any]:
     return {"name": "backlog", "ok": True, "level": "ok", "detail": "all items done"}
 
 
+def check_delivery_artifacts(repo_root: Path) -> dict[str, Any]:
+    """REVIEW2-11 delivery gate: no runtime caches/keys/prototype in a release.
+
+    Hard fails (critical):
+    * any tracked path matching __pycache__ / *.pyc / *.db(-wal|-shm) /
+      *.pdb / helper.exe / private-key-handles-*.json;
+    * a production composition root (scripts/run_cockpit.py) referencing the
+      GmSSL prototype provider;
+    * secret-scan fixture exemptions expanding beyond tests/ + loop/.
+
+    Warning: the Win7 separation doc missing its release markers.
+    """
+
+    result = _run(repo_root, ["git", "ls-files"])
+    forbidden = [
+        line
+        for line in result.stdout.splitlines()
+        if FORBIDDEN_TRACKED_ARTIFACTS.search(line)
+    ]
+    if forbidden:
+        return {
+            "name": "delivery_artifacts",
+            "ok": False,
+            "level": "critical",
+            "detail": f"forbidden tracked artifacts: {forbidden[:5]}",
+        }
+    production_runner = repo_root / "scripts" / "run_cockpit.py"
+    if (
+        production_runner.is_file()
+        and "GmsslPrototypeProvider"
+        in production_runner.read_text(encoding="utf-8")
+    ):
+        return {
+            "name": "delivery_artifacts",
+            "ok": False,
+            "level": "critical",
+            "detail": "run_cockpit.py references the GmSSL prototype provider",
+        }
+    secret_scan = (repo_root / "scripts" / "secret_scan.py")
+    if (
+        not secret_scan.is_file()
+        or "_FIXTURE_ALLOWED_PREFIXES" not in secret_scan.read_text(encoding="utf-8")
+        or '"tests/"' not in secret_scan.read_text(encoding="utf-8")
+    ):
+        return {
+            "name": "delivery_artifacts",
+            "ok": False,
+            "level": "critical",
+            "detail": "secret-scan fixture exemption is not narrowly scoped",
+        }
+    win7_doc = repo_root / "docs" / "architecture" / "win7-compat-branch.md"
+    if not win7_doc.is_file():
+        return {
+            "name": "delivery_artifacts",
+            "ok": False,
+            "level": "critical",
+            "detail": "win7-compat-branch.md missing",
+        }
+    win7 = win7_doc.read_text(encoding="utf-8")
+    missing_markers = [marker for marker in ("独立", "发布") if marker not in win7]
+    if missing_markers:
+        return {
+            "name": "delivery_artifacts",
+            "ok": False,
+            "level": "warning",
+            "detail": f"win7 doc missing release markers: {missing_markers}",
+        }
+    return {
+        "name": "delivery_artifacts",
+        "ok": True,
+        "level": "ok",
+        "detail": "clean",
+    }
+
+
 def build_report(
     repo_root: Path,
     *,
@@ -179,6 +259,7 @@ def build_report(
         check_audit(repo_root, python),
         check_secret_scan(repo_root, python),
         check_traceability(repo_root, python),
+        check_delivery_artifacts(repo_root),
     ]
     critical = [c for c in checks if not c["ok"] and c["level"] == "critical"]
     warnings = [c for c in checks if not c["ok"] or c["level"] == "warning"]
