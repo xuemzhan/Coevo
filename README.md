@@ -43,6 +43,12 @@ Coevo 是一个**分布式任务管理具身智能体系统**的 MVP 实现。�
 | US-15 | 安全审计（统一事件 + 哈希链 + 拦截判定） | `audit_governance/` |
 | US-16 | 框架层（CTAF v0.4.1）：Manifest 校验 / 能力闭集 / Policy+validate_plan / Memory / Tool+MCP 路径 A / A2A+policy_ref / Plan-LSP / Hybrid Orchestrator / K8s 纸面清单 | `framework/`、`timefmt.py` |
 
+**能力状态**：每项能力的当前成熟度（DESIGNED / MODELED / UNIT_VERIFIED /
+INTEGRATION_VERIFIED / E2E_VERIFIED / PROTOTYPE / PRODUCTION_READY / BLOCKED）
+见 [docs/architecture/capability-status.md](docs/architecture/capability-status.md)。
+`done` 只表示切片完成，不表示生产级完成；`PRODUCTION_READY` 需独立验证 +
+独立安全审查 + 批准密码产品。
+
 两条**固定编排链**均已端到端验证：
 
 - 任务下发链：`tests/e2e/test_demo_runner.py`（流程理解 → 分解 → 推荐 → 人工确认 → 加密包导出）；
