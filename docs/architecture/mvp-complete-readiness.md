@@ -18,7 +18,7 @@
 | 8 | 目标 Windows 兼容 | test-win7（本轮重跑通过）；Win7 真机验收待做 | 满足（真机待验） |
 | 9 | 无 Critical/High 安全问题 | 历史 security PASS；本轮无新 Critical/High 发现 | 满足（无新发现） |
 | 10 | 需求—代码—测试追溯完整 | traceability missing=0（lint 通过） | 满足 |
-| 11 | 独立 mvp-verifier + security-reviewer 双签 | 当前状态未完成独立双签（子代理机制失控后改为增量自验）；external-gates 中 ARCH-REVIEW-4/5、REVIEW2-10 为 REVIEW-REQUIRED | **未满足（关键缺口）** |
+| 11 | 独立 mvp-verifier + security-reviewer 双签 | 2026-08-10 记录为"实现完成、待独立验收"；独立双签为 REVIEW-REQUIRED（执行包见 docs/process/independent-verification-pack.md），另含 ARCH-REVIEW-4/5、REVIEW2-10 独立审查门 | **待独立验收（REVIEW-REQUIRED）** |
 
 ## 建议
 

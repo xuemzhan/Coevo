@@ -12,7 +12,7 @@
 | `protocol/` | `.agent` 任务包协议规范 | `agent-package-protocol.md` |
 | `traceability/` | 需求—代码—测试追踪矩阵 | `requirements-test-matrix.md` |
 | `dependencies/` | 经批准工具的精确版本、来源、哈希与许可证 | `toolchain-lock.json` |
-| `process/` | 独立双签、只读沙箱、记录归档等治理流程 | `independent-review-governance.md` |
+| `process/` | 独立双签、只读沙箱、记录归档与独立验收执行包等治理流程 | `independent-review-governance.md`、`independent-verification-pack.md` |
 | `operations/` | 生产运维手册（配置参考、安装/升级/回滚、审计密钥恢复、健康检查/自启/排障） | `configuration-reference.md`、`install-upgrade.md`、`audit-key-runbook.md`、`ops-runbook.md` |
 | `plans/` | 各工作项的切片规划（历史） | `*.md` |
 | `framework/` | CTAF 框架层设计与适配映射（manifest / capability / policy / plan / memory / tools / a2a / k8s / hybrid / integration / plan-lsp） | `*.md` |
