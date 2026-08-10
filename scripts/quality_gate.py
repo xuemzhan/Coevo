@@ -47,6 +47,9 @@ TARGETS={
  "test":[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"],[sys.executable,"-m","unittest","discover","-s","tests/integration","-p","*test*.py","-v"],go_test_argv()],
  "test-security":[[sys.executable,"-m","unittest","discover","-s","tests/security","-v"],[os.environ.get("COEVO_NODE_PATH",str(ROOT/".tools"/"node"/"24.14.0"/"node.exe")),"tests/security/path_policy_test.mjs"]],
  "test-e2e":[[sys.executable,"-m","unittest","discover","-s","tests/e2e","-v"]]}
+# ARCH-REVIEW-7: fast tier for iteration loops (compileall + lint + unit);
+# full `quality` stays the release/closure gate (fmt+lint+test+security+e2e).
+TARGETS["fast"]=TARGETS["fmt"]+TARGETS["lint"]+[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"]]
 GO_TEST_ARGV=TARGETS["test"][-1]
 def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
 def fingerprint(argvs): return hashlib.sha256(json.dumps(argvs,separators=(",",":")).encode()).hexdigest()[:16]
