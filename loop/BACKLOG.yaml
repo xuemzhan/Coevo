@@ -1969,3 +1969,12 @@ items:
       - tests/e2e/test_review2_9_offline_blackbox.py
     security_review: false
     protocol_review: false
+  - id: REVIEW2-10
+    story: REVIEW2
+    title: 第二位架构师审查 P2：审计日志代际重锚定——audit_seal.py re-anchor（fully-sealed 前置 fail-closed → 归档整代 → genesis 锚定 → checkpoint 重置 → 重封缄），不重写既有记录，archive_records 提示指向专用流程；契约文档 + 单元守卫
+    status: done
+    dependencies: [RECORDS-ARCHIVE-3]
+    acceptance_tests:
+      - tests/unit/test_audit_seal_reanchor.py
+    security_review: true
+    protocol_review: false
