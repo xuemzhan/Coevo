@@ -5523,3 +5523,31 @@ security-reviewer 双签门禁。
 - Security review: 门禁接线/哈希锁变更不涉及身份/密钥/文件解析/权限/审计语义，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 第二位架构师审查批判性吸收与计划融合（REVIEW2 系列登记）
+- 来源：用户提供的第二份架构审查报告（基于 commit 7a1ca53 的现场检查）。本条目记录批判性分析结论与融合后的工作项队列。
+- 现场核验（不轻信报告原文，逐条对源码/记录复核）：
+  1. **属实**：`cockpit/facade.py:321` 仍返回 WPS render stub（"Actual subprocess is US-7-AC-4"）——真实启动链路未接入 facade。
+  2. **属实**：`protocol/package_builder.py` 模块说明明确 BuiltPackage 的 signature 为 out-of-band Python 属性、不嵌入 wire——签名承载边界未闭合（demo 路径 build_encrypted_package 除外）。
+  3. **属实**：`python -m unittest discover -s tests -p 'test_*.py'` 得 0 tests——测试按子目录分层，缺统一入口。
+  4. **属实**：全量门禁耗时长（本会话实测约 24 分钟）且门禁同时承担执行/记录/封缄/归档职责——两阶段化与分阶段进度有价值。
+  5. **属实**：DECISIONS 明示"audit 归档需专用重锚定流程（未实现）"——治理缺口仍开放。
+  6. **过时/不实**：巨型 `__init__.py` 论断——merge/risk/supervision/decision_brief/orchestrator 的 `__init__.py` 当前分别为 129/25/55/47/51 行，早已在 FRAMEWORK-OPTIMIZE 系列拆分；不新增重构项，仅保留"随演进逐步拆分"纪律。
+  7. **过时**："全量门禁无法现场复验"——审查时点成立；本会话已现场复验一次 exit=0（fingerprint `f742f64aa8dce72c`）且已新增 fast 分层；门禁速度/两阶段仍按 REVIEW2-2 采纳。
+  8. **误报/已处理**：私钥句柄文件（loop/private-key-handles-*.json）——已按治理 a+b（.gitignore + git rm --cached + 历史清理 + secret scan 最小豁免）；`python Makefile quality` 属命令使用错误。
+  9. **部分已覆盖**：crypto prototype/production 隔离已有 ProviderRegistry/require_approved fail-closed；HTTP Host/Origin/CSRF/会话已有 server 集成测试；Win7 独立分支为强制约束——均只补缺口不全量重做。
+- 采纳并登记为 REVIEW2 系列工作项（按 RECORDS-2 逐轮登记，当前 backlog 仅 REVIEW2-1 非 done）：
+  - `REVIEW2-1`（P1，ready）统一测试入口：`scripts/test.py --suite unit|integration|security|e2e|win7|all`，0 测试 fail-closed，输出 discovered/passed/failed/skipped/duration，接入 quality_gate test 目标。
+  - `REVIEW2-2`（P1）门禁两阶段化：Phase A 不可变执行→临时结果 JSON；Phase B 治理写回（audit/VERIFICATION/seal）；每阶段独立超时与进度输出。
+  - `REVIEW2-3`（P1）`.agent` 签名承载闭合：package_builder 的 out-of-band signature 改为加密载荷内 sender.sig 或显式 bytes+signature 绑定；签名覆盖范围文档化；补协议测试向量（截断/重排/重复字段/签名失配/跨版本拒绝）。
+  - `REVIEW2-4`（P1）WPS 真实启动链路：CockpitFacade._wps_open 接入 WpsLauncher 真实子进程；结果语义 ACCEPTED/STARTED/FAILED/DENIED/NOT_AVAILABLE；进程返回/超时/审计。
+  - `REVIEW2-5`（P1）cockpit HTTP 全链路认证黑盒矩阵：未认证写 401/403、Host/Origin 拒绝、会话过期、CSRF 缺失、replay write token（补 server 既有测试之外缺口）。
+  - `REVIEW2-6`（P1）crypto prototype/production 隔离门禁：生产 profile 拒绝 prototype provider 的启动/门禁断言 + crypto_mode 显式输出（复用既有 ProviderRegistry）。
+  - `REVIEW2-7`（P2）模型建议/正式状态类型边界：DraftSuggestion / ConfirmedStateChange 类型化，正式状态写入 API 只接受 ConfirmedStateChange。
+  - `REVIEW2-8`（P2）显式事件模型：EventId/AggregateId/CausationId/ClientSequence/CorrelationId 文档+模型，明确不依赖时间戳排序（承接 ARCH-REVIEW-2 合并收敛演进）。
+  - `REVIEW2-9`（P2）断网黑盒证明：socket 级 external_requests=0 测试（启动本地服务+网络拦截+连接捕获）。
+  - `REVIEW2-10`（P2）审计归档重锚定流程：实现 audit 种类专用重锚定（裁剪后重封缄/重链）或正式排除；闭合 DECISIONS 已记录的未实现缺口。
+  - `REVIEW2-11`（P3）交付门禁：发布包排除 __pycache__/WAL/helper/私钥句柄/原型 crypto；secret scan 豁免最小化；Win7 产物独立锁定说明。
+  - `REVIEW2-12`（P2）能力状态矩阵：done 语义升级为 DESIGNED..PRODUCTION_READY 分级并应用于 BACKLOG/README 叙事（并入 ARCH-REVIEW-3 范围治理决策）。
+- 与既有 ARCH-REVIEW 系列关系：REVIEW2 系列与 ARCH-REVIEW-3（blocked 待裁决）、4/5（security_review=true 待独立审查）、6/8 共同构成合并队列；实施顺序由业务负责人按"继续"指令逐轮推进。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（批判性吸收并融合到优化方案和计划）；executed by: Codex (loop-engineer)。

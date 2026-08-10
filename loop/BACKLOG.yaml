@@ -1839,6 +1839,11 @@ items:
   #   ARCH-REVIEW-4（P1-1 Agent Manifest 注册表）/ ARCH-REVIEW-5（P1-2 审计密钥仪式）/
   #   ARCH-REVIEW-6（P1-3 SLO 门禁）/ ARCH-REVIEW-7（P2-1 门禁分层）/
   #   ARCH-REVIEW-8（P2-2 记录治理）/ ARCH-REVIEW-9（P2-3 Win7 回归）
+  # REVIEW2 系列（第二位架构师审查，2026-08-10 批判性吸收后登记，完整清单见 DECISIONS 2026-08-10 条目）：
+  #   REVIEW2-1 统一测试入口 / REVIEW2-2 门禁两阶段化 / REVIEW2-3 .agent 签名承载闭合 /
+  #   REVIEW2-4 WPS 真实启动链路 / REVIEW2-5 HTTP 认证黑盒矩阵 / REVIEW2-6 crypto 隔离门禁 /
+  #   REVIEW2-7 类型化状态边界 / REVIEW2-8 显式事件模型 / REVIEW2-9 断网黑盒证明 /
+  #   REVIEW2-10 审计归档重锚定 / REVIEW2-11 交付门禁 / REVIEW2-12 能力状态矩阵
   - id: ARCH-REVIEW-1
     story: ARCH-REVIEW
     title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化
@@ -1873,5 +1878,14 @@ items:
     dependencies: [WIN7-AC-1]
     acceptance_tests:
       - tests/unit/test_arch_review_9_win7_gate.py
+    security_review: false
+    protocol_review: false
+  - id: REVIEW2-1
+    story: REVIEW2
+    title: 第二位架构师审查 P1：统一测试入口——scripts/test.py --suite unit|integration|security|e2e|win7|all，0 测试 fail-closed，输出 discovered/passed/failed/skipped/duration 摘要，接入 quality_gate test 目标
+    status: ready
+    dependencies: [ARCH-REVIEW-7, ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_review2_1_test_entry.py
     security_review: false
     protocol_review: false
