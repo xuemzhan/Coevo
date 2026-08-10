@@ -2089,3 +2089,42 @@ items:
       - tests/security/test_arch_review_5_audit_key_ceremony.py
     security_review: true
     protocol_review: false
+
+  # ---------- 架构级风险修复（2026-08-10，用户指令"修复所有架构级风险"） ----------
+  - id: ARCH-REVIEW-10
+    story: ARCH-REVIEW
+    title: Go↔Python 一致性契约（架构审查 P1-1）——共享 golden corpus（go/taskflow/testdata/mapping-rules.json，27 规则 + 30 用例）+ Go/Python 双侧一致性测试 + doc.go 单一事实来源声明 + 契约文档
+    status: done
+    dependencies: [US-1-AC-1]
+    acceptance_tests:
+      - go/taskflow/parity_test.go
+      - tests/unit/test_arch_review_10_go_python_parity.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-11
+    story: ARCH-REVIEW
+    title: 状态持久化矩阵（架构审查 P2-2）——内存态/持久态全量清单（23 个有状态组件）+ 重启行为/恢复/审计 + 接线纪律；守卫测试扫描式强制覆盖
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_11_persistence_matrix.py
+    security_review: false
+    protocol_review: false
+  - id: ENG-OPTIMIZE-7
+    story: ENG-OPTIMIZE
+    title: 源码文件规模预算门禁（架构审查 P2-1）——MAX_FILE_LINES=1133 + 600 行以上大文件白名单（9 个，只降不增）+ 契约文档
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_eng_optimize_7_file_size_budget.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-12
+    story: ARCH-REVIEW
+    title: 架构级风险收口登记——外部门禁补登记 CTAF-PROPOSAL-REVIEW（CTAF 设计提案独立架构评审）+ DECISIONS 风险分类裁决（P0-1 独立双签 REVIEW-REQUIRED / P0-2 密码产品 BLOCKED / P1-2 在线协同为后续版本范围）
+    status: done
+    dependencies: [ARCH-REVIEW-3]
+    acceptance_tests:
+      - tests/unit/test_arch_review_3_external_gates.py
+    security_review: false
+    protocol_review: false

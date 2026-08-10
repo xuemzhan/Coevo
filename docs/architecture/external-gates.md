@@ -13,6 +13,7 @@
 | ARCH-REVIEW-4 | 独立安全审查 | `REVIEW-REQUIRED` | 子智能体 Manifest 目录生产采用前独立安全审查 |
 | ARCH-REVIEW-5 | 独立安全审查 | `REVIEW-REQUIRED` | 审计签名密钥轮换/恢复生产执行前独立安全审查 |
 | REVIEW2-10 | 独立安全审查 | `REVIEW-REQUIRED` | audit re-anchor 生产使用前独立安全审查 |
+| CTAF-PROPOSAL-REVIEW | 独立架构评审 | `REVIEW-REQUIRED` | CTAF 设计提案 v0.4.1（docs/plans/distributed-agent-framework/design-proposal.md）定稿前独立架构评审 |
 
 ## 纪律
 

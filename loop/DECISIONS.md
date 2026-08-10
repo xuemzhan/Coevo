@@ -5217,6 +5217,36 @@ security-reviewer 双签门禁。
 - 说明：standalone 套件运行会追加审计记录并遗留未封缄尾，属已知环境行为；正式门禁按阶段重封缄（REVIEW2-2）。本记录支撑 GOAL.md mvp-complete 条件 3/4/5/6/7/8/10 的当前状态证据；条件 11（独立双签）仍待业务负责人裁决。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 架构级风险修复收口（ARCH-REVIEW-10/11/12 + ENG-OPTIMIZE-7；全量门禁收口）
+- 用户指令："修复所有架构级风险"（基于架构师审查结论；本轮按"可实施 / 外部决策"分类执行）。
+- 风险分类裁决：
+  - **可实施（本轮落地）**：P1-1 Go/Python 双实现漂移 → ARCH-REVIEW-10；P2-2 内存/持久态
+    边界 → ARCH-REVIEW-11；P2-1 大文件 → ENG-OPTIMIZE-7；P1-3 CTAF 提案独立评审 →
+    登记外部门禁 CTAF-PROPOSAL-REVIEW（ARCH-REVIEW-12）。
+  - **外部决策（不可由实现者关闭，保持登记）**：P0-1 独立双签（mvp-complete 条件 11）仍
+    REVIEW-REQUIRED，需业务负责人安排独立 mvp-verifier + security-reviewer；P0-2 正式国密
+    密码产品仍 BLOCKED（外部审批）；P1-2 受控网络协同模式为后续版本范围，MVP 不实现（依据
+    AGENTS.md"不得实现未写入用户故事的扩展功能"与 MVP 用户故事范围），能力矩阵保持
+    DESIGNED/MODELED。
+- Delivery:
+  - ARCH-REVIEW-10：`go/taskflow/testdata/mapping-rules.json`（27 规则 + 30 用例 golden
+    corpus）、`go/taskflow/parity_test.go`、`tests/unit/test_arch_review_10_go_python_parity.py`、
+    `go/taskflow/doc.go` 单一事实来源声明、`docs/architecture/go-python-parity.md`；
+  - ARCH-REVIEW-11：`docs/architecture/state-persistence.md`（23 个有状态组件矩阵）+
+    `tests/unit/test_arch_review_11_persistence_matrix.py`（扫描式覆盖守卫）；
+  - ENG-OPTIMIZE-7：`docs/architecture/file-size-budget.md` +
+    `tests/unit/test_eng_optimize_7_file_size_budget.py`（MAX_FILE_LINES=1133、9 个大文件
+    白名单只降不增）；
+  - ARCH-REVIEW-12：`docs/architecture/external-gates.md` 补 CTAF-PROPOSAL-REVIEW 行 +
+    守卫测试断言。
+- Verification: 定向 13/13；Go 套件 ok；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；
+  全量 quality exit=0 fingerprint=`b96157dbb895a417`（14 阶段全绿：单元 1500 / 集成 270 /
+  Go / 安全 102 / E2E 16 / Win7 4；totals discovered=1892 passed=1888 skipped=4；
+  audit fully-sealed）。
+- Security review: 本轮为文档+测试+门禁守卫（新增守卫测试、契约文档、外部门禁登记），
+  无运行时/密钥/审计逻辑变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（修复所有架构级风险）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

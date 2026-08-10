@@ -21,6 +21,8 @@ class ExternalGatesTests(unittest.TestCase):
         self.assertIn("ARCH-REVIEW-4", text)
         self.assertIn("ARCH-REVIEW-5", text)
         self.assertIn("REVIEW2-10", text)
+        self.assertIn("CTAF-PROPOSAL-REVIEW", text)
+        self.assertIn("design-proposal.md", text)
 
     def test_capability_status_references_external_gates(self) -> None:
         text = (

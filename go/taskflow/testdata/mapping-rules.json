@@ -1,0 +1,318 @@
+{
+  "schema_version": "1.0",
+  "source_of_truth": "src/coevo/task_flow/mapping.py",
+  "rule_count": 27,
+  "rules": [
+    {
+      "rule_id": "m1",
+      "hint": "intake",
+      "standard_stage": "intake",
+      "priority": 10
+    },
+    {
+      "rule_id": "m2",
+      "hint": "Intake",
+      "standard_stage": "intake",
+      "priority": 11
+    },
+    {
+      "rule_id": "m3",
+      "hint": "接收",
+      "standard_stage": "intake",
+      "priority": 12
+    },
+    {
+      "rule_id": "m4",
+      "hint": "接收阶段",
+      "standard_stage": "intake",
+      "priority": 13
+    },
+    {
+      "rule_id": "m10",
+      "hint": "planning",
+      "standard_stage": "planning",
+      "priority": 10
+    },
+    {
+      "rule_id": "m11",
+      "hint": "Planning",
+      "standard_stage": "planning",
+      "priority": 11
+    },
+    {
+      "rule_id": "m12",
+      "hint": "策划",
+      "standard_stage": "planning",
+      "priority": 12
+    },
+    {
+      "rule_id": "m13",
+      "hint": "方案策划",
+      "standard_stage": "planning",
+      "priority": 13
+    },
+    {
+      "rule_id": "m20",
+      "hint": "execution",
+      "standard_stage": "execution",
+      "priority": 10
+    },
+    {
+      "rule_id": "m21",
+      "hint": "Execution",
+      "standard_stage": "execution",
+      "priority": 11
+    },
+    {
+      "rule_id": "m22",
+      "hint": "执行",
+      "standard_stage": "execution",
+      "priority": 12
+    },
+    {
+      "rule_id": "m23",
+      "hint": "实施",
+      "standard_stage": "execution",
+      "priority": 13
+    },
+    {
+      "rule_id": "m24",
+      "hint": "开发阶段",
+      "standard_stage": "execution",
+      "priority": 14
+    },
+    {
+      "rule_id": "m30",
+      "hint": "review",
+      "standard_stage": "review",
+      "priority": 10
+    },
+    {
+      "rule_id": "m31",
+      "hint": "Review",
+      "standard_stage": "review",
+      "priority": 11
+    },
+    {
+      "rule_id": "m32",
+      "hint": "审核",
+      "standard_stage": "review",
+      "priority": 12
+    },
+    {
+      "rule_id": "m33",
+      "hint": "评审",
+      "standard_stage": "review",
+      "priority": 13
+    },
+    {
+      "rule_id": "m40",
+      "hint": "delivery",
+      "standard_stage": "delivery",
+      "priority": 10
+    },
+    {
+      "rule_id": "m41",
+      "hint": "Delivery",
+      "standard_stage": "delivery",
+      "priority": 11
+    },
+    {
+      "rule_id": "m42",
+      "hint": "交付",
+      "standard_stage": "delivery",
+      "priority": 12
+    },
+    {
+      "rule_id": "m43",
+      "hint": "验收",
+      "standard_stage": "delivery",
+      "priority": 13
+    },
+    {
+      "rule_id": "m44",
+      "hint": "提交",
+      "standard_stage": "delivery",
+      "priority": 14
+    },
+    {
+      "rule_id": "m50",
+      "hint": "closure",
+      "standard_stage": "closure",
+      "priority": 10
+    },
+    {
+      "rule_id": "m51",
+      "hint": "Closure",
+      "standard_stage": "closure",
+      "priority": 11
+    },
+    {
+      "rule_id": "m52",
+      "hint": "收尾",
+      "standard_stage": "closure",
+      "priority": 12
+    },
+    {
+      "rule_id": "m53",
+      "hint": "结束",
+      "standard_stage": "closure",
+      "priority": 13
+    },
+    {
+      "rule_id": "m54",
+      "hint": "复盘",
+      "standard_stage": "closure",
+      "priority": 14
+    }
+  ],
+  "cases": [
+    {
+      "hint": "intake",
+      "expected_stage": "intake",
+      "expected_rule_id": "m1"
+    },
+    {
+      "hint": "Intake",
+      "expected_stage": "intake",
+      "expected_rule_id": "m2"
+    },
+    {
+      "hint": "接收",
+      "expected_stage": "intake",
+      "expected_rule_id": "m3"
+    },
+    {
+      "hint": "接收阶段",
+      "expected_stage": "intake",
+      "expected_rule_id": "m4"
+    },
+    {
+      "hint": "planning",
+      "expected_stage": "planning",
+      "expected_rule_id": "m10"
+    },
+    {
+      "hint": "Planning",
+      "expected_stage": "planning",
+      "expected_rule_id": "m11"
+    },
+    {
+      "hint": "策划",
+      "expected_stage": "planning",
+      "expected_rule_id": "m12"
+    },
+    {
+      "hint": "方案策划",
+      "expected_stage": "planning",
+      "expected_rule_id": "m13"
+    },
+    {
+      "hint": "execution",
+      "expected_stage": "execution",
+      "expected_rule_id": "m20"
+    },
+    {
+      "hint": "Execution",
+      "expected_stage": "execution",
+      "expected_rule_id": "m21"
+    },
+    {
+      "hint": "执行",
+      "expected_stage": "execution",
+      "expected_rule_id": "m22"
+    },
+    {
+      "hint": "实施",
+      "expected_stage": "execution",
+      "expected_rule_id": "m23"
+    },
+    {
+      "hint": "开发阶段",
+      "expected_stage": "execution",
+      "expected_rule_id": "m24"
+    },
+    {
+      "hint": "review",
+      "expected_stage": "review",
+      "expected_rule_id": "m30"
+    },
+    {
+      "hint": "Review",
+      "expected_stage": "review",
+      "expected_rule_id": "m31"
+    },
+    {
+      "hint": "审核",
+      "expected_stage": "review",
+      "expected_rule_id": "m32"
+    },
+    {
+      "hint": "评审",
+      "expected_stage": "review",
+      "expected_rule_id": "m33"
+    },
+    {
+      "hint": "delivery",
+      "expected_stage": "delivery",
+      "expected_rule_id": "m40"
+    },
+    {
+      "hint": "Delivery",
+      "expected_stage": "delivery",
+      "expected_rule_id": "m41"
+    },
+    {
+      "hint": "交付",
+      "expected_stage": "delivery",
+      "expected_rule_id": "m42"
+    },
+    {
+      "hint": "验收",
+      "expected_stage": "delivery",
+      "expected_rule_id": "m43"
+    },
+    {
+      "hint": "提交",
+      "expected_stage": "delivery",
+      "expected_rule_id": "m44"
+    },
+    {
+      "hint": "closure",
+      "expected_stage": "closure",
+      "expected_rule_id": "m50"
+    },
+    {
+      "hint": "Closure",
+      "expected_stage": "closure",
+      "expected_rule_id": "m51"
+    },
+    {
+      "hint": "收尾",
+      "expected_stage": "closure",
+      "expected_rule_id": "m52"
+    },
+    {
+      "hint": "结束",
+      "expected_stage": "closure",
+      "expected_rule_id": "m53"
+    },
+    {
+      "hint": "复盘",
+      "expected_stage": "closure",
+      "expected_rule_id": "m54"
+    },
+    {
+      "hint": "unknown-hint",
+      "expected_error": true
+    },
+    {
+      "non_string_hint": true,
+      "expected_error": true
+    },
+    {
+      "duplicate_node": true,
+      "expected_error": true
+    }
+  ]
+}
