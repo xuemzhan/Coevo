@@ -1837,7 +1837,7 @@ items:
   - id: ARCH-REVIEW-1
     story: ARCH-REVIEW
     title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化
-    status: ready
+    status: done
     dependencies: [US-4-AC-2, US-16-AC-8-hybrid-orchestrator-v0.1]
     acceptance_tests:
       - tests/unit/test_arch_review_1_orchestrator_seam.py
@@ -1846,7 +1846,7 @@ items:
   - id: ARCH-REVIEW-2
     story: ARCH-REVIEW
     title: 架构审查 P0-2：离线合并收敛性——任意顺序重放同一组结果包收敛到同一主版本；部分合并+后续提交语义；幂等/去重；合并代数文档化（可交换/幂等或显式串行化）；property 测试覆盖组合场景
-    status: ready
+    status: in-progress
     dependencies: [US-10-AC-1]
     acceptance_tests:
       - tests/unit/test_arch_review_2_merge_convergence.py
