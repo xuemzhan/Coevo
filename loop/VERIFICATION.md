@@ -10400,3 +10400,254 @@ OK
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-10T03:15:48.574853Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
+- exit_code: `0`
+```text
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+audit seal: fully-sealed
+
+```
+
+## 2026-08-10T03:16:13.524609Z — target=`lint` fingerprint=`5103146e112f2dd1`
+- exit_code: `0`
+```text
+  "kind": "test",
+          "path": "tests/integration/test_agent_package_atomic_import.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-35",
+      "title": "门禁稳定性：tamper 测试复原硬化（2026-08-09，全量门禁收口发现）：关闭 DECISIONS 记录的已知 flake——test_local_toolchain_security 临时篡改 validate_opencode.py，复原源改为 git HEAD 纯净 blob（finally 无条件写回），污染基线无法自我延续，test_engineering_baseline 不再偶发 RuntimeError；污染模拟验证通过",
+      "code": [
+        "tests/security/test_local_toolchain_security.py"
+      ],
+      "tests": [
+        "tests/security/test_local_toolchain_security.py",
+        "tests/unit/test_engineering_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_local_toolchain_security.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_engineering_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-36",
+      "title": "门禁稳定性：sm2-test-pki helper stdin BOM 根因修复（2026-08-09，全量门禁收口发现）：CP65001 下 .NET StandardInput StreamWriter 预写 UTF-8 BOM，与 COEVOPKI/2 帧自带 BOM 叠加成双重 BOM → GMH-E-MAGIC（探针实证 chcp 65001=40 字节双 BOM / chcp 936=37 字节干净帧）；generate-sm2-test-pki.ps1 顶部钉 BOM-free CP936 + toolchain-lock gmssl_test_pki.helper.launcher 重哈希（11208→11642）",
+      "code": [
+        "scripts/generate-sm2-test-pki.ps1",
+        "docs/dependencies/toolchain-lock.json"
+      ],
+      "tests": [
+        "tests/integration/test_sm2_test_pki_generation.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/generate-sm2-test-pki.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/integration/test_sm2_test_pki_generation.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-37",
+      "title": "同类收口：crypto helper stdin BOM 健壮性（2026-08-09，OPTIMIZE-36 同类扫描发现）：invoke-gmssl-crypto.ps1 同样被 CP65001 StreamWriter BOM 破坏 COEVOCRYPTO/1 帧（GCP-E-MAGIC，e2e test_return_chain 实测失败，单元 mock 未覆盖）；同款编码钉 + toolchain-lock gmssl_prototype_provider.helper.launcher 重哈希（8166→8604）",
+      "code": [
+        "scripts/invoke-gmssl-crypto.ps1",
+        "docs/dependencies/toolchain-lock.json"
+      ],
+      "tests": [
+        "tests/e2e/test_return_chain.py",
+        "tests/unit/test_gmssl_provider_retry.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/invoke-gmssl-crypto.ps1",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/dependencies/toolchain-lock.json",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_return_chain.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_gmssl_provider_retry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-38",
+      "title": "_build_content 阶段拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：decision_brief/_build._build_content（145 行/cc~19）按三类型分支纯迁移式拆分为 3 个模块级助手（_type_parameters AC-5 类型参数校验返回 topic_set、_content_title 标签与标题、_progress_text 进度文案），_build_content 收敛为 98 行组装编排；校验顺序、错误消息、标题/进度文案、风险字段逐字节不变；守卫 tests/unit/test_framework_optimize38.py + OPTIMIZE-21 守卫适配新助手",
+      "code": [
+        "src/coevo/decision_brief/_build.py",
+        "tests/unit/test_framework_optimize21.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize38.py",
+        "tests/unit/test_decision_brief.py",
+        "tests/unit/test_framework_optimize21.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/decision_brief/_build.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "tests/unit/test_framework_optimize21.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize38.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_decision_brief.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize21.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-BASE",
+      "ac": "FRAMEWORK-OPTIMIZE-39",
+      "title": "revise 字段覆盖去重（2026-08-09，用户指令\"继续优化\"；增量门禁）：ProgressCaptureService.revise（109 行）内 text/kind/confidence 三块同构 ItemOverride 构造去重为模块级 `_apply_override`（返回 overrides+新条目 与 edited_value 二元组），revise 收敛为 94 行；kind 的 ProgressItemKind 类型检查保留在调用处；判定顺序、override 字段、错误语义逐字节不变；守卫 tests/unit/test_framework_optimize39.py",
+      "code": [
+        "src/coevo/progress_capture/service.py"
+      ],
+      "tests": [
+        "tests/unit/test_framework_optimize39.py",
+        "tests/unit/test_progress_capture.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/progress_capture/service.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_framework_optimize39.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_progress_capture.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-1",
+      "title": "编排器 seam 契约（2026-08-10 架构审查 P0-1）：框架层（framework/orchestrator + integration）= 校验/策略网关，产品层（orchestrator/service + real_chain_store）= 唯一执行器，integration = 唯一合法桥；无旁路规则：组合根必须先 validate_product_chain 再调用产品 dispatch，guarded_dispatch 校验失败不调用内层，TOOL/非 MVP 能力不得进入执行器；Plan↔Chain 往返结构稳定；report_to_outcome 对全部产品 outcome fail-closed（未知 → ESCALATED）；契约文档 + AST 组合根守卫测试",
+      "code": [
+        "docs/architecture/orchestrator-seam.md",
+        "src/coevo/framework/integration.py",
+        "src/coevo/framework/orchestrator.py",
+        "src/coevo/app/pipeline.py"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_1_orchestrator_seam.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/orchestrator-seam.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/integration.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/orchestrator.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/app/pipeline.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_1_orchestrator_seam.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+audit seal: fully-sealed
+
+```

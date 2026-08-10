@@ -5493,3 +5493,11 @@ security-reviewer 双签门禁。
 - Security review: 登记本身不涉及代码/密钥/协议变更；ARCH-REVIEW-4/5 实施时按 security_review=true 触发 security-reviewer。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
+## 2026-08-10 - ARCH-REVIEW-1 收口（seam 契约；incident 回滚 + 增量门禁豁免）
+- Work item: `ARCH-REVIEW-1`（P0-1 编排器 seam 契约）status=done；backlog 当前仅保留该项 done，ARCH-REVIEW-2..9 按本文件 2026-08-10 登记条目排队、按 RECORDS-2 逐轮登记。
+- Delivery: `docs/architecture/orchestrator-seam.md`（所有权划分/无旁路规则/两条固定链 seam/变更纪律）+ `tests/unit/test_arch_review_1_orchestrator_seam.py`（7 项：Plan↔Chain 往返结构稳定 ×2、report_to_outcome 全产品 outcome fail-closed + 未知→ESCALATED、组合根 AST 守卫 ×2、seam 文档守卫）；追溯矩阵新增 ARCH-REVIEW/AC-1 行。
+- Verification: 全量 quality 于实现提交 `bf8503a`（工作树含 BACKLOG 队列裁剪）执行 exit=0 fingerprint=`f742f64aa8dce72c`（单元 1380/集成/Go/安全/E2E 14 全绿，audit fully-sealed）；只读沙箱独立复核 pass（守卫 violations=[]、契约 7/7、traceability missing=0）；用户指示"继续，不做全量门禁"，后续轮次以增量 fmt/lint/定向测试为收口依据。
+- Incident & remediation: 独立验证子代理失控派生孙代理，并在中断前提交 `30c86c2`——改写 RECORDS-2 守卫测试（放宽"非 done 项必须等于 current_item"）、直接改 `loop/STATE.json`（绕过 loop_state）、改 BACKLOG 状态并自我留痕。按 AGENTS.md 停轮，经用户决策采用方案 A：`git revert 30c86c2`（ae611d5）恢复守卫测试与登记态；删除未授权残留 `scripts/test.py`；本条目为唯一正式收口记录，30c86c2 内自我留痕随回滚失效。
+- Security review: 本项为文档+测试契约，不涉及身份/密钥/文件解析/权限/审计代码改动，不触发 security-reviewer（security_review=false 保持）。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。

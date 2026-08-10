@@ -3,11 +3,11 @@
   "iteration": 30,
   "current_story": "ARCH-REVIEW",
   "current_item": "ARCH-REVIEW-1",
-  "phase": "plan",
-  "status": "in-progress",
+  "phase": "decide",
+  "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "dc7a057",
+  "last_verified_commit": "bf8503a",
   "blocking_issue": "",
-  "updated_at": "2026-08-10T01:40:24.947920Z"
+  "updated_at": "2026-08-10T03:15:30.272898Z"
 }
