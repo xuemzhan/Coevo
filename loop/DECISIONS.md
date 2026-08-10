@@ -5177,6 +5177,12 @@ security-reviewer 双签门禁。
 - Security review: 纯文档，无运行时/密钥/审计行为变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 项目现状总览（决策入口文档；增量门禁豁免）
+- Delivery: `docs/architecture/project-status.md`——一句话状态 / 架构与能力 / 质量与验证 / 外部依赖与待批门 / 需业务负责人裁决（推荐"实现完成、待独立验收"口径）单一交接页；文档索引登记；守卫测试 1 项。
+- 说明：工程侧可实施工作已全部收口（27 项 done + 全套件证据），本文档为业务负责人提供唯一决策入口；循环 blocked 仍待 ARCH-REVIEW-3 裁决。
+- Verification: 用户指示不做全量门禁；定向 1/1；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - 全套件整合验证记录（当前状态；非全量门禁）
 - 目的：为 ARCH-REVIEW-3 MVP 裁决补充当前状态的完整证据（经统一测试入口 `scripts/test.py`，非 quality 目标）。
 - 结果（2026-08-10）：
