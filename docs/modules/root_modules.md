@@ -16,6 +16,7 @@
 | `decision_brief/_util.py` | `_safe_string` / `_digest` / `_encode_json` / `_stat_is_reparse` / `_is_link_or_reparse` / `_parse_utc` / `_ZERO_DIGEST` | decision_brief/models 纯工具助手（error_factory 保留异常类与消息；无域导入依赖；models.py 薄包装再导出，导入面不变） |
 | `logging_setup.py` | `setup_logging()` | 日志引导（stdlib logging，轮转 5MB×5，绝不吞审计链） |
 | `records_archive.py` | `archive_plan()` / `over_policy_size()` / `POLICY` | 记录归档策略唯一事实源（纯函数：VERIFICATION/DECISIONS/tool-audit 分节、按容量+期限裁剪、容量判定与策略常量） |
+| `events/` | `DomainEvent` / `validate_event_chain` / `event_order_key` | 显式领域事件模型（REVIEW2-8）：聚合内按 client_sequence 严格递增排序，created_at 仅元数据不参与排序，causation_id 只允许指向前序事件（无自指/环），fail-closed |
 
 ## 关键入口
 
