@@ -8,6 +8,6 @@
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "36704bc",
-  "blocking_issue": "???????? MVP ?????external-gates ???? docs/architecture/external-gates.md?",
-  "updated_at": "2026-08-10T05:35:06.317430Z"
+  "blocking_issue": "awaiting business-owner decision on MVP completion (see docs/architecture/external-gates.md)",
+  "updated_at": "2026-08-10T05:35:32.476995Z"
 }
