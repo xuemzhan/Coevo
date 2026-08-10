@@ -1987,3 +1987,12 @@ items:
       - tests/unit/test_release_check.py
     security_review: false
     protocol_review: false
+  - id: REVIEW2-12
+    story: REVIEW2
+    title: 第二位架构师审查 P2/P3：能力状态矩阵——DESIGNED..PRODUCTION_READY/BLOCKED 八级模型 + US-0..US-16 快照（done=切片完成）、README 接入并移除过度叙事；契约文档 + 单元守卫；BACKLOG 级别字段采用并入 ARCH-REVIEW-3
+    status: done
+    dependencies: [ARCH-REVIEW-3]
+    acceptance_tests:
+      - tests/unit/test_review2_12_capability_status.py
+    security_review: false
+    protocol_review: false

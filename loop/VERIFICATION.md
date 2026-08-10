@@ -11104,3 +11104,303 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 11 section(s): archived 11 old section(s); size 508098 > 500000 bytes; size-trimmed 11 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
+## 2026-08-10T05:02:57.730940Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `0`
+```text
+fline_baseline.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/cockpit/server.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/offline-proof.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_review2_9_offline_blackbox.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_cockpit_offline_frontend.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/e2e/test_offline_baseline.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "REVIEW2",
+      "ac": "AC-10",
+      "title": "审计日志代际重锚定（第二位架构师审查 P2，2026-08-10）：audit_seal.py 新增 `re-anchor` 动作——前置 fully-sealed 校验（fail-closed）→ 归档整代（原样字节 + 摘要）→ 新代 genesis 记录（prev_hash=0*64、绑定旧代摘要与旧 head 序列）→ checkpoint 重置 → 重封缄；不重写任何既有记录；archive_records 提示指向专用流程；契约文档 + 单元守卫；闭合 DECISIONS \"重锚定未实现\"缺口",
+      "code": [
+        "scripts/audit_seal.py",
+        "scripts/archive_records.py",
+        "docs/architecture/audit-reanchor.md"
+      ],
+      "tests": [
+        "tests/unit/test_audit_seal_reanchor.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/audit_seal.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "scripts/archive_records.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/audit-reanchor.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_audit_seal_reanchor.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "REVIEW2",
+      "ac": "AC-12",
+      "title": "能力状态矩阵（第二位架构师审查 P2/P3，2026-08-10）：DESIGNED..PRODUCTION_READY/BLOCKED 八级能力模型 + US-0..US-16 当前状态快照（done=切片完成，生产级需独立验证+独立安全审查+批准产品）；README 接入矩阵并移除过度叙事；契约文档 + 单元守卫；BACKLOG 能力级别字段正式采用并入 ARCH-REVIEW-3 范围治理裁决",
+      "code": [
+        "docs/architecture/capability-status.md",
+        "README.md",
+        "docs/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_review2_12_capability_status.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/capability-status.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "README.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_review2_12_capability_status.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+{"ok": true, "errors": []}
+{"ok": true, "status": "fully-sealed"}
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+secret scan ok
+STATE.json is unreadable or malformed: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+STATE.json does not exist.
+STATE.json is not a JSON object.
+artifact ready: path=C:\Users\liq08\AppData\Local\Temp\tmpw1x5hdil\out.zip size=560 files=4 sha256=65d3870e7e90003e50c14e0bbfe84162a84b472d46bc117534e12149952ff04c
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+preflight ok
+  warning: legacy COEVO_LLM_EXTERNAL_DATA_OK=1 is set (compat switch only; approval via config/model-config.json governs)
+preflight ok
+  warning: model external egress is APPROVED (provider=deepseek, external_data_ok=true): data may leave this machine
+preflight ok
+preflight critical
+  critical: audit seal verify failed: signature invalid
+preflight critical
+  critical: data dir not writable ([WinError 183] 当文件已存在时，无法创建该文件。: 'C:\\Users\\liq08\\AppData\\Local\\Temp\\tmphvwu9mtw\\data-file')
+preflight ok
+  warning: audit has an unsealed tail (run make quality to re-seal)
+preflight ok
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires the dedicated re-anchor flow: python scripts/audit_seal.py re-anchor (RECORDS-ARCHIVE-3 / REVIEW2-10); refusing to touch loop/tool-audit.jsonl
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires the dedicated re-anchor flow: python scripts/audit_seal.py re-anchor (RECORDS-ARCHIVE-3 / REVIEW2-10); refusing to touch loop/tool-audit.jsonl
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+{
+  "checks": [
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "git_clean",
+      "ok": true
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1452 passed=1449 failed=0 skipped=3 duration_ms=110039
+  [unit] discovered=1452 passed=1449 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+audit seal: fully-sealed
+
+```

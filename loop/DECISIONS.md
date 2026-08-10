@@ -5158,4 +5158,12 @@ security-reviewer 双签门禁。
 - Security review: 交付门禁为只读检查（git ls-files + 静态扫描），不改变任何运行时/密钥/密码行为，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-12 收口（能力状态矩阵；增量门禁豁免）
+- Work item: `REVIEW2-12`（第二位架构师审查 P2/P3：能力状态矩阵）status=done；deps=[ARCH-REVIEW-3]。
+- Delivery: `docs/architecture/capability-status.md`——八级能力模型（DESIGNED/MODELED/UNIT_VERIFIED/INTEGRATION_VERIFIED/E2E_VERIFIED/PROTOTYPE/PRODUCTION_READY/BLOCKED）+ US-0..US-16 与关键能力（中心端同步/生产密码/生产部署）当前状态快照 + 叙事纪律（done=切片完成；PRODUCTION_READY 需独立验证+独立安全审查+批准产品；禁用"全量门禁全绿因此系统完成"）；README 接入矩阵并声明能力级别；守卫测试 4 项（级别闭集、US-0..16 全覆盖、done 语义、README 无过度叙事并链接）。
+- 边界：BACKLOG 增加 `capability_level` 字段的正式采用，并入 ARCH-REVIEW-3 范围治理裁决（本矩阵为先行契约）。
+- Verification: 用户指示不做全量门禁；定向 4/4；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1452 全绿）。
+- Security review: 文档+测试，无运行时/密钥/密码行为变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 
