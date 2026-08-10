@@ -2155,3 +2155,13 @@ items:
       - tests/unit/test_arch_review_15_risk_ledger.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-16
+    story: ARCH-REVIEW
+    title: 架构文档登记守卫与台账交叉引用——docs/architecture 全部文档必须登记 docs/README 索引（修复 win7-compat-branch.md 遗漏）；风险台账被 capability-status/external-gates/project-status 交叉引用
+    status: done
+    dependencies: [ARCH-REVIEW-15]
+    acceptance_tests:
+      - tests/unit/test_arch_review_16_docs_registry.py
+      - tests/unit/test_arch_review_15_risk_ledger.py
+    security_review: false
+    protocol_review: false

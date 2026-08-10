@@ -15,6 +15,7 @@ Coevo MVP 的**实现与工程治理已完成**：两位架构师审查的 20 �
 - 能力级别：DESIGNED..PRODUCTION_READY/BLOCKED（`capability-status.md`）；
 - 双模式范围：MVP 验证离线闭环；受控网络协同为设计态/后续版本范围
   （`online-mode-scope.md`）；
+- 架构风险台账：`architecture-risk-ledger.md`（风险 → 处置状态 → 证据 → 责任）；
 - 关键契约索引：`docs/README.md`（25+ 份架构契约）。
 
 ## 3. 质量与验证

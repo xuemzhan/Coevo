@@ -49,6 +49,15 @@ class RiskLedgerTests(unittest.TestCase):
         self.assertIn("architecture-risk-ledger.md", index)
         self.assertIn("架构风险台账", index)
 
+    def test_ledger_cross_referenced_by_governance_docs(self) -> None:
+        for rel in (
+            "docs/architecture/capability-status.md",
+            "docs/architecture/external-gates.md",
+            "docs/architecture/project-status.md",
+        ):
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            self.assertIn("architecture-risk-ledger", text, rel)
+
 
 if __name__ == "__main__":
     unittest.main()

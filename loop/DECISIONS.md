@@ -5285,6 +5285,22 @@ security-reviewer 双签门禁。
 - Security review: 文档+守卫测试，无运行时/密钥/审计逻辑变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 文档治理收口（ARCH-REVIEW-16；按用户指令不跑全量门禁）
+- 用户指令："修复所有架构级风险，不跑全量门禁"（第四波收口；深度只读复核发现的
+  文档治理缺口）。
+- Delivery:
+  - 修复 `win7-compat-branch.md` 未登记 docs/README 索引的遗漏；
+  - 新增 `tests/unit/test_arch_review_16_docs_registry.py`——docs/architecture 全部
+    文档必须出现在 docs/README 索引，防止未来文档漂移；
+  - 风险台账 `architecture-risk-ledger.md` 被 capability-status / external-gates /
+    project-status 交叉引用（台账纪律"与三表一致"落到守卫）。
+- Verification: 定向 20/20（含新守卫 1 项、台账交叉引用 1 项与全部相关回归）；
+  fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；按用户指令未运行全量 quality。
+- Security review: 文档+守卫测试，无运行时/密钥/审计逻辑变更，security_review=false 保持。
+- 风险收口结论：P1-1/P1-2/P2-1/P2-2 已修复；P0-1/P0-2/P1-3/EXT-1..3 为外部项
+  （台账登记、责任明确），需业务负责人/外部方决策后方可关闭。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

@@ -49,6 +49,8 @@
 
 - 不得使用"全量门禁全绿，因此系统完成"；正确表述为"切片 done + 能力级别 X"；
 - 报告/README 的能力声明必须引用本矩阵的级别；
+- 外部依赖/待批门与架构级风险以 `architecture-risk-ledger.md` 台账为对照
+  （与 `external-gates.md` 一致）；
 - BACKLOG 新增字段（如 `capability_level`）的正式采用，并入 ARCH-REVIEW-3 范围治理
   裁决（本矩阵为先行契约）。
 - 进入 `PRODUCTION_READY` 前必须先关闭 `docs/architecture/external-gates.md`
