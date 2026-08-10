@@ -5195,4 +5195,13 @@ security-reviewer 双签门禁。
 - Security review: 纯文档+配置断言测试，不改变签名方案与密钥处理；BACKLOG 保持 `security_review=true`——**生产执行轮换/恢复前需独立安全审查**（责任移交记录）。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-3 可落地部分交付（范围治理；业务裁决仍 blocked）
+- Work item: `ARCH-REVIEW-3`（P0-3 范围治理）——**业务裁决部分保持 blocked 待业务负责人**；本条目交付其可落地部分：
+  - `docs/architecture/external-gates.md`：外部依赖/待批门登记表（US-5-AC-2 `BLOCKED`、ARCH-REVIEW-3 `DECISION-REQUIRED`、ARCH-REVIEW-4/5/REVIEW2-10 `REVIEW-REQUIRED`），防止依赖隐式消失；
+  - `capability-status.md` §3 增加"进入 PRODUCTION_READY 前必须先关闭 external-gates 对应门禁"；
+  - 守卫测试 3 项（登记表完整性、能力矩阵引用、ARCH-REVIEW-3 在 BACKLOG 保持注释登记而非条目——RECORDS-2 单一在飞不变量）。
+- 剩余待业务负责人裁决：MVP 完成状态（对照 GOAL.md mvp-complete）、backlog 能力级别字段正式采用、以及 external-gates 中各待批门的处理顺序。
+- Verification: 用户指示不做全量门禁；定向 3/3；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1470 全绿）。循环状态置为 `blocked`（blocking_issue=需业务负责人裁决 MVP 完成状态）。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 

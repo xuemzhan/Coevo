@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ARCH-REVIEW",
-  "current_item": "ARCH-REVIEW-5",
+  "current_item": "ARCH-REVIEW-3",
   "phase": "decide",
-  "status": "done",
+  "status": "blocked",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "39d6002",
-  "blocking_issue": "",
-  "updated_at": "2026-08-10T05:29:06.196489Z"
+  "last_verified_commit": "36704bc",
+  "blocking_issue": "???????? MVP ?????external-gates ???? docs/architecture/external-gates.md?",
+  "updated_at": "2026-08-10T05:35:06.317430Z"
 }

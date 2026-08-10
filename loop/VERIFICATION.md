@@ -12292,3 +12292,298 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-10T05:32:11.415349Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `0`
+```text
+records_governance.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/decision-records.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "loop/DECISIONS.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "loop/archive/",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_8_records_governance.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-4",
+      "title": "子智能体 Manifest 注册表（2026-08-10 架构审查 P1-1）：七个专业子智能体设计期目录（agent_catalog.py）——能力闭集（TASK_FLOW_UNDERSTANDING..KNOWLEDGE_INGEST）/服务模块/model_binding（rule/hybrid）/人工确认点/工具策略；validate_catalog fail-closed；运行时注册仍经 guard_registration；契约文档 + 模块文档 + 单元守卫；security_review=true（生产采用前需独立安全审查）",
+      "code": [
+        "src/coevo/framework/agent_catalog.py",
+        "docs/architecture/agent-manifest-registry.md",
+        "docs/modules/framework.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_4_agent_manifest_registry.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/framework/agent_catalog.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/agent-manifest-registry.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/framework.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_4_agent_manifest_registry.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-5",
+      "title": "审计签名密钥生命周期仪式（2026-08-10 架构审查 P1-2）：轮换/离线备份/丢失恢复/备份签名者评估契约文档（当前单签名者 F6DE、CNG 非导出、prototype=true；正式替换方向=国密产品+受保护句柄）；运行手册引用；守卫测试；security_review=true（生产执行前需独立安全审查）",
+      "code": [
+        "docs/architecture/audit-key-ceremony.md",
+        "loop/audit-signing.json",
+        "docs/operations/audit-key-runbook.md"
+      ],
+      "tests": [
+        "tests/security/test_arch_review_5_audit_key_ceremony.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/audit-key-ceremony.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "loop/audit-signing.json",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/operations/audit-key-runbook.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_arch_review_5_audit_key_ceremony.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+{"ok": true, "errors": []}
+{"ok": true, "status": "fully-sealed"}
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+secret scan ok
+STATE.json is unreadable or malformed: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+STATE.json does not exist.
+STATE.json is not a JSON object.
+artifact ready: path=C:\Users\liq08\AppData\Local\Temp\tmpv2vatxc6\out.zip size=560 files=4 sha256=0bca5deca64697008a7197dbb4e28eb641709561ef6eb2355091757d4e9a2339
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+preflight ok
+  warning: legacy COEVO_LLM_EXTERNAL_DATA_OK=1 is set (compat switch only; approval via config/model-config.json governs)
+preflight ok
+  warning: model external egress is APPROVED (provider=deepseek, external_data_ok=true): data may leave this machine
+preflight ok
+preflight critical
+  critical: audit seal verify failed: signature invalid
+preflight critical
+  critical: data dir not writable ([WinError 183] 当文件已存在时，无法创建该文件。: 'C:\\Users\\liq08\\AppData\\Local\\Temp\\tmpqvul5kl2\\data-file')
+preflight ok
+  warning: audit has an unsealed tail (run make quality to re-seal)
+preflight ok
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires the dedicated re-anchor flow: python scripts/audit_seal.py re-anchor (RECORDS-ARCHIVE-3 / REVIEW2-10); refusing to touch loop/tool-audit.jsonl
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires the dedicated re-anchor flow: python scripts/audit_seal.py re-anchor (RECORDS-ARCHIVE-3 / REVIEW2-10); refusing to touch loop/tool-audit.jsonl
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+{
+  "checks": [
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "git_clean",
+      "ok": true
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1470 passed=1467 failed=0 skipped=3 duration_ms=103840
+  [unit] discovered=1470 passed=1467 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+audit seal: fully-sealed
+
+```
