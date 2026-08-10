@@ -5170,6 +5170,13 @@ security-reviewer 双签门禁。
 - Security review: 纯格式重构（行为零变化、fingerprint 钉证），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ENG-OPTIMIZE-6 收口（运维手册补齐；增量门禁豁免）
+- Work item: `ENG-OPTIMIZE-6`（运维手册覆盖新流程）status=done；deps=[ENG-OPTIMIZE-5]。
+- Delivery: `docs/operations/ops-runbook.md`——新增"8. 门禁与审计运维"节（fast/quality 分层门禁用法、`loop/runtime/gate-results/` artifact 与 VERIFICATION JSON 派生说明、`audit_seal.py re-anchor` 代际重锚定（含生产独立审查前置）、external-gates/能力状态/决策记录治理引用）；"7. 发布就绪"节补充 delivery_artifacts 与 recent_gate（发布前本机必须跑过门禁生成 artifact）。守卫测试 2 项（新运维流程覆盖、发布节新门禁）。
+- Verification: 用户指示不做全量门禁；定向 2/2；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；单元 1486 全绿。
+- Security review: 纯文档，无运行时/密钥/审计行为变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - 全套件整合验证记录（当前状态；非全量门禁）
 - 目的：为 ARCH-REVIEW-3 MVP 裁决补充当前状态的完整证据（经统一测试入口 `scripts/test.py`，非 quality 目标）。
 - 结果（2026-08-10）：

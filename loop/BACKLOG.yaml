@@ -2062,6 +2062,15 @@ items:
       - tests/unit/test_eng_optimize_2_verification_from_json.py
     security_review: false
     protocol_review: false
+  - id: ENG-OPTIMIZE-6
+    story: ENG-OPTIMIZE
+    title: 运维手册补齐——ops-runbook 新增门禁与审计运维节（fast/quality 分层、gate-results、audit re-anchor、external-gates、能力状态/决策治理引用），发布就绪节补充 delivery_artifacts 与 recent_gate；守卫测试
+    status: done
+    dependencies: [ENG-OPTIMIZE-5]
+    acceptance_tests:
+      - tests/unit/test_eng_optimize_6_ops_runbook.py
+    security_review: false
+    protocol_review: false
   - id: ARCH-REVIEW-4
     story: ARCH-REVIEW
     title: 架构审查 P1-1：子智能体 Agent 契约——七个专业子智能体设计期 Manifest 目录（能力闭集/服务模块/model_binding/人工确认点/工具策略），运行时注册仍经 guard_registration；契约文档 + 单元守卫
