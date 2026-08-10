@@ -10,7 +10,7 @@ round-trips into VERIFICATION.md without mojibake on Windows consoles
 (QUALITY-GATE-ENCODING-1).
 """
 from __future__ import annotations
-import argparse, datetime as dt, hashlib, json, os, subprocess, sys, time
+import argparse, datetime as dt, hashlib, json, os, re, subprocess, sys, time
 from dataclasses import dataclass
 from pathlib import Path
 from audit_log import append_record, exclusive_lock
@@ -126,6 +126,24 @@ class StageResult:
     exit_code: int
     duration_ms: int
     output: str
+    discovered: int | None = None
+    passed: int | None = None
+    failed: int | None = None
+    skipped: int | None = None
+
+
+_TEST_COUNTS_RE = re.compile(
+    r"discovered=(\d+) passed=(\d+) failed=(\d+) skipped=(\d+)"
+)
+
+
+def _parse_test_counts(output: str) -> tuple[int, int, int, int] | None:
+    """Parse the unified test-entry summary line (ENG-OPTIMIZE-1)."""
+
+    match = _TEST_COUNTS_RE.search(output)
+    if match is None:
+        return None
+    return tuple(int(group) for group in match.groups())
 
 
 STAGE_TIMEOUTS = {
@@ -156,11 +174,16 @@ def _run_one(argv, timeout_sec):
             encoding="utf-8", errors="replace", timeout=timeout_sec,
         )
         combined=process.stdout+process.stderr
+        counts=_parse_test_counts(combined)
         return StageResult(
             argv=tuple(argv),
             exit_code=process.returncode,
             duration_ms=int((time.monotonic()-started)*1000),
             output=combined,
+            discovered=counts[0] if counts else None,
+            passed=counts[1] if counts else None,
+            failed=counts[2] if counts else None,
+            skipped=counts[3] if counts else None,
         )
     except subprocess.TimeoutExpired as exc:
         return StageResult(
@@ -229,6 +252,10 @@ def _run_stages(target, argvs, timeout_sec):
                         "\n[gate] e2e failed with transient GCP-E-LAUNCH; "
                         "retried once (bounded)\n" + retried.output
                     ),
+                    discovered=retried.discovered,
+                    passed=retried.passed,
+                    failed=retried.failed,
+                    skipped=retried.skipped,
                 ))
                 result=retried
             rc=result.exit_code
@@ -255,9 +282,19 @@ def _write_results_json(target, fp, rc, results, ts, total_ms):
                     "exit_code":stage.exit_code,
                     "duration_ms":stage.duration_ms,
                     "output_tail":stage.output[-2000:],
+                    "discovered":stage.discovered,
+                    "passed":stage.passed,
+                    "failed":stage.failed,
+                    "skipped":stage.skipped,
                 }
                 for stage in results
             ],
+            "totals":{
+                "discovered":sum(s.discovered or 0 for s in results),
+                "passed":sum(s.passed or 0 for s in results),
+                "failed":sum(s.failed or 0 for s in results),
+                "skipped":sum(s.skipped or 0 for s in results),
+            },
         }
         path=GATE_RESULTS_DIR/f"{target}-{ts.replace(':','-')}.json"
         path.write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8")
