@@ -1,18 +1,20 @@
 # 项目现状总览（Project Status）
 
-> 快照：2026-08-10（全部审查项与工程优化收口后；供业务负责人作为决策入口）
+> 快照：2026-08-10（全部审查项、工程优化与架构级风险修复收口后；供业务负责人作为决策入口）
 
 ## 1. 一句话状态
 
 Coevo MVP 的**实现与工程治理已完成**：两位架构师审查的 20 项建议 + 6 项工程优化
-全部落地（27 项 done），全套件当前状态全绿；**正式宣告完成（mvp-complete）还差
-独立双签与业务裁决**。
++ 架构级风险修复轮次（ARCH-REVIEW-10..14、ENG-OPTIMIZE-7，共 31 项 done）全部落地，
+全套件当前状态全绿；**正式宣告完成（mvp-complete）还差独立双签与业务裁决**。
 
 ## 2. 架构与能力
 
 - 分层：Domain / Application / Ports / Adapters（`ports-adapters.md`）；
 - 双模式：受控网络 + 物理隔离离线（`.agent` 加密包）；
 - 能力级别：DESIGNED..PRODUCTION_READY/BLOCKED（`capability-status.md`）；
+- 双模式范围：MVP 验证离线闭环；受控网络协同为设计态/后续版本范围
+  （`online-mode-scope.md`）；
 - 关键契约索引：`docs/README.md`（25+ 份架构契约）。
 
 ## 3. 质量与验证

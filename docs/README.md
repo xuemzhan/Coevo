@@ -8,13 +8,13 @@
 |---|---|---|
 | `requirements/` | 系统原始需求、MVP 用户故事及验收标准 | `system-requirements.md`、`mvp-user-stories.md` |
 | `constraints/` | 强制性技术约束（含密码方案、私钥保护、审计链等硬约束） | `mandatory-technical-constraints.md` |
-| `architecture/` | MVP 参考架构、技术选型、编排器 seam 契约、离线合并收敛语义、门禁分层与两阶段化策略、.agent 签名承载契约、WPS 启动链路契约、HTTP 认证黑盒矩阵、密码模式隔离契约、状态变更边界契约、显式事件模型契约、断网黑盒证明、审计日志代际重锚定契约、交付门禁契约、能力状态矩阵、验收指标 SLO 契约、决策记录治理契约、子智能体 Manifest 注册表契约、审计签名密钥仪式契约、外部依赖与待批门登记、MVP 完成度就绪评估、Ports & Adapters 分层契约、Go↔Python 一致性契约、状态持久化矩阵契约、源码文件规模预算契约、项目现状总览 | `mvp-reference-architecture.md`、`orchestrator-seam.md`、`merge-convergence.md`、`gate-tiers.md`、`gate-phases.md`、`agent-signature-carrier.md`、`wps-launch-contract.md`、`http-auth-matrix.md`、`crypto-mode-isolation.md`、`state-change-boundary.md`、`event-model.md`、`offline-proof.md`、`audit-reanchor.md`、`delivery-gate.md`、`capability-status.md`、`slo-metrics.md`、`decision-records.md`、`agent-manifest-registry.md`、`audit-key-ceremony.md`、`external-gates.md`、`mvp-complete-readiness.md`、`ports-adapters.md`、`go-python-parity.md`、`state-persistence.md`、`file-size-budget.md`、`project-status.md` |
+| `architecture/` | MVP 参考架构、技术选型、编排器 seam 契约、离线合并收敛语义、门禁分层与两阶段化策略、.agent 签名承载契约、WPS 启动链路契约、HTTP 认证黑盒矩阵、密码模式隔离契约、状态变更边界契约、显式事件模型契约、断网黑盒证明、审计日志代际重锚定契约、交付门禁契约、能力状态矩阵、验收指标 SLO 契约、决策记录治理契约、子智能体 Manifest 注册表契约、审计签名密钥仪式契约、外部依赖与待批门登记、MVP 完成度就绪评估、Ports & Adapters 分层契约、Go↔Python 一致性契约、状态持久化矩阵契约、源码文件规模预算契约、在线协同实现范围契约、项目现状总览 | `mvp-reference-architecture.md`、`orchestrator-seam.md`、`merge-convergence.md`、`gate-tiers.md`、`gate-phases.md`、`agent-signature-carrier.md`、`wps-launch-contract.md`、`http-auth-matrix.md`、`crypto-mode-isolation.md`、`state-change-boundary.md`、`event-model.md`、`offline-proof.md`、`audit-reanchor.md`、`delivery-gate.md`、`capability-status.md`、`slo-metrics.md`、`decision-records.md`、`agent-manifest-registry.md`、`audit-key-ceremony.md`、`external-gates.md`、`mvp-complete-readiness.md`、`ports-adapters.md`、`go-python-parity.md`、`state-persistence.md`、`file-size-budget.md`、`online-mode-scope.md`、`project-status.md` |
 | `protocol/` | `.agent` 任务包协议规范 | `agent-package-protocol.md` |
 | `traceability/` | 需求—代码—测试追踪矩阵 | `requirements-test-matrix.md` |
 | `dependencies/` | 经批准工具的精确版本、来源、哈希与许可证 | `toolchain-lock.json` |
 | `process/` | 独立双签、只读沙箱、记录归档与独立验收执行包等治理流程 | `independent-review-governance.md`、`independent-verification-pack.md` |
 | `operations/` | 生产运维手册（配置参考、安装/升级/回滚、审计密钥恢复、健康检查/自启/排障） | `configuration-reference.md`、`install-upgrade.md`、`audit-key-runbook.md`、`ops-runbook.md` |
-| `plans/` | 各工作项的切片规划（历史） | `*.md` |
+| `plans/` | 各工作项的切片规划（历史）；CTAF 框架设计提案（v0.4.1，产品级草案，定稿前须独立架构评审） | `*.md`、`distributed-agent-framework/design-proposal.md` |
 | `framework/` | CTAF 框架层设计与适配映射（manifest / capability / policy / plan / memory / tools / a2a / k8s / hybrid / integration / plan-lsp） | `*.md` |
 | `development-environment.md` | 本地开发环境入口、使用方法和离线边界 | `development-environment.md` |
 | `production-readiness.md` | MVP 生产可用性说明（配置/停机/日志/版本/性能） | `production-readiness.md` |

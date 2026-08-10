@@ -2128,3 +2128,21 @@ items:
       - tests/unit/test_arch_review_3_external_gates.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-13
+    story: ARCH-REVIEW
+    title: 在线协同实现范围声明契约（架构审查 P1-2 收口）——MVP 仅验证离线闭环、受控网络协同为设计态/后续版本范围；声明纪律（不得声称已建成分布式在线协同）+ 守卫测试
+    status: done
+    dependencies: [ARCH-REVIEW-3]
+    acceptance_tests:
+      - tests/unit/test_arch_review_13_online_mode_scope.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-14
+    story: ARCH-REVIEW
+    title: CTAF 设计提案草案状态守护（架构审查 P1-3 收口）——design-proposal.md 保持"产品级草案/待独立复核后定稿"标记；独立架构评审登记 CTAF-PROPOSAL-REVIEW；文档索引引用
+    status: done
+    dependencies: [ARCH-REVIEW-12]
+    acceptance_tests:
+      - tests/unit/test_arch_review_14_ctaf_draft_guard.py
+    security_review: false
+    protocol_review: false

@@ -5247,6 +5247,27 @@ security-reviewer 双签门禁。
   无运行时/密钥/审计逻辑变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（修复所有架构级风险）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 架构级风险收口第二波（ARCH-REVIEW-13/14；按用户指令不跑全量门禁）
+- 用户指令："修复所有架构级风险，不跑全量门禁"；本轮沿用仓库"增量门禁豁免"先例，
+  以定向测试 + fast 门禁为验证证据，**不运行**全量 quality。
+- 剩余可实施项收口：
+  - **ARCH-REVIEW-13（P1-2 收口）**：`docs/architecture/online-mode-scope.md`——显式声明
+    MVP 仅验证离线闭环、受控网络协同（节点注册/实时同步/跨节点通道/在线动态编排）为
+    设计态与后续版本范围；声明纪律（不得声称已建成分布式在线协同，上线前须关闭
+    external-gates 对应门禁）；守卫测试 3 项。
+  - **ARCH-REVIEW-14（P1-3 收口）**：CTAF 设计提案草案状态守护——design-proposal.md 必须
+    保持"产品级草案/待独立复核后定稿"标记；独立架构评审已登记 CTAF-PROPOSAL-REVIEW；
+    docs/README 索引引用提案；守卫测试 3 项。
+- 仍属外部决策（不可由实现者关闭，保持登记）：P0-1 独立双签（mvp-complete 条件 11）
+  REVIEW-REQUIRED；P0-2 正式国密密码产品 BLOCKED；Win7 实机验证、CI 激活、审计密钥托管
+  为外部执行项（known-limitations 已登记）。
+- Verification: 定向 20/20（含上轮全部守卫回归）；fast 门禁 exit=0
+  fingerprint=`fb8029ba3cf2de07`（compileall+lint+追溯+单元全绿）；按用户指令未运行
+  全量 quality，发布级复验待业务负责人解除限制后执行。
+- Security review: 本轮为文档+守卫测试，无运行时/密钥/审计逻辑变更，
+  security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：
