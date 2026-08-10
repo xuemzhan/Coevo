@@ -5170,6 +5170,18 @@ security-reviewer 双签门禁。
 - Security review: 纯格式重构（行为零变化、fingerprint 钉证），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 全套件整合验证记录（当前状态；非全量门禁）
+- 目的：为 ARCH-REVIEW-3 MVP 裁决补充当前状态的完整证据（经统一测试入口 `scripts/test.py`，非 quality 目标）。
+- 结果（2026-08-10）：
+  - unit：discovered=1484 passed=1481 failed=0 skipped=3（fast 门禁阶段实测）；
+  - integration：discovered=270 passed=269 failed=0 skipped=1；
+  - security：discovered=102 passed=102 failed=0 skipped=0（standalone 首跑唯一失败为"审计未封缄尾"环境行为，重封缄后 102/102）；
+  - e2e：discovered=16 passed=16 failed=0 skipped=0（含两条固定链、断网黑盒、SLO 管线）；
+  - win7：4/4（此前实测）；
+  - 审计链重封缄 fully-sealed（sequence=2148→2149）。
+- 说明：standalone 套件运行会追加审计记录并遗留未封缄尾，属已知环境行为；正式门禁按阶段重封缄（REVIEW2-2）。本记录支撑 GOAL.md mvp-complete 条件 3/4/5/6/7/8/10 的当前状态证据；条件 11（独立双签）仍待业务负责人裁决。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：
