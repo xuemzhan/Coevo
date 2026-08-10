@@ -179,5 +179,36 @@ python scripts\release_check.py --expect-version <版本>
 
 检查项：git 工作区干净、版本语义化且匹配、审计 fully-sealed（未封尾=警告）、
 secret_scan 干净、追溯矩阵一致、loop/STATE done 且无阻塞、无 in-progress 工作项
-（ready 项=警告，视为显式推迟）。已知限制与外部条件见
-`known-limitations.md`，发布前必读。
+（ready 项=警告，视为显式推迟）、交付门禁（delivery_artifacts：跟踪树无
+`__pycache__/ *.pyc *.db(-wal|-shm) *.pdb helper.exe private-key-handles-*.json`、
+生产 runner 无原型 crypto）、**最近门禁结果（recent_gate：本机必须先跑过门禁以生成
+`loop/runtime/gate-results/` artifact；缺失/失败/超期=不发布）**。已知限制与外部
+条件见 `known-limitations.md`，发布前必读。
+
+## 8. 门禁与审计运维（2026-08-10 增补）
+
+### 8.1 分层门禁
+
+```powershell
+python scripts\quality_gate.py --target fast    # 迭代内环：compile+lint+单元（约 2-3 分钟）
+python scripts\quality_gate.py --target quality # 发布/收口：fast+集成+Go+安全+E2E+Win7
+```
+
+每阶段输出进度与结果 JSON（`loop/runtime/gate-results/<target>-<ts>.json`，
+含每阶段 discovered/passed/failed/skipped 与 totals）；VERIFICATION 记录由
+Phase B 从该 JSON 生成（artifact 与记录一致）。
+
+### 8.2 审计日志归档（超容量时）
+
+```powershell
+python scripts\audit_seal.py re-anchor   # 代际重锚定：归档整代 + genesis + 重封缄
+```
+
+注意：生产环境使用 re-anchor 前需独立安全审查（external-gates 登记
+REVIEW-REQUIRED）。
+
+### 8.3 外部门与记录治理
+
+- 外部依赖/待批门：`docs/architecture/external-gates.md`（US-5-AC-2 密码产品审批等）；
+- 决策记录：DECISIONS 保持 ADR 式摘要，长正文进 `loop/archive/`（`decision-records.md`）；
+- 能力状态：发布报告引用 `capability-status.md`（done=切片完成，不表示生产级完成）。
