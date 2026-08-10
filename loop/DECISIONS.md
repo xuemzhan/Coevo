@@ -5569,3 +5569,11 @@ security-reviewer 双签门禁。
 - Security review: 门禁执行/记录边界重构，不改变审计语义（append-only、最终 seal、fully-sealed 校验均保留并由 lint 复验），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-3 收口（.agent 签名承载闭合；增量门禁豁免）
+- Work item: `REVIEW2-3`（第二位架构师审查 P1：.agent 签名承载闭合）status=done；deps=[US-5-AC-2]。
+- 结论与事实核验：第二位架构师"签名 out-of-band"论断对 `package_builder.py` 的 P1 未签名表面成立，但**交付路径（build_encrypted_package/open_encrypted_package）已把 sender.sig 嵌入认证加密内层载荷**（协议 §8：manifest.json + sender.sig），`.agent` 文件自包含；真实 e2e（test_return_chain）已用 GmSSL 原型完成验签闭环。因此本项以"文档闭合 + 承载契约测试"收口，**不改 wire 布局、不调整 .agent 主版本、不改生产密码逻辑**。
+- Delivery: `src/coevo/protocol/package_builder.py` 模块与 BuiltPackage/parse 文档修正（交付路径=内嵌签名、P1 未签名表面=fail-closed 载体占位）；契约文档 `docs/architecture/agent-signature-carrier.md`（承载定位/签名覆盖范围/变更纪律）；`tests/unit/test_review2_3_signature_carrier.py` 6 项假 provider 单元测试（交付路径 wire 自包含并验签、ciphertext 篡改 fail、Envelope AEAD 绑定、manifest 失配 fail-closed、未签名表面占位验签必拒、截断/尾随/跨主版本拒绝）。
+- Verification: 用户指示不做全量门禁；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1410 全绿）；定向 6/6。
+- Security/protocol review: 本切片为文档+测试（假 provider），无 wire/字段/生产密码逻辑变更，protocol-reviewer 与 security-reviewer 均不触发；US-5-AC-2 正式 SM2 产品接入仍为外部审批依赖（backlog/ARCH-REVIEW-3 范围治理跟踪）。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
