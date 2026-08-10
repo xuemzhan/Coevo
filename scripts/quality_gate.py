@@ -46,12 +46,15 @@ TARGETS={
  "lint":[[sys.executable,str(ROOT/"scripts"/"validate_opencode.py")],control("traceability_check"),control("audit_log","verify"),[sys.executable,str(ROOT/"scripts"/"audit_seal.py"),"verify","--allow-tail"],[sys.executable,str(ROOT/"scripts"/"archive_records.py"),"--check"],[sys.executable,str(ROOT/"scripts"/"secret_scan.py")]],
  "test":[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"],[sys.executable,"-m","unittest","discover","-s","tests/integration","-p","*test*.py","-v"],go_test_argv()],
  "test-security":[[sys.executable,"-m","unittest","discover","-s","tests/security","-v"],[os.environ.get("COEVO_NODE_PATH",str(ROOT/".tools"/"node"/"24.14.0"/"node.exe")),"tests/security/path_policy_test.mjs"]],
- "test-e2e":[[sys.executable,"-m","unittest","discover","-s","tests/e2e","-v"]]}
+ "test-e2e":[[sys.executable,"-m","unittest","discover","-s","tests/e2e","-v"]],
+ "test-win7":[[sys.executable,"-m","unittest","discover","-s","tests/win7","-v"]]}
 # ARCH-REVIEW-7: fast tier for iteration loops (compileall + lint + unit);
 # full `quality` stays the release/closure gate (fmt+lint+test+security+e2e).
 TARGETS["fast"]=TARGETS["fmt"]+TARGETS["lint"]+[[sys.executable,"-m","unittest","discover","-s","tests/unit","-v"]]
 GO_TEST_ARGV=TARGETS["test"][-1]
-def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
+# ARCH-REVIEW-9: the Win7 compatibility subset is part of the full quality
+# gate so the compat profile cannot silently rot.
+def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e","test-win7") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
 def fingerprint(argvs): return hashlib.sha256(json.dumps(argvs,separators=(",",":")).encode()).hexdigest()[:16]
 
 def _trim_records_to_policy(verification: Path = VERIFICATION) -> str:

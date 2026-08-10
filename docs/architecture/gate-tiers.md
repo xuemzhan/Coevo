@@ -10,7 +10,8 @@
   audit seal verify / archive_records --check / secret_scan）+ 单元测试
   （`tests/unit`）。用于每个工作项的最小反馈闭环，约 3-5 分钟。
 - **quality（发布/收口）**：`--target quality` = fmt + lint + test（单元+集成+Go）+
-  test-security + test-e2e。作为 mvp-complete、发布与审计收口的唯一权威门槛。
+  test-security + test-e2e + test-win7（Win7 兼容子集）。作为 mvp-complete、
+  发布与审计收口的唯一权威门槛。
 
 ## 2. 纪律
 

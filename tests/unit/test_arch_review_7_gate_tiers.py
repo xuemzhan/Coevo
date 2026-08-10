@@ -60,13 +60,14 @@ class FastTierTests(unittest.TestCase):
                     "test",
                     "test-security",
                     "test-e2e",
+                    "test-win7",
                 )
                 for command in quality_gate.TARGETS[name]
             ],
         )
         self.assertEqual(
             quality_gate.fingerprint(quality_gate.commands("quality")),
-            "f742f64aa8dce72c",
+            "e1b4d1226e2794df",
         )
 
     def test_make_shim_exposes_fast_target(self) -> None:
