@@ -13881,3 +13881,230 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-10T14:01:54.433062Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `0`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+test_arch_review_16_docs_registry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_15_risk_ledger.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-OPTIMIZE",
+      "ac": "AC-8",
+      "title": "release_check 子进程编码健壮性（2026-08-10 架构风险修复）：GBK 控制台下 scripts/traceability_check.py 打印矩阵中非 GBK 字符（U+2194）触发 UnicodeEncodeError，release_check 发布门禁 critical（既有缺陷，历次矩阵已含该字符）；_run 为子进程强制 PYTHONIOENCODING=utf-8 + 回归守卫",
+      "code": [
+        "scripts/release_check.py"
+      ],
+      "tests": [
+        "tests/unit/test_eng_optimize_8_release_encoding.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/release_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_eng_optimize_8_release_encoding.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+  {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1513 passed=1510 failed=0 skipped=3 duration_ms=68718
+  [unit] discovered=1513 passed=1510 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+[gate] counts: discovered=1513 passed=1510 failed=0 skipped=3
+[gate] totals: {"discovered": 1513, "failed": 0, "passed": 1510, "skipped": 3}
+audit seal: fully-sealed
+
+```

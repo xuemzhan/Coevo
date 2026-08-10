@@ -5335,6 +5335,21 @@ security-reviewer 双签门禁。
 - Security review: 文档+守卫测试，无运行时/密钥/审计逻辑变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 双守卫一致性安全守卫（ARCH-REVIEW-17；第七波；按用户指令不跑全量门禁）
+- 用户指令："修复所有架构级风险，不跑全量门禁"（第七波；只读复核发现守卫覆盖缺口）。
+- 复核结果：run_validation（209 项 done/40 文件/审计一致）、check_loop_stop（exit=10
+  为 done 设计语义）、benchmark 13 项 SLA 全 OK、run_demo --smoke OK、双守卫内容一致。
+- 缺口：`tests/security/test_loop_guard_static.py` 仅覆盖 `.opencode/plugins/loop-guard.ts`，
+  Codex 镜像 `.codex/hooks/loop-guard.mjs` 无一致性守护——双守卫若漂移，单一运行时可能
+  静默放行禁用命令（git push / rm -rf / curl / wget / 包管理器 install / go get 等）。
+- 修复：安全测试新增 `test_codex_guard_mirrors_opencode_blocklist_and_path_policy`——
+  断言两侧守卫均含同一禁用命令集与 path-policy 引用，且 Codex 侧保留 deny 语义。
+- Verification: 定向 2/2（安全测试全量方法回归）；fast 门禁 exit=0
+  fingerprint=`fb8029ba3cf2de07`；按用户指令未运行全量 quality。
+- Security review: 纯测试增强（只读断言），无运行时/密钥/审计逻辑变更；
+  BACKLOG 保持 security_review=true（守卫一致性属安全边界）。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

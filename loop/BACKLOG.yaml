@@ -2174,3 +2174,12 @@ items:
       - tests/unit/test_eng_optimize_8_release_encoding.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-17
+    story: ARCH-REVIEW
+    title: 双守卫一致性安全守卫——.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集与 path-policy，防止单运行时漂移放行禁用命令
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/security/test_loop_guard_static.py
+    security_review: true
+    protocol_review: false
