@@ -5614,3 +5614,10 @@ security-reviewer 双签门禁。
 - Security review: 纯新增类型+守卫+测试+文档，不放宽任何既有确认边界（反而显式收紧），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-8 收口（显式事件模型；增量门禁豁免）
+- Work item: `REVIEW2-8`（第二位架构师审查 P2：显式事件模型）status=done；deps=[ARCH-REVIEW-2]。
+- Delivery: 新增 `src/coevo/events/` 包——`DomainEvent`（event_id/aggregate_id/aggregate_type/base_revision/actor/operation/payload/created_at/client_sequence/correlation_id/causation_id，构造 fail-closed）、`event_order_key`（(aggregate_id, client_sequence)，时间戳不参与排序）、`validate_event_chain`（唯一 id → 聚合内严格递增序号 → 因果仅允许前序，无自指/环）；契约文档 `docs/architecture/event-model.md`；模块文档 `docs/modules/events.md` + root_modules.md + 模块索引登记；守卫测试 `tests/unit/test_review2_8_event_model.py` 8 项。与现有 OrchestrationEvent/AuditEvent 的关系在文档 §3 明确（各自领域入口保留，DomainEvent 为离线同步统一契约，后续工作项逐个映射，不一次性替换）。
+- Verification: 用户指示不做全量门禁；定向 8/8 + 模块文档/未使用导入守卫 14/14；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1440 全绿）。
+- Security review: 纯新增模型+校验+文档，不改变现有事件/审计语义，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。

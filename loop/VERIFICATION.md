@@ -11103,3 +11103,561 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-10T04:29:03.323324Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `1`
+```text
+08-10）：DomainEvent（event_id/aggregate_id/aggregate_type/base_revision/actor/operation/payload/created_at/client_sequence/correlation_id/causation_id）；聚合内按 client_sequence 严格递增排序，created_at 仅元数据；causation_id 只允许指向前序事件（无自指/环）；validate_event_chain fail-closed；root_modules 登记；契约文档 + 单元守卫",
+      "code": [
+        "src/coevo/events/models.py",
+        "src/coevo/events/__init__.py",
+        "docs/architecture/event-model.md",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_review2_8_event_model.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/events/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/events/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/event-model.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_review2_8_event_model.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+{"ok": true, "errors": []}
+{"ok": true, "status": "fully-sealed"}
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+secret scan ok
+STATE.json is unreadable or malformed: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+STATE.json does not exist.
+STATE.json is not a JSON object.
+artifact ready: path=C:\Users\liq08\AppData\Local\Temp\tmpt0e0cuzx\out.zip size=560 files=4 sha256=0aba4ffe86089bfe06dde0103817972bd5ffaacd21209d4728d98327a3533c88
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+preflight ok
+  warning: legacy COEVO_LLM_EXTERNAL_DATA_OK=1 is set (compat switch only; approval via config/model-config.json governs)
+preflight ok
+  warning: model external egress is APPROVED (provider=deepseek, external_data_ok=true): data may leave this machine
+preflight ok
+preflight critical
+  critical: audit seal verify failed: signature invalid
+preflight critical
+  critical: data dir not writable ([WinError 183] 当文件已存在时，无法创建该文件。: 'C:\\Users\\liq08\\AppData\\Local\\Temp\\tmpjyeqiqxd\\data-file')
+preflight ok
+  warning: audit has an unsealed tail (run make quality to re-seal)
+preflight ok
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires a dedicated re-anchor flow (not implemented); refusing to touch loop/tool-audit.jsonl
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires a dedicated re-anchor flow (not implemented); refusing to touch loop/tool-audit.jsonl
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+{
+  "checks": [
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "git_clean",
+      "ok": true
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1440 passed=1434 failed=3 skipped=3 duration_ms=68214
+  [unit] discovered=1440 passed=1434 failed=3 skipped=3 exit=1
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+======================================================================
+FAILED/ERROR: test_no_unused_top_level_imports_outside_allowlist (unit.test_framework_optimize22.UnusedImportGuardTests.test_no_unused_top_level_imports_outside_allowlist)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_framework_optimize22.py", line 75, in test_no_unused_top_level_imports_outside_allowlist
+    self.assertEqual([], violations)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['src/coevo/events/models.py:20: Iterable']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'src/coevo/events/models.py:20: Iterable'
+
+- []
++ ['src/coevo/events/models.py:20: Iterable']
+
+======================================================================
+FAILED/ERROR: test_every_package_has_a_module_doc (unit.test_module_docs.ModuleDocsTests.test_every_package_has_a_module_doc)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_module_docs.py", line 30, in test_every_package_has_a_module_doc
+    self.assertEqual([], missing, "packages missing module docs")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['events']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'events'
+
+- []
++ ['events'] : packages missing module docs
+
+======================================================================
+FAILED/ERROR: test_index_lists_every_package (unit.test_module_docs.ModuleDocsTests.test_index_lists_every_package)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_module_docs.py", line 63, in test_index_lists_every_package
+    self.assertEqual([], missing, "packages missing from module-docs index")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['events']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'events'
+
+- []
++ ['events'] : packages missing from module-docs index
+
+
+```
+
+## 2026-08-10T04:34:28.009675Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `0`
+```text
+ture/crypto-mode-isolation.md"
+      ],
+      "tests": [
+        "tests/unit/test_review2_6_crypto_isolation.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/contract.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/crypto/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/crypto-mode-isolation.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_review2_6_crypto_isolation.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "REVIEW2",
+      "ac": "AC-7",
+      "title": "模型建议/正式状态类型边界（第二位架构师审查 P2，2026-08-10）：DraftSuggestion（requires_confirmation 默认 True、confidence∈[0,1]、SuggestionEvidence）+ ConfirmedStateChange（confirmed_by/confirmed_at UTC Z/source_draft_id/非空 changes）；ensure_confirmed_state_change 守卫拒绝原始 dict 与未确认草稿；契约文档 + 单元守卫；现有正式状态 API 已用类型化模型，统一边界后续逐个接入",
+      "code": [
+        "src/coevo/model/contract.py",
+        "src/coevo/model/__init__.py",
+        "docs/architecture/state-change-boundary.md"
+      ],
+      "tests": [
+        "tests/unit/test_review2_7_state_boundary.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/model/contract.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/model/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/state-change-boundary.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_review2_7_state_boundary.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "REVIEW2",
+      "ac": "AC-8",
+      "title": "显式事件模型（第二位架构师审查 P2，2026-08-10）：DomainEvent（event_id/aggregate_id/aggregate_type/base_revision/actor/operation/payload/created_at/client_sequence/correlation_id/causation_id）；聚合内按 client_sequence 严格递增排序，created_at 仅元数据；causation_id 只允许指向前序事件（无自指/环）；validate_event_chain fail-closed；root_modules 登记；契约文档 + 单元守卫",
+      "code": [
+        "src/coevo/events/models.py",
+        "src/coevo/events/__init__.py",
+        "docs/architecture/event-model.md",
+        "docs/modules/root_modules.md"
+      ],
+      "tests": [
+        "tests/unit/test_review2_8_event_model.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "src/coevo/events/models.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "src/coevo/events/__init__.py",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/event-model.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/modules/root_modules.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_review2_8_event_model.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+{"ok": true, "errors": []}
+{"ok": true, "status": "fully-sealed"}
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+secret scan ok
+STATE.json is unreadable or malformed: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+STATE.json does not exist.
+STATE.json is not a JSON object.
+artifact ready: path=C:\Users\liq08\AppData\Local\Temp\tmp7hw1de00\out.zip size=560 files=4 sha256=d99bf7c0270811ab66cb8e99c84b2778b06249de97ab2bc8cb6f0a8385c2488a
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+preflight ok
+  warning: legacy COEVO_LLM_EXTERNAL_DATA_OK=1 is set (compat switch only; approval via config/model-config.json governs)
+preflight ok
+  warning: model external egress is APPROVED (provider=deepseek, external_data_ok=true): data may leave this machine
+preflight ok
+preflight critical
+  critical: audit seal verify failed: signature invalid
+preflight critical
+  critical: data dir not writable ([WinError 183] 当文件已存在时，无法创建该文件。: 'C:\\Users\\liq08\\AppData\\Local\\Temp\\tmp3r8yao80\\data-file')
+preflight ok
+  warning: audit has an unsealed tail (run make quality to re-seal)
+preflight ok
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires a dedicated re-anchor flow (not implemented); refusing to touch loop/tool-audit.jsonl
+[audit] over archiving policy but NOT actionable via this tool: audit archival requires a dedicated re-anchor flow (not implemented); refusing to touch loop/tool-audit.jsonl
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+{
+  "checks": [
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "git_clean",
+      "ok": true
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1440 passed=1437 failed=0 skipped=3 duration_ms=71982
+  [unit] discovered=1440 passed=1437 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+audit seal: fully-sealed
+
+```

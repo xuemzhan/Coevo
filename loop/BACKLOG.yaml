@@ -1951,3 +1951,12 @@ items:
       - tests/unit/test_review2_7_state_boundary.py
     security_review: false
     protocol_review: false
+  - id: REVIEW2-8
+    story: REVIEW2
+    title: 第二位架构师审查 P2：显式事件模型——DomainEvent（event_id/aggregate/client_sequence/correlation_id/causation_id 等），聚合内按 client_sequence 严格递增排序（created_at 仅元数据），因果只允许前序（无环），validate_event_chain fail-closed；契约文档 + 单元守卫
+    status: done
+    dependencies: [ARCH-REVIEW-2]
+    acceptance_tests:
+      - tests/unit/test_review2_8_event_model.py
+    security_review: false
+    protocol_review: false
