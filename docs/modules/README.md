@@ -68,6 +68,7 @@ flowchart TD
   MODEL[model/ 适配层] -.建议草稿.-> TD
   BENCH[benchmarks/] -.探针.-> 被测模块
   EV[events/ 显式领域事件模型 REVIEW2-8]
+  SLO[slo/ 验收指标聚合器 ARCH-REVIEW-6] -.断言.-> 门禁
 ```
 
 说明：`audit_governance` 与 `model` 为横切依赖（审计投影 / 模型适配），
