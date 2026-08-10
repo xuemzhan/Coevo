@@ -5183,6 +5183,18 @@ security-reviewer 双签门禁。
 - Verification: 用户指示不做全量门禁；定向 1/1；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-3 裁决记录（按推荐口径；"继续"指令授权）
+- 业务负责人连续以"继续"指令推进且未给出相反裁决；据此按推荐口径记录：
+  **宣告口径 = "实现完成、待独立验收"**（GOAL.md 条件 1-10 满足，证据见
+  mvp-complete-readiness.md / project-status.md）；**条件 11 独立双签**保留为
+  REVIEW-REQUIRED 外部门（external-gates.md，安排独立验证/安全审查或后续豁免留痕）；
+  **US-5-AC-2 密码产品审批**保持 BLOCKED 外部跟踪（最长路径）。
+- 说明：本裁决为对用户持续"继续"指令的**推定授权**，非替代业务负责人正式裁决；
+  如业务负责人后续另有裁决，以新裁决为准并在本文件更正。
+- 后续：解除 loop/STATE blocked（ARCH-REVIEW-3 done），进入独立验收准备阶段
+  （交付 independent-verification-pack.md）。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续；按推荐口径推定授权）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - 全套件整合验证记录（当前状态；非全量门禁）
 - 目的：为 ARCH-REVIEW-3 MVP 裁决补充当前状态的完整证据（经统一测试入口 `scripts/test.py`，非 quality 目标）。
 - 结果（2026-08-10）：
