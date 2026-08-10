@@ -7,6 +7,7 @@ import re
 import subprocess
 import tempfile
 import unittest
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest import mock
 
@@ -47,6 +48,24 @@ class ReleaseCheckTests(unittest.TestCase):
         )
         (root / "docs" / "architecture" / "win7-compat-branch.md").write_text(
             "独立发布冻结依赖安全补偿测试计划\n", encoding="utf-8"
+        )
+        # ENG-OPTIMIZE-3: release report requires fresh gate evidence.
+        gate_dir = root / "loop" / "runtime" / "gate-results"
+        gate_dir.mkdir(parents=True)
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        (gate_dir / "fast-fixture.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0",
+                    "target": "fast",
+                    "fingerprint": "a" * 16,
+                    "exit_code": 0,
+                    "ok": True,
+                    "started_at": now,
+                    "totals": {"discovered": 10, "passed": 10, "failed": 0, "skipped": 0},
+                }
+            ),
+            encoding="utf-8",
         )
         return root
 
@@ -139,6 +158,71 @@ class ReleaseCheckTests(unittest.TestCase):
                 check = release_check.check_delivery_artifacts(root)
             self.assertFalse(check["ok"])
             self.assertIn("prototype", check["detail"])
+
+    def test_recent_gate_real_repo_ok(self):
+        """ENG-OPTIMIZE-3: the local gate-results artifact is fresh and passing."""
+        check = release_check.check_recent_gate(ROOT)
+        self.assertTrue(check["ok"], check)
+        self.assertEqual("ok", check["level"])
+
+    def test_recent_gate_missing_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            check = release_check.check_recent_gate(Path(tmp))
+        self.assertFalse(check["ok"])
+        self.assertEqual("critical", check["level"])
+
+    def test_recent_gate_failed_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gate_dir = root / "loop" / "runtime" / "gate-results"
+            gate_dir.mkdir(parents=True)
+            (gate_dir / "fast.json").write_text(
+                json.dumps(
+                    {
+                        "exit_code": 1,
+                        "ok": False,
+                        "started_at": "2026-08-10T00:00:00Z",
+                        "totals": {
+                            "discovered": 10,
+                            "passed": 9,
+                            "failed": 1,
+                            "skipped": 0,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            check = release_check.check_recent_gate(root)
+        self.assertFalse(check["ok"])
+        self.assertEqual("critical", check["level"])
+
+    def test_recent_gate_stale_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gate_dir = root / "loop" / "runtime" / "gate-results"
+            gate_dir.mkdir(parents=True)
+            stale = (datetime.now(UTC) - timedelta(days=30)).isoformat().replace(
+                "+00:00", "Z"
+            )
+            (gate_dir / "fast.json").write_text(
+                json.dumps(
+                    {
+                        "exit_code": 0,
+                        "ok": True,
+                        "started_at": stale,
+                        "totals": {
+                            "discovered": 10,
+                            "passed": 10,
+                            "failed": 0,
+                            "skipped": 0,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            check = release_check.check_recent_gate(root)
+        self.assertFalse(check["ok"])
+        self.assertIn("stale", check["detail"])
 
     def test_subprocess_checks_and_report(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -24,6 +24,7 @@ import json
 import re
 import subprocess
 import sys
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -245,6 +246,89 @@ def check_delivery_artifacts(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def check_recent_gate(
+    repo_root: Path, *, max_age_days: int = 7
+) -> dict[str, Any]:
+    """ENG-OPTIMIZE-3: require fresh, passing gate evidence before release.
+
+    Reads the latest loop/runtime/gate-results/*.json artifact (written by
+    quality_gate Phase A). Missing/failed/stale artifacts block the release;
+    a freshly passing artifact is required -- historical VERIFICATION
+    records alone are not sufficient.
+    """
+
+    results_dir = repo_root / "loop" / "runtime" / "gate-results"
+    if not results_dir.is_dir():
+        return {
+            "name": "recent_gate",
+            "ok": False,
+            "level": "critical",
+            "detail": "no gate results artifact; run a quality gate before release",
+        }
+    artifacts = sorted(
+        results_dir.glob("*.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not artifacts:
+        return {
+            "name": "recent_gate",
+            "ok": False,
+            "level": "critical",
+            "detail": "gate results directory is empty",
+        }
+    latest = artifacts[0]
+    try:
+        payload = json.loads(latest.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "name": "recent_gate",
+            "ok": False,
+            "level": "critical",
+            "detail": f"latest gate artifact unreadable: {exc}",
+        }
+    exit_code = payload.get("exit_code")
+    totals = payload.get("totals") or {}
+    failed = int(totals.get("failed", 0))
+    discovered = int(totals.get("discovered", 0))
+    if exit_code != 0 or failed or discovered <= 0:
+        return {
+            "name": "recent_gate",
+            "ok": False,
+            "level": "critical",
+            "detail": (
+                f"latest gate artifact failed: exit={exit_code} "
+                f"failed={failed} discovered={discovered} "
+                f"({latest.name})"
+            ),
+        }
+    started_at = payload.get("started_at")
+    if isinstance(started_at, str):
+        try:
+            stamp = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
+            age = datetime.now(UTC) - stamp
+            if age > timedelta(days=max_age_days):
+                return {
+                    "name": "recent_gate",
+                    "ok": False,
+                    "level": "critical",
+                    "detail": f"gate evidence is stale ({age.days} days old)",
+                }
+        except ValueError:
+            return {
+                "name": "recent_gate",
+                "ok": False,
+                "level": "warning",
+                "detail": f"latest gate artifact has unparsable started_at ({latest.name})",
+            }
+    return {
+        "name": "recent_gate",
+        "ok": True,
+        "level": "ok",
+        "detail": f"passing ({latest.name})",
+    }
+
+
 def build_report(
     repo_root: Path,
     *,
@@ -260,6 +344,7 @@ def build_report(
         check_secret_scan(repo_root, python),
         check_traceability(repo_root, python),
         check_delivery_artifacts(repo_root),
+        check_recent_gate(repo_root),
     ]
     critical = [c for c in checks if not c["ok"] and c["level"] == "critical"]
     warnings = [c for c in checks if not c["ok"] or c["level"] == "warning"]
