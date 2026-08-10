@@ -1883,7 +1883,7 @@ items:
   - id: REVIEW2-1
     story: REVIEW2
     title: 第二位架构师审查 P1：统一测试入口——scripts/test.py --suite unit|integration|security|e2e|win7|all，0 测试 fail-closed，输出 discovered/passed/failed/skipped/duration 摘要，接入 quality_gate test 目标
-    status: ready
+    status: done
     dependencies: [ARCH-REVIEW-7, ENG-BASE-AC-1]
     acceptance_tests:
       - tests/unit/test_review2_1_test_entry.py

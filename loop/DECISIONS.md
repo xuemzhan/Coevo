@@ -5551,3 +5551,10 @@ security-reviewer 双签门禁。
 - 与既有 ARCH-REVIEW 系列关系：REVIEW2 系列与 ARCH-REVIEW-3（blocked 待裁决）、4/5（security_review=true 待独立审查）、6/8 共同构成合并队列；实施顺序由业务负责人按"继续"指令逐轮推进。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（批判性吸收并融合到优化方案和计划）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-1 收口（统一测试入口；增量门禁豁免）
+- Work item: `REVIEW2-1`（第二位架构师审查 P1：统一测试入口）status=done；deps=[ARCH-REVIEW-7, ENG-BASE-AC-1]。
+- Delivery: `scripts/test.py`（stdlib-only；`--suite unit|integration|security|e2e|win7|all`；0 测试发现 fail-closed exit=3；输出 discovered/passed/failed/skipped/duration 摘要 + `--json`；按套件文件模式发现 unit=`test_*.py`/integration=`*test*.py`/security/e2e/win7=`test_*.py`）；`quality_gate.py` 全部测试阶段（test/test-security/test-e2e/test-win7/fast）统一经 `test.py --suite ...` 执行；`test_engineering_baseline` 适配（integration 模式随统一入口移入 test.py）；哈希锁新增 test.py 行并三轮同步（python-script-lock.tsv → make.cs ScriptInventorySha256 → toolchain-lock make_compatibility_shim）；`docs/architecture/gate-tiers.md` 补充统一入口说明。**quality 命令集指纹回归钉再更新：`e1b4d1226e2794df` → `b96157dbb895a417`**（ARCH-REVIEW-7/9 守卫同步更新）。实现提交 `5c3c327`。
+- Verification: 用户指示不做全量门禁；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1399 全绿，统一入口）；test-win7 门禁 exit=0；守卫 13/13（REVIEW2-1 5 + ARCH-REVIEW-7 4 + ARCH-REVIEW-9 4）；单元套件直跑 discovered=1399 passed=1396 failed=0 skipped=3。
+- Security review: 统一测试入口为测试基础设施变更，不涉及身份/密钥/文件解析/权限/审计语义（lint 阶段 validate_opencode/secret_scan/traceability/audit 全通过），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
