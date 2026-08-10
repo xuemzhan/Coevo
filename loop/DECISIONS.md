@@ -5181,6 +5181,13 @@ security-reviewer 双签门禁。
 - Security review: 文档+测试，无运行时/密钥/审计行为变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - MVP 完成度就绪评估（ARCH-REVIEW-3 决策支持；增量门禁豁免）
+- 背景：唯一剩余循环项为 ARCH-REVIEW-3 业务裁决。为支持裁决，重跑关键证据并输出就绪评估。
+- 现场证据（本轮重跑）：两条固定链 e2e（test_demo_runner + test_return_chain）+ 离线 baseline/frontend + win7 兼容 13/13 通过；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1470 全绿）；traceability missing=0。
+- 评估结论（docs/architecture/mvp-complete-readiness.md）：GOAL.md mvp-complete 条件 **1-10 满足（切片/测试级）**；**条件 11（独立 mvp-verifier + security-reviewer 双签）未满足**——子代理机制失控后改为增量自验，external-gates 中 ARCH-REVIEW-4/5、REVIEW2-10 为 REVIEW-REQUIRED。
+- 待业务负责人裁决：是否宣告"实现完成、待独立验收"；安排独立双签或授权豁免并留痕；外部门（US-5-AC-2 密码产品审批为最长路径）处理顺序。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - ARCH-REVIEW-4 收口（子智能体 Manifest 注册表；增量门禁豁免；security_review=true）
 - Work item: `ARCH-REVIEW-4`（架构审查 P1-1）status=done；deps=[US-16-AC-1, US-16-AC-3]。
 - Delivery: `src/coevo/framework/agent_catalog.py`——七个专业子智能体设计期目录（agent.flow_understanding / task_decomposition / progress_capture / risk_analysis / supervision_meeting / decision_brief / knowledge_ingest），每项声明能力闭集（AgentCapability）、服务模块、model_binding（rule/hybrid，切换只改配置与提示词版本）、人工确认点、工具策略；`validate_catalog()` fail-closed；契约文档 `docs/architecture/agent-manifest-registry.md`（目录表/规则模型切换边界/运行时注册仍经 guard_registration）；framework 模块文档登记；守卫测试 4 项。
