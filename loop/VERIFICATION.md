@@ -13103,3 +13103,236 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=244
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-10T13:30:35.523924Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `0`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+  "tests/unit/test_arch_review_11_persistence_matrix.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/state-persistence.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_11_persistence_matrix.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-OPTIMIZE",
+      "ac": "AC-7",
+      "title": "源码文件规模预算门禁（2026-08-10 架构风险修复 P2-1）：MAX_FILE_LINES=1133 + 600 行以上大文件白名单（9 个，只降不增）+ 契约文档；跟踪树扫描",
+      "code": [
+        "docs/architecture/file-size-budget.md"
+      ],
+      "tests": [
+        "tests/unit/test_eng_optimize_7_file_size_budget.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/file-size-budget.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_eng_optimize_7_file_size_budget.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-12",
+      "title": "架构级风险收口与外部门禁补登记（2026-08-10）：CTAF-PROPOSAL-REVIEW（CTAF 设计提案 v0.4.1 独立架构评审）入表；DECISIONS 风险分类裁决（P0-1 独立双签 REVIEW-REQUIRED / P0-2 密码产品 BLOCKED / P1-2 在线协同为后续版本范围）",
+      "code": [
+        "docs/architecture/external-gates.md",
+        "loop/DECISIONS.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_3_external_gates.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/external-gates.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "loop/DECISIONS.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_3_external_gates.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+  {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1500 passed=1497 failed=0 skipped=3 duration_ms=68243
+  [unit] discovered=1500 passed=1497 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+[gate] counts: discovered=1500 passed=1497 failed=0 skipped=3
+[gate] totals: {"discovered": 1500, "failed": 0, "passed": 1497, "skipped": 3}
+audit seal: fully-sealed
+
+```
