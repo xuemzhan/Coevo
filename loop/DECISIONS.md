@@ -5183,6 +5183,15 @@ security-reviewer 双签门禁。
 - Verification: 用户指示不做全量门禁；定向 1/1；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 全量门禁收口 + GitHub 推送授权
+- 业务负责人明确指令："完成全量门禁，然后 push 到 github"。
+- 全量门禁：`python scripts/quality_gate.py --target quality` exit=0
+  fingerprint=`b96157dbb895a417`（14 阶段全绿：compileall/fmt/lint/单元 1490/
+  集成 270/Go/安全 102/E2E 16/Win7 4，audit fully-sealed）。
+- 推送授权：按仓库先例（2026-07-25），本条为对当前 `main` 分支 `git push`
+  的**单次明确授权**；仍禁止合并分支、打 tag、发 release。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（完成全量门禁，然后 push 到 github）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - ARCH-REVIEW-3 裁决记录（按推荐口径；"继续"指令授权）
 - 业务负责人连续以"继续"指令推进且未给出相反裁决；据此按推荐口径记录：
   **宣告口径 = "实现完成、待独立验收"**（GOAL.md 条件 1-10 满足，证据见
