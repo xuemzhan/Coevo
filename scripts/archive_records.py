@@ -50,10 +50,12 @@ def main(argv: list[str] | None = None) -> int:
     archive_dir = ROOT / "loop" / "archive" / date_stamp
     pending: list[str] = []
 
-    # Audit-chain guard (RECORDS-ARCHIVE-3): tool-audit.jsonl is append-only
-    # and seal-protected. Trimming it would break the signed audit head
-    # (audit tail deletion) and there is no re-anchor flow yet, so the tool
-    # reports the condition but refuses to touch it.
+    # Audit-chain guard (RECORDS-ARCHIVE-3 / REVIEW2-10): tool-audit.jsonl is
+    # append-only and seal-protected. Trimming it would break the signed audit
+    # head (audit tail deletion); the dedicated re-anchor flow is
+    # `python scripts/audit_seal.py re-anchor` (generation-based, archives the
+    # old generation and re-seals a new genesis). This tool reports the
+    # condition but refuses to touch the audit chain itself.
     audit_path = FILES["audit"]
     if audit_path.is_file():
         audit_over = over_policy_size(
@@ -62,8 +64,10 @@ def main(argv: list[str] | None = None) -> int:
         if audit_over:
             print(
                 "[audit] over archiving policy but NOT actionable via this tool: "
-                "audit archival requires a dedicated re-anchor flow (not "
-                "implemented); refusing to touch loop/tool-audit.jsonl"
+                "audit archival requires the dedicated re-anchor flow: "
+                "python scripts/audit_seal.py re-anchor "
+                "(RECORDS-ARCHIVE-3 / REVIEW2-10); refusing to touch "
+                "loop/tool-audit.jsonl"
             )
             if apply:
                 print(
