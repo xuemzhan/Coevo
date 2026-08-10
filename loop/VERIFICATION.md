@@ -1,1171 +1,3 @@
-## 2026-08-09T09:50:57.845276Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-
-## 2026-08-09T09:52:03.960492Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
- docstring，说明失败关闭语义/哈希链绑定/返回与异常契约；纯注释零行为变化；merge/models.py 随带一次性行尾归一（CRLF→LF，内容除 docstring 外逐字节相同，`--ignore-space-at-eol` 验证仅 +1 行）；守卫 tests/unit/test_framework_optimize29.py（70 函数均有非空 docstring）",
-      "code": [
-        "src/coevo/decision_brief/_build.py",
-        "src/coevo/decision_brief/_util.py",
-        "src/coevo/decision_brief/models.py",
-        "src/coevo/merge/engine.py",
-        "src/coevo/merge/receipt.py",
-        "src/coevo/merge/repository.py",
-        "src/coevo/merge/models.py",
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize29.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_build.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_util.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize29.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-29",
-      "title": "安全关键域注释强化（2026-08-09，用户指令\"继续补全注释\"；增量门禁）：crypto（cng_handle/gmssl_provider/sm3，14 处）、identity（audit_anchor/repository/private_keys/validation/certificates，30 处，重名 `_run` 按行号区分）、protocol（agent_package/package_store_db/package_builder/import_service/replay_detector，17 处）共 61 个函数补全 docstring，写明失败关闭/哈希链绑定/受控子进程调用契约；纯注释零行为变化；agent_package.py 随带一次性行尾归一（CRLF→LF，`--ignore-space-at-eol` 验证仅 +7 行）；守卫 tests/unit/test_framework_optimize30.py（61 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/crypto/gmssl_provider.py",
-        "src/coevo/crypto/sm3.py",
-        "src/coevo/identity/audit_anchor.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/identity/validation.py",
-        "src/coevo/identity/certificates.py",
-        "src/coevo/protocol/agent_package.py",
-        "src/coevo/protocol/package_store_db.py",
-        "src/coevo/protocol/package_builder.py",
-        "src/coevo/protocol/import_service.py",
-        "src/coevo/protocol/replay_detector.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize30.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/gmssl_provider.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/sm3.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/certificates.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_builder.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/replay_detector.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize30.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-30",
-      "title": "注释补全收尾（2026-08-09，用户指令\"继续优化\"；增量门禁）：audit_governance（stream_store/facade，5 处）+ orchestrator/real_chain_store（27 处，含 canonical_json_bytes 内嵌套 validate 与 9 个 operation 事务闭包）共 32 个函数补全 docstring，写明失败关闭/审计链绑定/事务原子性契约；纯注释零行为变化；守卫 tests/unit/test_framework_optimize31.py（32 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/audit_governance/stream_store.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/real_chain_store.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize31.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/stream_store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/real_chain_store.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize31.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-31",
-      "title": "_score_candidate 阶段化拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：talent/recommender._score_candidate（123 行）按评分算法五阶段纯迁移式拆分为 5 个模块级助手（_match_skills/_match_credentials/_window_fit/_load_headroom/_tie_break），_score_candidate 收敛为 32 行编排；评分权重、reason/alert 语义、确定性排序逐字节不变；守卫 tests/unit/test_framework_optimize32.py",
-      "code": [
-        "src/coevo/talent/recommender.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize32.py",
-        "tests/unit/test_talent_recommender.py",
-        "tests/unit/test_talent_store.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize32.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_store.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-
-## 2026-08-09T10:01:42.776276Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-
-## 2026-08-09T10:02:47.914551Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
- docstring，说明失败关闭语义/哈希链绑定/返回与异常契约；纯注释零行为变化；merge/models.py 随带一次性行尾归一（CRLF→LF，内容除 docstring 外逐字节相同，`--ignore-space-at-eol` 验证仅 +1 行）；守卫 tests/unit/test_framework_optimize29.py（70 函数均有非空 docstring）",
-      "code": [
-        "src/coevo/decision_brief/_build.py",
-        "src/coevo/decision_brief/_util.py",
-        "src/coevo/decision_brief/models.py",
-        "src/coevo/merge/engine.py",
-        "src/coevo/merge/receipt.py",
-        "src/coevo/merge/repository.py",
-        "src/coevo/merge/models.py",
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize29.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_build.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_util.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize29.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-29",
-      "title": "安全关键域注释强化（2026-08-09，用户指令\"继续补全注释\"；增量门禁）：crypto（cng_handle/gmssl_provider/sm3，14 处）、identity（audit_anchor/repository/private_keys/validation/certificates，30 处，重名 `_run` 按行号区分）、protocol（agent_package/package_store_db/package_builder/import_service/replay_detector，17 处）共 61 个函数补全 docstring，写明失败关闭/哈希链绑定/受控子进程调用契约；纯注释零行为变化；agent_package.py 随带一次性行尾归一（CRLF→LF，`--ignore-space-at-eol` 验证仅 +7 行）；守卫 tests/unit/test_framework_optimize30.py（61 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/crypto/gmssl_provider.py",
-        "src/coevo/crypto/sm3.py",
-        "src/coevo/identity/audit_anchor.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/identity/validation.py",
-        "src/coevo/identity/certificates.py",
-        "src/coevo/protocol/agent_package.py",
-        "src/coevo/protocol/package_store_db.py",
-        "src/coevo/protocol/package_builder.py",
-        "src/coevo/protocol/import_service.py",
-        "src/coevo/protocol/replay_detector.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize30.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/gmssl_provider.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/sm3.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/certificates.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_builder.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/replay_detector.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize30.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-30",
-      "title": "注释补全收尾（2026-08-09，用户指令\"继续优化\"；增量门禁）：audit_governance（stream_store/facade，5 处）+ orchestrator/real_chain_store（27 处，含 canonical_json_bytes 内嵌套 validate 与 9 个 operation 事务闭包）共 32 个函数补全 docstring，写明失败关闭/审计链绑定/事务原子性契约；纯注释零行为变化；守卫 tests/unit/test_framework_optimize31.py（32 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/audit_governance/stream_store.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/real_chain_store.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize31.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/stream_store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/real_chain_store.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize31.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-31",
-      "title": "_score_candidate 阶段化拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：talent/recommender._score_candidate（123 行）按评分算法五阶段纯迁移式拆分为 5 个模块级助手（_match_skills/_match_credentials/_window_fit/_load_headroom/_tie_break），_score_candidate 收敛为 32 行编排；评分权重、reason/alert 语义、确定性排序逐字节不变；守卫 tests/unit/test_framework_optimize32.py",
-      "code": [
-        "src/coevo/talent/recommender.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize32.py",
-        "tests/unit/test_talent_recommender.py",
-        "tests/unit/test_talent_store.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize32.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_store.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-[gate] records self-trim: [verification] archive 11 section(s): archived 11 old section(s); size 500864 > 500000 bytes; size-trimmed 11 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260809\verification-20260809.txt; [ok] decisions: nothing to archive
-
-
-
-
-
-
-
-
-## 2026-08-09T10:11:02.667872Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T10:12:06.420626Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-   }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-29",
-      "title": "安全关键域注释强化（2026-08-09，用户指令\"继续补全注释\"；增量门禁）：crypto（cng_handle/gmssl_provider/sm3，14 处）、identity（audit_anchor/repository/private_keys/validation/certificates，30 处，重名 `_run` 按行号区分）、protocol（agent_package/package_store_db/package_builder/import_service/replay_detector，17 处）共 61 个函数补全 docstring，写明失败关闭/哈希链绑定/受控子进程调用契约；纯注释零行为变化；agent_package.py 随带一次性行尾归一（CRLF→LF，`--ignore-space-at-eol` 验证仅 +7 行）；守卫 tests/unit/test_framework_optimize30.py（61 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/crypto/gmssl_provider.py",
-        "src/coevo/crypto/sm3.py",
-        "src/coevo/identity/audit_anchor.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/identity/validation.py",
-        "src/coevo/identity/certificates.py",
-        "src/coevo/protocol/agent_package.py",
-        "src/coevo/protocol/package_store_db.py",
-        "src/coevo/protocol/package_builder.py",
-        "src/coevo/protocol/import_service.py",
-        "src/coevo/protocol/replay_detector.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize30.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/gmssl_provider.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/sm3.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/certificates.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_builder.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/replay_detector.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize30.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-30",
-      "title": "注释补全收尾（2026-08-09，用户指令\"继续优化\"；增量门禁）：audit_governance（stream_store/facade，5 处）+ orchestrator/real_chain_store（27 处，含 canonical_json_bytes 内嵌套 validate 与 9 个 operation 事务闭包）共 32 个函数补全 docstring，写明失败关闭/审计链绑定/事务原子性契约；纯注释零行为变化；守卫 tests/unit/test_framework_optimize31.py（32 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/audit_governance/stream_store.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/real_chain_store.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize31.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/stream_store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/real_chain_store.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize31.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-31",
-      "title": "_score_candidate 阶段化拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：talent/recommender._score_candidate（123 行）按评分算法五阶段纯迁移式拆分为 5 个模块级助手（_match_skills/_match_credentials/_window_fit/_load_headroom/_tie_break），_score_candidate 收敛为 32 行编排；评分权重、reason/alert 语义、确定性排序逐字节不变；守卫 tests/unit/test_framework_optimize32.py",
-      "code": [
-        "src/coevo/talent/recommender.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize32.py",
-        "tests/unit/test_talent_recommender.py",
-        "tests/unit/test_talent_store.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize32.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_store.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-33",
-      "title": "64-hex 正则收敛并收紧（2026-08-09，用户指令\"继续优化\"；增量门禁）：4 处本地 `[0-9a-f]{64}` 副本收敛到共享叶子 ids.HEX_64/is_hex_64（identity/private_keys PUBLIC_DIGEST_RE、protocol/sm2_sign _HEX_RE（随删未使用的 import re）、audit_governance/models digest_hex、crypto/cng_handle 两处 fullmatch）；共享正则 `$`→`\\Z` 收紧——尾部换行由放行改拒绝（失败关闭强化，与既有 fullmatch 站点一致，行为差异记录在案）；更新 test_framework_optimize13 pattern 钉与收敛守卫 + 新增守卫 test_framework_optimize34.py",
-      "code": [
-        "src/coevo/ids.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/protocol/sm2_sign.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/crypto/cng_handle.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize34.py",
-        "tests/unit/test_framework_optimize13.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/ids.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/sm2_sign.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize34.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize13.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T10:22:00.397507Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `1`
-```text
-_is_done_with_evidence) ... ok
-test_us_2_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_2_ac_1_matrix_lists_src_and_test) ... ok
-test_us_3_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_3_ac_1_is_done_with_evidence) ... ok
-test_us_3_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_3_ac_1_matrix_lists_src_and_test) ... ok
-test_us_5_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_1_is_done_with_evidence) ... ok
-test_us_5_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_1_matrix_lists_src_and_test) ... ok
-test_us_5_ac_2_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_2_is_done_with_evidence) ... ok
-test_us_5_ac_2_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_2_matrix_lists_src_and_test) ... ok
-test_us_5_ac_3_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_3_is_done_with_evidence) ... ok
-test_us_5_ac_3_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_3_matrix_lists_src_and_test) ... ok
-test_us_6_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_6_ac_1_is_done_with_evidence) ... ok
-test_us_6_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_6_ac_1_matrix_lists_src_and_test) ... ok
-test_us_9_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_9_ac_1_is_done_with_evidence) ... ok
-test_us_9_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_9_ac_1_matrix_lists_src_and_test) ... ok
-test_build_paths_custom_roots (test_workspace_init.TestBuildPaths.test_build_paths_custom_roots) ... ok
-test_build_paths_default_roots (test_workspace_init.TestBuildPaths.test_build_paths_default_roots) ... ok
-test_build_paths_rejects_backslash_traversal_in_roots (test_workspace_init.TestBuildPaths.test_build_paths_rejects_backslash_traversal_in_roots) ... ok
-test_quarantine_path_default_root (test_workspace_init.TestQuarantinePath.test_quarantine_path_default_root) ... ok
-test_quarantine_path_layout (test_workspace_init.TestQuarantinePath.test_quarantine_path_layout) ... ok
-test_quarantine_path_rejects_backslash_traversal (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_backslash_traversal) ... ok
-test_quarantine_path_rejects_empty_root (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_empty_root) ... ok
-test_quarantine_path_rejects_invalid_id (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_invalid_id) ... ok
-test_quarantine_path_rejects_traversal (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_traversal) ... ok
-test_audit_record_is_json_safe_on_success (test_workspace_init.TestWorkspaceInitService.test_audit_record_is_json_safe_on_success) ... ok
-test_audit_record_on_rejection (test_workspace_init.TestWorkspaceInitService.test_audit_record_on_rejection) ... ok
-test_init_allows_same_package_different_role (test_workspace_init.TestWorkspaceInitService.test_init_allows_same_package_different_role) ... ok
-test_init_creates_workspace_for_committed_import (test_workspace_init.TestWorkspaceInitService.test_init_creates_workspace_for_committed_import) ... ok
-test_init_idempotent_on_duplicate_package (test_workspace_init.TestWorkspaceInitService.test_init_idempotent_on_duplicate_package) ... ok
-test_init_propagates_path_error_for_unsafe_package_id (test_workspace_init.TestWorkspaceInitService.test_init_propagates_path_error_for_unsafe_package_id) ... ok
-test_init_rejects_invalid_role_id (test_workspace_init.TestWorkspaceInitService.test_init_rejects_invalid_role_id) ... ok
-test_init_rejects_non_import_outcome (test_workspace_init.TestWorkspaceInitService.test_init_rejects_non_import_outcome) ... ok
-test_init_rejects_rolled_back_import (test_workspace_init.TestWorkspaceInitService.test_init_rejects_rolled_back_import) ... ok
-test_sanitize_id_accepts_exactly_maximum_length (test_workspace_init.TestWorkspacePath.test_sanitize_id_accepts_exactly_maximum_length) ... ok
-test_sanitize_id_accepts_safe (test_workspace_init.TestWorkspacePath.test_sanitize_id_accepts_safe) ... ok
-test_sanitize_id_rejects_empty (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_empty) ... ok
-test_sanitize_id_rejects_maximum_plus_one (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_maximum_plus_one) ... ok
-test_sanitize_id_rejects_too_long (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_too_long) ... ok
-test_workspace_path_default_root (test_workspace_init.TestWorkspacePath.test_workspace_path_default_root) ... ok
-test_workspace_path_layout (test_workspace_init.TestWorkspacePath.test_workspace_path_layout) ... ok
-test_workspace_path_rejects_backslash_traversal (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_backslash_traversal) ... ok
-test_workspace_path_rejects_empty_root (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_empty_root) ... ok
-test_workspace_path_rejects_invalid_project_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_project_id) ... ok
-test_workspace_path_rejects_invalid_role_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_role_id) ... ok
-test_workspace_path_rejects_traversal (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_traversal) ... ok
-test_by_package (test_workspace_init.TestWorkspaceRegistry.test_by_package) ... ok
-test_empty_registry (test_workspace_init.TestWorkspaceRegistry.test_empty_registry) ... ok
-test_register_allows_same_package_for_different_role (test_workspace_init.TestWorkspaceRegistry.test_register_allows_same_package_for_different_role) ... ok
-test_register_rejects_duplicate_package_for_same_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_package_for_same_role) ... ok
-test_register_rejects_duplicate_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_role) ... ok
-test_register_then_get (test_workspace_init.TestWorkspaceRegistry.test_register_then_get) ... ok
-test_disallowed_extension_is_denied (test_wps_launcher.WpsLauncherTests.test_disallowed_extension_is_denied) ... ok
-test_invalid_root_is_rejected (test_wps_launcher.WpsLauncherTests.test_invalid_root_is_rejected) ... ok
-test_missing_absolute_executable_is_not_available (test_wps_launcher.WpsLauncherTests.test_missing_absolute_executable_is_not_available) ... ok
-test_missing_file_is_denied (test_wps_launcher.WpsLauncherTests.test_missing_file_is_denied) ... ok
-test_runner_failure_is_error (test_wps_launcher.WpsLauncherTests.test_runner_failure_is_error) ... ok
-test_runner_is_invoked_with_explicit_executable_and_path (test_wps_launcher.WpsLauncherTests.test_runner_is_invoked_with_explicit_executable_and_path) ... ok
-test_symlink_escape_is_denied (test_wps_launcher.WpsLauncherTests.test_symlink_escape_is_denied) ... skipped 'symlink creation unavailable'
-test_traversal_and_absolute_paths_are_denied (test_wps_launcher.WpsLauncherTests.test_traversal_and_absolute_paths_are_denied) ... ok
-test_valid_document_dry_run_is_ok (test_wps_launcher.WpsLauncherTests.test_valid_document_dry_run_is_ok) ... ok
-
-======================================================================
-FAIL: test_eng_base_is_fully_covered (test_traceability_check.TraceabilityTests.test_eng_base_is_fully_covered)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\unit\test_traceability_check.py", line 12, in test_eng_base_is_fully_covered
-    self.assertEqual(88,result["checked"])
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 88 != 98
-
-----------------------------------------------------------------------
-Ran 1365 tests in 101.418s
-
-FAILED (failures=1, skipped=3)
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T11:15:54.694107Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `13`
-```text
-ted_registry) ... ok
-test_duplicate_digest_detected_across_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_duplicate_digest_detected_across_restart) ... ok
-test_duplicate_package_id_detected_across_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_duplicate_package_id_detected_across_restart) ... ok
-test_registered_records_survive_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_registered_records_survive_restart) ... ok
-test_scope_and_revision_queries_after_restart (test_package_store_persistence.CrossRestartPersistenceTests.test_scope_and_revision_queries_after_restart) ... ok
-test_snapshot_after_restart_supports_inmemory_facades (test_package_store_persistence.CrossRestartPersistenceTests.test_snapshot_after_restart_supports_inmemory_facades) ... ok
-test_tampered_file_is_refused_on_reopen (test_package_store_persistence.CrossRestartPersistenceTests.test_tampered_file_is_refused_on_reopen) ... ok
-test_watcher_background_mode_collects_modified_events (test_progress_watcher.ProgressWatcherIntegrationTests.test_watcher_background_mode_collects_modified_events) ... ok
-test_watcher_events_feed_progress_capture (test_progress_watcher.ProgressWatcherIntegrationTests.test_watcher_events_feed_progress_capture) ... ok
-test_partial_upgrade_leaves_pointer_intact_and_force_completes (test_recovery_faults.InstallerInterruptedUpgradeTests.test_partial_upgrade_leaves_pointer_intact_and_force_completes) ... ok
-test_restart_loads_last_committed_state (test_recovery_faults.StateStoreInterruptedSaveTests.test_restart_loads_last_committed_state) ... ok
-test_stale_tmp_does_not_corrupt_committed_state (test_recovery_faults.StateStoreInterruptedSaveTests.test_stale_tmp_does_not_corrupt_committed_state) ... ok
-test_committed_profile_rejects_minimal_receipt_and_missing_or_tampered_artifact (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_profile_rejects_minimal_receipt_and_missing_or_tampered_artifact) ... ok
-test_committed_receipt_hardlink_is_rejected (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_receipt_hardlink_is_rejected) ... ok
-test_committed_receipt_reparse_is_rejected_when_supported (test_sm2_test_pki_generation.Sm2TestPkiTests.test_committed_receipt_reparse_is_rejected_when_supported) ... skipped "file symlink privilege unavailable: [WinError 1314] 客户端没有所需的特权。: 'E:\\\\Workspace\\\\Coevo\\\\loop\\\\runtime\\\\sm2-test-pki\\\\receipt-target-97fa9f8d8f784206be4030cc030184be.json' -> 'E:\\\\Workspace\\\\Coevo\\\\loop\\\\runtime\\\\sm2-test-pki\\\\test-0115b036e2d346b6b69d\\\\receipt.json'"
-test_concurrent_same_profile_has_one_atomic_winner (test_sm2_test_pki_generation.Sm2TestPkiTests.test_concurrent_same_profile_has_one_atomic_winner) ... ok
-test_directory_lock_non_sharing_error_is_not_retried (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_non_sharing_error_is_not_retried) ... ok
-test_directory_lock_retries_sharing_violation_then_succeeds (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_retries_sharing_violation_then_succeeds) ... ok
-test_directory_lock_roles_and_share_flags_are_fixed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_roles_and_share_flags_are_fixed) ... ok
-test_directory_lock_sharing_violation_retry_exhaustion_fails_closed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_directory_lock_sharing_violation_retry_exhaustion_fails_closed) ... ok
-test_dpapi_and_encrypted_pkcs8_round_trip_without_command_line_secret (test_sm2_test_pki_generation.Sm2TestPkiTests.test_dpapi_and_encrypted_pkcs8_round_trip_without_command_line_secret) ... ok
-test_existing_profile_acl_must_remain_protected_owner_only (test_sm2_test_pki_generation.Sm2TestPkiTests.test_existing_profile_acl_must_remain_protected_owner_only) ... ok
-test_generation_is_isolated_encrypted_verified_and_non_overwriting (test_sm2_test_pki_generation.Sm2TestPkiTests.test_generation_is_isolated_encrypted_verified_and_non_overwriting) ... ok
-test_helper_command_line_and_input_channel_are_fail_closed (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_command_line_and_input_channel_are_fail_closed) ... ok
-test_helper_is_static_no_child_and_launcher_has_no_job_or_native_directory_layer (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_is_static_no_child_and_launcher_has_no_job_or_native_directory_layer) ... ok
-test_helper_launch_surface_has_no_cli_or_subprocess_secret_path (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_launch_surface_has_no_cli_or_subprocess_secret_path) ... ok
-test_helper_owns_handle_identity_reparse_rename_and_strict_recovery (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_owns_handle_identity_reparse_rename_and_strict_recovery) ... ok
-test_helper_response_is_fixed_public_frame_and_response_loss_recovers (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_response_is_fixed_public_frame_and_response_loss_recovers) ... ok
-test_hung_helper_is_tree_killed_and_drains_are_bounded (test_sm2_test_pki_generation.Sm2TestPkiTests.test_hung_helper_is_tree_killed_and_drains_are_bounded) ... ok
-test_kill_points_are_recovered_with_same_nonce (test_sm2_test_pki_generation.Sm2TestPkiTests.test_kill_points_are_recovered_with_same_nonce) ... ok
-test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper) ... ok
-test_lock_matches_offline_artifact_and_records_unsigned_risk (test_sm2_test_pki_generation.Sm2TestPkiTests.test_lock_matches_offline_artifact_and_records_unsigned_risk) ... ok
-test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper) ... ok
-test_prepositioned_profile_file_is_preserved_and_no_staging_remains (test_sm2_test_pki_generation.Sm2TestPkiTests.test_prepositioned_profile_file_is_preserved_and_no_staging_remains) ... ok
-test_recover_unknown_staged_object_fails_closed_without_deleting_it (test_sm2_test_pki_generation.Sm2TestPkiTests.test_recover_unknown_staged_object_fails_closed_without_deleting_it) ... ok
-test_runtime_output_is_gitignored (test_sm2_test_pki_generation.Sm2TestPkiTests.test_runtime_output_is_gitignored) ... ok
-test_wide_runtime_acl_is_corrected_before_staging_creation (test_sm2_test_pki_generation.Sm2TestPkiTests.test_wide_runtime_acl_is_corrected_before_staging_creation) ... ok
-test_append_after_reopen_extends_store (test_talent_store_persistence.CrossRestartPersistenceTests.test_append_after_reopen_extends_store) ... ok
-test_duplicate_talent_code_detected_across_restart (test_talent_store_persistence.CrossRestartPersistenceTests.test_duplicate_talent_code_detected_across_restart) ... ok
-test_from_pool_then_reopen_round_trip (test_talent_store_persistence.CrossRestartPersistenceTests.test_from_pool_then_reopen_round_trip) ... ok
-test_registered_talents_survive_restart (test_talent_store_persistence.CrossRestartPersistenceTests.test_registered_talents_survive_restart) ... ok
-test_snapshot_after_restart_drives_recommender (test_talent_store_persistence.CrossRestartPersistenceTests.test_snapshot_after_restart_drives_recommender) ... ok
-test_tampered_file_is_refused_on_reopen (test_talent_store_persistence.CrossRestartPersistenceTests.test_tampered_file_is_refused_on_reopen) ... ok
-test_custom_tools_reference_existing_controlled_scripts (test_tool_contracts.ToolContractIntegrationTests.test_custom_tools_reference_existing_controlled_scripts) ... ok
-
-----------------------------------------------------------------------
-Ran 262 tests in 556.850s
-
-OK (skipped=1)
-$ D:/Go/bin/go.exe test ./...
-ok  	coevo/go/taskflow	(cached)
-$ C:\Python314\python.exe -m unittest discover -s tests/security -v
-[gate] stage timed out after 2400s (Command '['C:\\Python314\\python.exe', '-m', 'unittest', 'discover', '-s', 'tests/security', '-v']' timed out after 2400 seconds)
-
-```
-
-[gate] records self-trim: trim error: TimeoutExpired: Command '['C:\\Python314\\python.exe', 'E:\\Workspace\\Coevo\\scripts\\archive_records.py', '--apply']' timed out after 120 seconds
-
-
-
-
-
-
-
-
-## 2026-08-09T11:46:37.833280Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `1`
-```text
-raceabilityTests.test_us_5_ac_1_is_done_with_evidence) ... ok
-test_us_5_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_1_matrix_lists_src_and_test) ... ok
-test_us_5_ac_2_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_2_is_done_with_evidence) ... ok
-test_us_5_ac_2_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_2_matrix_lists_src_and_test) ... ok
-test_us_5_ac_3_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_3_is_done_with_evidence) ... ok
-test_us_5_ac_3_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_3_matrix_lists_src_and_test) ... ok
-test_us_6_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_6_ac_1_is_done_with_evidence) ... ok
-test_us_6_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_6_ac_1_matrix_lists_src_and_test) ... ok
-test_us_9_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_9_ac_1_is_done_with_evidence) ... ok
-test_us_9_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_9_ac_1_matrix_lists_src_and_test) ... ok
-test_build_paths_custom_roots (test_workspace_init.TestBuildPaths.test_build_paths_custom_roots) ... ok
-test_build_paths_default_roots (test_workspace_init.TestBuildPaths.test_build_paths_default_roots) ... ok
-test_build_paths_rejects_backslash_traversal_in_roots (test_workspace_init.TestBuildPaths.test_build_paths_rejects_backslash_traversal_in_roots) ... ok
-test_quarantine_path_default_root (test_workspace_init.TestQuarantinePath.test_quarantine_path_default_root) ... ok
-test_quarantine_path_layout (test_workspace_init.TestQuarantinePath.test_quarantine_path_layout) ... ok
-test_quarantine_path_rejects_backslash_traversal (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_backslash_traversal) ... ok
-test_quarantine_path_rejects_empty_root (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_empty_root) ... ok
-test_quarantine_path_rejects_invalid_id (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_invalid_id) ... ok
-test_quarantine_path_rejects_traversal (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_traversal) ... ok
-test_audit_record_is_json_safe_on_success (test_workspace_init.TestWorkspaceInitService.test_audit_record_is_json_safe_on_success) ... ok
-test_audit_record_on_rejection (test_workspace_init.TestWorkspaceInitService.test_audit_record_on_rejection) ... ok
-test_init_allows_same_package_different_role (test_workspace_init.TestWorkspaceInitService.test_init_allows_same_package_different_role) ... ok
-test_init_creates_workspace_for_committed_import (test_workspace_init.TestWorkspaceInitService.test_init_creates_workspace_for_committed_import) ... ok
-test_init_idempotent_on_duplicate_package (test_workspace_init.TestWorkspaceInitService.test_init_idempotent_on_duplicate_package) ... ok
-test_init_propagates_path_error_for_unsafe_package_id (test_workspace_init.TestWorkspaceInitService.test_init_propagates_path_error_for_unsafe_package_id) ... ok
-test_init_rejects_invalid_role_id (test_workspace_init.TestWorkspaceInitService.test_init_rejects_invalid_role_id) ... ok
-test_init_rejects_non_import_outcome (test_workspace_init.TestWorkspaceInitService.test_init_rejects_non_import_outcome) ... ok
-test_init_rejects_rolled_back_import (test_workspace_init.TestWorkspaceInitService.test_init_rejects_rolled_back_import) ... ok
-test_sanitize_id_accepts_exactly_maximum_length (test_workspace_init.TestWorkspacePath.test_sanitize_id_accepts_exactly_maximum_length) ... ok
-test_sanitize_id_accepts_safe (test_workspace_init.TestWorkspacePath.test_sanitize_id_accepts_safe) ... ok
-test_sanitize_id_rejects_empty (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_empty) ... ok
-test_sanitize_id_rejects_maximum_plus_one (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_maximum_plus_one) ... ok
-test_sanitize_id_rejects_too_long (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_too_long) ... ok
-test_workspace_path_default_root (test_workspace_init.TestWorkspacePath.test_workspace_path_default_root) ... ok
-test_workspace_path_layout (test_workspace_init.TestWorkspacePath.test_workspace_path_layout) ... ok
-test_workspace_path_rejects_backslash_traversal (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_backslash_traversal) ... ok
-test_workspace_path_rejects_empty_root (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_empty_root) ... ok
-test_workspace_path_rejects_invalid_project_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_project_id) ... ok
-test_workspace_path_rejects_invalid_role_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_role_id) ... ok
-test_workspace_path_rejects_traversal (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_traversal) ... ok
-test_by_package (test_workspace_init.TestWorkspaceRegistry.test_by_package) ... ok
-test_empty_registry (test_workspace_init.TestWorkspaceRegistry.test_empty_registry) ... ok
-test_register_allows_same_package_for_different_role (test_workspace_init.TestWorkspaceRegistry.test_register_allows_same_package_for_different_role) ... ok
-test_register_rejects_duplicate_package_for_same_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_package_for_same_role) ... ok
-test_register_rejects_duplicate_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_role) ... ok
-test_register_then_get (test_workspace_init.TestWorkspaceRegistry.test_register_then_get) ... ok
-test_disallowed_extension_is_denied (test_wps_launcher.WpsLauncherTests.test_disallowed_extension_is_denied) ... ok
-test_invalid_root_is_rejected (test_wps_launcher.WpsLauncherTests.test_invalid_root_is_rejected) ... ok
-test_missing_absolute_executable_is_not_available (test_wps_launcher.WpsLauncherTests.test_missing_absolute_executable_is_not_available) ... ok
-test_missing_file_is_denied (test_wps_launcher.WpsLauncherTests.test_missing_file_is_denied) ... ok
-test_runner_failure_is_error (test_wps_launcher.WpsLauncherTests.test_runner_failure_is_error) ... ok
-test_runner_is_invoked_with_explicit_executable_and_path (test_wps_launcher.WpsLauncherTests.test_runner_is_invoked_with_explicit_executable_and_path) ... ok
-test_symlink_escape_is_denied (test_wps_launcher.WpsLauncherTests.test_symlink_escape_is_denied) ... skipped 'symlink creation unavailable'
-test_traversal_and_absolute_paths_are_denied (test_wps_launcher.WpsLauncherTests.test_traversal_and_absolute_paths_are_denied) ... ok
-test_valid_document_dry_run_is_ok (test_wps_launcher.WpsLauncherTests.test_valid_document_dry_run_is_ok) ... ok
-
-======================================================================
-ERROR: test_engineering_baseline (unittest.loader._FailedTest.test_engineering_baseline)
-----------------------------------------------------------------------
-ImportError: Failed to import test module: test_engineering_baseline
-Traceback (most recent call last):
-  File "C:\Python314\Lib\unittest\loader.py", line 426, in _find_test_path
-    module = self._get_module_from_name(name)
-  File "C:\Python314\Lib\unittest\loader.py", line 367, in _get_module_from_name
-    __import__(name)
-    ~~~~~~~~~~^^^^^^
-  File "E:\Workspace\Coevo\tests\unit\test_engineering_baseline.py", line 6, in <module>
-    validator=importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(validator)
-                                                     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
-  File "E:\Workspace\Coevo\scripts\validate_opencode.py", line 92, in <module>
-    raise RuntimeError("must not execute")
-RuntimeError: must not execute
-
-
-----------------------------------------------------------------------
-Ran 1363 tests in 96.154s
-
-FAILED (errors=1, skipped=3)
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T12:00:10.576106Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `1`
-```text
-lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_3_ac_1_matrix_lists_src_and_test) ... ok
-test_us_5_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_1_is_done_with_evidence) ... ok
-test_us_5_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_1_matrix_lists_src_and_test) ... ok
-test_us_5_ac_2_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_2_is_done_with_evidence) ... ok
-test_us_5_ac_2_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_2_matrix_lists_src_and_test) ... ok
-test_us_5_ac_3_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_5_ac_3_is_done_with_evidence) ... ok
-test_us_5_ac_3_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_5_ac_3_matrix_lists_src_and_test) ... ok
-test_us_6_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_6_ac_1_is_done_with_evidence) ... ok
-test_us_6_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_6_ac_1_matrix_lists_src_and_test) ... ok
-test_us_9_ac_1_is_done_with_evidence (test_traceability_check.TraceabilityTests.test_us_9_ac_1_is_done_with_evidence) ... ok
-test_us_9_ac_1_matrix_lists_src_and_test (test_traceability_check.TraceabilityTests.test_us_9_ac_1_matrix_lists_src_and_test) ... ok
-test_build_paths_custom_roots (test_workspace_init.TestBuildPaths.test_build_paths_custom_roots) ... ok
-test_build_paths_default_roots (test_workspace_init.TestBuildPaths.test_build_paths_default_roots) ... ok
-test_build_paths_rejects_backslash_traversal_in_roots (test_workspace_init.TestBuildPaths.test_build_paths_rejects_backslash_traversal_in_roots) ... ok
-test_quarantine_path_default_root (test_workspace_init.TestQuarantinePath.test_quarantine_path_default_root) ... ok
-test_quarantine_path_layout (test_workspace_init.TestQuarantinePath.test_quarantine_path_layout) ... ok
-test_quarantine_path_rejects_backslash_traversal (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_backslash_traversal) ... ok
-test_quarantine_path_rejects_empty_root (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_empty_root) ... ok
-test_quarantine_path_rejects_invalid_id (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_invalid_id) ... ok
-test_quarantine_path_rejects_traversal (test_workspace_init.TestQuarantinePath.test_quarantine_path_rejects_traversal) ... ok
-test_audit_record_is_json_safe_on_success (test_workspace_init.TestWorkspaceInitService.test_audit_record_is_json_safe_on_success) ... ok
-test_audit_record_on_rejection (test_workspace_init.TestWorkspaceInitService.test_audit_record_on_rejection) ... ok
-test_init_allows_same_package_different_role (test_workspace_init.TestWorkspaceInitService.test_init_allows_same_package_different_role) ... ok
-test_init_creates_workspace_for_committed_import (test_workspace_init.TestWorkspaceInitService.test_init_creates_workspace_for_committed_import) ... ok
-test_init_idempotent_on_duplicate_package (test_workspace_init.TestWorkspaceInitService.test_init_idempotent_on_duplicate_package) ... ok
-test_init_propagates_path_error_for_unsafe_package_id (test_workspace_init.TestWorkspaceInitService.test_init_propagates_path_error_for_unsafe_package_id) ... ok
-test_init_rejects_invalid_role_id (test_workspace_init.TestWorkspaceInitService.test_init_rejects_invalid_role_id) ... ok
-test_init_rejects_non_import_outcome (test_workspace_init.TestWorkspaceInitService.test_init_rejects_non_import_outcome) ... ok
-test_init_rejects_rolled_back_import (test_workspace_init.TestWorkspaceInitService.test_init_rejects_rolled_back_import) ... ok
-test_sanitize_id_accepts_exactly_maximum_length (test_workspace_init.TestWorkspacePath.test_sanitize_id_accepts_exactly_maximum_length) ... ok
-test_sanitize_id_accepts_safe (test_workspace_init.TestWorkspacePath.test_sanitize_id_accepts_safe) ... ok
-test_sanitize_id_rejects_empty (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_empty) ... ok
-test_sanitize_id_rejects_maximum_plus_one (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_maximum_plus_one) ... ok
-test_sanitize_id_rejects_too_long (test_workspace_init.TestWorkspacePath.test_sanitize_id_rejects_too_long) ... ok
-test_workspace_path_default_root (test_workspace_init.TestWorkspacePath.test_workspace_path_default_root) ... ok
-test_workspace_path_layout (test_workspace_init.TestWorkspacePath.test_workspace_path_layout) ... ok
-test_workspace_path_rejects_backslash_traversal (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_backslash_traversal) ... ok
-test_workspace_path_rejects_empty_root (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_empty_root) ... ok
-test_workspace_path_rejects_invalid_project_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_project_id) ... ok
-test_workspace_path_rejects_invalid_role_id (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_invalid_role_id) ... ok
-test_workspace_path_rejects_traversal (test_workspace_init.TestWorkspacePath.test_workspace_path_rejects_traversal) ... ok
-test_by_package (test_workspace_init.TestWorkspaceRegistry.test_by_package) ... ok
-test_empty_registry (test_workspace_init.TestWorkspaceRegistry.test_empty_registry) ... ok
-test_register_allows_same_package_for_different_role (test_workspace_init.TestWorkspaceRegistry.test_register_allows_same_package_for_different_role) ... ok
-test_register_rejects_duplicate_package_for_same_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_package_for_same_role) ... ok
-test_register_rejects_duplicate_role (test_workspace_init.TestWorkspaceRegistry.test_register_rejects_duplicate_role) ... ok
-test_register_then_get (test_workspace_init.TestWorkspaceRegistry.test_register_then_get) ... ok
-test_disallowed_extension_is_denied (test_wps_launcher.WpsLauncherTests.test_disallowed_extension_is_denied) ... ok
-test_invalid_root_is_rejected (test_wps_launcher.WpsLauncherTests.test_invalid_root_is_rejected) ... ok
-test_missing_absolute_executable_is_not_available (test_wps_launcher.WpsLauncherTests.test_missing_absolute_executable_is_not_available) ... ok
-test_missing_file_is_denied (test_wps_launcher.WpsLauncherTests.test_missing_file_is_denied) ... ok
-test_runner_failure_is_error (test_wps_launcher.WpsLauncherTests.test_runner_failure_is_error) ... ok
-test_runner_is_invoked_with_explicit_executable_and_path (test_wps_launcher.WpsLauncherTests.test_runner_is_invoked_with_explicit_executable_and_path) ... ok
-test_symlink_escape_is_denied (test_wps_launcher.WpsLauncherTests.test_symlink_escape_is_denied) ... skipped 'symlink creation unavailable'
-test_traversal_and_absolute_paths_are_denied (test_wps_launcher.WpsLauncherTests.test_traversal_and_absolute_paths_are_denied) ... ok
-test_valid_document_dry_run_is_ok (test_wps_launcher.WpsLauncherTests.test_valid_document_dry_run_is_ok) ... ok
-
-======================================================================
-FAIL: test_real_backlog_matches_state (test_release_check.ReleaseCheckTests.test_real_backlog_matches_state)
-RECORDS-2: every non-done BACKLOG item must be the current item.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\unit\test_release_check.py", line 84, in test_real_backlog_matches_state
-    self.assertEqual([], [i for i in non_done if i != current], non_done)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: Lists differ: [] != ['FRAMEWORK-OPTIMIZE-35']
-
-Second list contains 1 additional elements.
-First extra element 0:
-'FRAMEWORK-OPTIMIZE-35'
-
-- []
-+ ['FRAMEWORK-OPTIMIZE-35'] : ['FRAMEWORK-OPTIMIZE-35']
-
-----------------------------------------------------------------------
-Ran 1365 tests in 100.933s
-
-FAILED (failures=1, skipped=3)
-
-```
-
-
-
-
-
-
-
-
 ## 2026-08-09T12:10:46.708376Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `1`
 ```text
@@ -1291,6 +123,7 @@ FAILED (failures=15, errors=3)
 
 
 
+
 ## 2026-08-09T12:47:56.086142Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `0`
 ```text
@@ -1360,6 +193,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 501769 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260809\verification-20260809.txt; [ok] decisions: nothing to archive
+
 
 
 
@@ -1440,6 +274,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T13:19:15.953153Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -1448,6 +283,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -1719,6 +555,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T13:23:38.958818Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -1727,6 +564,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -1992,6 +830,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T13:40:53.939770Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `0`
 ```text
@@ -2065,6 +904,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:15:48.574853Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -2073,6 +913,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2328,6 +1169,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:19:44.658598Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -2336,6 +1178,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2593,6 +1436,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:28:30.837331Z — target=`fast` fingerprint=`b3b305cfbb18796f`
 - exit_code: `0`
 ```text
@@ -2676,6 +1520,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:30:55.301824Z — target=`test-win7` fingerprint=`ed47f47b5590627d`
 - exit_code: `0`
 ```text
@@ -2693,6 +1538,7 @@ OK
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2773,6 +1619,7 @@ OK (skipped=3)
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3069,6 +1916,7 @@ apply refused: the audit chain must remain append-only
 
 
 
+
 ## 2026-08-10T03:39:41.431777Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -3079,6 +1927,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=295
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3375,6 +2224,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:48:41.810797Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -3646,6 +2496,7 @@ ValueError: substring not found
 
 
 ```
+
 
 
 
@@ -3952,6 +2803,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:54:54.755110Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -3961,6 +2813,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=308
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4252,6 +3105,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4554,6 +3408,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:12:58.013406Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -4846,6 +3701,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5153,6 +4009,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:23:30.485224Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -5449,6 +4306,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:29:03.323324Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -5714,6 +4572,7 @@ First extra element 0:
 
 
 ```
+
 
 
 
@@ -6010,6 +4869,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -6312,6 +5172,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:48:20.358669Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -6603,6 +5464,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -6905,6 +5767,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 11 section(s): archived 11 old section(s); size 508098 > 500000 bytes; size-trimmed 11 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
 
 
 
@@ -7212,6 +6075,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:11:56.988328Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -7508,6 +6372,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -7811,6 +6676,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:26:05.288128Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -8105,6 +6971,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8407,6 +7274,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:38:09.220462Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -8701,6 +7569,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -9005,6 +7874,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T11:40:15.500433Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -9018,6 +7888,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=279
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -9250,6 +8121,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -9487,6 +8359,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T11:57:17.321547Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -9718,6 +8591,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -9956,6 +8830,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T12:21:56.190981Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -10191,6 +9066,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T12:25:32.051464Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -10339,6 +9215,7 @@ AssertionError: '`DECISION-REQUIRED`' not found in '# 外部依赖与待批门�
 [gate] totals: {"discovered": 1490, "failed": 1, "passed": 1486, "skipped": 3}
 
 ```
+
 
 
 
@@ -10550,6 +9427,7 @@ AssertionError: False is not true : {'name': 'recent_gate', 'ok': False, 'level'
 
 
 
+
 ## 2026-08-10T12:31:58.006570Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -10563,6 +9441,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=292
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -10801,6 +9680,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 500847 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
 
 
 ## 2026-08-10T12:36:16.306731Z — target=`quality` fingerprint=`b96157dbb895a417`
@@ -11057,6 +9937,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T13:16:07.315668Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -11289,6 +10170,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T13:19:54.917870Z — target=`quality` fingerprint=`b96157dbb895a417`
@@ -11545,6 +10427,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T13:30:35.523924Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -11777,6 +10660,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T13:34:20.415160Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -12014,6 +10898,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T13:36:21.330534Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -12249,6 +11134,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T13:39:42.078535Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -12482,6 +11368,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T13:41:32.643713Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -12721,6 +11608,7 @@ audit seal: fully-sealed
 
 [gate] records self-trim: [verification] archive 12 section(s): archived 12 old section(s); size 501986 > 500000 bytes; size-trimmed 12 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
 
+
 ## 2026-08-10T13:44:59.070850Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -12952,6 +11840,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T13:46:50.428304Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -13182,6 +12071,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-10T13:52:31.707419Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
@@ -13416,6 +12306,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T13:54:23.673880Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -13648,6 +12539,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-10T13:57:21.946524Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
@@ -13882,6 +12774,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T14:01:54.433062Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -14109,6 +13002,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T14:03:43.941780Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -14327,6 +13221,635 @@ $ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
 }
 [split] pkg: models=2
 discovered=1513 passed=1510 failed=0 skipped=3 duration_ms=69970
+  [unit] discovered=1513 passed=1510 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+[gate] counts: discovered=1513 passed=1510 failed=0 skipped=3
+[gate] totals: {"discovered": 1513, "failed": 0, "passed": 1510, "skipped": 3}
+audit seal: fully-sealed
+
+```
+
+
+## 2026-08-10T23:47:14.391267Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `1`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+test_arch_review_16_docs_registry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_15_risk_ledger.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-OPTIMIZE",
+      "ac": "AC-8",
+      "title": "release_check 子进程编码健壮性（2026-08-10 架构风险修复）：GBK 控制台下 scripts/traceability_check.py 打印矩阵中非 GBK 字符（U+2194）触发 UnicodeEncodeError，release_check 发布门禁 critical（既有缺陷，历次矩阵已含该字符）；_run 为子进程强制 PYTHONIOENCODING=utf-8 + 回归守卫",
+      "code": [
+        "scripts/release_check.py"
+      ],
+      "tests": [
+        "tests/unit/test_eng_optimize_8_release_encoding.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/release_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_eng_optimize_8_release_encoding.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+tail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1513 passed=1509 failed=1 skipped=3 duration_ms=80931
+  [unit] discovered=1513 passed=1509 failed=1 skipped=3 exit=1
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+======================================================================
+FAILED/ERROR: test_decisions_sections_are_chronologically_ordered (unit.test_records_archive.DecisionsChronologicalGuardTests.test_decisions_sections_are_chronologically_ordered)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_records_archive.py", line 287, in test_decisions_sections_are_chronologically_ordered
+    self.assertGreaterEqual(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        date,
+        ^^^^^
+    ...<2 lines>...
+        f"({header[:40]!r})",
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: '2026-08-10' not greater than or equal to '2026-08-11' : DECISIONS sections out of order: 2026-08-11 -> 2026-08-10 ('2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门')
+
+[gate] counts: discovered=1513 passed=1509 failed=1 skipped=3
+[gate] totals: {"discovered": 1513, "failed": 1, "passed": 1509, "skipped": 3}
+
+```
+
+
+## 2026-08-10T23:50:17.691371Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `1`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+test_arch_review_16_docs_registry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_15_risk_ledger.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-OPTIMIZE",
+      "ac": "AC-8",
+      "title": "release_check 子进程编码健壮性（2026-08-10 架构风险修复）：GBK 控制台下 scripts/traceability_check.py 打印矩阵中非 GBK 字符（U+2194）触发 UnicodeEncodeError，release_check 发布门禁 critical（既有缺陷，历次矩阵已含该字符）；_run 为子进程强制 PYTHONIOENCODING=utf-8 + 回归守卫",
+      "code": [
+        "scripts/release_check.py"
+      ],
+      "tests": [
+        "tests/unit/test_eng_optimize_8_release_encoding.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/release_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_eng_optimize_8_release_encoding.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+ersion",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1513 passed=1509 failed=1 skipped=3 duration_ms=121480
+  [unit] discovered=1513 passed=1509 failed=1 skipped=3 exit=1
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+======================================================================
+FAILED/ERROR: test_recent_gate_real_repo_ok (unit.test_release_check.ReleaseCheckTests.test_recent_gate_real_repo_ok)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_release_check.py", line 165, in test_recent_gate_real_repo_ok
+    self.assertTrue(check["ok"], check)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : {'name': 'recent_gate', 'ok': False, 'level': 'critical', 'detail': 'latest gate artifact failed: exit=1 failed=1 discovered=1513 (fast-2026-08-10T23-47-14.391267Z.json)'}
+
+[gate] counts: discovered=1513 passed=1509 failed=1 skipped=3
+[gate] totals: {"discovered": 1513, "failed": 1, "passed": 1509, "skipped": 3}
+
+```
+
+
+[gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 503152 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
+## 2026-08-10T23:53:48.218381Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `0`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+test_arch_review_16_docs_registry.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_15_risk_ledger.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ENG-OPTIMIZE",
+      "ac": "AC-8",
+      "title": "release_check 子进程编码健壮性（2026-08-10 架构风险修复）：GBK 控制台下 scripts/traceability_check.py 打印矩阵中非 GBK 字符（U+2194）触发 UnicodeEncodeError，release_check 发布门禁 critical（既有缺陷，历次矩阵已含该字符）；_run 为子进程强制 PYTHONIOENCODING=utf-8 + 回归守卫",
+      "code": [
+        "scripts/release_check.py"
+      ],
+      "tests": [
+        "tests/unit/test_eng_optimize_8_release_encoding.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "scripts/release_check.py",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_eng_optimize_8_release_encoding.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+ {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1513 passed=1510 failed=0 skipped=3 duration_ms=129948
   [unit] discovered=1513 passed=1510 failed=0 skipped=3 exit=0
 reject path received a malformed import record (object); refusing to fabricate decision_maker
 apply refused: the audit chain must remain append-only

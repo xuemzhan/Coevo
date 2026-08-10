@@ -5428,4 +5428,23 @@ security-reviewer 双签门禁。
 - Verification: 用户指示不做全量门禁；定向 3/3；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1470 全绿）。循环状态置为 `blocked`（blocking_issue=需业务负责人裁决 MVP 完成状态）。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-11 - CTAF 设计提案 v0.4.1 实现方视角预评审交付（非独立评审）
+- 授权：业务负责人明确授权"实现方视角的 CTAF 预评审"（仅预审，不替代独立评审）。
+- 交付：`docs/process/ctaf-pre-review-2026-08-11.md`——通读提案全文 19 章，对照
+  `src/coevo/framework/` 13 模块、20+ 框架测试、8 份框架契约与框架 README，产出
+  提案→实现→测试对照表、发现清单与独立评审交接清单。
+- 结论：实现与提案高度对齐（M1a/M1b/M2/M3/M4/M5/M6/M7/M9 核心切片已交付）；
+  无阻断性设计缺陷；发现 3 处文档一致性缺陷（P1）+ 2 处交付跟踪问题（P2）：
+  F-1 §19.4 累计口径（45/38）与 §19.3/README（60/53）矛盾；
+  F-2 框架 README 威胁矩阵 15 行 vs 提案 16 行；
+  F-3 §6.1 trace_id 标注 `<uuid>` 与 §7.3.1/实现（64-hex SHA-256）不一致；
+  F-4 README 待补充文档表过时（M1a/M2 已交付但文档路径不同）；
+  F-5 "已交付"口径需显式限定为核心切片（M8/L2 RBAC 仍为设计/未来项）。
+- 边界：本预审为实现方视角，不替代 CTAF-PROPOSAL-REVIEW（仍 REVIEW-REQUIRED）；
+  独立评审重点交接清单见报告 §5。
+- Verification: 文档+登记变更；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；
+  按用户指令未运行全量 quality。
+- Security review: 纯文档交付，无运行时/密钥/审计逻辑变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（授权实现方视角 CTAF 预评审）；executed by: Codex (loop-engineer)。
 
