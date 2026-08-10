@@ -5606,3 +5606,11 @@ security-reviewer 双签门禁。
 - Security review: 纯增量守卫函数+测试+文档，不改既有 scope 语义、密钥句柄处理与已审查密码路径；US-5-AC-2 正式产品接入仍为外部审批依赖（crypto-mode-isolation.md §3 明示，无生产组合根可满足 production 守卫前不宣称生产就绪），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-7 收口（模型建议/正式状态类型边界；增量门禁豁免）
+- Work item: `REVIEW2-7`（第二位架构师审查 P2：模型输出与正式状态类型边界）status=done；deps=[ENG-BASE-AC-1]。
+- Delivery: `src/coevo/model/contract.py` 新增 `SuggestionEvidence` / `DraftSuggestion`（`requires_confirmation` 默认 True、`confidence∈[0,1]`、构造 fail-closed）/ `ConfirmedStateChange`（`confirmed_by` / `confirmed_at` ISO-8601 UTC Z / `source_draft_id` / 非空 `changes`）与 `ensure_confirmed_state_change` 守卫（拒绝原始 dict、未确认草稿与任意对象，接受后重新校验）；`model/__init__.py` 再导出；契约文档 `docs/architecture/state-change-boundary.md`（两层类型/守卫/接入纪律/变更纪律）；守卫测试 `tests/unit/test_review2_7_state_boundary.py` 8 项。
+- 边界说明：现有正式状态 API（merge MergeRecord、knowledge ReviewDecision、progress_capture formally_accepted 等）已使用类型化模型与确认路径；本契约为统一边界，后续随各工作项逐个显式接入（文档 §3 记录，避免一次性大重构）。
+- Verification: 用户指示不做全量门禁；定向 8/8；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1432 全绿）。
+- Security review: 纯新增类型+守卫+测试+文档，不放宽任何既有确认边界（反而显式收紧），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
