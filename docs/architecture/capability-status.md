@@ -51,6 +51,8 @@
 - 报告/README 的能力声明必须引用本矩阵的级别；
 - BACKLOG 新增字段（如 `capability_level`）的正式采用，并入 ARCH-REVIEW-3 范围治理
   裁决（本矩阵为先行契约）。
+- 进入 `PRODUCTION_READY` 前必须先关闭 `docs/architecture/external-gates.md`
+  中的对应门禁（外部审批 / 独立安全审查 / 业务决策）。
 
 ## 4. 守卫测试
 
