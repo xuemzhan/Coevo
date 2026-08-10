@@ -9,11 +9,15 @@ network.
 from __future__ import annotations
 
 from .contract import (
+    ConfirmedStateChange,
+    DraftSuggestion,
     ModelError,
     ModelProvider,
     ModelUnavailableError,
     ModelValidationError,
     NullModelProvider,
+    SuggestionEvidence,
+    ensure_confirmed_state_change,
     parse_json_object,
 )
 from .deepseek import DeepSeekProvider
@@ -61,7 +65,9 @@ def select_provider(config: ModelConfig | None = None) -> ModelProvider:
 
 
 __all__ = [
+    "ConfirmedStateChange",
     "DeepSeekProvider",
+    "DraftSuggestion",
     "ModelConfig",
     "ModelError",
     "ModelProvider",
@@ -71,6 +77,8 @@ __all__ = [
     "OpenAICompatibleProvider",
     "PromptRegistry",
     "PromptTemplate",
+    "SuggestionEvidence",
+    "ensure_confirmed_state_change",
     "load_model_config",
     "load_prompt_registry",
     "is_loopback",

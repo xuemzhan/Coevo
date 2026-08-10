@@ -17,7 +17,11 @@ boundaries (see ``task_decomposition.agent``).
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
+from typing import Mapping
 from typing import Protocol, runtime_checkable
+
+from src.coevo.timefmt import is_iso_utc_z
 
 
 class ModelError(Exception):
@@ -83,11 +87,124 @@ def parse_json_object(text: str, *, max_bytes: int) -> dict[str, object]:
     return parsed
 
 
+@dataclass(frozen=True)
+class SuggestionEvidence:
+    """A traceable reference supporting a draft suggestion (REVIEW2-7)."""
+
+    kind: str
+    source: str
+    digest: str
+
+    def __post_init__(self) -> None:
+        for label, value in (
+            ("kind", self.kind),
+            ("source", self.source),
+            ("digest", self.digest),
+        ):
+            if not isinstance(value, str) or not value:
+                raise ModelValidationError(
+                    f"evidence.{label} must be a non-empty string"
+                )
+
+
+@dataclass(frozen=True)
+class DraftSuggestion:
+    """The ONLY shape a model output may enter the business layer as.
+
+    A draft is never formal state: it must be routed through a
+    human-confirmation boundary before any state write. ``requires_
+    confirmation`` defaults to True and cannot be silently disabled
+    (REVIEW2-7).
+    """
+
+    source: str
+    content: Mapping[str, object]
+    evidence: tuple[SuggestionEvidence, ...] = ()
+    confidence: float = 0.0
+    requires_confirmation: bool = True
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.source, str) or not self.source:
+            raise ModelValidationError("source must be a non-empty string")
+        if not isinstance(self.content, Mapping):
+            raise ModelValidationError("content must be a mapping")
+        if not isinstance(self.confidence, (int, float)) or isinstance(
+            self.confidence, bool
+        ):
+            raise ModelValidationError("confidence must be a float")
+        if not 0.0 <= float(self.confidence) <= 1.0:
+            raise ModelValidationError(
+                f"confidence must be within [0, 1]; got {self.confidence!r}"
+            )
+        if not isinstance(self.requires_confirmation, bool):
+            raise ModelValidationError("requires_confirmation must be a bool")
+
+
+@dataclass(frozen=True)
+class ConfirmedStateChange:
+    """The ONLY shape a formal state write API may accept (REVIEW2-7).
+
+    Carries the human authorisation (who/when), the originating draft and
+    the exact field changes. Raw dicts and unconfirmed drafts are rejected
+    by :func:`ensure_confirmed_state_change`.
+    """
+
+    confirmed_by: str
+    confirmed_at: str
+    source_draft_id: str
+    changes: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        for label, value in (
+            ("confirmed_by", self.confirmed_by),
+            ("confirmed_at", self.confirmed_at),
+            ("source_draft_id", self.source_draft_id),
+        ):
+            if not isinstance(value, str) or not value:
+                raise ModelValidationError(
+                    f"{label} must be a non-empty string"
+                )
+        if not is_iso_utc_z(self.confirmed_at):
+            raise ModelValidationError(
+                "confirmed_at must be ISO-8601 UTC with trailing Z"
+            )
+        if not isinstance(self.changes, Mapping) or not self.changes:
+            raise ModelValidationError(
+                "changes must be a non-empty mapping"
+            )
+
+
+def ensure_confirmed_state_change(change: object) -> ConfirmedStateChange:
+    """Fail-closed guard: only ConfirmedStateChange may reach a state write.
+
+    Rejects raw dicts and unconfirmed :class:`DraftSuggestion` objects so a
+    model output can never bypass the human-confirmation boundary
+    (REVIEW2-7).
+    """
+
+    if not isinstance(change, ConfirmedStateChange):
+        raise ModelValidationError(
+            "formal state writes require a ConfirmedStateChange; "
+            f"got {type(change).__name__}"
+        )
+    # Re-validate so a tampered/incorrectly-constructed instance fails closed.
+    return ConfirmedStateChange(
+        confirmed_by=change.confirmed_by,
+        confirmed_at=change.confirmed_at,
+        source_draft_id=change.source_draft_id,
+        changes=dict(change.changes),
+    )
+
+
 __all__ = [
+    "ConfirmedStateChange",
+    "DraftSuggestion",
     "ModelError",
     "ModelProvider",
     "ModelUnavailableError",
     "ModelValidationError",
     "NullModelProvider",
+    "SuggestionEvidence",
+    "ensure_confirmed_state_change",
     "parse_json_object",
 ]
