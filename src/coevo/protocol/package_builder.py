@@ -14,17 +14,24 @@ SM2 key-transport) remain **fail-closed** in P1; the builder
 raises :class:`AgentPackageCryptoUnavailableError` when the caller
 asks it to actually encrypt / sign / wrap.
 
-Important: the signature record (协议 § 12) is **out-of-band**
-metadata in this slice. It is carried on :class:`BuiltPackage` as
-a Python attribute, NOT embedded in the envelope wire. The
-receiver contract (协议 § 13 步骤 16) is to verify the manifest
-signature before importing the package; in this slice the
-verification call surfaces a fail-closed error until an approved
-SM2 product is wired in. A future slice will define a wire carrier
-for the signature (either by extending the envelope under a
-reserved extensions key, or by adding an auxiliary block). For
-now, the signature lives next to the package bytes in the
-receiver's storage layer.
+Signature carrier (REVIEW2-3 closure):
+
+* The deliverable path (:func:`build_encrypted_package` /
+  :func:`open_encrypted_package`) embeds ``sender.sig`` INSIDE the
+  authenticated-encrypted inner payload (协议 § 8 layout:
+  ``manifest.json`` + ``signatures/sender.sig``), so the ``.agent``
+  file is self-contained: bytes and signature share one lifetime,
+  and a receiver can verify the file standalone after decryption.
+  The signature covers the canonical manifest bytes (协议 § 12) and
+  the envelope is bound as AEAD associated data.
+* The P1 unsigned surface (:func:`build_unsigned_package` /
+  :func:`parse_package_bytes`) is a **fail-closed pre-signature
+  carrier** used while an approved SM2 product is awaited
+  (AGENTS.md §6). Its :class:`BuiltPackage` ``signature`` is a
+  placeholder (``signature == ""``); any verification attempt
+  raises :class:`AgentPackageCryptoVerifyError`. It must NOT be
+  presented as a complete, independently verifiable signed
+  artifact.
 
 Non-goals
 ---------
@@ -95,11 +102,12 @@ class OpenedPackage:
 class BuiltPackage:
     """A wire-encoded .agent package assembled from all four layers.
 
-    ``signature`` is out-of-band metadata; it is not embedded in
-    ``to_bytes()``. The receiver imports the bytes via
-    :func:`parse_package_bytes` and pairs the result with the
-    signature record supplied by the upper-layer storage / audit
-    log (协议 § 13 步骤 16).
+    ``signature`` carries the sender's ``sender.sig`` record. On the
+    deliverable path (:func:`build_encrypted_package`) the same record
+    is embedded inside the authenticated-encrypted payload, so the
+    wire bytes are self-contained. On the P1 unsigned path
+    (:func:`build_unsigned_package`) it is an empty placeholder and
+    verification fails closed (REVIEW2-3).
     """
 
     fixed_header: FixedHeader
@@ -231,10 +239,10 @@ def parse_package_bytes(data: bytes) -> BuiltPackage:
     Trailing bytes are not silently accepted (协议 § 19).
 
     The returned package has a placeholder ``signature`` record
-    whose ``manifest_sm3`` is the digest of the canonical envelope
-    bytes (i.e. a stand-in manifest digest) — the actual
-    sender-supplied signature record must be paired in by the
-    caller via ``package_bytes + storage_layer_signature``.
+    (``signature == ""``); verification fails closed. A real signed
+    package must be produced with :func:`build_encrypted_package`,
+    which embeds ``sender.sig`` inside the encrypted payload
+    (REVIEW2-3).
     """
     if not isinstance(data, bytes):
         raise AgentPackageError("data must be bytes")
