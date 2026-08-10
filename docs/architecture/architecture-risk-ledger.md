@@ -15,6 +15,7 @@
 | P1-3 | CTAF 设计提案（v0.4.1）未经独立架构评审 | P1 | 已登记，待独立评审 | `external-gates.md`（CTAF-PROPOSAL-REVIEW = REVIEW-REQUIRED）；`design-proposal.md`（产品级草案 / 待独立复核后定稿） | 独立架构师评审后定稿 |
 | P2-1 | 大文件 / 高复杂度单文件风险 | P2 | **已修复** | `file-size-budget.md`；`tests/unit/test_eng_optimize_7_file_size_budget.py`（MAX_FILE_LINES=1133、9 个大文件只降不增） | 维护时遵守预算；超阈值先拆分 |
 | P2-2 | 内存态 / 持久态边界不透明 | P2 | **已修复** | `state-persistence.md`；`tests/unit/test_arch_review_11_persistence_matrix.py`（23 个有状态组件） | 新增有状态组件同步更新矩阵 |
+| P2-3 | 发布门禁子进程编码健壮性（GBK 控制台下 traceability 打印 U+2194 崩溃致 release_check critical） | P2 | **已修复** | `scripts/release_check.py`（PYTHONIOENCODING=utf-8）；`tests/unit/test_eng_optimize_8_release_encoding.py` | 子进程 stdout 编码保持 UTF-8；规范路径已健壮 |
 | EXT-1 | Win7 存量环境实机验证未落地 | P2 | 已登记，外部执行 | `known-limitations.md`；`win7-compat-branch.md`（静态专项） | 存量 Win7 环境实机验收 |
 | EXT-2 | CI 未激活（toolchain Release 未上传） | P2 | 已登记，外部执行 | `known-limitations.md`；`ci-artifact.json`；`.github/workflows/quality.yml` | 所有者创建 `toolchain-1.0.0` Release 并上传制品 |
 | EXT-3 | 审计签名密钥托管 / 独立审计节点未落地 | P2 | 已登记，外部执行 | `known-limitations.md`；`audit-key-ceremony.md` | 批准密码产品 / 受控密钥介质后落地 |

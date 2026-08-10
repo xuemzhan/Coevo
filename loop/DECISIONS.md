@@ -5320,6 +5320,21 @@ security-reviewer 双签门禁。
   security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - 风险台账补登 + 锁定链一致性审计（第六波；按用户指令不跑全量门禁）
+- 用户指令："修复所有架构级风险，不跑全量门禁"（第六波收口）。
+- 审计：python-script-lock.tsv（13 项锁定脚本哈希/大小）、toolchain-lock.json
+  script_inventory / control_archive / make.cs source_sha256、.tools/control/control.pyz
+  实况哈希——**全部一致，无漂移**。
+- 补登：架构风险台账新增 P2-3（发布门禁子进程编码健壮性，ENG-OPTIMIZE-8，已修复）；
+  台账守卫同步（风险 ID 集合 + 守卫证据标记）。
+- 结论：仓库内可实施的架构级风险已全部闭环（P1-1/P1-2/P2-1..3 + 文档治理 + 台账）；
+  剩余 P0-1/P0-2/P1-3/EXT-1..3 为外部项，需业务负责人/外部方决策，本台账与
+  external-gates.md 已登记责任与下一步。
+- Verification: 定向 3/3（台账守卫 + 文档登记 + 编码守卫回归）；fast 门禁 exit=0
+  fingerprint=`fb8029ba3cf2de07`；按用户指令未运行全量 quality。
+- Security review: 文档+守卫测试，无运行时/密钥/审计逻辑变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

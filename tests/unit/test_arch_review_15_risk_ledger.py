@@ -21,6 +21,7 @@ class RiskLedgerTests(unittest.TestCase):
             "P1-3",
             "P2-1",
             "P2-2",
+            "P2-3",
             "EXT-1",
             "EXT-2",
             "EXT-3",
@@ -34,6 +35,7 @@ class RiskLedgerTests(unittest.TestCase):
             "state-persistence.md",
             "file-size-budget.md",
             "online-mode-scope.md",
+            "test_eng_optimize_8_release_encoding.py",
         ):
             self.assertIn(marker, text, marker)
 
