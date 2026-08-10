@@ -14,11 +14,17 @@ class BaselineTests(unittest.TestCase):
     def test_quality_gate_covers_product_source_and_preseals_audit(self):
         source=(ROOT/"scripts/quality_gate.py").read_text(encoding="utf-8")
         test_entry=(ROOT/"scripts/test.py").read_text(encoding="utf-8")
-        self.assertIn('"scripts","src","tests"',source)
+        # ENG-OPTIMIZE-5: fmt target reformatted to multi-line; the compileall
+        # arguments (scripts/src/tests) must still be present verbatim.
+        self.assertIn('"compileall"', source)
+        self.assertIn('"scripts"', source)
+        self.assertIn('"src"', source)
+        self.assertIn('"tests"', source)
         # REVIEW2-1: integration discovery pattern now lives in the unified
         # test entry; the gate delegates to it with --suite integration.
         self.assertIn('"*test*.py"', test_entry)
-        self.assertIn('"--suite","integration"', source)
+        self.assertIn('"--suite"', source)
+        self.assertIn('"integration"', source)
         # REVIEW2-2: preflight seal happens before the stage loop inside
         # _run_stages (the loop was renamed to enumerate over argvs).
         self.assertLess(

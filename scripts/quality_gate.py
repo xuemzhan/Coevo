@@ -10,16 +10,36 @@ round-trips into VERIFICATION.md without mojibake on Windows consoles
 (QUALITY-GATE-ENCODING-1).
 """
 from __future__ import annotations
-import argparse, datetime as dt, hashlib, json, os, re, subprocess, sys, time
+
+import argparse
+import datetime as dt
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
+
 from audit_log import append_record, exclusive_lock
 from audit_seal import seal, verify_seal
-ROOT=Path(os.environ.get("COEVO_REPO_ROOT",Path(__file__).resolve().parents[1])); VERIFICATION=ROOT/"loop/VERIFICATION.md"; os.environ.setdefault("COEVO_REPO_ROOT",str(ROOT))
+
+ROOT = Path(
+    os.environ.get("COEVO_REPO_ROOT", Path(__file__).resolve().parents[1])
+)
+VERIFICATION = ROOT / "loop" / "VERIFICATION.md"
+os.environ.setdefault("COEVO_REPO_ROOT", str(ROOT))
 GATE_LOCK=ROOT/"loop/.quality-gate.lock"
 CONTROL=os.environ.get("COEVO_CONTROL_ARCHIVE",str(ROOT/".tools"/"control"/"control.pyz"))
 CHILD_TIMEOUT_SECS=2400
-def control(module,*args): return [sys.executable,CONTROL,module,*args]
+
+
+def control(module, *args):
+    return [sys.executable, CONTROL, module, *args]
+
+
 def gate_env():
     """Child-process environment that forces UTF-8 stdout/stderr capture.
 
@@ -32,6 +52,8 @@ def gate_env():
     env["PYTHONIOENCODING"]="utf-8"
     env["PYTHONUTF8"]="1"
     return env
+
+
 def go_test_argv():
     """Resolve the locked Go executable and return the offline Go test argv.
 
@@ -39,26 +61,82 @@ def go_test_argv():
     quality gate keeps the toolchain fully offline (GOPROXY=off) and only
     stdlib is permitted (no third-party Go modules).
     """
-    lock=json.loads((ROOT/"docs"/"dependencies"/"toolchain-lock.json").read_text(encoding="utf-8"))
-    go_tool=lock["tools"]["go"]["executable"]["path"]
-    return [go_tool,"test","./..."]
-TARGETS={
- "fmt":[[sys.executable,"-m","compileall","-q","-f","scripts","src","tests"]],
- "lint":[[sys.executable,str(ROOT/"scripts"/"validate_opencode.py")],control("traceability_check"),control("audit_log","verify"),[sys.executable,str(ROOT/"scripts"/"audit_seal.py"),"verify","--allow-tail"],[sys.executable,str(ROOT/"scripts"/"archive_records.py"),"--check"],[sys.executable,str(ROOT/"scripts"/"secret_scan.py")]],
- "test":[[sys.executable,str(ROOT/"scripts"/"test.py"),"--suite","unit"],[sys.executable,str(ROOT/"scripts"/"test.py"),"--suite","integration"],go_test_argv()],
- "test-security":[[sys.executable,str(ROOT/"scripts"/"test.py"),"--suite","security"],[os.environ.get("COEVO_NODE_PATH",str(ROOT/".tools"/"node"/"24.14.0"/"node.exe")),"tests/security/path_policy_test.mjs"]],
- "test-e2e":[[sys.executable,str(ROOT/"scripts"/"test.py"),"--suite","e2e"]],
- "test-win7":[[sys.executable,str(ROOT/"scripts"/"test.py"),"--suite","win7"]]}
+    lock = json.loads(
+        (ROOT / "docs" / "dependencies" / "toolchain-lock.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    go_tool = lock["tools"]["go"]["executable"]["path"]
+    return [go_tool, "test", "./..."]
+TARGETS = {
+    "fmt": [
+        [sys.executable, "-m", "compileall", "-q", "-f", "scripts", "src", "tests"]
+    ],
+    "lint": [
+        [sys.executable, str(ROOT / "scripts" / "validate_opencode.py")],
+        control("traceability_check"),
+        control("audit_log", "verify"),
+        [sys.executable, str(ROOT / "scripts" / "audit_seal.py"), "verify", "--allow-tail"],
+        [sys.executable, str(ROOT / "scripts" / "archive_records.py"), "--check"],
+        [sys.executable, str(ROOT / "scripts" / "secret_scan.py")],
+    ],
+    "test": [
+        [sys.executable, str(ROOT / "scripts" / "test.py"), "--suite", "unit"],
+        [sys.executable, str(ROOT / "scripts" / "test.py"), "--suite", "integration"],
+        go_test_argv(),
+    ],
+    "test-security": [
+        [sys.executable, str(ROOT / "scripts" / "test.py"), "--suite", "security"],
+        [
+            os.environ.get(
+                "COEVO_NODE_PATH",
+                str(ROOT / ".tools" / "node" / "24.14.0" / "node.exe"),
+            ),
+            "tests/security/path_policy_test.mjs",
+        ],
+    ],
+    "test-e2e": [
+        [sys.executable, str(ROOT / "scripts" / "test.py"), "--suite", "e2e"]
+    ],
+    "test-win7": [
+        [sys.executable, str(ROOT / "scripts" / "test.py"), "--suite", "win7"]
+    ],
+}
 # ARCH-REVIEW-7: fast tier for iteration loops (compileall + lint + unit);
 # full `quality` stays the release/closure gate (fmt+lint+test+security+e2e).
 # REVIEW2-1: every stage goes through the unified `scripts/test.py` entry,
 # which fails closed on zero-test discovery.
-TARGETS["fast"]=TARGETS["fmt"]+TARGETS["lint"]+[[sys.executable,str(ROOT/"scripts"/"test.py"),"--suite","unit"]]
-GO_TEST_ARGV=TARGETS["test"][-1]
+TARGETS["fast"] = (
+    TARGETS["fmt"]
+    + TARGETS["lint"]
+    + [[sys.executable, str(ROOT / "scripts" / "test.py"), "--suite", "unit"]]
+)
+GO_TEST_ARGV = TARGETS["test"][-1]
 # ARCH-REVIEW-9: the Win7 compatibility subset is part of the full quality
 # gate so the compat profile cannot silently rot.
-def commands(target): return [c for n in ("fmt","lint","test","test-security","test-e2e","test-win7") for c in TARGETS[n]] if target=="quality" else TARGETS[target]
-def fingerprint(argvs): return hashlib.sha256(json.dumps(argvs,separators=(",",":")).encode()).hexdigest()[:16]
+
+
+def commands(target):
+    if target == "quality":
+        return [
+            command
+            for name in (
+                "fmt",
+                "lint",
+                "test",
+                "test-security",
+                "test-e2e",
+                "test-win7",
+            )
+            for command in TARGETS[name]
+        ]
+    return TARGETS[target]
+
+
+def fingerprint(argvs):
+    return hashlib.sha256(
+        json.dumps(argvs, separators=(",", ":")).encode()
+    ).hexdigest()[:16]
 
 def _trim_records_to_policy(verification: Path = VERIFICATION) -> str:
     """Self-maintain loop-record capacity after the gate appended VERIFICATION.
@@ -103,14 +181,16 @@ def run(target):
         ) from exc
 
 def _run_locked(target):
-    argvs=commands(target); fp=fingerprint(argvs); started=time.monotonic()
-    ts=dt.datetime.now(dt.UTC).isoformat().replace("+00:00","Z")
-    timeout_sec=STAGE_TIMEOUTS.get(target,CHILD_TIMEOUT_SECS)
+    argvs = commands(target)
+    fp = fingerprint(argvs)
+    started = time.monotonic()
+    ts = dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
+    timeout_sec = STAGE_TIMEOUTS.get(target, CHILD_TIMEOUT_SECS)
     # Phase A: immutable test execution + machine-readable results artifact.
-    results,rc=_run_stages(target,argvs,timeout_sec)
-    total_ms=int((time.monotonic()-started)*1000)
-    artifact=_write_results_json(target,fp,rc,results,ts,total_ms)
-    output=[stage.output for stage in results]
+    results, rc = _run_stages(target, argvs, timeout_sec)
+    total_ms = int((time.monotonic() - started) * 1000)
+    artifact = _write_results_json(target, fp, rc, results, ts, total_ms)
+    output = [stage.output for stage in results]
     if artifact.startswith("results artifact failed"):
         output.append(artifact+"\n")
     # Phase B: governance recording only after all stages finished.
