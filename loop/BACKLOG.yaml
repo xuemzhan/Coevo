@@ -2006,3 +2006,12 @@ items:
       - tests/e2e/test_arch_review_6_slo_e2e.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-8
+    story: ARCH-REVIEW
+    title: 架构审查 P2-2：记录治理 ADR——DECISIONS 主文件 ADR 式索引摘要（长正文进归档）、VERIFICATION 门禁生成并自修剪、守卫钉最新条目 governance marker；契约文档 + 单元守卫
+    status: done
+    dependencies: [RECORDS-ARCHIVE-1, RECORDS-HYGIENE-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_8_records_governance.py
+    security_review: false
+    protocol_review: false

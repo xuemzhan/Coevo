@@ -5173,4 +5173,12 @@ security-reviewer 双签门禁。
 - Security review: 纯指标聚合（只读统计，不改任何调度/审计/密码行为），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-8 收口（记录治理 ADR；增量门禁豁免）
+- Work item: `ARCH-REVIEW-8`（架构审查 P2-2：记录文件治理）status=done；deps=[RECORDS-ARCHIVE-1, RECORDS-HYGIENE-1]。
+- Delivery: `docs/architecture/decision-records.md`——DECISIONS 主文件保持 ADR 式索引摘要（Decision/Rationale/Verification/Boundary/Governance marker），长正文经 `archive_records.py` 进 `loop/archive/`；VERIFICATION 由门禁 Phase B 生成并自修剪；守卫测试 3 项（契约格式、**最新 DECISIONS 条目保留 governance marker**（防止 marker 被静默丢弃）、归档策略引用）。
+- 说明：既有 ARCH-REVIEW-1..6 与 REVIEW2 系列的 DECISIONS 条目已按该格式书写；本契约固化格式并防止退化；"工具链哈希同步"仅适用于脚本变更，本切片为纯文档+测试无需同步。
+- Verification: 用户指示不做全量门禁；定向 3/3；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1463 全绿）。
+- Security review: 文档+测试，无运行时/密钥/审计行为变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 
