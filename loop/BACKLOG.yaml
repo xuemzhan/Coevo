@@ -1933,3 +1933,12 @@ items:
     # 既有 US-7-AC-2 认证实现已有历史 security-review PASS。
     security_review: false
     protocol_review: false
+  - id: REVIEW2-6
+    story: REVIEW2
+    title: 第二位架构师审查 P1：密码模式隔离门禁——crypto_mode 显式报告 prototype/production、require_production_crypto 生产启动守卫（拒绝原型/无密钥句柄）、注册表拒绝原型；契约文档 + 单元守卫
+    status: done
+    dependencies: [US-4-AC-2-PATH2]
+    acceptance_tests:
+      - tests/unit/test_review2_6_crypto_isolation.py
+    security_review: false
+    protocol_review: false

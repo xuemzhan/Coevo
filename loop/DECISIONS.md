@@ -5598,3 +5598,11 @@ security-reviewer 双签门禁。
 - Security review: 纯测试+文档，无认证逻辑变更（US-7-AC-2 认证实现已有历史 security-review PASS），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-6 收口（密码模式隔离门禁；增量门禁豁免）
+- Work item: `REVIEW2-6`（第二位架构师审查 P1：prototype/production 隔离）status=done；deps=[US-4-AC-2-PATH2]。
+- 现状核验：ProviderScope（MVP_PROTOTYPE/APPROVED_PRODUCT）、validate_provider_scope、ProviderRegistry.require_approved（approved-product + key_handle_backed）已存在；缺口为"显式 crypto_mode 报告 + 生产组合根启动守卫（拒绝原型而非调用时才失败）"。
+- Delivery: `src/coevo/crypto/contract.py` 新增 `crypto_mode(provider)`（prototype/production，未声明/未知 scope fail-closed）与 `require_production_crypto(provider)`（启动守卫：非 production 或 `key_handle_backed != True` 立即抛错）；`crypto/__init__.py` 再导出；契约文档 `docs/architecture/crypto-mode-isolation.md`（模式定义/启动守卫/接线要求/变更纪律）；守卫测试 `tests/unit/test_review2_6_crypto_isolation.py` 9 项（模式报告、未声明 fail-closed、启动守卫拒绝原型、无句柄拒绝、注册表拒绝原型、真实 GmSSL 原型恒为 mvp-prototype、文档守卫）。
+- Verification: 用户指示不做全量门禁；定向 9/9；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1424 全绿）。
+- Security review: 纯增量守卫函数+测试+文档，不改既有 scope 语义、密钥句柄处理与已审查密码路径；US-5-AC-2 正式产品接入仍为外部审批依赖（crypto-mode-isolation.md §3 明示，无生产组合根可满足 production 守卫前不宣称生产就绪），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
