@@ -1996,3 +1996,13 @@ items:
       - tests/unit/test_review2_12_capability_status.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-6
+    story: ARCH-REVIEW
+    title: 架构审查 P1-3：验收指标 SLO 化——src/coevo/slo 纯函数聚合器 + assert_slo_thresholds（空分母 fail-closed、未知指标违规），§20 指标分可门禁化/试点测量；真实管线 e2e 断言调度/审计覆盖/包闭环
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_6_slo_metrics.py
+      - tests/e2e/test_arch_review_6_slo_e2e.py
+    security_review: false
+    protocol_review: false

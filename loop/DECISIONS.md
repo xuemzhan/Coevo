@@ -5166,4 +5166,11 @@ security-reviewer 双签门禁。
 - Security review: 文档+测试，无运行时/密钥/密码行为变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-6 收口（验收指标 SLO 化；增量门禁豁免）
+- Work item: `ARCH-REVIEW-6`（架构审查 P1-3：关键验收指标 SLO 化）status=done；deps=[ENG-BASE-AC-1]。
+- Delivery: `src/coevo/slo/` 纯函数聚合器（`dispatch_success_rate`≥0.95、`replay_rejection_rate`=1.0、`interception_rate`=1.0、`audit_coverage`=1.0、`package_round_trip_rate`=1.0；空分母=0.0 fail-closed、计数越界/类型错误 fail-closed、`assert_slo_thresholds` 未知指标=违规）+ `SLO_DEFAULTS`；契约文档 `docs/architecture/slo-metrics.md`（§20 指标分"可门禁化/试点测量"两类）；模块文档 `docs/modules/slo.md`（含模块索引登记）；单元守卫 7 项 + 模块文档守卫；e2e `tests/e2e/test_arch_review_6_slo_e2e.py` 跑真实 demo 管线并把调度/审计覆盖/包闭环送入断言（实测通过）。
+- Verification: 用户指示不做全量门禁；单元 12/12（含模块文档守卫）；SLO e2e 1/1（真实管线）；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1460 全绿）。
+- Security review: 纯指标聚合（只读统计，不改任何调度/审计/密码行为），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 

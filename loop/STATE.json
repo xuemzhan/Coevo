@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
   "iteration": 30,
-  "current_story": "REVIEW2",
-  "current_item": "REVIEW2-12",
+  "current_story": "ARCH-REVIEW",
+  "current_item": "ARCH-REVIEW-6",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "98f9a87",
+  "last_verified_commit": "83a6785",
   "blocking_issue": "",
-  "updated_at": "2026-08-10T05:06:02.951687Z"
+  "updated_at": "2026-08-10T05:15:12.167463Z"
 }
