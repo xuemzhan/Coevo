@@ -17,6 +17,9 @@
 执行（REVIEW2-1）：该入口对 0 测试发现 fail-closed（exit=3），并输出
 discovered/passed/failed/skipped/duration 摘要，杜绝"0 测试却被当作全绿"。
 
+门禁执行与治理写回分离为 Phase A（不可变执行 + 结果 JSON）/ Phase B（审计/VERIFICATION/
+封缄写回），分阶段独立超时与进度输出，见 `gate-phases.md`（REVIEW2-2）。
+
 ## 2. 纪律
 
 1. 开发/迭代轮次允许仅过 `fast`；**任何宣称 done / 收口 / 发布的行为必须过 `quality`**，

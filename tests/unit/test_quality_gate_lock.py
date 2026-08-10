@@ -35,7 +35,9 @@ class QualityGateLockTests(unittest.TestCase):
         self.assertIn("with exclusive_lock(GATE_LOCK)", source)
         self.assertLess(
             source.index("with exclusive_lock(GATE_LOCK)"),
-            source.index("for argv in argvs"),
+            # REVIEW2-2: the stage loop now lives inside _run_stages, which
+            # is invoked from _run_locked inside the exclusive lock.
+            source.index("_run_stages("),
         )
 
     def test_lint_target_includes_records_archive_check(self):

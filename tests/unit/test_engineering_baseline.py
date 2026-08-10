@@ -19,4 +19,9 @@ class BaselineTests(unittest.TestCase):
         # test entry; the gate delegates to it with --suite integration.
         self.assertIn('"*test*.py"', test_entry)
         self.assertIn('"--suite","integration"', source)
-        self.assertLess(source.index("seal()"),source.index("for argv in argvs"))
+        # REVIEW2-2: preflight seal happens before the stage loop inside
+        # _run_stages (the loop was renamed to enumerate over argvs).
+        self.assertLess(
+            source.index("seal()"),
+            source.index("for index,argv in enumerate(argvs,1)"),
+        )

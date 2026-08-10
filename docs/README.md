@@ -8,7 +8,7 @@
 |---|---|---|
 | `requirements/` | 系统原始需求、MVP 用户故事及验收标准 | `system-requirements.md`、`mvp-user-stories.md` |
 | `constraints/` | 强制性技术约束（含密码方案、私钥保护、审计链等硬约束） | `mandatory-technical-constraints.md` |
-| `architecture/` | MVP 参考架构、技术选型、编排器 seam 契约、离线合并收敛语义与门禁分层策略 | `mvp-reference-architecture.md`、`orchestrator-seam.md`、`merge-convergence.md`、`gate-tiers.md` |
+| `architecture/` | MVP 参考架构、技术选型、编排器 seam 契约、离线合并收敛语义、门禁分层与两阶段化策略 | `mvp-reference-architecture.md`、`orchestrator-seam.md`、`merge-convergence.md`、`gate-tiers.md`、`gate-phases.md` |
 | `protocol/` | `.agent` 任务包协议规范 | `agent-package-protocol.md` |
 | `traceability/` | 需求—代码—测试追踪矩阵 | `requirements-test-matrix.md` |
 | `dependencies/` | 经批准工具的精确版本、来源、哈希与许可证 | `toolchain-lock.json` |

@@ -31,6 +31,7 @@ gate_spec = importlib.util.spec_from_file_location(
 )
 quality_gate = importlib.util.module_from_spec(gate_spec)
 assert gate_spec.loader is not None
+sys.modules[gate_spec.name] = quality_gate
 gate_spec.loader.exec_module(quality_gate)
 
 

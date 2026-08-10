@@ -24,6 +24,7 @@ spec = importlib.util.spec_from_file_location(
 quality_gate = importlib.util.module_from_spec(spec)
 sys.path.insert(0, str(ROOT / "scripts"))
 assert spec.loader is not None
+sys.modules[spec.name] = quality_gate
 spec.loader.exec_module(quality_gate)
 
 

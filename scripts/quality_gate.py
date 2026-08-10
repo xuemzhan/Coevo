@@ -10,7 +10,8 @@ round-trips into VERIFICATION.md without mojibake on Windows consoles
 (QUALITY-GATE-ENCODING-1).
 """
 from __future__ import annotations
-import argparse, datetime as dt, hashlib, json, os, subprocess, sys
+import argparse, datetime as dt, hashlib, json, os, subprocess, sys, time
+from dataclasses import dataclass
 from pathlib import Path
 from audit_log import append_record, exclusive_lock
 from audit_seal import seal, verify_seal
@@ -102,15 +103,93 @@ def run(target):
         ) from exc
 
 def _run_locked(target):
-    argvs=commands(target); fp=fingerprint(argvs); output=[]; rc=0
+    argvs=commands(target); fp=fingerprint(argvs); started=time.monotonic()
+    ts=dt.datetime.now(dt.UTC).isoformat().replace("+00:00","Z")
+    timeout_sec=STAGE_TIMEOUTS.get(target,CHILD_TIMEOUT_SECS)
+    # Phase A: immutable test execution + machine-readable results artifact.
+    results,rc=_run_stages(target,argvs,timeout_sec)
+    total_ms=int((time.monotonic()-started)*1000)
+    artifact=_write_results_json(target,fp,rc,results,ts,total_ms)
+    output=[stage.output for stage in results]
+    if artifact.startswith("results artifact failed"):
+        output.append(artifact+"\n")
+    # Phase B: governance recording only after all stages finished.
+    rc=_record_gate_result(target,fp,rc,output,ts)
+    print(json.dumps({"ok":rc==0,"exit_code":rc,"fingerprint":fp})); return rc
+
+
+@dataclass(frozen=True)
+class StageResult:
+    """Per-stage result collected during Phase A (REVIEW2-2)."""
+
+    argv: tuple[str, ...]
+    exit_code: int
+    duration_ms: int
+    output: str
+
+
+STAGE_TIMEOUTS = {
+    "fmt": 600,
+    "lint": 600,
+    "test": 2400,
+    "test-security": 1800,
+    "test-e2e": 2400,
+    "test-win7": 600,
+    "fast": 1800,
+    "quality": 2400,
+}
+GATE_RESULTS_DIR = ROOT / "loop" / "runtime" / "gate-results"
+
+
+def _run_one(argv, timeout_sec):
+    """Run one stage command and return a StageResult (no recording)."""
+
+    started=time.monotonic()
+    cwd=ROOT
+    env=gate_env()
+    if argv==GO_TEST_ARGV:
+        cwd=ROOT/"go"
+        env["GOPROXY"]="off"
+    try:
+        process=subprocess.run(
+            argv, cwd=cwd, env=env, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=timeout_sec,
+        )
+        combined=process.stdout+process.stderr
+        return StageResult(
+            argv=tuple(argv),
+            exit_code=process.returncode,
+            duration_ms=int((time.monotonic()-started)*1000),
+            output=combined,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return StageResult(
+            argv=tuple(argv),
+            exit_code=13,
+            duration_ms=int((time.monotonic()-started)*1000),
+            output=f"[gate] stage timed out after {timeout_sec}s ({exc})\n",
+        )
+
+
+def _run_stages(target, argvs, timeout_sec):
+    """Phase A: run every stage; the gate performs no governance recording here."""
+
+    results=[]; rc=0
     try:
         seal()
-        if verify_seal()!="fully-sealed": raise RuntimeError("preflight audit seal is incomplete")
-        output.append("preflight audit seal: fully-sealed\n")
-    except Exception as exc:
+        if verify_seal()!="fully-sealed":
+            raise RuntimeError("preflight audit seal is incomplete")
+        results.append(StageResult(
+            argv=("preflight",), exit_code=0, duration_ms=0,
+            output="preflight audit seal: fully-sealed\n",
+        ))
+    except Exception as exc:  # noqa: BLE001 - preflight seal failure stops the gate
         rc=14
-        output.append("preflight audit seal failed: "+str(exc)+"\n")
-    for argv in argvs:
+        results.append(StageResult(
+            argv=("preflight",), exit_code=14, duration_ms=0,
+            output="preflight audit seal failed: "+str(exc)+"\n",
+        ))
+    for index,argv in enumerate(argvs,1):
         if rc: break
         # Stages between the preflight seal and the final seal append gate
         # audit records (and some tests exercise the real chain), leaving an
@@ -124,51 +203,89 @@ def _run_locked(target):
                 raise RuntimeError("stage audit seal is incomplete")
         except Exception as exc:  # noqa: BLE001 - seal failure must stop the gate
             rc=14
-            output.append("stage audit seal failed: "+str(exc)+"\n")
+            results.append(StageResult(
+                argv=argv, exit_code=14, duration_ms=0,
+                output="stage audit seal failed: "+str(exc)+"\n",
+            ))
             break
-        cwd=ROOT
-        env=gate_env()
-        if argv==GO_TEST_ARGV:
-            cwd=ROOT/"go"
-            env["GOPROXY"]="off"
-        try:
-            process=subprocess.run(argv,cwd=cwd,env=env,capture_output=True,text=True,encoding="utf-8",errors="replace",timeout=CHILD_TIMEOUT_SECS)
-        except subprocess.TimeoutExpired as exc:
-            rc=13
-            output.append("$ "+" ".join(argv)+"\n[gate] stage timed out after "
-                          f"{CHILD_TIMEOUT_SECS}s ({exc})\n")
-            break
-        combined=process.stdout+process.stderr
-        output.append("$ "+" ".join(argv)+"\n"+combined)
-        if process.returncode:
+        result=_run_one(argv,timeout_sec)
+        results.append(result)
+        print(
+            f"[gate] stage {index}/{len(argvs)}: exit={result.exit_code} "
+            f"duration_ms={result.duration_ms}",
+            flush=True,
+        )
+        if result.exit_code:
             # Bounded, documented retry: e2e crypto tests may hit transient
             # GmSSL helper launch contention (GCP-E-LAUNCH; see
             # src/coevo/crypto/gmssl_provider.py). Retry once and record it.
-            if any("tests/e2e" in str(part) for part in argv) and "GCP-E-LAUNCH" in combined:
-                try:
-                    retried=subprocess.run(argv,cwd=ROOT,env=gate_env(),capture_output=True,text=True,encoding="utf-8",errors="replace",timeout=CHILD_TIMEOUT_SECS)
-                except subprocess.TimeoutExpired as exc:
-                    rc=13
-                    output.append("\n[gate] e2e retry timed out after "
-                                  f"{CHILD_TIMEOUT_SECS}s ({exc})\n")
-                    break
-                output.append("\n[gate] e2e failed with transient GCP-E-LAUNCH; retried once (bounded)\n$ "+" ".join(argv)+"\n"+retried.stdout+retried.stderr)
-                process=retried
-            rc=process.returncode
+            if any("tests/e2e" in str(part) for part in argv) and "GCP-E-LAUNCH" in result.output:
+                retried=_run_one(argv,timeout_sec)
+                results.append(StageResult(
+                    argv=tuple(argv)+("(retry)",),
+                    exit_code=retried.exit_code,
+                    duration_ms=retried.duration_ms,
+                    output=(
+                        "\n[gate] e2e failed with transient GCP-E-LAUNCH; "
+                        "retried once (bounded)\n" + retried.output
+                    ),
+                ))
+                result=retried
+            rc=result.exit_code
             if rc: break
-    ts=dt.datetime.now(dt.UTC).isoformat().replace("+00:00","Z"); append_record({"ts":ts,"actor":"quality_gate","tool":"quality_gate","target":target,"fingerprint":fp,"exit_code":rc})
+    return results,rc
+
+
+def _write_results_json(target, fp, rc, results, ts, total_ms):
+    """Phase A artifact: machine-readable gate results under loop/runtime/."""
+
+    try:
+        GATE_RESULTS_DIR.mkdir(parents=True,exist_ok=True)
+        payload={
+            "schema_version":"1.0",
+            "target":target,
+            "fingerprint":fp,
+            "exit_code":rc,
+            "ok":rc==0,
+            "started_at":ts,
+            "duration_ms":total_ms,
+            "stages":[
+                {
+                    "argv":list(stage.argv),
+                    "exit_code":stage.exit_code,
+                    "duration_ms":stage.duration_ms,
+                    "output_tail":stage.output[-2000:],
+                }
+                for stage in results
+            ],
+        }
+        path=GATE_RESULTS_DIR/f"{target}-{ts.replace(':','-')}.json"
+        path.write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8")
+        return str(path)
+    except Exception as exc:  # noqa: BLE001 - artifact failure never takes the gate down
+        return f"results artifact failed: {type(exc).__name__}: {exc}"
+
+
+def _record_gate_result(target, fp, rc, output, ts):
+    """Phase B: audit append, final seal, VERIFICATION write and records trim."""
+
+    append_record({"ts":ts,"actor":"quality_gate","tool":"quality_gate","target":target,"fingerprint":fp,"exit_code":rc})
     if rc==0:
         try:
             seal()
-            if verify_seal()!="fully-sealed": raise RuntimeError("final audit seal is incomplete")
+            if verify_seal()!="fully-sealed":
+                raise RuntimeError("final audit seal is incomplete")
             output.append("audit seal: fully-sealed\n")
-        except Exception as exc: rc=14; output.append("audit seal failed: "+str(exc)+"\n")
-    with VERIFICATION.open("a",encoding="utf-8") as stream: stream.write(f"\n## {ts} — target=`{target}` fingerprint=`{fp}`\n- exit_code: `{rc}`\n```text\n{''.join(output)[-8000:]}\n```\n")
+        except Exception as exc:  # noqa: BLE001 - seal failure must fail the gate
+            rc=14
+            output.append("audit seal failed: "+str(exc)+"\n")
+    with VERIFICATION.open("a",encoding="utf-8") as stream:
+        stream.write(f"\n## {ts} — target=`{target}` fingerprint=`{fp}`\n- exit_code: `{rc}`\n```text\n{''.join(output)[-8000:]}\n```\n")
     trim_note = _trim_records_to_policy()
     if trim_note:
         with VERIFICATION.open("a",encoding="utf-8") as stream:
             stream.write(f"\n[gate] records self-trim: {trim_note}\n")
-    print(json.dumps({"ok":rc==0,"exit_code":rc,"fingerprint":fp})); return rc
+    return rc
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument("--target",required=True,choices=[*TARGETS,"quality"])
     try:
