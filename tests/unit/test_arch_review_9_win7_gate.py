@@ -33,12 +33,9 @@ class Win7GateTests(unittest.TestCase):
             [
                 [
                     sys.executable,
-                    "-m",
-                    "unittest",
-                    "discover",
-                    "-s",
-                    "tests/win7",
-                    "-v",
+                    str(ROOT / "scripts" / "test.py"),
+                    "--suite",
+                    "win7",
                 ]
             ],
         )
@@ -49,7 +46,7 @@ class Win7GateTests(unittest.TestCase):
         self.assertIn(win7_argv, quality)
         self.assertEqual(
             quality_gate.fingerprint(quality),
-            "e1b4d1226e2794df",
+            "b96157dbb895a417",
         )
 
     def test_make_shim_exposes_test_win7(self) -> None:

@@ -13,6 +13,10 @@
   test-security + test-e2e + test-win7（Win7 兼容子集）。作为 mvp-complete、
   发布与审计收口的唯一权威门槛。
 
+所有测试阶段统一经 `python scripts/test.py --suite <unit|integration|security|e2e|win7>`
+执行（REVIEW2-1）：该入口对 0 测试发现 fail-closed（exit=3），并输出
+discovered/passed/failed/skipped/duration 摘要，杜绝"0 测试却被当作全绿"。
+
 ## 2. 纪律
 
 1. 开发/迭代轮次允许仅过 `fast`；**任何宣称 done / 收口 / 发布的行为必须过 `quality`**，

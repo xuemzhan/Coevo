@@ -36,12 +36,9 @@ class FastTierTests(unittest.TestCase):
             + [
                 [
                     sys.executable,
-                    "-m",
-                    "unittest",
-                    "discover",
-                    "-s",
-                    "tests/unit",
-                    "-v",
+                    str(ROOT / "scripts" / "test.py"),
+                    "--suite",
+                    "unit",
                 ]
             ]
         )
@@ -67,7 +64,7 @@ class FastTierTests(unittest.TestCase):
         )
         self.assertEqual(
             quality_gate.fingerprint(quality_gate.commands("quality")),
-            "e1b4d1226e2794df",
+            "b96157dbb895a417",
         )
 
     def test_make_shim_exposes_fast_target(self) -> None:

@@ -13,6 +13,10 @@ class BaselineTests(unittest.TestCase):
         self.assertEqual([],validator.validate(False))
     def test_quality_gate_covers_product_source_and_preseals_audit(self):
         source=(ROOT/"scripts/quality_gate.py").read_text(encoding="utf-8")
+        test_entry=(ROOT/"scripts/test.py").read_text(encoding="utf-8")
         self.assertIn('"scripts","src","tests"',source)
-        self.assertIn('"-p","*test*.py"',source)
+        # REVIEW2-1: integration discovery pattern now lives in the unified
+        # test entry; the gate delegates to it with --suite integration.
+        self.assertIn('"*test*.py"', test_entry)
+        self.assertIn('"--suite","integration"', source)
         self.assertLess(source.index("seal()"),source.index("for argv in argvs"))
