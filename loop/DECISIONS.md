@@ -5501,3 +5501,11 @@ security-reviewer 双签门禁。
 - Security review: 本项为文档+测试契约，不涉及身份/密钥/文件解析/权限/审计代码改动，不触发 security-reviewer（security_review=false 保持）。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-2 收口（离线合并收敛语义；增量门禁豁免）
+- Work item: `ARCH-REVIEW-2`（P0-2 离线合并收敛性）status=done；deps=[US-10-AC-1]。
+- Delivery: `docs/architecture/merge-convergence.md`（合并代数定位：串行化+冲突停止、非 CRDT；收敛不变量 P1-P6：同序重放确定性 / 重复包幂等 / HOLD 全有或全无 / 陈旧基线串行化 / 版本恰好 +1 / 重放收敛+冲突人工裁决后重提；部分合并语义；变更纪律）+ `tests/unit/test_arch_review_2_merge_convergence.py`（6 项固定种子 property 测试：重放确定性、幂等 no-op、HOLD 全有或全无、陈旧基线 HOLD-with-conflict、版本单调 +1、多种子随机序列全程保不变量）；追溯矩阵新增 ARCH-REVIEW/AC-2 行。
+- Verification: 用户指示本轮起不做全量门禁；增量门禁 fmt exit=0 fingerprint=`8d456a2ce09245c7`、lint exit=0 fingerprint=`5103146e112f2dd1`（含 archive_records --check、audit fully-sealed）；定向 76 项全绿（merge 单元 71 + 集成 3 + 新 property 6）。实现提交 `f11278f`。
+- Security review: 本项为 merge 语义契约文档+纯测试，不涉及身份/密钥/文件解析/权限/审计代码改动，不触发 security-reviewer（security_review=false 保持）。
+- Backlog: 当前仅 ARCH-REVIEW-1/2 done；ARCH-REVIEW-3（blocked 待用户裁决）与 4..9 按 2026-08-10 登记条目排队、逐轮登记。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
