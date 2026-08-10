@@ -5156,6 +5156,13 @@ security-reviewer 双签门禁。
 - Security review: 只读发布检查（文件读取+统计），不改任何运行时/密钥/审计行为，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ENG-OPTIMIZE-4 收口（Ports & Adapters 分层契约；增量门禁豁免）
+- Work item: `ENG-OPTIMIZE-4`（落实第二位架构师 P2 分层建议）status=done；deps=[ENG-BASE-AC-1]。
+- Delivery: `docs/architecture/ports-adapters.md`——Domain Core（不可变模型/确定性规则，无 IO）/ Application（用例/编排/授权/确认）/ Ports（协议接口）/ Adapters（SQLite/文件系统/CNG/GmSSL/WPS/HTTP/模型厂商）四层定义；`src/coevo` 全部包分层映射表；不变量（Domain 无 IO、业务不绑定厂商、外部能力一律走端口、模型输出仅以 DraftSuggestion 进入、新增实现先声明层）；变更纪律。守卫测试 3 项（四层定义、全包覆盖、变更纪律）。
+- Verification: 用户指示不做全量门禁；定向 3/3；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1484 全绿）。
+- Security review: 文档+测试，无运行时/密钥/审计行为变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：
