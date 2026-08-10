@@ -2146,3 +2146,12 @@ items:
       - tests/unit/test_arch_review_14_ctaf_draft_guard.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-15
+    story: ARCH-REVIEW
+    title: 架构风险台账——历次架构审查风险统一登记（P0-1/P0-2/P1-1..3/P2-1..2/EXT-1..3，处置状态+证据+责任），防止风险隐式消失或回归；守卫测试
+    status: done
+    dependencies: [ARCH-REVIEW-13, ARCH-REVIEW-14]
+    acceptance_tests:
+      - tests/unit/test_arch_review_15_risk_ledger.py
+    security_review: false
+    protocol_review: false
