@@ -5163,6 +5163,13 @@ security-reviewer 双签门禁。
 - Security review: 文档+测试，无运行时/密钥/审计行为变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ENG-OPTIMIZE-5 收口（quality_gate.py 可读性重构；增量门禁豁免）
+- Work item: `ENG-OPTIMIZE-5`（落实第二位架构师 P2 门禁代码可维护性）status=done；deps=[ENG-OPTIMIZE-3]。
+- Delivery: `scripts/quality_gate.py` 保守重构——import/ROOT/VERIFICATION 多行化、`control`/`commands`/`fingerprint` 一行 def 展开、TARGETS 字典逐条多行、`TARGETS["fast"]` 与 `_run_locked` 头多行化；**命令集与 fingerprint 逐字节不变**（fast `fb8029ba3cf2de07`、quality `b96157dbb895a417` 复验一致）；`test_engineering_baseline` 两处紧凑子串断言适配为空格容错（语义断言不变）；哈希锁三轮同步。
+- Verification: 用户指示不做全量门禁；相关守卫 25/25（含 gate tiers/quality lock/engineering baseline/eng 计数与 JSON 派生）；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；单元 1484 全绿。
+- Security review: 纯格式重构（行为零变化、fingerprint 钉证），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

@@ -2051,6 +2051,17 @@ items:
       - tests/unit/test_eng_optimize_4_ports_adapters.py
     security_review: false
     protocol_review: false
+  - id: ENG-OPTIMIZE-5
+    story: ENG-OPTIMIZE
+    title: quality_gate.py 可读性重构（第二位架构师 P2）——压缩单行语句/一行 def 展开为多行；命令集与 fingerprint 逐字节不变；守卫测试与 fast 门禁复验；哈希锁同步
+    status: done
+    dependencies: [ENG-OPTIMIZE-3]
+    acceptance_tests:
+      - tests/unit/test_arch_review_7_gate_tiers.py
+      - tests/unit/test_eng_optimize_1_gate_counts.py
+      - tests/unit/test_eng_optimize_2_verification_from_json.py
+    security_review: false
+    protocol_review: false
   - id: ARCH-REVIEW-4
     story: ARCH-REVIEW
     title: 架构审查 P1-1：子智能体 Agent 契约——七个专业子智能体设计期 Manifest 目录（能力闭集/服务模块/model_binding/人工确认点/工具策略），运行时注册仍经 guard_registration；契约文档 + 单元守卫
