@@ -1921,3 +1921,15 @@ items:
       - tests/unit/test_wps_launcher.py
     security_review: false
     protocol_review: false
+  - id: REVIEW2-5
+    story: REVIEW2
+    title: 第二位架构师审查 P1：驾驶舱 HTTP 认证黑盒矩阵——真实 HTTP 服务黑盒覆盖无 token 写/Host 伪造/CSRF+Origin 双头/显式确认/会话过期写/撤销后重放写 + 成功基线；契约矩阵文档
+    status: done
+    dependencies: [US-7-AC-2, REVIEW2-4]
+    acceptance_tests:
+      - tests/integration/test_review2_5_http_auth_matrix.py
+      - tests/integration/test_cockpit_http_server.py
+    # 本切片为黑盒测试+矩阵文档，不改任何认证/会话/CSRF/Origin 逻辑；
+    # 既有 US-7-AC-2 认证实现已有历史 security-review PASS。
+    security_review: false
+    protocol_review: false

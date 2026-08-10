@@ -5590,3 +5590,11 @@ security-reviewer 双签门禁。
 - Security review: 本切片不改变鉴权/会话/CSRF/Origin 语义（集成测试仍验证 403），无身份/密钥/审计语义变更，security_review=false 保持；HTTP 全链路黑盒矩阵由 REVIEW2-5 继续补齐。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-5 收口（驾驶舱 HTTP 认证黑盒矩阵；增量门禁豁免）
+- Work item: `REVIEW2-5`（第二位架构师审查 P1：HTTP 全链路认证）status=done；deps=[US-7-AC-2, REVIEW2-4]。
+- 覆盖盘点：既有 test_cockpit_http_server 已覆盖读路径无 token、Host 伪造、WPS 写 CSRF/Origin/confirm、会话过期（读）；缺口为**写路径**黑盒矩阵与撤销重放。
+- Delivery: `tests/integration/test_review2_5_http_auth_matrix.py` 对真实 HTTP 服务黑盒 7 项——成功基线（200+started）、无 token 写 401、写路径 Host 伪造 403、CSRF/Origin 双头缺一 403、无显式确认 403、会话过期写 401、撤销后重放同一写 401（用 CockpitSessionManager.revoke）；契约矩阵文档 `docs/architecture/http-auth-matrix.md`（请求类型/必备/用例/期望 + 变更纪律）。不改任何认证/会话/CSRF/Origin 生产逻辑。
+- Verification: 用户指示不做全量门禁；黑盒矩阵 7/7；既有 cockpit HTTP 集成 24/24 回归（共 31/31）；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1415 全绿）。
+- Security review: 纯测试+文档，无认证逻辑变更（US-7-AC-2 认证实现已有历史 security-review PASS），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
