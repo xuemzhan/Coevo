@@ -1857,3 +1857,12 @@ items:
       - tests/unit/test_arch_review_2_merge_convergence.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-7
+    story: ARCH-REVIEW
+    title: 架构审查 P2-1：门禁分层——quality_gate 增加 fast target（compile+lint+unit），全量 quality 保留为发布/收口门槛；make.cs 暴露 fast；哈希锁同步
+    status: done
+    dependencies: [QUALITY-GATE-ENCODING-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_7_gate_tiers.py
+    security_review: false
+    protocol_review: false

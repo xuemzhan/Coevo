@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "iteration": 30,
   "current_story": "ARCH-REVIEW",
-  "current_item": "ARCH-REVIEW-2",
+  "current_item": "ARCH-REVIEW-7",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
-  "last_verified_commit": "f11278f",
+  "last_verified_commit": "bf7a3e6",
   "blocking_issue": "",
-  "updated_at": "2026-08-10T03:21:13.209802Z"
+  "updated_at": "2026-08-10T03:29:02.961122Z"
 }

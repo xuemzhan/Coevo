@@ -5509,3 +5509,10 @@ security-reviewer 双签门禁。
 - Backlog: 当前仅 ARCH-REVIEW-1/2 done；ARCH-REVIEW-3（blocked 待用户裁决）与 4..9 按 2026-08-10 登记条目排队、逐轮登记。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-7 收口（门禁分层 fast target；增量门禁豁免）
+- Work item: `ARCH-REVIEW-7`（P2-1 门禁分层）status=done；deps=[QUALITY-GATE-ENCODING-1]。
+- Delivery: `scripts/quality_gate.py` 新增 `fast` target（= compileall + lint + 单元测试，迭代内环），`quality` 命令集与 fingerprint 不变（回归钉 `f742f64aa8dce72c`）；`scripts/tool-shims/make.cs` Targets/usage 暴露 `fast`；哈希锁同步（python-script-lock.tsv 的 quality_gate.py 行重哈希、make.cs `ScriptInventorySha256`=tsv 新 sha256 `e20cfc89...`、toolchain-lock.json `make_compatibility_shim.source_sha256/source_size/script_inventory` 同步）；契约文档 `docs/architecture/gate-tiers.md`；守卫测试 `tests/unit/test_arch_review_7_gate_tiers.py`（4 项）。实现提交 `bf7a3e6`。
+- Verification: 用户指示不做全量门禁；新 fast 分层门禁端到端运行 exit=0 fingerprint=`b3b305cfbb18796f`（compileall+lint+单元全绿）；守卫 4/4。收口依据 = fast 门禁 + 定向守卫。
+- Security review: 门禁脚本/哈希锁变更不涉及身份/密钥/文件解析/权限/审计语义（validate_opencode、secret_scan 均在 fast 的 lint 阶段通过），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
