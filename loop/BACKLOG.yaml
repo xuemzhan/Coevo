@@ -1833,3 +1833,85 @@ items:
       - tests/unit/test_progress_capture.py
     security_review: false
     protocol_review: false
+  # ---------- ARCH-REVIEW 系列：2026-08-10 资深架构师审查结论拆分（用户指令"拆分成工作项然后逐条落实"） ----------
+  - id: ARCH-REVIEW-1
+    story: ARCH-REVIEW
+    title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化
+    status: ready
+    dependencies: [US-4-AC-2, US-16-AC-8-hybrid-orchestrator-v0.1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_1_orchestrator_seam.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-2
+    story: ARCH-REVIEW
+    title: 架构审查 P0-2：离线合并收敛性——任意顺序重放同一组结果包收敛到同一主版本；部分合并+后续提交语义；幂等/去重；合并代数文档化（可交换/幂等或显式串行化）；property 测试覆盖组合场景
+    status: ready
+    dependencies: [US-10-AC-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_2_merge_convergence.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-3
+    story: ARCH-REVIEW
+    # 需业务负责人裁决：对照 GOAL.md mvp-complete 条件裁决 MVP 完成状态、外部依赖（US-5-AC-2 密码产品审批）显式跟踪、backlog 队列视图恢复
+    title: 架构审查 P0-3：范围治理——裁决 MVP 完成状态与后续路线；外部依赖显式跟踪；backlog 恢复 ready/blocked 队列视图（本登记已恢复队列视图，裁决待用户）
+    status: blocked
+    dependencies: []
+    acceptance_tests: []
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-4
+    story: ARCH-REVIEW
+    title: 架构审查 P1-1：子智能体 Agent 契约——为七个专业子智能体登记 Manifest（能力/工具策略/模型绑定/人工确认点），与 framework/manifest_checker 能力闭集打通；规则实现与模型实现切换边界文档化
+    status: ready
+    dependencies: [US-16-AC-1-framework-manifest-checker-v0.1, US-16-AC-3-framework-capability-closedset-v0.1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_4_agent_manifest_registry.py
+    security_review: true
+    protocol_review: false
+  - id: ARCH-REVIEW-5
+    story: ARCH-REVIEW
+    title: 架构审查 P1-2：审计签名密钥生命周期仪式——轮换/离线备份/丢失恢复流程文档 + 守卫测试；不改变现有密码方案与签名链；评估备份签名者机制
+    status: ready
+    dependencies: [US-15-AC-2]
+    acceptance_tests:
+      - tests/security/test_arch_review_5_audit_key_ceremony.py
+    security_review: true
+    protocol_review: false
+  - id: ARCH-REVIEW-6
+    story: ARCH-REVIEW
+    title: 架构审查 P1-3：关键验收指标 SLO 化——调度成功率/消息送达率/审计覆盖率等对照 system-requirements §20 接入门禁断言或 metrics 端点
+    status: ready
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_6_slo_metrics.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-7
+    story: ARCH-REVIEW
+    title: 架构审查 P2-1：门禁分层——quality_gate 增加 fast target（compile+lint+unit），全量 quality 保留为发布/收口门槛
+    status: ready
+    dependencies: [QUALITY-GATE-ENCODING-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_7_gate_tiers.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-8
+    story: ARCH-REVIEW
+    title: 架构审查 P2-2：记录文件治理——DECISIONS/VERIFICATION 主文件瘦身：决策转 ADR 索引式摘要、正文进归档区；工具链哈希同步
+    status: ready
+    dependencies: [RECORDS-ARCHIVE-1, RECORDS-HYGIENE-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_8_records_governance.py
+    security_review: false
+    protocol_review: false
+  - id: ARCH-REVIEW-9
+    story: ARCH-REVIEW
+    title: 架构审查 P2-3：Win7 兼容回归固化——门禁固定运行 tests/win7 子集并维护显式功能降级清单
+    status: ready
+    dependencies: [WIN7-AC-1]
+    acceptance_tests:
+      - tests/win7/test_arch_review_9_win7_subset.py
+    security_review: false
+    protocol_review: false

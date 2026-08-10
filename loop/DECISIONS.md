@@ -5477,4 +5477,19 @@ security-reviewer 双签门禁。
 - Security: pure dedup extraction; override semantics unchanged.
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction; executed by: Codex (loop-engineer).
-
+## 2026-08-10 - ARCH-REVIEW 系列登记（资深架构师审查结论拆分；用户指令"拆分成工作项然后逐条落实"）
+- User instruction: 基于 2026-08-10 资深架构师审查结论（P0/P1/P2 共 10 项建议），拆分成工作项并逐条落实。
+- Decision: 注册 `ARCH-REVIEW` story 下 9 个工作项：
+  1. `ARCH-REVIEW-1`（ready，P0-1）编排器 seam 契约：框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；deps=[US-4-AC-2, US-16-AC-8-hybrid-orchestrator-v0.1]。
+  2. `ARCH-REVIEW-2`（ready，P0-2）离线合并收敛性：任意顺序重放同一组结果包收敛到同一主版本；部分合并+后续提交语义；幂等/去重；合并代数文档化 + property 测试；deps=[US-10-AC-1]。
+  3. `ARCH-REVIEW-3`（blocked，P0-3）范围治理：对照 GOAL.md mvp-complete 条件裁决 MVP 完成状态、外部依赖（US-5-AC-2 密码产品审批）显式跟踪、backlog 队列视图恢复；阻塞原因=需业务负责人裁决，待用户。
+  4. `ARCH-REVIEW-4`（ready，P1-1）子智能体 Agent 契约：七个专业子智能体 Manifest 注册表（能力/工具策略/模型绑定/人工确认点），与 manifest_checker 能力闭集打通；security_review=true；deps=[US-16-AC-1, US-16-AC-3]。
+  5. `ARCH-REVIEW-5`（ready，P1-2）审计签名密钥生命周期仪式（轮换/备份/恢复 + 守卫测试），不改变现有密码方案；security_review=true；deps=[US-15-AC-2]。
+  6. `ARCH-REVIEW-6`（ready，P1-3）关键验收指标 SLO 化（system-requirements §20 接入门禁断言或 metrics 端点）；deps=[ENG-BASE-AC-1]。
+  7. `ARCH-REVIEW-7`（ready，P2-1）门禁分层：quality_gate 增加 fast target（compile+lint+unit），全量保留为收口门槛；deps=[QUALITY-GATE-ENCODING-1]。
+  8. `ARCH-REVIEW-8`（ready，P2-2）记录文件治理：DECISIONS/VERIFICATION 决策转 ADR 索引式摘要、正文进归档区；deps=[RECORDS-ARCHIVE-1, RECORDS-HYGIENE-1]。
+  9. `ARCH-REVIEW-9`（ready，P2-3）Win7 兼容回归固化：门禁固定运行 tests/win7 子集 + 显式功能降级清单；deps=[WIN7-AC-1]。
+- Boundary: 本轮仅登记；逐条落实按 Loop Engineering 七阶段推进，每轮一个工作项，完成后停轮请求业务负责人决策继续下一项。ARCH-REVIEW-3 为 blocked/决策项，不自动执行。
+- Security review: 登记本身不涉及代码/密钥/协议变更；ARCH-REVIEW-4/5 实施时按 security_review=true 触发 security-reviewer。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction; executed by: Codex (loop-engineer).
