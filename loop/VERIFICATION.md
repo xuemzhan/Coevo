@@ -1,1623 +1,3 @@
-## 2026-08-09T00:50:28.270459Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-
-## 2026-08-09T00:51:43.379772Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-ork/memory.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/certificates.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/knowledge_base/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/watcher.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize22.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-22",
-      "title": "MergeEngine.merge 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：394 行/复杂度约 33 的全仓最大单体方法按 docstring 算法 1-7 步纯迁移拆为 8 个私有阶段助手（_validate_merge_inputs/_import_binding_rejection/_duplicate_rejection/_revision_rejection/_decision_maker_rejection/_merge_fields/_rejected_proposal/_commit_proposal），merge 收敛为 133 行线性编排；校验顺序、rejection_reason 字符串、失败关闭语义逐字节不变；新增守卫 tests/unit/test_framework_optimize23.py（merge≤200 行、8 助手存在且被调用、关键拒绝标记存活）",
-      "code": [
-        "src/coevo/merge/engine.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize23.py",
-        "tests/unit/test_merge_engine.py",
-        "tests/unit/test_merge_engine_v3.py",
-        "tests/unit/test_merge_commit_receipt.py",
-        "tests/integration/test_merge_risk_receipt_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize23.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine_v3.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_commit_receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_merge_risk_receipt_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-23",
-      "title": "manifest_checker._validate 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：150 行/复杂度约 33 的部署点校验函数按既有顺序纯迁移拆为 7 个模块级阶段助手（_validate_metadata/_validate_spec/_validate_security/_validate_audit/_require_policy/_compute_spec_hash/_verify_policy_binding），_validate 收敛为 31 行线性编排；错误消息与失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize24.py；同时修复 OPTIMIZE-21 回归——demo_support.now_utc_iso_z 实为 app 包再导出（app/__init__.py 依赖），恢复导入并把该再导出加入未使用导入守卫允许清单",
-      "code": [
-        "src/coevo/framework/manifest_checker.py",
-        "src/coevo/app/demo_support.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize24.py",
-        "tests/unit/test_framework_manifest_checker.py",
-        "tests/unit/test_framework_optimize14.py",
-        "tests/unit/test_framework_optimize22.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/manifest_checker.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize24.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_manifest_checker.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize14.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize22.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-24",
-      "title": "merge_and_commit 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：176 行方法在 `merge` 拆分后做同款纯迁移式拆分为 4 个私有阶段助手（_receipt_context/_receipt_binding_rejection/_field_decision_rejection/_status_task_rejection），merge_and_commit 收敛为 123 行线性编排；校验顺序、拒绝字符串、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize25.py；过程中修复两个迁移遗漏（receipt_builder 闭包引用 imported_record、末尾 outcome return 缺失），测试先红后绿",
-      "code": [
-        "src/coevo/merge/engine.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize25.py",
-        "tests/unit/test_merge_commit_receipt.py",
-        "tests/unit/test_merge_engine.py",
-        "tests/unit/test_merge_engine_v3.py",
-        "tests/integration/test_merge_risk_receipt_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize25.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_commit_receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine_v3.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_merge_risk_receipt_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-25",
-      "title": "dispatch_event AGENT_CALL 分支提取（2026-08-09，用户指令\"继续\"；增量门禁）：Orchestrator.dispatch_event（170 行）的 AGENT_CALL 分支（约 85 行：确认 hold/registry 缺失/AVAILABLE/RETRY 单次重试/SKIP/ESCALATE）提取为模块级纯函数 `_dispatch_agent_step` + 冻结 `_AgentStepResult`（outcome/next_id_seed/stop），break/continue 语义经返回 stop 标志保留，dispatch_event 收敛为 101 行循环编排；判定顺序、trace detail 字符串、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize26.py",
-      "code": [
-        "src/coevo/orchestrator/service.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize26.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize26.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-
-## 2026-08-09T00:56:03.456035Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-
-## 2026-08-09T00:56:43.318288Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-it/test_merge_commit_receipt.py",
-        "tests/integration/test_merge_risk_receipt_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize23.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine_v3.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_commit_receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_merge_risk_receipt_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-23",
-      "title": "manifest_checker._validate 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：150 行/复杂度约 33 的部署点校验函数按既有顺序纯迁移拆为 7 个模块级阶段助手（_validate_metadata/_validate_spec/_validate_security/_validate_audit/_require_policy/_compute_spec_hash/_verify_policy_binding），_validate 收敛为 31 行线性编排；错误消息与失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize24.py；同时修复 OPTIMIZE-21 回归——demo_support.now_utc_iso_z 实为 app 包再导出（app/__init__.py 依赖），恢复导入并把该再导出加入未使用导入守卫允许清单",
-      "code": [
-        "src/coevo/framework/manifest_checker.py",
-        "src/coevo/app/demo_support.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize24.py",
-        "tests/unit/test_framework_manifest_checker.py",
-        "tests/unit/test_framework_optimize14.py",
-        "tests/unit/test_framework_optimize22.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/manifest_checker.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize24.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_manifest_checker.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize14.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize22.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-24",
-      "title": "merge_and_commit 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：176 行方法在 `merge` 拆分后做同款纯迁移式拆分为 4 个私有阶段助手（_receipt_context/_receipt_binding_rejection/_field_decision_rejection/_status_task_rejection），merge_and_commit 收敛为 123 行线性编排；校验顺序、拒绝字符串、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize25.py；过程中修复两个迁移遗漏（receipt_builder 闭包引用 imported_record、末尾 outcome return 缺失），测试先红后绿",
-      "code": [
-        "src/coevo/merge/engine.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize25.py",
-        "tests/unit/test_merge_commit_receipt.py",
-        "tests/unit/test_merge_engine.py",
-        "tests/unit/test_merge_engine_v3.py",
-        "tests/integration/test_merge_risk_receipt_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize25.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_commit_receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine_v3.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_merge_risk_receipt_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-25",
-      "title": "dispatch_event AGENT_CALL 分支提取（2026-08-09，用户指令\"继续\"；增量门禁）：Orchestrator.dispatch_event（170 行）的 AGENT_CALL 分支（约 85 行：确认 hold/registry 缺失/AVAILABLE/RETRY 单次重试/SKIP/ESCALATE）提取为模块级纯函数 `_dispatch_agent_step` + 冻结 `_AgentStepResult`（outcome/next_id_seed/stop），break/continue 语义经返回 stop 标志保留，dispatch_event 收敛为 101 行循环编排；判定顺序、trace detail 字符串、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize26.py",
-      "code": [
-        "src/coevo/orchestrator/service.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize26.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize26.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-26",
-      "title": "task_decomposition/agent._validate 阶段化拆分（2026-08-09，用户指令\"继续P2\"；增量门禁）：108 行/cc~21 的模型输出校验方法纯迁移式拆分为模块级 `_parse_task`（单任务条目：dict/字段缺省/SAFE_ID/字符串字节上限/ISO 窗口/acceptance_criteria）与 `_parse_edge`（单边条目：dict/字段缺省/SAFE_ID/自环/未知引用），`_validate` 收敛为 33 行线性编排（界限→known_packages→任务→已知 id→边→去重构造）；错误消息、校验顺序、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize27.py；修复两处迁移残留（tasks.append/edges.append 改 return），测试先红后绿",
-      "code": [
-        "src/coevo/task_decomposition/agent.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize27.py",
-        "tests/unit/test_task_decomposition_agent.py",
-        "tests/unit/test_task_decomposition.py",
-        "tests/unit/test_task_decomposition_editing.py",
-        "tests/unit/test_task_flow_models.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize27.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_editing.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_flow_models.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-[gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 500109 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260809\verification-20260809.txt; [ok] decisions: nothing to archive
-
-
-
-
-
-
-
-
-## 2026-08-09T01:01:43.214012Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T01:03:00.243553Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-.py；同时修复 OPTIMIZE-21 回归——demo_support.now_utc_iso_z 实为 app 包再导出（app/__init__.py 依赖），恢复导入并把该再导出加入未使用导入守卫允许清单",
-      "code": [
-        "src/coevo/framework/manifest_checker.py",
-        "src/coevo/app/demo_support.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize24.py",
-        "tests/unit/test_framework_manifest_checker.py",
-        "tests/unit/test_framework_optimize14.py",
-        "tests/unit/test_framework_optimize22.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/manifest_checker.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/demo_support.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize24.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_manifest_checker.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize14.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize22.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-24",
-      "title": "merge_and_commit 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：176 行方法在 `merge` 拆分后做同款纯迁移式拆分为 4 个私有阶段助手（_receipt_context/_receipt_binding_rejection/_field_decision_rejection/_status_task_rejection），merge_and_commit 收敛为 123 行线性编排；校验顺序、拒绝字符串、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize25.py；过程中修复两个迁移遗漏（receipt_builder 闭包引用 imported_record、末尾 outcome return 缺失），测试先红后绿",
-      "code": [
-        "src/coevo/merge/engine.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize25.py",
-        "tests/unit/test_merge_commit_receipt.py",
-        "tests/unit/test_merge_engine.py",
-        "tests/unit/test_merge_engine_v3.py",
-        "tests/integration/test_merge_risk_receipt_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize25.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_commit_receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine_v3.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_merge_risk_receipt_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-25",
-      "title": "dispatch_event AGENT_CALL 分支提取（2026-08-09，用户指令\"继续\"；增量门禁）：Orchestrator.dispatch_event（170 行）的 AGENT_CALL 分支（约 85 行：确认 hold/registry 缺失/AVAILABLE/RETRY 单次重试/SKIP/ESCALATE）提取为模块级纯函数 `_dispatch_agent_step` + 冻结 `_AgentStepResult`（outcome/next_id_seed/stop），break/continue 语义经返回 stop 标志保留，dispatch_event 收敛为 101 行循环编排；判定顺序、trace detail 字符串、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize26.py",
-      "code": [
-        "src/coevo/orchestrator/service.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize26.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize26.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-26",
-      "title": "task_decomposition/agent._validate 阶段化拆分（2026-08-09，用户指令\"继续P2\"；增量门禁）：108 行/cc~21 的模型输出校验方法纯迁移式拆分为模块级 `_parse_task`（单任务条目：dict/字段缺省/SAFE_ID/字符串字节上限/ISO 窗口/acceptance_criteria）与 `_parse_edge`（单边条目：dict/字段缺省/SAFE_ID/自环/未知引用），`_validate` 收敛为 33 行线性编排（界限→known_packages→任务→已知 id→边→去重构造）；错误消息、校验顺序、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize27.py；修复两处迁移残留（tasks.append/edges.append 改 return），测试先红后绿",
-      "code": [
-        "src/coevo/task_decomposition/agent.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize27.py",
-        "tests/unit/test_task_decomposition_agent.py",
-        "tests/unit/test_task_decomposition.py",
-        "tests/unit/test_task_decomposition_editing.py",
-        "tests/unit/test_task_flow_models.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize27.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_editing.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_flow_models.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-27",
-      "title": "resume_real_chain 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：_real_chain.resume_real_chain（148 行/cc~19）验证门序列纯迁移式拆分为 4 个模块级助手（_validate_resume_context 确认结果/存储绑定/固定链/类型/ISO 时间/上下文匹配、_verify_resume_bindings 事件摘要重算+存储比对、_require_package_agent step-4 能力门、_begin_resume preview+resume_digest+原子开始），resume_real_chain 收敛为 103 行编排（保留局部导入与加密包构建/升级路径）；校验顺序、错误消息、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize28.py",
-      "code": [
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize28.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize28.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T09:21:49.320432Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-[gate] records self-trim: [ok] verification: nothing to archive; [decisions] archive 17 section(s): archived 17 old section(s); size 501050 > 500000 bytes; size-trimmed 17 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260809\decisions-20260809.txt
-
-
-
-
-
-
-
-
-## 2026-08-09T09:23:00.187385Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize25.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_commit_receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_merge_engine_v3.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_merge_risk_receipt_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-25",
-      "title": "dispatch_event AGENT_CALL 分支提取（2026-08-09，用户指令\"继续\"；增量门禁）：Orchestrator.dispatch_event（170 行）的 AGENT_CALL 分支（约 85 行：确认 hold/registry 缺失/AVAILABLE/RETRY 单次重试/SKIP/ESCALATE）提取为模块级纯函数 `_dispatch_agent_step` + 冻结 `_AgentStepResult`（outcome/next_id_seed/stop），break/continue 语义经返回 stop 标志保留，dispatch_event 收敛为 101 行循环编排；判定顺序、trace detail 字符串、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize26.py",
-      "code": [
-        "src/coevo/orchestrator/service.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize26.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/service.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize26.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-26",
-      "title": "task_decomposition/agent._validate 阶段化拆分（2026-08-09，用户指令\"继续P2\"；增量门禁）：108 行/cc~21 的模型输出校验方法纯迁移式拆分为模块级 `_parse_task`（单任务条目：dict/字段缺省/SAFE_ID/字符串字节上限/ISO 窗口/acceptance_criteria）与 `_parse_edge`（单边条目：dict/字段缺省/SAFE_ID/自环/未知引用），`_validate` 收敛为 33 行线性编排（界限→known_packages→任务→已知 id→边→去重构造）；错误消息、校验顺序、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize27.py；修复两处迁移残留（tasks.append/edges.append 改 return），测试先红后绿",
-      "code": [
-        "src/coevo/task_decomposition/agent.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize27.py",
-        "tests/unit/test_task_decomposition_agent.py",
-        "tests/unit/test_task_decomposition.py",
-        "tests/unit/test_task_decomposition_editing.py",
-        "tests/unit/test_task_flow_models.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize27.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_editing.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_flow_models.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-27",
-      "title": "resume_real_chain 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：_real_chain.resume_real_chain（148 行/cc~19）验证门序列纯迁移式拆分为 4 个模块级助手（_validate_resume_context 确认结果/存储绑定/固定链/类型/ISO 时间/上下文匹配、_verify_resume_bindings 事件摘要重算+存储比对、_require_package_agent step-4 能力门、_begin_resume preview+resume_digest+原子开始），resume_real_chain 收敛为 103 行编排（保留局部导入与加密包构建/升级路径）；校验顺序、错误消息、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize28.py",
-      "code": [
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize28.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize28.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-28",
-      "title": "重构域注释强化（2026-08-09，用户指令\"继续加强代码的注释\"；增量门禁）：为 decision_brief（_build/_util/models，30 处，含 OPTIMIZE-20 迁移缺口）、merge（engine/receipt/repository/models，32 处）、orchestrator/_real_chain（8 处）共 70 个函数补全 docstring，说明失败关闭语义/哈希链绑定/返回与异常契约；纯注释零行为变化；merge/models.py 随带一次性行尾归一（CRLF→LF，内容除 docstring 外逐字节相同，`--ignore-space-at-eol` 验证仅 +1 行）；守卫 tests/unit/test_framework_optimize29.py（70 函数均有非空 docstring）",
-      "code": [
-        "src/coevo/decision_brief/_build.py",
-        "src/coevo/decision_brief/_util.py",
-        "src/coevo/decision_brief/models.py",
-        "src/coevo/merge/engine.py",
-        "src/coevo/merge/receipt.py",
-        "src/coevo/merge/repository.py",
-        "src/coevo/merge/models.py",
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize29.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_build.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_util.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize29.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T09:32:33.116685Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T09:33:58.598236Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
- {
-          "kind": "code",
-          "path": "src/coevo/task_decomposition/agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize27.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_agent.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_decomposition_editing.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_task_flow_models.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-27",
-      "title": "resume_real_chain 阶段化拆分（2026-08-09，用户指令\"继续\"；增量门禁）：_real_chain.resume_real_chain（148 行/cc~19）验证门序列纯迁移式拆分为 4 个模块级助手（_validate_resume_context 确认结果/存储绑定/固定链/类型/ISO 时间/上下文匹配、_verify_resume_bindings 事件摘要重算+存储比对、_require_package_agent step-4 能力门、_begin_resume preview+resume_digest+原子开始），resume_real_chain 收敛为 103 行编排（保留局部导入与加密包构建/升级路径）；校验顺序、错误消息、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize28.py",
-      "code": [
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize28.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize28.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-28",
-      "title": "重构域注释强化（2026-08-09，用户指令\"继续加强代码的注释\"；增量门禁）：为 decision_brief（_build/_util/models，30 处，含 OPTIMIZE-20 迁移缺口）、merge（engine/receipt/repository/models，32 处）、orchestrator/_real_chain（8 处）共 70 个函数补全 docstring，说明失败关闭语义/哈希链绑定/返回与异常契约；纯注释零行为变化；merge/models.py 随带一次性行尾归一（CRLF→LF，内容除 docstring 外逐字节相同，`--ignore-space-at-eol` 验证仅 +1 行）；守卫 tests/unit/test_framework_optimize29.py（70 函数均有非空 docstring）",
-      "code": [
-        "src/coevo/decision_brief/_build.py",
-        "src/coevo/decision_brief/_util.py",
-        "src/coevo/decision_brief/models.py",
-        "src/coevo/merge/engine.py",
-        "src/coevo/merge/receipt.py",
-        "src/coevo/merge/repository.py",
-        "src/coevo/merge/models.py",
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize29.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_build.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_util.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize29.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-29",
-      "title": "安全关键域注释强化（2026-08-09，用户指令\"继续补全注释\"；增量门禁）：crypto（cng_handle/gmssl_provider/sm3，14 处）、identity（audit_anchor/repository/private_keys/validation/certificates，30 处，重名 `_run` 按行号区分）、protocol（agent_package/package_store_db/package_builder/import_service/replay_detector，17 处）共 61 个函数补全 docstring，写明失败关闭/哈希链绑定/受控子进程调用契约；纯注释零行为变化；agent_package.py 随带一次性行尾归一（CRLF→LF，`--ignore-space-at-eol` 验证仅 +7 行）；守卫 tests/unit/test_framework_optimize30.py（61 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/crypto/gmssl_provider.py",
-        "src/coevo/crypto/sm3.py",
-        "src/coevo/identity/audit_anchor.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/identity/validation.py",
-        "src/coevo/identity/certificates.py",
-        "src/coevo/protocol/agent_package.py",
-        "src/coevo/protocol/package_store_db.py",
-        "src/coevo/protocol/package_builder.py",
-        "src/coevo/protocol/import_service.py",
-        "src/coevo/protocol/replay_detector.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize30.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/gmssl_provider.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/sm3.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/certificates.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_builder.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/replay_detector.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize30.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T09:41:38.686937Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T09:42:32.440518Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize28.py",
-      "code": [
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize28.py",
-        "tests/unit/test_orchestrator.py",
-        "tests/integration/test_orchestrator_real_facade_chain.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize28.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_orchestrator_real_facade_chain.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-28",
-      "title": "重构域注释强化（2026-08-09，用户指令\"继续加强代码的注释\"；增量门禁）：为 decision_brief（_build/_util/models，30 处，含 OPTIMIZE-20 迁移缺口）、merge（engine/receipt/repository/models，32 处）、orchestrator/_real_chain（8 处）共 70 个函数补全 docstring，说明失败关闭语义/哈希链绑定/返回与异常契约；纯注释零行为变化；merge/models.py 随带一次性行尾归一（CRLF→LF，内容除 docstring 外逐字节相同，`--ignore-space-at-eol` 验证仅 +1 行）；守卫 tests/unit/test_framework_optimize29.py（70 函数均有非空 docstring）",
-      "code": [
-        "src/coevo/decision_brief/_build.py",
-        "src/coevo/decision_brief/_util.py",
-        "src/coevo/decision_brief/models.py",
-        "src/coevo/merge/engine.py",
-        "src/coevo/merge/receipt.py",
-        "src/coevo/merge/repository.py",
-        "src/coevo/merge/models.py",
-        "src/coevo/orchestrator/_real_chain.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize29.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_build.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_util.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/engine.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/receipt.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/merge/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/_real_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize29.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-29",
-      "title": "安全关键域注释强化（2026-08-09，用户指令\"继续补全注释\"；增量门禁）：crypto（cng_handle/gmssl_provider/sm3，14 处）、identity（audit_anchor/repository/private_keys/validation/certificates，30 处，重名 `_run` 按行号区分）、protocol（agent_package/package_store_db/package_builder/import_service/replay_detector，17 处）共 61 个函数补全 docstring，写明失败关闭/哈希链绑定/受控子进程调用契约；纯注释零行为变化；agent_package.py 随带一次性行尾归一（CRLF→LF，`--ignore-space-at-eol` 验证仅 +7 行）；守卫 tests/unit/test_framework_optimize30.py（61 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/crypto/cng_handle.py",
-        "src/coevo/crypto/gmssl_provider.py",
-        "src/coevo/crypto/sm3.py",
-        "src/coevo/identity/audit_anchor.py",
-        "src/coevo/identity/repository.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/identity/validation.py",
-        "src/coevo/identity/certificates.py",
-        "src/coevo/protocol/agent_package.py",
-        "src/coevo/protocol/package_store_db.py",
-        "src/coevo/protocol/package_builder.py",
-        "src/coevo/protocol/import_service.py",
-        "src/coevo/protocol/replay_detector.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize30.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/gmssl_provider.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/sm3.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/certificates.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_builder.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/replay_detector.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize30.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-30",
-      "title": "注释补全收尾（2026-08-09，用户指令\"继续优化\"；增量门禁）：audit_governance（stream_store/facade，5 处）+ orchestrator/real_chain_store（27 处，含 canonical_json_bytes 内嵌套 validate 与 9 个 operation 事务闭包）共 32 个函数补全 docstring，写明失败关闭/审计链绑定/事务原子性契约；纯注释零行为变化；守卫 tests/unit/test_framework_optimize31.py（32 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/audit_governance/stream_store.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/real_chain_store.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize31.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/stream_store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/real_chain_store.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize31.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
 ## 2026-08-09T09:50:57.845276Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -1626,6 +6,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -1895,6 +276,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T10:01:42.776276Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -1903,6 +285,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2174,6 +557,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T10:11:02.667872Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -2182,6 +566,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2444,6 +829,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T10:22:00.397507Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `1`
 ```text
@@ -2529,6 +915,7 @@ FAILED (failures=1, skipped=3)
 
 
 
+
 ## 2026-08-09T11:15:54.694107Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `13`
 ```text
@@ -2589,6 +976,7 @@ $ C:\Python314\python.exe -m unittest discover -s tests/security -v
 ```
 
 [gate] records self-trim: trim error: TimeoutExpired: Command '['C:\\Python314\\python.exe', 'E:\\Workspace\\Coevo\\scripts\\archive_records.py', '--apply']' timed out after 120 seconds
+
 
 
 
@@ -2686,6 +1074,7 @@ FAILED (errors=1, skipped=3)
 
 
 
+
 ## 2026-08-09T12:00:10.576106Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `1`
 ```text
@@ -2769,6 +1158,7 @@ Ran 1365 tests in 100.933s
 FAILED (failures=1, skipped=3)
 
 ```
+
 
 
 
@@ -2900,6 +1290,7 @@ FAILED (failures=15, errors=3)
 
 
 
+
 ## 2026-08-09T12:47:56.086142Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `0`
 ```text
@@ -2969,6 +1360,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 501769 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260809\verification-20260809.txt; [ok] decisions: nothing to archive
+
 
 
 
@@ -3047,6 +1439,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T13:19:15.953153Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -3055,6 +1448,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3324,6 +1718,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T13:23:38.958818Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -3332,6 +1727,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3595,6 +1991,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-09T13:40:53.939770Z — target=`quality` fingerprint=`f742f64aa8dce72c`
 - exit_code: `0`
 ```text
@@ -3667,6 +2064,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:15:48.574853Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -3675,6 +2073,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3928,6 +2327,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:19:44.658598Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -3936,6 +2336,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4191,6 +2592,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:28:30.837331Z — target=`fast` fingerprint=`b3b305cfbb18796f`
 - exit_code: `0`
 ```text
@@ -4273,6 +2675,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:30:55.301824Z — target=`test-win7` fingerprint=`ed47f47b5590627d`
 - exit_code: `0`
 ```text
@@ -4290,6 +2693,7 @@ OK
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4369,6 +2773,7 @@ OK (skipped=3)
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4663,6 +3068,7 @@ apply refused: the audit chain must remain append-only
 
 
 
+
 ## 2026-08-10T03:39:41.431777Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -4673,6 +3079,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=295
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4967,6 +3374,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:48:41.810797Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -5238,6 +3646,7 @@ ValueError: substring not found
 
 
 ```
+
 
 
 
@@ -5542,6 +3951,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:54:54.755110Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -5551,6 +3961,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=308
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5841,6 +4252,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -6141,6 +4553,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:12:58.013406Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -6433,6 +4846,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -6738,6 +5152,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:23:30.485224Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -7033,6 +5448,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:29:03.323324Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -7298,6 +5714,7 @@ First extra element 0:
 
 
 ```
+
 
 
 
@@ -7593,6 +6010,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -7893,6 +6311,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:48:20.358669Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -8184,6 +6603,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8485,6 +6905,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 11 section(s): archived 11 old section(s); size 508098 > 500000 bytes; size-trimmed 11 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
 
 
 
@@ -8790,6 +7211,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:11:56.988328Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -9086,6 +7508,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -9387,6 +7810,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:26:05.288128Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -9681,6 +8105,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -9981,6 +8406,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:38:09.220462Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -10275,6 +8701,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -10577,6 +9004,7 @@ audit seal: fully-sealed
 [gate] records self-trim: [verification] archive 14 section(s): archived 14 old section(s); size 504958 > 500000 bytes; size-trimmed 14 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
 
 
+
 ## 2026-08-10T11:40:15.500433Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -10590,6 +9018,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=279
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T11:43:38.374324Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -10821,6 +9250,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T11:48:50.907941Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -11056,6 +9486,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T11:57:17.321547Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -11287,6 +9718,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T12:17:39.480748Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -11523,6 +9955,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T12:21:56.190981Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -11757,6 +10190,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T12:25:32.051464Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -11905,6 +10339,7 @@ AssertionError: '`DECISION-REQUIRED`' not found in '# 外部依赖与待批门�
 [gate] totals: {"discovered": 1490, "failed": 1, "passed": 1486, "skipped": 3}
 
 ```
+
 
 
 ## 2026-08-10T12:28:50.739275Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -12114,6 +10549,7 @@ AssertionError: False is not true : {'name': 'recent_gate', 'ok': False, 'level'
 ```
 
 
+
 ## 2026-08-10T12:31:58.006570Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -12127,6 +10563,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=292
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T12:32:06.420639Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -12364,6 +10801,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 500847 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
 
 ## 2026-08-10T12:36:16.306731Z — target=`quality` fingerprint=`b96157dbb895a417`
 - exit_code: `0`
@@ -12618,6 +11056,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T13:16:07.315668Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -12850,6 +11289,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-10T13:19:54.917870Z — target=`quality` fingerprint=`b96157dbb895a417`
 - exit_code: `0`
@@ -13104,6 +11544,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T13:30:35.523924Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -13336,6 +11777,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-10T13:34:20.415160Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
@@ -13571,6 +12013,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T13:36:21.330534Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -13805,6 +12248,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-10T13:39:42.078535Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -14038,3 +12482,241 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
+
+## 2026-08-10T13:41:32.643713Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
+- exit_code: `0`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe -m compileall -q -f scripts src tests
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+ode_scope.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-14",
+      "title": "CTAF 设计提案草案状态守护（2026-08-10 架构风险修复 P1-3 收口）：design-proposal.md 保持\"产品级草案/待独立复核后定稿\"；独立架构评审登记 CTAF-PROPOSAL-REVIEW；文档索引引用",
+      "code": [
+        "docs/plans/distributed-agent-framework/design-proposal.md",
+        "docs/architecture/external-gates.md",
+        "docs/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_14_ctaf_draft_guard.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/design-proposal.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/architecture/external-gates.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_14_ctaf_draft_guard.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-15",
+      "title": "架构风险台账（2026-08-10 架构风险修复收口）：历次架构审查风险统一登记（P0-1/P0-2/P1-1..3/P2-1..2/EXT-1..3，处置状态+证据+责任），防止风险隐式消失或回归；守卫测试 4 项",
+      "code": [
+        "docs/architecture/architecture-risk-ledger.md",
+        "docs/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_15_risk_ledger.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/architecture/architecture-risk-ledger.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_15_risk_ledger.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+  {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1510 passed=1507 failed=0 skipped=3 duration_ms=70224
+  [unit] discovered=1510 passed=1507 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+[gate] counts: discovered=1510 passed=1507 failed=0 skipped=3
+[gate] totals: {"discovered": 1510, "failed": 0, "passed": 1507, "skipped": 3}
+audit seal: fully-sealed
+
+```
+
+
+[gate] records self-trim: [verification] archive 12 section(s): archived 12 old section(s); size 501986 > 500000 bytes; size-trimmed 12 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
