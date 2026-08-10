@@ -43,6 +43,7 @@ Manifest 构建器 + demo 注册适配器（显式非生产）。
 | `orchestrator.py` | `plan_for`、`dispatch`、`transition`、`chain_plan`、`StaticChainProvider`/`LlmPlanProvider`/`PlanExecutor`（注入协议）、`OrchestrationOutcome` | Hybrid Orchestrator：validate_plan 前置 + 三种模式 + L19 + HOLD 门 |
 | `k8s_listing.py` | `generate_listing`、`listing_fingerprint`、`render_yaml`、`validate_listing_bytes`、`ListingInput` | 声明式纸面清单生成（JSON + YAML 子集），确定性可哈希、零 IO |
 | `integration.py` | `guard_registration`、`build_registration_manifest`、`plan_to_chain`、`guarded_dispatch`、`report_to_outcome`、`chain_to_plan`、`validate_product_chain`、`GuardResult` | 框架门禁接入现有编排：注册过 manifest、派发过 validate_plan、Manifest 构建器（spec_hash 排除自指字段）、Plan↔OrchestrationChain 双向适配 |
+| `agent_catalog.py` | `AgentCatalogEntry`、`PROFESSIONAL_AGENT_CATALOG`、`validate_catalog` | 七个专业子智能体设计期 Manifest 目录（ARCH-REVIEW-4）：能力闭集/服务模块/模型绑定/人工确认点/工具策略；运行时注册仍经 guard_registration |
 
 ## 关键入口与数据流
 

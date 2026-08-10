@@ -8,7 +8,7 @@
 |---|---|---|
 | `requirements/` | 系统原始需求、MVP 用户故事及验收标准 | `system-requirements.md`、`mvp-user-stories.md` |
 | `constraints/` | 强制性技术约束（含密码方案、私钥保护、审计链等硬约束） | `mandatory-technical-constraints.md` |
-| `architecture/` | MVP 参考架构、技术选型、编排器 seam 契约、离线合并收敛语义、门禁分层与两阶段化策略、.agent 签名承载契约、WPS 启动链路契约、HTTP 认证黑盒矩阵、密码模式隔离契约、状态变更边界契约、显式事件模型契约、断网黑盒证明、审计日志代际重锚定契约、交付门禁契约、能力状态矩阵、验收指标 SLO 契约、决策记录治理契约 | `mvp-reference-architecture.md`、`orchestrator-seam.md`、`merge-convergence.md`、`gate-tiers.md`、`gate-phases.md`、`agent-signature-carrier.md`、`wps-launch-contract.md`、`http-auth-matrix.md`、`crypto-mode-isolation.md`、`state-change-boundary.md`、`event-model.md`、`offline-proof.md`、`audit-reanchor.md`、`delivery-gate.md`、`capability-status.md`、`slo-metrics.md`、`decision-records.md` |
+| `architecture/` | MVP 参考架构、技术选型、编排器 seam 契约、离线合并收敛语义、门禁分层与两阶段化策略、.agent 签名承载契约、WPS 启动链路契约、HTTP 认证黑盒矩阵、密码模式隔离契约、状态变更边界契约、显式事件模型契约、断网黑盒证明、审计日志代际重锚定契约、交付门禁契约、能力状态矩阵、验收指标 SLO 契约、决策记录治理契约、子智能体 Manifest 注册表契约、审计签名密钥仪式契约 | `mvp-reference-architecture.md`、`orchestrator-seam.md`、`merge-convergence.md`、`gate-tiers.md`、`gate-phases.md`、`agent-signature-carrier.md`、`wps-launch-contract.md`、`http-auth-matrix.md`、`crypto-mode-isolation.md`、`state-change-boundary.md`、`event-model.md`、`offline-proof.md`、`audit-reanchor.md`、`delivery-gate.md`、`capability-status.md`、`slo-metrics.md`、`decision-records.md`、`agent-manifest-registry.md`、`audit-key-ceremony.md` |
 | `protocol/` | `.agent` 任务包协议规范 | `agent-package-protocol.md` |
 | `traceability/` | 需求—代码—测试追踪矩阵 | `requirements-test-matrix.md` |
 | `dependencies/` | 经批准工具的精确版本、来源、哈希与许可证 | `toolchain-lock.json` |
