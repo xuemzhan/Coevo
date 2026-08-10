@@ -678,14 +678,17 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             request,
             server_state=self.server.state,
             now=self._now(),
+            wps_launcher=self.server._wps_launcher,
         )
         self.server.append_audit(CockpitFacade.to_audit_record(request, response))
         status_codes = {
             CockpitResponseStatus.OK: 200,
+            CockpitResponseStatus.STARTED: 200,
             CockpitResponseStatus.NOT_FOUND: 404,
             CockpitResponseStatus.BAD_REQUEST: 400,
             CockpitResponseStatus.DENIED: 403,
             CockpitResponseStatus.NOT_BOUND: 403,
+            CockpitResponseStatus.NOT_AVAILABLE: 503,
             CockpitResponseStatus.ERROR: 500,
         }
         self._send_json(
@@ -847,6 +850,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
         role_views: tuple[Any, ...] = (),
         started_at: str = "",
         session_manager: CockpitSessionManager | None = None,
+        wps_launcher: object | None = None,
     ) -> None:
         if not isinstance(config, CockpitHttpConfig):
             raise CockpitValidationError("config must be CockpitHttpConfig")
@@ -866,6 +870,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
         self.session_manager = session_manager or CockpitSessionManager(
             timeout_sec=config.session_timeout_sec
         )
+        self._wps_launcher = wps_launcher
         started_at = started_at or now_utc_iso_z()
         if (
             not workspace_views

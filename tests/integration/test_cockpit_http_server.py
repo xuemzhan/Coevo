@@ -282,6 +282,52 @@ class CockpitHttpServerTests(unittest.TestCase):
         self.assertEqual(403, status)
 
     def test_wps_open_success_and_audit(self):
+        # REVIEW2-4: a configured launcher yields STARTED (200) with real
+        # launch semantics instead of the old render stub.
+        from src.coevo.cockpit.wps import WpsLaunchDecision, WpsLaunchResult
+
+        class _FakeLauncher:
+            def launch(self, artifact_path):
+                return WpsLaunchResult(
+                    WpsLaunchDecision.OK, "h" * 16, "launched", 0
+                )
+
+        launcher_port = _free_port()
+        launcher_server = CockpitHttpServer(
+            CockpitHttpConfig(
+                bind_port=launcher_port,
+                request_timeout_sec=3,
+                session_timeout_sec=60,
+                lock_path=None,
+            ),
+            workspace_views=(_workspace_view(),),
+            role_views=(_role_view(),),
+            wps_launcher=_FakeLauncher(),
+        )
+        self.addCleanup(launcher_server.stop)
+        launcher_server.start()
+        base = f"http://127.0.0.1:{launcher_port}"
+        token = launcher_server.session_manager.create()
+        status, _, body = _request(
+            f"{base}/api/wps_open",
+            token=token,
+            headers={
+                "Origin": base,
+                "X-Requested-With": "coevo-cockpit",
+            },
+            body={"project_id": "PRJ001", "artifact_path": "docs/report.docx", "confirm": True},
+        )
+        self.assertEqual(200, status)
+        data = json.loads(body)
+        self.assertEqual("started", data["payload"]["decision"])
+        records = launcher_server.recent_audit()
+        wps_records = [r for r in records if r["route"] == "wps_open"]
+        self.assertGreaterEqual(len(wps_records), 1)
+        self.assertEqual(16, len(wps_records[-1]["artifact_path_hash"]))
+
+    def test_wps_open_without_launcher_reports_not_available(self):
+        # REVIEW2-4: without a configured launcher the server must not claim
+        # the document was opened -- 503 NOT_AVAILABLE.
         status, _, body = _request(
             f"{self.base}/api/wps_open",
             token=self.token,
@@ -291,13 +337,9 @@ class CockpitHttpServerTests(unittest.TestCase):
             },
             body={"project_id": "PRJ001", "artifact_path": "docs/report.docx", "confirm": True},
         )
-        self.assertEqual(200, status)
+        self.assertEqual(503, status)
         data = json.loads(body)
-        self.assertTrue(data["payload"]["ok"])
-        records = self.server.recent_audit()
-        wps_records = [r for r in records if r["route"] == "wps_open"]
-        self.assertGreaterEqual(len(wps_records), 1)
-        self.assertEqual(16, len(wps_records[-1]["artifact_path_hash"]))
+        self.assertEqual("not_available", data["payload"]["decision"])
 
     def test_abrupt_client_disconnect_does_not_break_server(self):
         # A client that opens a connection and vanishes mid-request must not

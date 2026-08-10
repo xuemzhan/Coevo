@@ -251,18 +251,96 @@ class TaskMilestoneViewTests(unittest.TestCase):
 
 
 class WPSOpenTests(unittest.TestCase):
-    def test_dispatch_wps_open_allowed_extension_succeeds(self):
+    def _fake_launcher(self, decision="ok", detail="", returncode=0):
+        from src.coevo.cockpit.wps import WpsLaunchDecision, WpsLaunchResult
+
+        class _Fake:
+            def launch(self, artifact_path):
+                return WpsLaunchResult(
+                    WpsLaunchDecision(decision),
+                    "h" * 16,
+                    detail,
+                    returncode,
+                )
+
+        return _Fake()
+
+    def test_dispatch_wps_open_without_launcher_reports_not_available(self):
+        # REVIEW2-4: the facade must not claim the document was opened
+        # when no launcher is configured -- NOT_AVAILABLE, not OK.
+        r = CockpitFacade.dispatch(
+            _req(route=CockpitRoute.WPS_OPEN, artifact_path="docs/report.docx"),
+            server_state=_state(),
+            now=NOW2,
+        )
+        self.assertEqual(CockpitResponseStatus.NOT_AVAILABLE, r.status)
+        self.assertEqual("not_available", r.payload["decision"])
+
+    def test_dispatch_wps_open_launcher_ok_maps_to_started(self):
         for ext in (".docx", ".doc", ".xlsx", ".pptx", ".pdf"):
             r = CockpitFacade.dispatch(
                 _req(route=CockpitRoute.WPS_OPEN, artifact_path=f"docs/report{ext}"),
                 server_state=_state(),
                 now=NOW2,
+                wps_launcher=self._fake_launcher(decision="ok", returncode=0),
             )
             self.assertEqual(
-                CockpitResponseStatus.OK,
+                CockpitResponseStatus.STARTED,
                 r.status,
-                f"expected OK for {ext}, got {r.status.value}",
+                f"expected STARTED for {ext}, got {r.status.value}",
             )
+            self.assertEqual("started", r.payload["decision"])
+            self.assertEqual(0, r.payload["returncode"])
+
+    def test_dispatch_wps_open_launcher_denied_maps_to_denied(self):
+        r = CockpitFacade.dispatch(
+            _req(route=CockpitRoute.WPS_OPEN, artifact_path="docs/report.docx"),
+            server_state=_state(),
+            now=NOW2,
+            wps_launcher=self._fake_launcher(
+                decision="denied", detail="extension not in WPS allow-list"
+            ),
+        )
+        self.assertEqual(CockpitResponseStatus.DENIED, r.status)
+        self.assertEqual("denied", r.payload["decision"])
+
+    def test_dispatch_wps_open_launcher_not_available_maps_to_not_available(self):
+        r = CockpitFacade.dispatch(
+            _req(route=CockpitRoute.WPS_OPEN, artifact_path="docs/report.docx"),
+            server_state=_state(),
+            now=NOW2,
+            wps_launcher=self._fake_launcher(
+                decision="not_available", detail="executable unavailable"
+            ),
+        )
+        self.assertEqual(CockpitResponseStatus.NOT_AVAILABLE, r.status)
+        self.assertEqual("not_available", r.payload["decision"])
+
+    def test_dispatch_wps_open_launcher_error_maps_to_error(self):
+        r = CockpitFacade.dispatch(
+            _req(route=CockpitRoute.WPS_OPEN, artifact_path="docs/report.docx"),
+            server_state=_state(),
+            now=NOW2,
+            wps_launcher=self._fake_launcher(
+                decision="error", detail="launch failed", returncode=1
+            ),
+        )
+        self.assertEqual(CockpitResponseStatus.ERROR, r.status)
+        self.assertEqual("failed", r.payload["decision"])
+
+    def test_dispatch_wps_open_launcher_raise_fails_closed(self):
+        class _Raising:
+            def launch(self, artifact_path):
+                raise RuntimeError("launcher down")
+
+        r = CockpitFacade.dispatch(
+            _req(route=CockpitRoute.WPS_OPEN, artifact_path="docs/report.docx"),
+            server_state=_state(),
+            now=NOW2,
+            wps_launcher=_Raising(),
+        )
+        self.assertEqual(CockpitResponseStatus.ERROR, r.status)
+        self.assertEqual("failed", r.payload["decision"])
 
     def test_dispatch_wps_open_denied_extension_rejected(self):
         for ext in (".exe", ".bat", ".ps1", ".js", ".vbs", ".scr", ".jar"):

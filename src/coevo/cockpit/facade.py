@@ -57,6 +57,7 @@ class CockpitFacade:
         *,
         server_state: CockpitServerState,
         now: str,
+        wps_launcher: object | None = None,
     ) -> CockpitResponse:
         """AC-5..AC-8: dispatch a request to a response. Pure function."""
         if not isinstance(request, CockpitRequest):
@@ -90,7 +91,7 @@ class CockpitFacade:
         if request.route == CockpitRoute.MILESTONE_VIEW:
             return CockpitFacade._milestone_view(server_state, request, now)
         if request.route == CockpitRoute.WPS_OPEN:
-            return CockpitFacade._wps_open(server_state, request, now)
+            return CockpitFacade._wps_open(server_state, request, now, wps_launcher)
         return CockpitResponse(
             status=CockpitResponseStatus.BAD_REQUEST,
             body_html="",
@@ -295,7 +296,10 @@ class CockpitFacade:
 
     @staticmethod
     def _wps_open(
-        state: CockpitServerState, request: CockpitRequest, now: str
+        state: CockpitServerState,
+        request: CockpitRequest,
+        now: str,
+        launcher: object | None = None,
     ) -> CockpitResponse:
         # AC-4 + AC-8: artifact_path must be workspace-relative (no traversal)
         # AND must pass WPS allow-list.
@@ -318,14 +322,88 @@ class CockpitFacade:
                 payload={"artifact_path_hash": _hash_path(path)},
                 ts=now,
             )
-        # OK: facade returns a render stub. Actual subprocess is US-7-AC-4.
-        html = f"<p>WPS open accepted: {path}</p>"
+        path_hash = _hash_path(path)
+        if launcher is None:
+            # REVIEW2-4: without a configured launcher the facade must NOT
+            # claim the document was opened -- it reports NOT_AVAILABLE.
+            return CockpitResponse(
+                status=CockpitResponseStatus.NOT_AVAILABLE,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task="WPS launcher not configured",
+                payload={
+                    "artifact_path_hash": path_hash,
+                    "decision": "not_available",
+                },
+                ts=now,
+            )
+        try:
+            result = launcher.launch(request.artifact_path)
+        except Exception as exc:  # noqa: BLE001 - launcher failure fails closed
+            return CockpitResponse(
+                status=CockpitResponseStatus.ERROR,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task=f"WPS launcher raised {type(exc).__name__}",
+                payload={
+                    "artifact_path_hash": path_hash,
+                    "decision": "failed",
+                },
+                ts=now,
+            )
+        decision = getattr(result, "decision", None)
+        decision_value = getattr(decision, "value", None)
+        detail = getattr(result, "detail", "")
+        returncode = getattr(result, "returncode", None)
+        if decision_value == "ok":
+            return CockpitResponse(
+                status=CockpitResponseStatus.STARTED,
+                body_html=f"<p>WPS open started: {path}</p>",
+                content_type="text/html; charset=utf-8",
+                task="wps_open started",
+                payload={
+                    "artifact_path_hash": path_hash,
+                    "decision": "started",
+                    "returncode": returncode,
+                    "detail": detail,
+                },
+                ts=now,
+            )
+        if decision_value == "denied":
+            return CockpitResponse(
+                status=CockpitResponseStatus.DENIED,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task=detail or "wps_open denied",
+                payload={
+                    "artifact_path_hash": path_hash,
+                    "decision": "denied",
+                },
+                ts=now,
+            )
+        if decision_value == "not_available":
+            return CockpitResponse(
+                status=CockpitResponseStatus.NOT_AVAILABLE,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task=detail or "WPS executable unavailable",
+                payload={
+                    "artifact_path_hash": path_hash,
+                    "decision": "not_available",
+                },
+                ts=now,
+            )
+        # Any other outcome (including ERROR) fails closed.
         return CockpitResponse(
-            status=CockpitResponseStatus.OK,
-            body_html=html,
-            content_type="text/html; charset=utf-8",
-            task="wps_open accepted",
-            payload={"artifact_path_hash": _hash_path(path), "ok": True},
+            status=CockpitResponseStatus.ERROR,
+            body_html="",
+            content_type="text/plain; charset=utf-8",
+            task=detail or "wps_open failed",
+            payload={
+                "artifact_path_hash": path_hash,
+                "decision": "failed",
+                "returncode": returncode,
+            },
             ts=now,
         )
 

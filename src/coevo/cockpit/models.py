@@ -45,10 +45,12 @@ class CockpitResponseStatus(enum.Enum):
     """HTTP-like status codes (without depending on http module)."""
 
     OK = "ok"
+    STARTED = "started"
     NOT_FOUND = "not_found"
     BAD_REQUEST = "bad_request"
     DENIED = "denied"
     NOT_BOUND = "not_bound"
+    NOT_AVAILABLE = "not_available"
     ERROR = "error"
 
 @dataclass(frozen=True)
