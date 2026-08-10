@@ -2018,10 +2018,19 @@ items:
   - id: ENG-OPTIMIZE-1
     story: ENG-OPTIMIZE
     title: 门禁结果 JSON 增强——每阶段测试计数（discovered/passed/failed/skipped）解析并落入 loop/runtime/gate-results artifact；守卫测试（解析/真实阶段计数/artifact 字段）
-    status: in-progress
+    status: done
     dependencies: [REVIEW2-2]
     acceptance_tests:
       - tests/unit/test_eng_optimize_1_gate_counts.py
+    security_review: false
+    protocol_review: false
+  - id: ENG-OPTIMIZE-2
+    story: ENG-OPTIMIZE
+    title: 门禁 VERIFICATION 由 Phase A 结果 JSON 生成——_record_gate_result 读取 gate-results artifact 写 VERIFICATION（artifact 与记录一致性）；守卫测试（temp VERIFICATION + mock seal/audit）
+    status: done
+    dependencies: [ENG-OPTIMIZE-1]
+    acceptance_tests:
+      - tests/unit/test_eng_optimize_2_verification_from_json.py
     security_review: false
     protocol_review: false
   - id: ARCH-REVIEW-4

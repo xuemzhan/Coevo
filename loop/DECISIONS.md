@@ -5140,6 +5140,14 @@ security-reviewer 双签门禁。
 - Security review: 纯门禁产物增强（只读统计），不改审计/测试语义，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ENG-OPTIMIZE-2 收口（VERIFICATION 由结果 JSON 生成；增量门禁豁免）
+- Work item: `ENG-OPTIMIZE-2`（闭合 REVIEW2-2"用结果 JSON 生成 VERIFICATION.md"意图）status=done；deps=[ENG-OPTIMIZE-1]。
+- Delivery: `scripts/quality_gate.py`——`_verification_body_from_json` 从 Phase A 结果 JSON 重建记录体（每阶段 `$ argv` + output_tail + `[gate] counts` + 末尾 `[gate] totals`）；`_record_gate_result` 接收 `results_json`（有则 JSON 派生、失败回退内存输出），新增 `verification` 参数支持可测性；`_run_locked` 把 artifact 路径传入 Phase B；哈希锁三轮同步；守卫测试 3 项（body 构造含 argv/counts/totals、写记录含 seal、回退输出）。
+- 说明：本项实现后的一次 fast 全量运行曾出现 shell 包装层挂起（门禁本身 05:45Z 完成 exit=0，记录与 artifact 均落盘；挂起为工具层问题，已用后续 test-win7 运行确认门禁正常）。实测 test-win7 记录含 `[gate] counts: discovered=4 passed=4 failed=0 skipped=0` 与 `[gate] totals: {...}`。
+- Verification: 用户指示不做全量门禁；定向 3/3；test-win7 门禁 exit=0（JSON 派生记录验证）；fast 门禁此前 exit=0（05:45Z，记录落盘）。
+- Security review: 纯记录派生增强（只读），不改审计/测试语义，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

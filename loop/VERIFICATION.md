@@ -11751,3 +11751,17 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 14 section(s): archived 14 old section(s); size 504958 > 500000 bytes; size-trimmed 14 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
+## 2026-08-10T11:40:15.500433Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
+- exit_code: `0`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\test.py --suite win7
+discovered=4 passed=4 failed=0 skipped=0 duration_ms=279
+  [win7] discovered=4 passed=4 failed=0 skipped=0 exit=0
+[gate] counts: discovered=4 passed=4 failed=0 skipped=0
+[gate] totals: {"discovered": 4, "failed": 0, "passed": 4, "skipped": 0}
+audit seal: fully-sealed
+
+```
