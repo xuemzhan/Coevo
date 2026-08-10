@@ -4,7 +4,9 @@ from .contract import (
     CryptoProvider,
     ProviderScope,
     ProviderRegistry,
+    crypto_mode,
     declared_scope,
+    require_production_crypto,
     validate_provider_scope,
 )
 from .cng_handle import (
@@ -56,8 +58,10 @@ __all__ = [
     "ProviderScope",
     "ProviderRegistry",
     "SealedPayload",
+    "crypto_mode",
     "SM2_KEY_ALGORITHM_OID",
     "declared_scope",
+    "require_production_crypto",
     "require_key_handle_backed",
     "sm3_digest",
     "sm3_hexdigest",

@@ -145,3 +145,44 @@ class ProviderRegistry:
                 "non-exportable key handle"
             )
         return provider
+
+
+def crypto_mode(provider: Any) -> str:
+    """Report the explicit crypto mode: ``prototype`` | ``production``.
+
+    Fail-closed (REVIEW2-6): an undeclared or unknown scope raises instead
+    of guessing. ``prototype`` = ``ProviderScope.MVP_PROTOTYPE`` (open-source
+    GmSSL prototype, ``key_handle_backed=False``); ``production`` =
+    ``ProviderScope.APPROVED_PRODUCT`` (approved product, protected
+    non-exportable key handle).
+    """
+
+    scope = declared_scope(provider)
+    if scope is ProviderScope.MVP_PROTOTYPE:
+        return "prototype"
+    if scope is ProviderScope.APPROVED_PRODUCT:
+        return "production"
+    raise TypeError(f"unsupported provider scope: {scope!r}")
+
+
+def require_production_crypto(provider: Any) -> Any:
+    """Fail-closed startup guard: production wiring must never use a prototype.
+
+    Raises unless the provider declares ``APPROVED_PRODUCT`` scope AND is
+    backed by a protected non-exportable key handle. Composition roots for
+    production MUST call this before any cryptographic operation (REVIEW2-6),
+    so a prototype provider is refused at startup rather than at call time.
+    """
+
+    mode = crypto_mode(provider)
+    if mode != "production":
+        raise ValueError(
+            "production crypto mode requires an approved-product provider; "
+            f"got mode={mode!r}"
+        )
+    if getattr(provider, "key_handle_backed", False) is not True:
+        raise ValueError(
+            "approved-product providers must be backed by a protected "
+            "non-exportable key handle"
+        )
+    return provider
