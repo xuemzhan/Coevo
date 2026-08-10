@@ -1889,3 +1889,14 @@ items:
       - tests/unit/test_review2_1_test_entry.py
     security_review: false
     protocol_review: false
+  - id: REVIEW2-2
+    story: REVIEW2
+    title: 第二位架构师审查 P1：门禁两阶段化——Phase A 不可变执行 + 结果 JSON 产物（loop/runtime/gate-results/），Phase B 治理写回（audit/VERIFICATION/seal/修剪）仅在全阶段结束后执行；分阶段独立超时与进度输出；单阶段超时 fail-closed
+    status: done
+    dependencies: [REVIEW2-1, QUALITY-GATE-ENCODING-1]
+    acceptance_tests:
+      - tests/unit/test_review2_2_gate_phases.py
+      - tests/unit/test_engineering_baseline.py
+      - tests/unit/test_quality_gate_lock.py
+    security_review: false
+    protocol_review: false

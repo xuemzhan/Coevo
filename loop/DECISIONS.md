@@ -5558,3 +5558,14 @@ security-reviewer 双签门禁。
 - Security review: 统一测试入口为测试基础设施变更，不涉及身份/密钥/文件解析/权限/审计语义（lint 阶段 validate_opencode/secret_scan/traceability/audit 全通过），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-2 收口（门禁两阶段化；增量门禁豁免）
+- Work item: `REVIEW2-2`（第二位架构师审查 P1：门禁两阶段化）status=done；deps=[REVIEW2-1, QUALITY-GATE-ENCODING-1]。
+- Delivery: `scripts/quality_gate.py` 重构为两阶段：
+  - Phase A `_run_stages` 只执行阶段命令（前置 seal 幂等保留），**不做任何治理写回**，每阶段输出 `[gate] stage i/n: exit=... duration_ms=...` 进度；`STAGE_TIMEOUTS` 分目标独立超时（fmt/lint 600s、test/quality/e2e 2400s、security 1800s、win7 600s、fast 1800s），单阶段超时 fail-closed exit=13；
+  - `_write_results_json` 将机器可读结果写入 `loop/runtime/gate-results/<target>-<ts>.json`（gitignored，含每阶段 argv/exit/duration/output_tail）；
+  - Phase B `_record_gate_result`（tool-audit append → 最终 seal → VERIFICATION 写入 → 自修剪）仅在全部阶段结束后执行；quality 命令集与 fingerprint 不变（回归钉保持 `b96157dbb895a417`）。
+  - 守卫适配：quality_gate 引入 dataclass 后，三个守卫测试补 `sys.modules` 注册；test_engineering_baseline / test_quality_gate_lock 的结构断言改为指向 `_run_stages`（阶段循环仍位于排他锁内、preflight seal 先于循环）。契约文档 `docs/architecture/gate-phases.md` + gate-tiers 引用。实现提交 `757eb56`。
+- Verification: 用户指示不做全量门禁；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（8 阶段进度输出 + 结果 JSON 落盘）；test-win7 门禁 exit=0；单元套件 discovered=1404 passed=1401 failed=0 skipped=3；守卫 18/18。
+- Security review: 门禁执行/记录边界重构，不改变审计语义（append-only、最终 seal、fully-sealed 校验均保留并由 lint 复验），security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
