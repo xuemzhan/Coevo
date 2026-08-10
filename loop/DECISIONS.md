@@ -5577,3 +5577,16 @@ security-reviewer 双签门禁。
 - Security/protocol review: 本切片为文档+测试（假 provider），无 wire/字段/生产密码逻辑变更，protocol-reviewer 与 security-reviewer 均不触发；US-5-AC-2 正式 SM2 产品接入仍为外部审批依赖（backlog/ARCH-REVIEW-3 范围治理跟踪）。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-4 收口（WPS 真实启动链路闭合；增量门禁豁免）
+- Work item: `REVIEW2-4`（第二位架构师审查 P1：WPS 真实启动链路）status=done；deps=[US-7-AC-4, US-7-AC-1]。
+- 事实核验：第二位架构师"facade 返回 render stub"论断属实（facade.py:321 原注释自证）。WpsLauncher（US-7-AC-4）已具备完整校验与真实子进程启动，缺口在 facade 业务路径未接入。
+- Delivery:
+  - `CockpitResponseStatus` 新增 `STARTED` / `NOT_AVAILABLE`（additive，无测试钉闭集）；
+  - `CockpitFacade.dispatch(..., wps_launcher=None)` 与 `_wps_open` 注入 launcher，映射 WpsLaunchResult → STARTED/DENIED/NOT_AVAILABLE/ERROR（含 returncode/detail）；launcher 抛异常 fail-closed；未注入 launcher 一律 `NOT_AVAILABLE`，**彻底移除 "wps_open accepted" 假 stub**；
+  - HTTP 层 `CockpitHttpServer(wps_launcher=...)` 透传，status_codes 补 STARTED=200 / NOT_AVAILABLE=503；
+  - 契约文档 `docs/architecture/wps-launch-contract.md`（结果语义表/边界职责/变更纪律）；
+  - 单元测试扩展（无启动器/成功/拒绝/不可用/失败/抛异常）+ 集成测试适配（注入假启动器验证 200+started、无启动器 503+not_available）。
+- Verification: 用户指示不做全量门禁；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1415 全绿）；cockpit+launcher 单元 36/36；cockpit HTTP 集成 24/24。
+- Security review: 本切片不改变鉴权/会话/CSRF/Origin 语义（集成测试仍验证 403），无身份/密钥/审计语义变更，security_review=false 保持；HTTP 全链路黑盒矩阵由 REVIEW2-5 继续补齐。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。

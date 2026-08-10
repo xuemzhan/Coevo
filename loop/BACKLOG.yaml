@@ -1911,3 +1911,13 @@ items:
     # 正式 SM2 产品接入仍属 US-5-AC-2 外部审批。
     security_review: false
     protocol_review: false
+  - id: REVIEW2-4
+    story: REVIEW2
+    title: 第二位架构师审查 P1：WPS 真实启动链路闭合——CockpitFacade 接入注入的 WpsLauncher，结果语义 STARTED/DENIED/NOT_AVAILABLE/ERROR（未配置启动器返回 NOT_AVAILABLE，杜绝 stub accepted）；HTTP 层透传；契约文档 + 单元测试
+    status: done
+    dependencies: [US-7-AC-4, US-7-AC-1]
+    acceptance_tests:
+      - tests/unit/test_cockpit.py
+      - tests/unit/test_wps_launcher.py
+    security_review: false
+    protocol_review: false
