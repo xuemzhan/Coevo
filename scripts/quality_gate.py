@@ -114,7 +114,14 @@ def _run_locked(target):
     if artifact.startswith("results artifact failed"):
         output.append(artifact+"\n")
     # Phase B: governance recording only after all stages finished.
-    rc=_record_gate_result(target,fp,rc,output,ts)
+    results_json = (
+        Path(artifact)
+        if not artifact.startswith("results artifact failed")
+        else None
+    )
+    rc=_record_gate_result(
+        target, fp, rc, output, ts, results_json=results_json
+    )
     print(json.dumps({"ok":rc==0,"exit_code":rc,"fingerprint":fp})); return rc
 
 
@@ -303,24 +310,73 @@ def _write_results_json(target, fp, rc, results, ts, total_ms):
         return f"results artifact failed: {type(exc).__name__}: {exc}"
 
 
-def _record_gate_result(target, fp, rc, output, ts):
-    """Phase B: audit append, final seal, VERIFICATION write and records trim."""
+def _verification_body_from_json(results_json: Path) -> str:
+    """Build the VERIFICATION section body from the Phase A results JSON."""
 
+    payload = json.loads(results_json.read_text(encoding="utf-8"))
+    parts: list[str] = []
+    for stage in payload.get("stages", []):
+        parts.append("$ " + " ".join(stage.get("argv") or []) + "\n")
+        parts.append(stage.get("output_tail") or "")
+        counts = [
+            stage.get(key)
+            for key in ("discovered", "passed", "failed", "skipped")
+        ]
+        if any(count is not None for count in counts):
+            parts.append(
+                f"[gate] counts: discovered={stage.get('discovered')} "
+                f"passed={stage.get('passed')} failed={stage.get('failed')} "
+                f"skipped={stage.get('skipped')}\n"
+            )
+    parts.append(
+        f"[gate] totals: {json.dumps(payload.get('totals', {}), sort_keys=True)}\n"
+    )
+    return "".join(parts)
+
+
+def _record_gate_result(
+    target,
+    fp,
+    rc,
+    output,
+    ts,
+    *,
+    results_json: Path | None = None,
+    verification: Path = VERIFICATION,
+):
+    """Phase B: audit append, final seal, VERIFICATION write and records trim.
+
+    VERIFICATION is derived from the Phase A results JSON when available
+    (artifact/record consistency, ENG-OPTIMIZE-2); in-memory output is the
+    fail-open fallback.
+    """
+
+    tail: list[str] = []
     append_record({"ts":ts,"actor":"quality_gate","tool":"quality_gate","target":target,"fingerprint":fp,"exit_code":rc})
     if rc==0:
         try:
             seal()
             if verify_seal()!="fully-sealed":
                 raise RuntimeError("final audit seal is incomplete")
-            output.append("audit seal: fully-sealed\n")
+            tail.append("audit seal: fully-sealed\n")
         except Exception as exc:  # noqa: BLE001 - seal failure must fail the gate
             rc=14
-            output.append("audit seal failed: "+str(exc)+"\n")
-    with VERIFICATION.open("a",encoding="utf-8") as stream:
-        stream.write(f"\n## {ts} — target=`{target}` fingerprint=`{fp}`\n- exit_code: `{rc}`\n```text\n{''.join(output)[-8000:]}\n```\n")
-    trim_note = _trim_records_to_policy()
+            tail.append("audit seal failed: "+str(exc)+"\n")
+    if results_json is not None and Path(results_json).is_file():
+        try:
+            body = _verification_body_from_json(Path(results_json)) + "".join(tail)
+        except Exception as exc:  # noqa: BLE001 - fall back to in-memory output
+            body = "".join(output) + (
+                f"\n[gate] results JSON read failed: "
+                f"{type(exc).__name__}: {exc}\n"
+            ) + "".join(tail)
+    else:
+        body = "".join(output) + "".join(tail)
+    with verification.open("a",encoding="utf-8") as stream:
+        stream.write(f"\n## {ts} — target=`{target}` fingerprint=`{fp}`\n- exit_code: `{rc}`\n```text\n{body[-8000:]}\n```\n")
+    trim_note = _trim_records_to_policy(verification)
     if trim_note:
-        with VERIFICATION.open("a",encoding="utf-8") as stream:
+        with verification.open("a",encoding="utf-8") as stream:
             stream.write(f"\n[gate] records self-trim: {trim_note}\n")
     return rc
 def main():
