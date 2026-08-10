@@ -5516,3 +5516,10 @@ security-reviewer 双签门禁。
 - Security review: 门禁脚本/哈希锁变更不涉及身份/密钥/文件解析/权限/审计语义（validate_opencode、secret_scan 均在 fast 的 lint 阶段通过），security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-9 收口（Win7 兼容回归固化；增量门禁豁免）
+- Work item: `ARCH-REVIEW-9`（P2-3 Win7 兼容回归固化）status=done；deps=[WIN7-AC-1]。
+- Delivery: `scripts/quality_gate.py` 新增 `test-win7` target（`unittest discover -s tests/win7`）并纳入 `quality` 命令集（`commands("quality")` 组合元组加入 test-win7）；`scripts/tool-shims/make.cs` Targets/usage 暴露 `test-win7`；哈希锁同步（python-script-lock.tsv 的 quality_gate.py 行重哈希、make.cs `ScriptInventorySha256`、toolchain-lock.json `make_compatibility_shim.source_sha256/source_size/script_inventory`）；显式功能降级清单由既有 `docs/architecture/win7-compat-branch.md` + `tests/win7/test_win7_compat_profile.py` 守卫；新增守卫 `tests/unit/test_arch_review_9_win7_gate.py`（4 项）。**quality 命令集指纹回归钉随本次更新：`f742f64aa8dce72c` → `e1b4d1226e2794df`**（ARCH-REVIEW-7 守卫测试同步更新）。实现提交 `17347bb`。
+- Verification: 用户指示不做全量门禁；test-win7 门禁 exit=0 fingerprint=`ed47f47b5590627d`；fast 门禁 exit=0 fingerprint=`b3b305cfbb18796f`（compileall+lint+单元全绿）；守卫 12/12（7+9+win7 兼容档案）。
+- Security review: 门禁接线/哈希锁变更不涉及身份/密钥/文件解析/权限/审计语义，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续，不做全量门禁）；executed by: Codex (loop-engineer)。

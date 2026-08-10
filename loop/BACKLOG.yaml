@@ -1866,3 +1866,12 @@ items:
       - tests/unit/test_arch_review_7_gate_tiers.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-9
+    story: ARCH-REVIEW
+    title: 架构审查 P2-3：Win7 兼容回归固化——门禁固定运行 tests/win7 子集（新增 test-win7 target 并纳入 quality），显式功能降级清单由 win7-compat-branch.md 守卫；守卫测试钉门禁接线
+    status: done
+    dependencies: [WIN7-AC-1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_9_win7_gate.py
+    security_review: false
+    protocol_review: false
