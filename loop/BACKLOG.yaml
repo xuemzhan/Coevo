@@ -2033,6 +2033,15 @@ items:
       - tests/unit/test_eng_optimize_2_verification_from_json.py
     security_review: false
     protocol_review: false
+  - id: ENG-OPTIMIZE-3
+    story: ENG-OPTIMIZE
+    title: release_check 增加最近门禁结果检查——读取最新 gate-results artifact（存在/exit=0/failed=0/discovered>0/时效性），防止基于过期或失败门禁证据发布；守卫测试（真实仓库/缺失/失败/过期）
+    status: done
+    dependencies: [ENG-OPTIMIZE-2]
+    acceptance_tests:
+      - tests/unit/test_release_check.py
+    security_review: false
+    protocol_review: false
   - id: ARCH-REVIEW-4
     story: ARCH-REVIEW
     title: 架构审查 P1-1：子智能体 Agent 契约——七个专业子智能体设计期 Manifest 目录（能力闭集/服务模块/model_binding/人工确认点/工具策略），运行时注册仍经 guard_registration；契约文档 + 单元守卫

@@ -5148,6 +5148,14 @@ security-reviewer 双签门禁。
 - Security review: 纯记录派生增强（只读），不改审计/测试语义，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ENG-OPTIMIZE-3 收口（release_check 最近门禁结果检查；增量门禁豁免）
+- Work item: `ENG-OPTIMIZE-3`（防止基于过期/失败门禁证据发布）status=done；deps=[ENG-OPTIMIZE-2]。
+- Delivery: `scripts/release_check.py` 新增 `check_recent_gate` 并接入 `build_report`——读取最新 `loop/runtime/gate-results/*.json`：目录缺失/空、exit≠0、failed>0、discovered=0、started_at 超期（>7 天）均为 critical；明确"历史 VERIFICATION 记录不足为凭，必须有新鲜通过的门禁 artifact"。测试扩展 4 项（真实仓库通过/缺失 critical/失败 critical/过期 critical）；`_repo` 夹具补新鲜 artifact 使既有报告用例适配。
+- 说明：release_check.py 不在脚本锁清单内，无需哈希锁同步。
+- Verification: 用户指示不做全量门禁；release_check 13/13；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；单元 1481 全绿。
+- Security review: 只读发布检查（文件读取+统计），不改任何运行时/密钥/审计行为，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：
