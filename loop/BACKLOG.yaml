@@ -2015,3 +2015,21 @@ items:
       - tests/unit/test_arch_review_8_records_governance.py
     security_review: false
     protocol_review: false
+  - id: ARCH-REVIEW-4
+    story: ARCH-REVIEW
+    title: 架构审查 P1-1：子智能体 Agent 契约——七个专业子智能体设计期 Manifest 目录（能力闭集/服务模块/model_binding/人工确认点/工具策略），运行时注册仍经 guard_registration；契约文档 + 单元守卫
+    status: done
+    dependencies: [US-16-AC-1-framework-manifest-checker-v0.1, US-16-AC-3-framework-capability-closedset-v0.1]
+    acceptance_tests:
+      - tests/unit/test_arch_review_4_agent_manifest_registry.py
+    security_review: true
+    protocol_review: false
+  - id: ARCH-REVIEW-5
+    story: ARCH-REVIEW
+    title: 架构审查 P1-2：审计签名密钥生命周期仪式——轮换/离线备份/丢失恢复/备份签名者评估契约文档（当前单签名者 F6DE、CNG 非导出）；运行手册引用；守卫测试
+    status: done
+    dependencies: [US-15-AC-2]
+    acceptance_tests:
+      - tests/security/test_arch_review_5_audit_key_ceremony.py
+    security_review: true
+    protocol_review: false

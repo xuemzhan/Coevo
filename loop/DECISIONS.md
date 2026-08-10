@@ -5181,4 +5181,18 @@ security-reviewer 双签门禁。
 - Security review: 文档+测试，无运行时/密钥/审计行为变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-4 收口（子智能体 Manifest 注册表；增量门禁豁免；security_review=true）
+- Work item: `ARCH-REVIEW-4`（架构审查 P1-1）status=done；deps=[US-16-AC-1, US-16-AC-3]。
+- Delivery: `src/coevo/framework/agent_catalog.py`——七个专业子智能体设计期目录（agent.flow_understanding / task_decomposition / progress_capture / risk_analysis / supervision_meeting / decision_brief / knowledge_ingest），每项声明能力闭集（AgentCapability）、服务模块、model_binding（rule/hybrid，切换只改配置与提示词版本）、人工确认点、工具策略；`validate_catalog()` fail-closed；契约文档 `docs/architecture/agent-manifest-registry.md`（目录表/规则模型切换边界/运行时注册仍经 guard_registration）；framework 模块文档登记；守卫测试 4 项。
+- Verification: 用户指示不做全量门禁；定向 4/4 + 模块文档守卫；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1467 全绿）。
+- Security review: 设计期目录+文档+测试，不改运行时注册门与密码/权限行为；BACKLOG 保持 `security_review=true`——**生产采用前需独立安全审查**（责任移交记录）。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - ARCH-REVIEW-5 收口（审计签名密钥生命周期仪式；增量门禁豁免；security_review=true）
+- Work item: `ARCH-REVIEW-5`（架构审查 P1-2）status=done；deps=[US-15-AC-2]。
+- Delivery: `docs/architecture/audit-key-ceremony.md`——当前状态（单签名者 F6DE、CNG `CurrentUser/My` 非导出、RSA/SHA-256 prototype、正式替换方向=国密产品+受保护句柄）/ 轮换仪式（过渡期补签+旧 p7s 归档+配置更新人工审批）/ 离线备份（公钥版本化、私钥受控备份）/ 丢失恢复（新签者+全链复验+留痕）/ 备份签名者评估（HSM 多签方向，当前方案不变）；守卫测试 3 项（契约章节、audit-signing.json 单签名者 prototype、运行手册存在）。
+- Verification: 用户指示不做全量门禁；安全定向 3/3；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1467 全绿）。
+- Security review: 纯文档+配置断言测试，不改变签名方案与密钥处理；BACKLOG 保持 `security_review=true`——**生产执行轮换/恢复前需独立安全审查**（责任移交记录）。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 
