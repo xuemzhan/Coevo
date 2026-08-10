@@ -5185,6 +5185,7 @@ security-reviewer 双签门禁。
   - security：discovered=102 passed=102 failed=0 skipped=0（standalone 首跑唯一失败为"审计未封缄尾"环境行为，重封缄后 102/102）；
   - e2e：discovered=16 passed=16 failed=0 skipped=0（含两条固定链、断网黑盒、SLO 管线）；
   - win7：4/4（此前实测）；
+  - go：`coevo/go/taskflow` ok（锁定工具链 `D:\Go\bin\go.exe`、GOPROXY=off，2026-08-10 复验）；
   - 审计链重封缄 fully-sealed（sequence=2148→2149）。
 - 说明：standalone 套件运行会追加审计记录并遗留未封缄尾，属已知环境行为；正式门禁按阶段重封缄（REVIEW2-2）。本记录支撑 GOAL.md mvp-complete 条件 3/4/5/6/7/8/10 的当前状态证据；条件 11（独立双签）仍待业务负责人裁决。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
