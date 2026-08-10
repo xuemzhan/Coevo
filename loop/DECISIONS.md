@@ -5301,6 +5301,25 @@ security-reviewer 双签门禁。
   （台账登记、责任明确），需业务负责人/外部方决策后方可关闭。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - release_check 编码健壮性修复（ENG-OPTIMIZE-8；按用户指令不跑全量门禁）
+- 用户指令："修复所有架构级风险，不跑全量门禁"（第五波；独立验收就绪复核发现发布门禁 critical）。
+- 发现：`python scripts/release_check.py` 返回 critical——`check_traceability` 直接运行
+  `scripts/traceability_check.py`，在 GBK 控制台下打印矩阵中非 GBK 字符（U+2194 ↔）触发
+  `UnicodeEncodeError`（该字符在历次矩阵中已存在，属**既有移植性缺陷**；fast 门禁走
+  `control.pyz` 打包路径未暴露）。
+- 修复：`scripts/release_check.py::_run`（不在脚本哈希锁清单内）为全部子进程注入
+  `PYTHONIOENCODING=utf-8`；新增守卫测试
+  `tests/unit/test_eng_optimize_8_release_encoding.py` 钉住 env 与 capture encoding。
+- 边界说明：`scripts/traceability_check.py` 与 `.tools/control/control.pyz` 处于
+  toolchain 哈希锁链（tsv + make.cs + toolchain-lock 三轮同步），本轮不改其内容；
+  规范调用路径（release_check、门禁 lint/control.pyz、CI workflow）均已 UTF-8 健壮。
+- Verification: 定向 1/1；实测 release_check traceability=`consistent`（唯一剩余 critical
+  为本轮未提交改动，提交后全绿）；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；
+  按用户指令未运行全量 quality。
+- Security review: 子进程环境变量增强（只读检查工具），无运行时/密钥/审计逻辑变更，
+  security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（修复所有架构级风险，不跑全量门禁）；executed by: Codex (loop-engineer)。
 ## 2026-08-10 - REVIEW2-10 收口（审计日志代际重锚定；增量门禁豁免）
 - Work item: `REVIEW2-10`（第二位架构师审查 P2：审计归档重锚定）status=done；deps=[RECORDS-ARCHIVE-3]。闭合 DECISIONS 长期记录的"真正重锚定流程未实现"缺口。
 - 方案：**代际重锚定**（不重写任何既有记录）——`scripts/audit_seal.py re-anchor`：

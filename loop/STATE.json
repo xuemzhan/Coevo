@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
   "iteration": 30,
-  "current_story": "ARCH-REVIEW",
-  "current_item": "ARCH-REVIEW-16",
+  "current_story": "ENG-OPTIMIZE",
+  "current_item": "ENG-OPTIMIZE-8",
   "phase": "decide",
   "status": "done",
   "failed_verifications": 0,
   "last_failure_fingerprint": "",
   "last_verified_commit": "cf3c35cf7def0106248f97968214c4872649c3b2",
   "blocking_issue": "",
-  "updated_at": "2026-08-10T13:46:46.103986Z"
+  "updated_at": "2026-08-10T13:52:31.492288Z"
 }

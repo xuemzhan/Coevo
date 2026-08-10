@@ -2165,3 +2165,12 @@ items:
       - tests/unit/test_arch_review_15_risk_ledger.py
     security_review: false
     protocol_review: false
+  - id: ENG-OPTIMIZE-8
+    story: ENG-OPTIMIZE
+    title: release_check 子进程编码健壮性——GBK 控制台下 traceability_check 打印非 GBK 字符（U+2194）崩溃导致发布门禁 critical；_run 强制 PYTHONIOENCODING=utf-8 + 回归守卫
+    status: done
+    dependencies: [ENG-BASE-AC-1]
+    acceptance_tests:
+      - tests/unit/test_eng_optimize_8_release_encoding.py
+    security_review: false
+    protocol_review: false

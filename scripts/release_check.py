@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -38,6 +39,11 @@ FORBIDDEN_TRACKED_ARTIFACTS = re.compile(
 
 
 def _run(repo_root: Path, command: list[str]) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ)
+    # Force UTF-8 stdout/stderr in child Python processes so matrix/content
+    # containing non-GBK characters (e.g. U+2194) cannot crash the report
+    # on a GBK console (ENG-OPTIMIZE-8).
+    env["PYTHONIOENCODING"] = "utf-8"
     return subprocess.run(
         command,
         cwd=repo_root,
@@ -46,6 +52,7 @@ def _run(repo_root: Path, command: list[str]) -> subprocess.CompletedProcess[str
         encoding="utf-8",
         errors="replace",
         timeout=120,
+        env=env,
     )
 
 
