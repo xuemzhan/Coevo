@@ -5147,4 +5147,15 @@ security-reviewer 双签门禁。
 - Security review: 审计链敏感项，BACKLOG 保持 `security_review=true` 标注；本切片为增量新增、默认不自动执行、fail-closed + 归档绑定 + 单元验证；**生产环境使用 re-anchor 前需独立安全审查复核**（责任移交记录于本条目）。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
+## 2026-08-10 - REVIEW2-11 收口（交付门禁；增量门禁豁免）
+- Work item: `REVIEW2-11`（第二位架构师审查 P3：交付门禁）status=done；deps=[REVIEW2-6, WIN7-AC-1, RELEASE-1]。
+- Delivery: `scripts/release_check.py` 新增 `check_delivery_artifacts` 并接入 `build_report`：
+  - critical：跟踪树含 `__pycache__/`、`*.pyc`、`*.db(-wal|-shm)`、`*.pdb`、`helper.exe`、`loop/private-key-handles-*.json`；生产 runner（run_cockpit.py）引用 GmSSL 原型 provider；secret-scan 夹具豁免超出 tests/+loop/ 最小前缀；
+  - warning：Win7 分离文档缺失发布标记（独立/发布）。
+  契约文档 `docs/architecture/delivery-gate.md`；测试扩展 `tests/unit/test_release_check.py`（真实仓库 clean、伪造跟踪制品拒绝、生产 runner 原型拒绝；`_repo` 夹具补齐 secret_scan/run_cockpit/win7 文档使既有子进程用例适配）。
+- 说明：release_check.py 不在 python-script-lock.tsv 清单内，无需哈希锁同步。
+- Verification: 用户指示不做全量门禁；release_check 全套回归绿（真实仓库 delivery_artifacts=clean）；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`（compileall+lint+单元 1445 全绿）。
+- Security review: 交付门禁为只读检查（git ls-files + 静态扫描），不改变任何运行时/密钥/密码行为，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化，不做全量门禁）；executed by: Codex (loop-engineer)。
 
