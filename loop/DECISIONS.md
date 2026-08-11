@@ -5484,4 +5484,20 @@ security-reviewer 双签门禁。
 - Security review: 纯文档修正，无运行时/密钥/审计逻辑变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化与修复）；executed by: Codex (loop-engineer)。
+## 2026-08-11 - CTAF 提案一致性守卫收口（ARCH-REVIEW-18；不跑全量门禁）
+- 用户指令："继续优化与修复"（沿用不跑全量门禁约束）。
+- 交付：`tests/unit/test_arch_review_18_ctaf_consistency.py`（6 项守卫）——把预评审
+  F-1..F-5 修正固化为防回归不变量：
+  - F-1：提案累计口径必须保持 60 条 / 53 条 net new，禁止回退到 45/38；
+  - F-2：提案 §13 威胁矩阵实测行数必须为 16，且框架 README 不得出现 15 行；
+  - F-3：§6.1 trace_id 标注必须为 `<sha256-64hex>`，禁止回退 `<uuid>`；
+  - F-4：框架 README 待补充表 M1a/M2 必须保持"已交付"标记；
+  - F-5：框架 README 必须保留"交付口径说明"；
+  - 附加：§16.6 / §17 正文不得再出现幽灵编号 B12 / A18。
+- Verification: 定向 6/6；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；按用户指令
+  未运行全量 quality。
+- Security review: 纯守卫测试（只读断言），无运行时/密钥/审计逻辑变更，
+  security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化与修复）；executed by: Codex (loop-engineer)。
 

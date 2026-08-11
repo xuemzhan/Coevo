@@ -2183,3 +2183,12 @@ items:
       - tests/security/test_loop_guard_static.py
     security_review: true
     protocol_review: false
+  - id: ARCH-REVIEW-18
+    story: ARCH-REVIEW
+    title: CTAF 提案一致性守卫——固化预评审 F-1..F-5 修正（累计口径 60/53、威胁矩阵 16 行、trace_id sha256-64hex、M1a/M2 已交付标记、交付口径说明、幽灵编号清除），防回归
+    status: done
+    dependencies: [ARCH-REVIEW-15]
+    acceptance_tests:
+      - tests/unit/test_arch_review_18_ctaf_consistency.py
+    security_review: false
+    protocol_review: false
