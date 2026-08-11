@@ -5447,4 +5447,22 @@ security-reviewer 双签门禁。
 - Security review: 纯文档交付，无运行时/密钥/审计逻辑变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（授权实现方视角 CTAF 预评审）；executed by: Codex (loop-engineer)。
+## 2026-08-11 - CTAF 独立架构评审安排尝试记录（P1-3 / CTAF-PROPOSAL-REVIEW 保持开放）
+- 授权：业务负责人指令"安排 CTAF 独立架构评审（P1-3）以关闭 CTAF-PROPOSAL-REVIEW"。
+- 尝试：派生零上下文继承的独立评审子代理（`fork_turns=none`，任务消息含完整评审范围与
+  只读约束），共 3 次（spawn + 2 次 followup + interrupt 重发），子代理均返回闲聊式应答
+  （"ready to help" / "standing by"），**未执行任何评审动作**。
+- 结论：与仓库先例一致（DECISIONS 2026-08-10"子代理机制失控后改为增量自验"），当前
+  协作子代理机制无法承载独立评审执行。
+- 处置：**CTAF-PROPOSAL-REVIEW 保持 REVIEW-REQUIRED，不以前置状态冒充关闭**；
+  实现方不会以自审代替独立评审（独立性为硬约束）。待办选项：
+  1) 业务负责人指派外部/人工架构师执行评审并留痕；
+  2) 业务负责人明确豁免该独立评审门禁并留痕（DECISIONS 批准）；
+  3) 在可用的外部会话/代理环境中运行独立评审（执行包见
+     `docs/process/ctaf-pre-review-2026-08-11.md` §5 交接清单）。
+- Verification: 本次仅记录；fast 门禁未重跑（无代码/测试变更，DECISIONS 追加且时间序
+  守卫复验通过）。
+- Security review: 纯记录，无运行时/密钥/审计逻辑变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（安排 CTAF 独立架构评审）；executed by: Codex (loop-engineer)。
 
