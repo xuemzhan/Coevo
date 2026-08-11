@@ -24,7 +24,7 @@
 | OrchestrationEngine | 4 方法 | **+ validate_plan 前置**（A9） |
 | ESCALATED 出口 | 3 种（含直跳 ACTIVE） | **3 种全部经 HELD 中转**（A10 + L19） |
 | 红线 | L9..L17 | **L9..L19（11 条，新增 L18/L19）** |
-| 威胁矩阵 | 13 行 | **15 行**（+Plan 数值错位 + ESCALATED 直跳） |
+| 威胁矩阵 | 13 行 | **16 行**（+policy_ref 冒名、Plan 越 L4 Scope、Plan 数值错位、ESCALATED 直跳） | 
 | 路线图 | 估时表 | **+ 风险点 + 进度锚 + 延长触发器**（A3） |
 | M1 | 4 周（混合项） | **M1a + M1b 各 2 周**（A4） |
 | 依赖图 | ASCII | **Mermaid**（B11） |
@@ -76,9 +76,9 @@
 
 | 主题 | 负责模块 | 里程碑 | 测试要求 | 估算 |
 | --- | --- | --- | --- | --- |
-| `manifest-checker.md` | `src/coevo/framework/manifest/` | **M1a (2 周)** | T1..T6 | 2 周 |
+| `manifest-checker 契约` | `src/coevo/framework/manifest_checker.py` | **M1a（已交付 2026-08-08，US-16-AC-1；契约见 design-proposal §5.3 与 docs/architecture/agent-manifest-registry.md）** | T1..T6（含 T6 wire 回归） | 2 周 |
 | `capability-closedset.md` | `src/coevo/framework/capability.py` | **M1b（已交付 2026-08-08，US-16-AC-3）** | 与 `AgentCapability` 双向一致 + CRYPTO_PROXY approved scope | 2 周 |
-| `policy-template.md` | `src/coevo/framework/policy/` | M2 (4 周) | 4 个 Profile 模板 + validate_plan | 4 周 |
+| `policy 模板` | `src/coevo/framework/policy.py` | **M2（已交付 2026-08-08，US-16-AC-2；契约见 design-proposal §6.5）** | 4 个 Profile 模板 + validate_plan + L18 | 4 周 |
 | `memory-interface.md` | `src/coevo/framework/memory.py` | **M3（已交付 2026-08-08，US-16-AC-4）** | bridge 与 `progress_capture/` / `knowledge_base/` 兼容 + L12 脱敏 | 6 周 |
 | `tool-registry.md` | `src/coevo/framework/tools.py` | **M4（已交付 2026-08-08，US-16-AC-5）** | MCP 路径 A 子集往返字节级一致 + 未知关键字显式拒绝 | 8 周 |
 | `a2a-protocol.md` | `src/coevo/framework/a2a.py` | **M5（已交付 2026-08-08，US-16-AC-6）** | protocol-reviewer 审批 + policy_ref 五步验证 + 大小边界 | 6 周 |
@@ -86,6 +86,10 @@
 | `hybrid-orchestrator.md` | `src/coevo/framework/orchestrator.py` | **M7（核心切片已交付 2026-08-08，US-16-AC-8）** | validate_plan 前置 + 三模式 + L19 + HOLD 门 | 12 周 |
 | `cross-org-validation.md` | 演练手册 | M8 (14 周) | 跨网 + 跨组织 | 14 周 |
 | `k8s-crd-listing.md` | `src/coevo/framework/k8s_listing.py` | **M9（已交付 2026-08-08，US-16-AC-9）** | 与 K8s 解耦 + 确定性可哈希 + YAML 安全引号 | 8 周 |
+
+> **交付口径说明**：表中"已交付"表示 US-16 AC 切片级完成（与 capability-status 的
+> `done` 口径一致），不等于里程碑整体完成；M8 跨组织验证、四层 RBAC L2 实体等仍为
+> 设计/未来项，进入 `PRODUCTION_READY` 前需独立验证 + 独立安全审查 + 批准产品。
 
 ## 业务负责人审阅清单（建议逐项签字）
 

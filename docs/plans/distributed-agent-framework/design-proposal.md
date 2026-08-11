@@ -304,7 +304,7 @@ Task = {
   protocol_version: "1.0",
   package_id:       <uuid>,                  # = .agent package_id
   task_type:        <closed_enum>,           # §5.2 闭集
-  trace_id:         <uuid>,                  # _make_trace_id(event_id, step_index, seed)
+  trace_id:         <sha256-64hex>,          # _make_trace_id(event_id, step_index, seed); 与 §7.3.1 / a2a.py 一致
   parent_task_id:   <uuid|None>,
   project_id:       <safe_id>,
   sender_cert_id:   <safe_id>,
@@ -1081,12 +1081,15 @@ flowchart TB
 | v0.1 → v0.2 审查 | v0.2 | 0 | 17 | +17 |
 | v0.2 → v0.3 审查 | v0.3 | 17 | 17+9=26 | +9 |
 | v0.3 → v0.4 审查 | v0.4 | 17+9=26 | 17+9+19=45 | +19 (A+B 合计) |
+| v0.4 → v0.4.1 审查 | v0.4.1 | 17+9+19=45 | 45+15=60 | +15 (F1..F15，§19.6) |
 
 **口径说明**:
 - v0.2 中 17 条 = v0.1 评审首次提出的全部结论 (v0.2 全部吸收)
 - v0.3 中 9 条 = v0.2 评审首次提出的全部结论 (v0.3 全部吸收)
 - v0.4 中 12+7=19 条 = v0.3 评审首次提出的全部结论 (v0.4 全部吸收)
-- 累计总条数 = 17 + 9 + 19 = 45 条, 因迭代交叉净新增 = **38 条 net new**
+- v0.4.1 中 15 条 = v0.4 评审首次提出的全部结论 (v0.4.1 全部吸收, §19.6)
+- 累计总条数 = 17 + 9 + 19 + 15 = **60 条**（含迭代交叉）, 因迭代交叉净新增 =
+  **53 条 net new**（与 §19.3、框架 README 口径一致）
 
 ### 19.5 v0.5 预约 (业务负责人批准后启动)
 

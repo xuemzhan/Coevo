@@ -5465,4 +5465,23 @@ security-reviewer 双签门禁。
 - Security review: 纯记录，无运行时/密钥/审计逻辑变更，security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（安排 CTAF 独立架构评审）；executed by: Codex (loop-engineer)。
+## 2026-08-11 - CTAF 预评审 F-1..F-5 修正收口（继续优化与修复；不跑全量门禁）
+- 用户指令："继续优化与修复"（沿用不跑全量门禁约束）。
+- 修正（实现方预评审 `docs/process/ctaf-pre-review-2026-08-11.md` 发现项全部落地）：
+  - F-1：design-proposal §19.4 增加 v0.4.1 行（+15），累计口径统一为 60/53，与
+    §19.3 及框架 README 一致；
+  - F-2：框架 README 威胁矩阵行数更正为 16 行（与提案 §13/§19.6 F3 一致）；
+  - F-3：§6.1 trace_id 标注更正为 `<sha256-64hex>`（与 §7.3.1/a2a.py 一致）；
+  - F-4：框架 README 待补充文档表更新——M1a/M2 标记已交付并指向实际契约路径
+    （§5.3、docs/architecture/agent-manifest-registry.md、src/coevo/framework/policy.py）；
+  - F-5：框架 README 新增"交付口径说明"——已交付=AC 切片级完成，M8 跨组织验证与
+    四层 RBAC L2 实体仍为设计/未来项，进入 PRODUCTION_READY 前需独立验证+独立安全
+    审查+批准产品。
+- 预评审报告新增 §7 修正状态表，记录上述逐项修正。
+- Verification: 文档修正+状态核对（60/53、16 行、sha256-64hex、已交付标记、口径说明
+  全部命中）；fast 门禁 exit=0 fingerprint=`fb8029ba3cf2de07`；按用户指令未运行全量
+  quality。
+- Security review: 纯文档修正，无运行时/密钥/审计逻辑变更，security_review=false 保持。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（继续优化与修复）；executed by: Codex (loop-engineer)。
 
