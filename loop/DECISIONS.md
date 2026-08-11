@@ -5500,4 +5500,15 @@ security-reviewer 双签门禁。
   security_review=false 保持。
 - Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decided by: user instruction（继续优化与修复）；executed by: Codex (loop-engineer)。
+## 2026-08-11 - 全量门禁收口 + GitHub 推送授权
+- 业务负责人明确指令："进行全部质量门禁验证，然后 push 到 github"（解除此前
+  "不跑全量门禁"限制）。
+- 全量门禁：`python scripts/quality_gate.py --target quality` exit=0
+  fingerprint=`b96157dbb895a417`（14 阶段全绿：compileall / fmt / lint / 单元 1519 /
+  集成 270 / Go / 安全 103 / E2E 16 / Win7 4；totals discovered=1912 passed=1908
+  skipped=4 failed=0；audit fully-sealed）。
+- 推送授权：按仓库先例（2026-07-25、2026-08-10），本条为对当前 `main` 分支
+  `git push` 的**单次明确授权**；仍禁止合并分支、打 tag、发 release。
+- Governance marker check (latest section must acknowledge the policy): decision status: approved a+b; .gitignore excludes runtime receipts; git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: user instruction（进行全部质量门禁验证，然后 push 到 github）；executed by: Codex (loop-engineer)。
 
