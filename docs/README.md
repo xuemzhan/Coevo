@@ -13,8 +13,8 @@
 | `traceability/` | 需求—代码—测试追踪矩阵 | `requirements-test-matrix.md` |
 | `dependencies/` | 经批准工具的精确版本、来源、哈希与许可证 | `toolchain-lock.json` |
 | `process/` | 独立双签、只读沙箱、记录归档、独立验收执行包与实现方预评审等治理流程 | `independent-review-governance.md`、`independent-verification-pack.md`、`ctaf-pre-review-2026-08-11.md` |
-| `operations/` | 生产运维手册（配置参考、安装/升级/回滚、审计密钥恢复、健康检查/自启/排障） | `configuration-reference.md`、`install-upgrade.md`、`audit-key-runbook.md`、`ops-runbook.md` |
-| `plans/` | 各工作项的切片规划（历史）；CTAF 框架设计提案（v0.4.1，产品级草案，定稿前须独立架构评审） | `*.md`、`distributed-agent-framework/design-proposal.md` |
+| `operations/` | 生产运维手册（配置参考、安装/升级/回滚、审计密钥恢复、健康检查/自启/排障、CI 激活、外部环境验收） | `configuration-reference.md`、`install-upgrade.md`、`audit-key-runbook.md`、`ops-runbook.md`、`ci-activation-checklist.md`、`acceptance-runbooks.md` |
+| `plans/` | 各工作项的切片规划（历史）；CTAF 框架设计提案（v0.4.1，产品级草案，定稿前须独立架构评审）；成熟度修复/优化计划与待决策简报 | `*.md`、`distributed-agent-framework/design-proposal.md`、`maturity-review-2026-08-12-tasks.md`、`pending-decisions-brief.md` |
 | `framework/` | CTAF 框架层设计与适配映射（manifest / capability / policy / plan / memory / tools / a2a / k8s / hybrid / integration / plan-lsp） | `*.md` |
 | `development-environment.md` | 本地开发环境入口、使用方法和离线边界 | `development-environment.md` |
 | `production-readiness.md` | MVP 生产可用性说明（配置/停机/日志/版本/性能） | `production-readiness.md` |
@@ -29,6 +29,8 @@
 | `operations/configuration-reference.md` | 全部 `COEVO_*` 环境变量登记表（代码 ⇄ 文档一致性由测试校验） |
 | `operations/install-upgrade.md` | 离线安装 / 升级 / 回滚 / 卸载 |
 | `operations/audit-key-runbook.md` | 审计签名密钥健康诊断与恢复 |
+| `operations/ci-activation-checklist.md` | CI 激活执行单（owner 建 Release 与验收命令，MATURITY O-02） |
+| `operations/acceptance-runbooks.md` | 外部环境验收手册（Win7 实机 O-03 / WPS 宿主 O-04 / 目标硬件性能 O-05） |
 | `production-readiness.md` | 生产可用性基线（配置/优雅停机/日志/版本/性能） |
 
 ## 冲突优先级

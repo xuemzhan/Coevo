@@ -1874,7 +1874,9 @@ items:
   #     2017/2013/0/4 + security pass；外部门条件 11 -> PASS）
   #   R-06 审计密钥托管 + 独立审查：done（T-07 三档托管；ARCH-REVIEW-5/REVIEW2-10 PASS；
   #     CTAF-PROPOSAL-REVIEW PASS）
-  #   其余 R-02/R-05 与 O-02..O-05 待后续轮次或外部依赖。
+  #   O-02/O-03/O-04/O-05 就绪件：done（CI 激活执行单 + 外部环境验收手册）
+  #   O-01/R-05 决策卡：就绪（docs/plans/pending-decisions-brief.md），待业务负责人裁决
+  #   其余 R-02 与 O-02..O-05 的实际执行待外部审批/环境就绪。
   - id: ARCH-REVIEW-1
     story: ARCH-REVIEW
     title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化

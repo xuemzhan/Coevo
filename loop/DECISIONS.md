@@ -5823,3 +5823,26 @@ security-reviewer 双签门禁。
   executed by: Codex（独立审查方）；未推送（需另行确认）。
 
 
+## 2026-08-12T15:00:00Z -- MATURITY 就绪件交付：CI 执行单 + 外部验收手册 + 决策卡（Approved）
+
+- Item: 为剩余外部依赖/业务决策项交付"开箱即用"的就绪件，环境与裁决就绪后可直接执行。
+- O-02 就绪件：`.github/workflows/quality.yml` 已入库；`docs/dependencies/ci-artifact.json`
+  已锚定（version=1.0.0、sha256=`81dd3e7d5e1e0bfdd1dc8562bf58abf0a5a6fc4b0f311d1cb5acbb3899902856`、
+  url 已填）；新增 `docs/operations/ci-activation-checklist.md`（owner 5 步执行单 +
+  首次运行验收标准 + 完成收口动作）。
+- O-03/O-04/O-05 就绪件：新增 `docs/operations/acceptance-runbooks.md`
+  （Win7 实机验收步骤与通过标准 / WPS 真实宿主验收 / 目标硬件 13 项性能探针复测，
+  均含记录回 DECISIONS/VERIFICATION 的方法）。
+- O-01/R-05 决策卡：新增 `docs/plans/pending-decisions-brief.md`——O-01 三选项
+  （推荐 A：离线闭环=当前版本、在线列入下一版本）与 R-05 两选项（确认 B / 改 A），
+  附裁决后自动同步点；裁决留痕仍以 DECISIONS 为准。
+- 文档索引 `docs/README.md` 已登记新增文件；计划文档与 BACKLOG 队列同步。
+- 本批不改变任何代码/测试/门禁；未跑全量门禁（纯文档）。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: user instruction（"继续"）；executed by: Codex（独立审查方）；
+  未推送（需另行确认）。
+
+
