@@ -14553,3 +14553,537 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=187
 audit seal: fully-sealed
 
 ```
+
+## 2026-08-12T04:48:36.426706Z — target=`quality` fingerprint=`507ff7cb3ed3fd24`
+- exit_code: `1`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe -m compileall -q -f scripts src tests
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-18",
+      "title": "CTAF 提案一致性守卫（2026-08-11 继续优化与修复）：固化预评审 F-1..F-5 修正——累计口径 60/53（§19.3/§19.4 一致）、威胁矩阵 16 行（提案 §13 实测 16 行且 README 一致）、trace_id 标注 sha256-64hex、M1a/M2 已交付标记与交付口径说明、§16.6/§17 幽灵编号 B12/A18 清除",
+      "code": [
+        "docs/plans/distributed-agent-framework/design-proposal.md",
+        "docs/plans/distributed-agent-framework/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_18_ctaf_consistency.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/design-proposal.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_18_ctaf_consistency.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+o/protocol/agent_package.py',
+   'src/coevo/talent/store.py'] : large-file set drifted; update contract + whitelist together
+
+======================================================================
+FAILED/ERROR: test_no_file_exceeds_budget (unit.test_eng_optimize_7_file_size_budget.FileSizeBudgetTests.test_no_file_exceeds_budget)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_eng_optimize_7_file_size_budget.py", line 50, in test_no_file_exceeds_budget
+    self.assertEqual(over, [], f"files exceed budget {MAX_FILE_LINES}: {over}")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['src/coevo/cockpit/server.py'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'src/coevo/cockpit/server.py'
+
+- ['src/coevo/cockpit/server.py']
++ [] : files exceed budget 1133: ['src/coevo/cockpit/server.py']
+
+======================================================================
+FAILED/ERROR: test_inline_stages_are_extracted_to_module_helpers (unit.test_framework_optimize6.CompositionRootGuardTests.test_inline_stages_are_extracted_to_module_helpers)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_framework_optimize6.py", line 62, in test_inline_stages_are_extracted_to_module_helpers
+    self.assertEqual(1, source.count("WorkspaceView("))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 2
+
+======================================================================
+FAILED/ERROR: test_views_are_built_with_demo_fields (unit.test_framework_optimize6.CockpitViewsTests.test_views_are_built_with_demo_fields)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_framework_optimize6.py", line 23, in test_views_are_built_with_demo_fields
+    self.assertEqual("PRJ001", workspace_view.project_id)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'tuple' object has no attribute 'project_id'
+
+[gate] counts: discovered=1528 passed=1517 failed=8 skipped=3
+[gate] totals: {"discovered": 1528, "failed": 8, "passed": 1517, "skipped": 3}
+
+```
+
+## 2026-08-12T04:57:44.390981Z — target=`quality` fingerprint=`507ff7cb3ed3fd24`
+- exit_code: `1`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe -m compileall -q -f scripts src tests
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-18",
+      "title": "CTAF 提案一致性守卫（2026-08-11 继续优化与修复）：固化预评审 F-1..F-5 修正——累计口径 60/53（§19.3/§19.4 一致）、威胁矩阵 16 行（提案 §13 实测 16 行且 README 一致）、trace_id 标注 sha256-64hex、M1a/M2 已交付标记与交付口径说明、§16.6/§17 幽灵编号 B12/A18 清除",
+      "code": [
+        "docs/plans/distributed-agent-framework/design-proposal.md",
+        "docs/plans/distributed-agent-framework/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_18_ctaf_consistency.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/design-proposal.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_18_ctaf_consistency.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+eer) per contract exception flow; user\n  instructed full gate + push.\n\n'
+
+======================================================================
+FAILED/ERROR: test_decisions_records_the_audit_corpus_status (unit.test_private_key_handles_bindings.PrivateKeyHandlesBindingsTests.test_decisions_records_the_audit_corpus_status)
+Traceback (most recent call last):
+  File "E:\Workspace\Coevo\tests\unit\test_private_key_handles_bindings.py", line 162, in test_decisions_records_the_audit_corpus_status
+    self.assertIn(
+    ~~~~~~~~~~~~~^
+        marker,
+        ^^^^^^^
+        latest,
+        ^^^^^^^
+        f"latest DECISIONS.md section lacks approved governance marker: {marker}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 'decision status: approved a+b' not found in '## 2026-08-12t05:00:00z -- file-size-budget registration for app/pipeline.py (approved)\n\n- item: eng-optimize-7 file-size budget contract; `src/coevo/app/pipeline.py`\n  crossed the 600-line large-file threshold (722 lines) after the cockpit\n  web-confirmation (serve-gate) and multi-project demo slices.\n- trigger: contract exception flow in docs/architecture/file-size-budget.md\n  section 2 (new large file must be registered via decisions.md + contract +\n  guard whitelist together).\n- decision: register `src/coevo/app/pipeline.py: 722` in known_large_files,\n  update the contract doc count (9 -> 10) and keep the guard intact; the file\n  is the demo composition root, not a new module added for size.\n- also applied: `src/coevo/cockpit/server.py` was kept within its registered\n  budget (1100) by extracting the shared json-body reader and compacting\n  import formatting (no logic change); final 1096 lines.\n- decision status: approved.\n- decided by: codex (loop-engineer) per contract exception flow; user\n  instructed full gate + push.\n\n' : latest DECISIONS.md section lacks approved governance marker: decision status: approved a+b
+
+[gate] counts: discovered=1528 passed=1523 failed=2 skipped=3
+[gate] totals: {"discovered": 1528, "failed": 2, "passed": 1523, "skipped": 3}
+
+```
+
+## 2026-08-12T05:51:37.460325Z — target=`quality` fingerprint=`507ff7cb3ed3fd24`
+- exit_code: `0`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe -m compileall -q -f scripts src tests
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-18",
+      "title": "CTAF 提案一致性守卫（2026-08-11 继续优化与修复）：固化预评审 F-1..F-5 修正——累计口径 60/53（§19.3/§19.4 一致）、威胁矩阵 16 行（提案 §13 实测 16 行且 README 一致）、trace_id 标注 sha256-64hex、M1a/M2 已交付标记与交付口径说明、§16.6/§17 幽灵编号 B12/A18 清除",
+      "code": [
+        "docs/plans/distributed-agent-framework/design-proposal.md",
+        "docs/plans/distributed-agent-framework/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_18_ctaf_consistency.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/design-proposal.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_18_ctaf_consistency.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+  {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1528 passed=1525 failed=0 skipped=3 duration_ms=81613
+  [unit] discovered=1528 passed=1525 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+[gate] counts: discovered=1528 passed=1525 failed=0 skipped=3
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite integration
+discovered=272 passed=271 failed=0 skipped=1 duration_ms=370141
+  [integration] discovered=272 passed=271 failed=0 skipped=1 exit=0
+[gate] counts: discovered=272 passed=271 failed=0 skipped=1
+$ D:/Go/bin/go.exe test ./...
+ok  	coevo/go/taskflow	(cached)
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite security
+discovered=103 passed=103 failed=0 skipped=0 duration_ms=125824
+  [security] discovered=103 passed=103 failed=0 skipped=0 exit=0
+[gate] counts: discovered=103 passed=103 failed=0 skipped=0
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite e2e
+external_requests=0 loopback_requests=8 missing_local_assets=0 runtime_downloads=0
+discovered=25 passed=25 failed=0 skipped=0 duration_ms=177331
+  [e2e] discovered=25 passed=25 failed=0 skipped=0 exit=0
+[gate] counts: discovered=25 passed=25 failed=0 skipped=0
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite win7
+discovered=4 passed=4 failed=0 skipped=0 duration_ms=353
+  [win7] discovered=4 passed=4 failed=0 skipped=0 exit=0
+[gate] counts: discovered=4 passed=4 failed=0 skipped=0
+[gate] totals: {"discovered": 1932, "failed": 0, "passed": 1928, "skipped": 4}
+audit seal: fully-sealed
+
+```

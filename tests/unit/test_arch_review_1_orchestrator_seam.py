@@ -222,7 +222,7 @@ class CompositionRootGuardTests(unittest.TestCase):
             node
             for node in ast.walk(tree)
             if isinstance(node, ast.FunctionDef)
-            and node.name == "run_demo_pipeline"
+            and node.name == "_run_demo_pipeline_with_store"
         )
         names = list(self._ordered_names(func))
         self.assertIn("validate_product_chain", names)
@@ -230,7 +230,7 @@ class CompositionRootGuardTests(unittest.TestCase):
         self.assertLess(
             names.index("validate_product_chain"),
             names.index("dispatch_event_with_real_facades"),
-            "run_demo_pipeline must call validate_product_chain "
+            "the pipeline body must call validate_product_chain "
             "before any product dispatch entry",
         )
         # No other product dispatch entry is allowed in the composition root.

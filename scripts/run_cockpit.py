@@ -5,6 +5,7 @@ Usage:
     python scripts/run_cockpit.py --check          # validate config and exit
     python scripts/run_cockpit.py --preflight      # fail-fast startup checks and exit
     python scripts/run_cockpit.py --print-token    # print a one-time UI session token
+    python scripts/run_cockpit.py --open           # open the cockpit in the browser
     python scripts/run_cockpit.py --version        # print version and exit
     python scripts/run_cockpit.py --port 12710     # override bind port
 
@@ -32,6 +33,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import webbrowser
 from pathlib import Path
 
 
@@ -96,6 +98,7 @@ def build_config(args: argparse.Namespace) -> AppConfig:
             log_level=config.log_level,
             cockpit_state_path=config.cockpit_state_path,
             cockpit_log_path=config.cockpit_log_path,
+            cockpit_lock_path=config.cockpit_lock_path,
         )
     return config
 
@@ -192,12 +195,18 @@ def run(args: argparse.Namespace) -> int:
         http_config.log_path,
     )
     print(f"coevo cockpit ready: {server.url}")
-    if args.print_token:
+    if args.print_token or args.open:
         # REVIEW-FIX-2: interactive token handoff. The raw token is shown
         # once on stdout (never via the logging framework and never written
         # to disk); the server retains only its SHA-256 digest.
         token = server.session_manager.create()
-        print(f"session token: {token}", flush=True)
+        if args.print_token:
+            print(f"session token: {token}", flush=True)
+        # 直接打印可点击的完整地址，方便使用者复制粘贴。
+        open_url = f"{server.url}?token={token}"
+        print(f"open cockpit: {open_url}", flush=True)
+        if args.open:
+            webbrowser.open(open_url)
     stop_event = threading.Event()
 
     def _shutdown(_signum: int, _frame: object) -> None:
@@ -231,6 +240,11 @@ def main(argv: list[str] | None = None) -> int:
         "--print-token",
         action="store_true",
         help="issue and print a one-time UI session token at startup (stdout only)",
+    )
+    parser.add_argument(
+        "--open",
+        action="store_true",
+        help="issue a session token and open the cockpit in the default browser",
     )
     parser.add_argument(
         "--preflight",

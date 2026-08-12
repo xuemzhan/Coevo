@@ -30,6 +30,39 @@ header {
 
 header h1 { margin: 0; font-size: 18px; }
 
+.detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-head h2 { margin: 0; }
+
+.pending-badge {
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pending-badge.pending {
+  background: #fff7e0;
+  color: #8a5b00;
+  border: 1px solid #e6a700;
+}
+
+.pending-badge.ok {
+  background: #e3fcef;
+  color: #006644;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
 .pill {
   background: #e3fcef;
   color: #006644;
@@ -47,16 +80,68 @@ aside {
 
 aside h2 { font-size: 14px; margin: 0 0 8px; }
 
+.global-pending {
+  font-size: 12px;
+  margin: 0 0 8px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.global-pending.has-pending {
+  background: #fff7e0;
+  color: #8a5b00;
+}
+
+.global-pending.clear {
+  background: #e3fcef;
+  color: #006644;
+}
+
 ul { list-style: none; padding: 0; margin: 0; }
 
 li { padding: 6px 8px; border-bottom: 1px solid var(--border); }
 
 .project { cursor: pointer; }
 .project:hover { background: var(--bg); color: var(--accent); }
+.project.active { background: #deebff; color: var(--accent); font-weight: 600; }
+.project .project-name { display: block; }
+.project .project-id { display: block; font-size: 11px; color: #6b778c; }
+.project .project-counts {
+  display: block;
+  font-size: 11px;
+  color: #8993a4;
+  margin-top: 2px;
+}
 
 main { padding: 16px; overflow-y: auto; }
 
 h3 { font-size: 14px; margin: 14px 0 6px; }
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.section-head h3 { margin: 14px 0 6px; }
+
+#task-filter {
+  font-size: 12px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--fg);
+}
+
+footer#status-bar {
+  grid-column: 1 / -1;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  padding: 6px 16px;
+  font-size: 12px;
+}
 
 button {
   margin-left: 8px;
@@ -70,4 +155,201 @@ button {
 
 button:hover { background: var(--accent); color: #fff; }
 
+button.ghost {
+  margin-left: 0;
+  border-color: var(--border);
+  color: var(--fg);
+  background: #fff;
+}
+
+button.ghost:hover { background: var(--bg); color: var(--accent); }
+
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
 #status.error { color: #bf2600; }
+#status.info { color: #006644; }
+
+.muted { color: #6b778c; font-size: 12px; }
+
+#role-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+#role-tabs button {
+  margin-left: 0;
+  border-radius: 4px;
+  padding: 4px 12px;
+}
+
+#role-tabs button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+#role-tabs .role-empty {
+  color: #6b778c;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+li.task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+li.task-row:hover { background: var(--bg); }
+
+.status-chip {
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.status-chip.done { background: #e3fcef; color: #006644; }
+.status-chip.in_progress { background: #deebff; color: #0052cc; }
+.status-chip.blocked { background: #ffebe6; color: #bf2600; }
+.status-chip.overdue { background: #ffebe6; color: #bf2600; }
+.status-chip.default { background: #f4f5f7; color: #42526e; }
+
+.milestone-done { color: #006644; }
+.milestone-open { color: #6b778c; }
+.milestone-overdue { color: #bf2600; }
+
+.artifact-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.artifact-name {
+  word-break: break-all;
+}
+
+.artifact-meta {
+  color: #6b778c;
+  font-size: 12px;
+}
+
+.artifact-disabled {
+  color: #8993a4;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+dl.detail-grid {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 6px 12px;
+  margin: 8px 0;
+}
+
+dl.detail-grid dt { color: #6b778c; }
+dl.detail-grid dd { margin: 0; }
+
+.empty-note { color: #6b778c; font-style: italic; }
+
+#trace-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#trace-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-left: 3px solid var(--border);
+  margin: 4px 0;
+}
+
+#trace-list li.requires-confirm {
+  border-left-color: #e6a700;
+  background: #fffaf0;
+}
+
+#trace-list li.confirmed {
+  border-left-color: #36b37e;
+  background: #f4fcf6;
+}
+
+.trace-step {
+  min-width: 24px;
+  color: #6b778c;
+  font-weight: 600;
+}
+
+.trace-agent { flex: 1; }
+.trace-detail { color: #6b778c; font-size: 12px; }
+
+.trace-badge {
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.trace-badge.pending { background: #fff7e0; color: #8a5b00; }
+.trace-badge.approved { background: #e3fcef; color: #006644; }
+
+#activity-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.activity-time { color: #6b778c; font-size: 12px; white-space: nowrap; }
+.activity-seq { color: #8993a4; font-size: 11px; }
+.activity-action { flex: 1; }
+.activity-result.ok { color: #006644; }
+.activity-result.failed { color: #bf2600; }
+.activity-result.default { color: #42526e; }
+.activity-hash {
+  color: #c1c7d0;
+  font-size: 11px;
+  font-family: Consolas, monospace;
+}
+
+.error-note { color: #bf2600; font-size: 13px; margin: 8px 0 0; }
+
+#artifacts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 确认对话框 */
+#confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 43, 77, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+#confirm-dialog {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(9, 30, 66, 0.25);
+  padding: 16px 20px;
+  max-width: 420px;
+  width: calc(100% - 32px);
+}
+
+#confirm-dialog p { margin: 8px 0 16px; }
+
+#confirm-dialog .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+#confirm-dialog .dialog-actions button { margin-left: 0; }

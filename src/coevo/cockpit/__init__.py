@@ -50,7 +50,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .models import (ArtifactSummary, CockpitError, CockpitNotFoundError, CockpitRequest, CockpitResponse, CockpitResponseStatus, CockpitRoute, CockpitServerConfig, CockpitServerState, CockpitValidationError, LOOPBACK_HOST, MilestoneSummary, RoleView, STATIC_ROOT, TaskSummary, WPSAllowList, WorkspaceView, _HEX_64, _SAFE_ID, _hash_path)
+from .models import (ActivityEntry, ArtifactSummary, CockpitError, CockpitNotFoundError, CockpitRequest, CockpitResponse, CockpitResponseStatus, CockpitRoute, CockpitServerConfig, CockpitServerState, CockpitValidationError, LOOPBACK_HOST, MilestoneSummary, RoleView, STATIC_ROOT, TaskSummary, TraceStepSummary, WPSAllowList, WorkspaceView, _HEX_64, _SAFE_ID, _hash_path)
 
 from .facade import (CockpitFacade)
 

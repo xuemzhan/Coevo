@@ -19,12 +19,17 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class CockpitViewsTests(unittest.TestCase):
     def test_views_are_built_with_demo_fields(self) -> None:
-        workspace_view, role_view = _build_demo_cockpit_views()
-        self.assertEqual("PRJ001", workspace_view.project_id)
-        self.assertEqual("a.eng", role_view.role_id)
-        self.assertEqual(1, len(role_view.current_tasks))
-        self.assertEqual(1, len(role_view.milestones))
-        self.assertEqual(1, len(role_view.artifacts))
+        workspace_views, role_views = _build_demo_cockpit_views()
+        self.assertEqual(
+            {"PRJ001", "PRJ002"},
+            {view.project_id for view in workspace_views},
+        )
+        eng_roles = [r for r in role_views if r.role_id == "a.eng"]
+        self.assertEqual(1, len(eng_roles))
+        eng = eng_roles[0]
+        self.assertEqual(1, len(eng.current_tasks))
+        self.assertEqual(1, len(eng.milestones))
+        self.assertEqual(1, len(eng.artifacts))
 
 
 class AuditPublishTests(unittest.TestCase):
@@ -59,7 +64,7 @@ class CompositionRootGuardTests(unittest.TestCase):
         # Each stage body must appear exactly once, inside its module helper.
         self.assertEqual(1, source.count("build_encrypted_package("))
         self.assertEqual(1, source.count("KnowledgeBaseFacade.aggregate("))
-        self.assertEqual(1, source.count("WorkspaceView("))
+        self.assertEqual(2, source.count("WorkspaceView("))
         self.assertEqual(1, source.count("AuditEvent.from_audit_record("))
 
 

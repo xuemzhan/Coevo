@@ -1,35 +1,86 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Coevo Cockpit</title>
+  <title>Coevo 驾驶舱</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header>
-    <h1>Coevo Cockpit</h1>
-    <span id="conn" class="pill">local</span>
+    <h1>Coevo 驾驶舱</h1>
+    <span id="conn" class="pill">本地</span>
+    <div class="header-actions">
+      <button id="refresh-btn" type="button" class="ghost">刷新</button>
+      <button id="copy-url-btn" type="button" class="ghost">复制地址</button>
+      <button id="relogin-btn" type="button" class="ghost">重新连接</button>
+    </div>
   </header>
   <aside id="sidebar">
-    <h2>Projects</h2>
+    <h2>项目</h2>
+    <p id="global-pending" class="global-pending"></p>
     <ul id="project-list"></ul>
+    <p id="sidebar-hint" class="muted" hidden>
+      暂无项目。运行 <code>run_demo.py</code> 并打开打印的驾驶舱地址即可看到演示项目。
+    </p>
   </aside>
   <main id="main">
     <section id="status">
-      <p>Loading?</p>
+      <p>加载中…</p>
+    </section>
+    <section id="login-panel" hidden>
+      <h2>连接驾驶舱</h2>
+      <p class="muted">启动驾驶舱时会打印一个带令牌的完整地址；也可以在此粘贴令牌连接。</p>
+      <p id="login-message" class="error-note" hidden></p>
+      <form id="token-form">
+        <input id="token-input" type="text" placeholder="粘贴会话令牌" autocomplete="off" spellcheck="false">
+        <button type="submit" class="ghost">连接</button>
+      </form>
     </section>
     <section id="detail" hidden>
-      <h2 id="detail-title"></h2>
-      <div id="roles"></div>
-      <h3>Tasks</h3>
-      <ul id="tasks"></ul>
-      <h3>Milestones</h3>
-      <ul id="milestones"></ul>
-      <h3>Artifacts</h3>
-      <ul id="artifacts"></ul>
+      <div class="detail-head">
+        <h2 id="detail-title"></h2>
+        <span id="pending-badge" class="pending-badge" hidden></span>
+      </div>
+      <p id="detail-summary" class="muted"></p>
+      <p id="package-summary" class="muted"></p>
+      <p id="snapshot-ts" class="muted"></p>
+      <section id="trace-panel">
+        <h3>编排轨迹</h3>
+        <ol id="trace-list"></ol>
+      </section>
+      <section id="activity-panel">
+        <h3>审计动态</h3>
+        <ul id="activity-list"></ul>
+      </section>
+      <nav id="role-tabs" aria-label="角色"></nav>
+      <section id="role-panel">
+        <div class="section-head">
+          <h3>任务</h3>
+          <select id="task-filter" aria-label="任务状态筛选">
+            <option value="">全部状态</option>
+            <option value="in_progress">进行中</option>
+            <option value="pending">待处理</option>
+            <option value="blocked">受阻</option>
+            <option value="done">已完成</option>
+          </select>
+        </div>
+        <ul id="tasks"></ul>
+        <h3>里程碑</h3>
+        <ul id="milestones"></ul>
+        <h3>产物</h3>
+        <ul id="artifacts"></ul>
+      </section>
+      <section id="task-detail" hidden>
+        <button id="task-back" type="button" class="ghost">返回角色视图</button>
+        <h3 id="task-detail-title"></h3>
+        <dl id="task-detail-body"></dl>
+      </section>
     </section>
   </main>
+  <footer id="status-bar">
+    <span id="health-info" class="muted">系统状态加载中…</span>
+  </footer>
   <script src="/static/app.js"></script>
 </body>
 </html>

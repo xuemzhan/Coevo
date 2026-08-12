@@ -165,6 +165,19 @@ class ListProjectsTests(unittest.TestCase):
         self.assertEqual(CockpitResponseStatus.OK, r.status)
         self.assertIn("<li>PRJ001</li>", r.body_html)
         self.assertEqual(("PRJ001",), r.payload["projects"])
+        # 前端需要视图元数据来渲染项目名称与角色入口。
+        self.assertEqual(1, r.payload["count"])
+        self.assertEqual(1, len(r.payload["views"]))
+        view = r.payload["views"][0]
+        self.assertEqual("PRJ001", view["project_id"])
+        self.assertEqual("Project One", view["display_name"])
+        self.assertEqual(("a.pm", "a.eng"), view["roles"])
+        self.assertEqual(3, view["task_count"])
+        self.assertEqual([], view["trace"])
+        self.assertEqual([], view["activity"])
+        self.assertEqual("", view["package_path"])
+        self.assertEqual("", view["package_digest"])
+        self.assertEqual("", view["knowledge_bundle_id"])
 
 
 # ---------------------------------------------------------------------------
@@ -208,6 +221,13 @@ class RoleViewTests(unittest.TestCase):
         self.assertEqual(1, r.payload["task_count"])
         self.assertEqual(1, r.payload["milestone_count"])
         self.assertEqual(1, r.payload["artifact_count"])
+        # 前端下钻需要明细列表，不只是计数。
+        self.assertEqual("draft spec", r.payload["current_tasks"][0]["title"])
+        self.assertEqual("in_progress", r.payload["current_tasks"][0]["status"])
+        self.assertEqual("spec review", r.payload["milestones"][0]["title"])
+        self.assertEqual(
+            "docs/report.docx", r.payload["artifacts"][0]["path"]
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -374,6 +394,54 @@ class WPSOpenTests(unittest.TestCase):
             self.assertFalse(WPSAllowList.is_allowed(path), f"expected deny for {path}")
         for path in ("x.docx", "x.xlsx", "x.pptx", "x.pdf"):
             self.assertTrue(WPSAllowList.is_allowed(path), f"expected allow for {path}")
+
+
+class PendingConfirmTests(unittest.TestCase):
+    """PENDING_CONFIRM 路由：fail-closed，未配置处理器时不可用。"""
+
+    def _dispatch(self, action: str, handler=None):
+        return CockpitFacade.dispatch(
+            _req(route=CockpitRoute.PENDING_CONFIRM, artifact_path=action),
+            server_state=_state(),
+            now=NOW2,
+            pending_action_handler=handler,
+        )
+
+    def test_without_handler_reports_not_available(self):
+        r = self._dispatch("confirm")
+        self.assertEqual(CockpitResponseStatus.NOT_AVAILABLE, r.status)
+        self.assertEqual("not_available", r.payload["decision"])
+
+    def test_approve_maps_to_started(self):
+        r = self._dispatch(
+            "confirm",
+            handler=lambda action: {"decision": "approved"},
+        )
+        self.assertEqual(CockpitResponseStatus.STARTED, r.status)
+        self.assertEqual("approved", r.payload["decision"])
+
+    def test_reject_maps_to_denied(self):
+        r = self._dispatch(
+            "reject",
+            handler=lambda action: {"decision": "rejected"},
+        )
+        self.assertEqual(CockpitResponseStatus.DENIED, r.status)
+        self.assertEqual("rejected", r.payload["decision"])
+
+    def test_invalid_action_is_rejected(self):
+        r = self._dispatch(
+            "maybe",
+            handler=lambda action: {"decision": "approved"},
+        )
+        self.assertEqual(CockpitResponseStatus.BAD_REQUEST, r.status)
+
+    def test_handler_exception_fails_closed(self):
+        def boom(action):
+            raise RuntimeError("handler down")
+
+        r = self._dispatch("confirm", handler=boom)
+        self.assertEqual(CockpitResponseStatus.ERROR, r.status)
+        self.assertEqual("failed", r.payload["decision"])
 
 
 # ---------------------------------------------------------------------------

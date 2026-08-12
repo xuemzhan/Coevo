@@ -14,59 +14,35 @@ handler, server lifecycle and single-instance lock.
 from __future__ import annotations
 
 
-
 import json
 import logging
-
 import mimetypes
-
 import os
-
 import re
-
 import socket
-
 import threading
-
 import time
-
 import urllib.parse
-
 from collections import deque
-
 from dataclasses import dataclass, field
-
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-
 from pathlib import Path
-
 from typing import Any, Final
 
 
 logger = logging.getLogger(__name__)
 
 
-
 from . import (
-
     LOOPBACK_HOST,
-
     STATIC_ROOT,
-
     CockpitFacade,
-
     CockpitRequest,
-
     CockpitResponse,
-
     CockpitResponseStatus,
-
     CockpitRoute,
-
     CockpitServerState,
-
     CockpitValidationError,
-
 )
 
 from .state_store import CockpitStateStore
@@ -94,12 +70,10 @@ DEFAULT_ALLOWED_HOSTS: Final[frozenset[str]] = frozenset({
 })
 
 
-
 def _default_lock_path() -> Path:
     """Default single-instance lock under the user's local app data."""
     base = os.environ.get("LOCALAPPDATA") or str(Path.home())
     return Path(base) / "KaiwuAgent" / "cockpit.lock"
-
 
 
 def _hostname_of(value: str) -> str:
@@ -279,7 +253,6 @@ class CockpitHttpConfig:
             )
 
 
-
 class SingleInstanceLock:
     """Exclusive-create lock file (Windows-safe) for cockpit single instance.
 
@@ -385,7 +358,6 @@ class SingleInstanceLock:
         self.release()
 
 
-
 # ---------------------------------------------------------------------------
 # Request handler
 # ---------------------------------------------------------------------------
@@ -440,6 +412,11 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 if path == "/":
                     self._serve_index(parsed.query)
                     return
+                if path.startswith("/static/"):
+                    # 静态资源不含敏感数据，且浏览器加载 CSS/JS 时不会携带
+                    # 会话令牌；必须先于会话校验提供，否则真实页面无法渲染。
+                    self._serve_static(path[len("/static/"):])
+                    return
                 if not self.server.session_manager.validate(
                     self._bearer_token(), self._now()
                 ):
@@ -449,9 +426,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 if path == "/api/health":
                     self._serve_api_health()
                     return
-                if path.startswith("/static/"):
-                    self._serve_static(path[len("/static/"):])
-                elif path.startswith("/api/"):
+                if path.startswith("/api/"):
                     self._serve_api_get(path, parsed.query)
                 else:
                     self._send_not_found()
@@ -467,6 +442,8 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                 return
             if path == "/api/wps_open":
                 self._serve_wps_open()
+            elif path == "/api/pending_confirm":
+                self._serve_pending_confirm()
             else:
                 self._send_not_found()
         except (ValueError, json.JSONDecodeError, CockpitValidationError) as exc:
@@ -532,12 +509,10 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
     # -- routes -------------------------------------------------------------
 
     def _serve_index(self, query: str) -> None:
-        params = urllib.parse.parse_qs(query, keep_blank_values=False)
-        token_values = params.get("token", [])
-        token = token_values[0] if len(token_values) == 1 else ""
-        if not self.server.session_manager.validate(token, self._now()):
-            self._send_unauthorized()
-            return
+        # 索引页本身不含敏感数据；token 只用于 API 鉴权，由前端在
+        # 首次加载时从 URL 读取并存放到 sessionStorage。刷新页面时 URL
+        # 已无 token，仍应返回静态页面，由前端用已存会话继续请求 API。
+        # （无 token 时前端会显示引导提示，不会泄漏任何数据。）
         index = resolve_static_path(self.server.config.static_root, "index.html")
         if index is None:
             self._send_json(404, {"error": "index.html missing"})
@@ -633,24 +608,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         )
 
     def _serve_wps_open(self) -> None:
-        length_header = self.headers.get("Content-Length", "")
-        try:
-            length = int(length_header)
-        except ValueError as exc:
-            raise ValueError("invalid Content-Length") from exc
-        if length < 0 or length > self.server.config.max_request_bytes:
-            self._send_bytes(
-                413,
-                b'{"error":"request body too large"}',
-                "application/json; charset=utf-8",
-            )
-            return
-        body = self.rfile.read(length)
-        if len(body) != length:
-            raise ValueError("truncated request body")
-        data = json.loads(body.decode("utf-8"))
-        if not isinstance(data, dict):
-            raise ValueError("request body must be a JSON object")
+        data = self._read_json_body()
         artifact_path = data.get("artifact_path", "")
         project_id = data.get("project_id", "")
         if not isinstance(artifact_path, str) or not isinstance(project_id, str):
@@ -671,6 +629,44 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         )
         self._dispatch_and_send(request)
 
+    def _read_json_body(self) -> dict[str, Any]:
+        """Read a bounded JSON object body shared by POST handlers."""
+        length_header = self.headers.get("Content-Length", "")
+        try:
+            length = int(length_header)
+        except ValueError as exc:
+            raise ValueError("invalid Content-Length") from exc
+        if length < 0 or length > self.server.config.max_request_bytes:
+            self._send_bytes(
+                413,
+                b'{"error":"request body too large"}',
+                "application/json; charset=utf-8",
+            )
+            return
+        body = self.rfile.read(length)
+        if len(body) != length:
+            raise ValueError("truncated request body")
+        data = json.loads(body.decode("utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError("request body must be a JSON object")
+        return data
+
+    def _serve_pending_confirm(self) -> None:
+        """POST a confirm/reject decision for the wired pending action."""
+        data = self._read_json_body()
+        action = data.get("action", "")
+        if not isinstance(action, str) or action not in ("confirm", "reject"):
+            raise ValueError("action must be confirm or reject")
+        request = CockpitRequest(
+            route=CockpitRoute.PENDING_CONFIRM,
+            project_id="",
+            role_id="",
+            task_id="",
+            artifact_path=action,  # 复用槽位承载 confirm/reject
+            ts=self._now(),
+        )
+        self._dispatch_and_send(request)
+
     # -- dispatch + response helpers ----------------------------------------
 
     def _dispatch_and_send(self, request: CockpitRequest) -> None:
@@ -679,6 +675,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             server_state=self.server.state,
             now=self._now(),
             wps_launcher=self.server._wps_launcher,
+            pending_action_handler=self.server._pending_action_handler,
         )
         self.server.append_audit(CockpitFacade.to_audit_record(request, response))
         status_codes = {
@@ -755,7 +752,6 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
 
     def _now(self) -> str:
         return now_utc_iso_z()
-
 
 
 # ---------------------------------------------------------------------------
@@ -835,7 +831,6 @@ class _CockpitLogWriter:
             pass
 
 
-
 class CockpitHttpServer(ThreadingHTTPServer):
     """Threading loopback HTTP server hosting the cockpit facade."""
 
@@ -851,6 +846,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
         started_at: str = "",
         session_manager: CockpitSessionManager | None = None,
         wps_launcher: object | None = None,
+        pending_action_handler: object | None = None,
     ) -> None:
         if not isinstance(config, CockpitHttpConfig):
             raise CockpitValidationError("config must be CockpitHttpConfig")
@@ -871,6 +867,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
             timeout_sec=config.session_timeout_sec
         )
         self._wps_launcher = wps_launcher
+        self._pending_action_handler = pending_action_handler
         started_at = started_at or now_utc_iso_z()
         if (
             not workspace_views
@@ -1097,4 +1094,3 @@ class CockpitHttpServer(ThreadingHTTPServer):
             self._log_writer.close()
         if self._lock is not None:
             self._lock.release()
-

@@ -25,11 +25,13 @@ from typing import Any
 from src.coevo.canon import canonical_json_bytes
 from src.coevo.jsonutil import reject_duplicate_pairs
 from . import (
+    ActivityEntry,
     ArtifactSummary,
     CockpitValidationError,
     MilestoneSummary,
     RoleView,
     TaskSummary,
+    TraceStepSummary,
     WorkspaceView,
 )
 
@@ -60,6 +62,31 @@ def _workspace_view_to_mapping(view: WorkspaceView) -> dict[str, Any]:
         "task_count": view.task_count,
         "milestone_count": view.milestone_count,
         "artifact_count": view.artifact_count,
+        "package_path": view.package_path,
+        "package_digest": view.package_digest,
+        "knowledge_bundle_id": view.knowledge_bundle_id,
+        "trace": [
+            {
+                "step_index": step.step_index,
+                "agent_id": step.agent_id,
+                "result": step.result,
+                "requires_human_confirmation": step.requires_human_confirmation,
+                "confirmed_by": step.confirmed_by,
+                "detail": step.detail,
+            }
+            for step in view.trace
+        ],
+        "activity": [
+            {
+                "sequence": entry.sequence,
+                "event_id": entry.event_id,
+                "action": entry.action,
+                "result": entry.result,
+                "digest": entry.digest,
+                "recorded_at": entry.recorded_at,
+            }
+            for entry in view.activity
+        ],
     }
 
 
@@ -67,12 +94,51 @@ def _mapping_to_workspace_view(data: dict[str, Any]) -> WorkspaceView:
     allowed = frozenset({
         "project_id", "display_name", "roles",
         "task_count", "milestone_count", "artifact_count",
+        "package_path", "package_digest", "knowledge_bundle_id",
+        "trace", "activity",
     })
-    if not isinstance(data, dict) or set(data) != allowed:
+    # trace 字段向后兼容：旧快照没有该键时按空轨迹处理。
+    allowed_without_new_fields = allowed - {
+        "trace", "activity", "package_path", "package_digest",
+        "knowledge_bundle_id",
+    }
+    if not isinstance(data, dict) or (
+        set(data) != allowed and set(data) != allowed_without_new_fields
+    ):
         raise CockpitValidationError("workspace_view fields are invalid")
     roles = tuple(_require(data, "roles", list))
     if not all(isinstance(role, str) for role in roles):
         raise CockpitValidationError("workspace_view roles must be strings")
+    trace_data = data.get("trace", [])
+    if not isinstance(trace_data, list):
+        raise CockpitValidationError("workspace_view trace must be a list")
+    trace = tuple(
+        TraceStepSummary(
+            step_index=_require(step, "step_index", int),
+            agent_id=_require(step, "agent_id", str),
+            result=_require(step, "result", str),
+            requires_human_confirmation=_require(
+                step, "requires_human_confirmation", bool
+            ),
+            confirmed_by=_require(step, "confirmed_by", str),
+            detail=_require(step, "detail", str),
+        )
+        for step in trace_data
+    )
+    activity_data = data.get("activity", [])
+    if not isinstance(activity_data, list):
+        raise CockpitValidationError("workspace_view activity must be a list")
+    activity = tuple(
+        ActivityEntry(
+            sequence=_require(entry, "sequence", int),
+            event_id=_require(entry, "event_id", str),
+            action=_require(entry, "action", str),
+            result=_require(entry, "result", str),
+            digest=_require(entry, "digest", str),
+            recorded_at=_require(entry, "recorded_at", str),
+        )
+        for entry in activity_data
+    )
     return WorkspaceView(
         project_id=_require(data, "project_id", str),
         display_name=_require(data, "display_name", str),
@@ -80,6 +146,11 @@ def _mapping_to_workspace_view(data: dict[str, Any]) -> WorkspaceView:
         task_count=_require(data, "task_count", int),
         milestone_count=_require(data, "milestone_count", int),
         artifact_count=_require(data, "artifact_count", int),
+        package_path=data.get("package_path", ""),
+        package_digest=data.get("package_digest", ""),
+        knowledge_bundle_id=data.get("knowledge_bundle_id", ""),
+        trace=trace,
+        activity=activity,
     )
 
 

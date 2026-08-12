@@ -58,6 +58,7 @@ class CockpitFacade:
         server_state: CockpitServerState,
         now: str,
         wps_launcher: object | None = None,
+        pending_action_handler: object | None = None,
     ) -> CockpitResponse:
         """AC-5..AC-8: dispatch a request to a response. Pure function."""
         if not isinstance(request, CockpitRequest):
@@ -92,6 +93,10 @@ class CockpitFacade:
             return CockpitFacade._milestone_view(server_state, request, now)
         if request.route == CockpitRoute.WPS_OPEN:
             return CockpitFacade._wps_open(server_state, request, now, wps_launcher)
+        if request.route == CockpitRoute.PENDING_CONFIRM:
+            return CockpitFacade._pending_confirm(
+                request, now, pending_action_handler
+            )
         return CockpitResponse(
             status=CockpitResponseStatus.BAD_REQUEST,
             body_html="",
@@ -106,13 +111,125 @@ class CockpitFacade:
     @staticmethod
     def _list_projects(state: CockpitServerState, now: str) -> CockpitResponse:
         projects = tuple(w.project_id for w in state.workspace_views)
+        views = tuple(
+            {
+                "project_id": w.project_id,
+                "display_name": w.display_name,
+                "roles": w.roles,
+                "task_count": w.task_count,
+                "milestone_count": w.milestone_count,
+                "artifact_count": w.artifact_count,
+                "package_path": w.package_path,
+                "package_digest": w.package_digest,
+                "knowledge_bundle_id": w.knowledge_bundle_id,
+                "trace": [
+                    {
+                        "step_index": t.step_index,
+                        "agent_id": t.agent_id,
+                        "result": t.result,
+                        "requires_human_confirmation": t.requires_human_confirmation,
+                        "confirmed_by": t.confirmed_by,
+                        "detail": t.detail,
+                    }
+                    for t in w.trace
+                ],
+                "activity": [
+                    {
+                        "sequence": a.sequence,
+                        "event_id": a.event_id,
+                        "action": a.action,
+                        "result": a.result,
+                        "digest": a.digest,
+                        "recorded_at": a.recorded_at,
+                    }
+                    for a in w.activity
+                ],
+            }
+            for w in state.workspace_views
+        )
         html = "<ul>" + "".join(f"<li>{p}</li>" for p in projects) + "</ul>"
         return CockpitResponse(
             status=CockpitResponseStatus.OK,
             body_html=html,
             content_type="text/html; charset=utf-8",
             task="list projects",
-            payload={"projects": projects, "count": len(projects)},
+            payload={
+                "projects": projects,
+                "views": views,
+                "count": len(projects),
+            },
+            ts=now,
+        )
+
+    @staticmethod
+    def _pending_confirm(
+        request: CockpitRequest,
+        now: str,
+        handler: object | None = None,
+    ) -> CockpitResponse:
+        """Route a pending human-confirmation action to the wired handler.
+
+        Fail-closed: without a configured handler the route reports
+        NOT_AVAILABLE and never claims the action was applied. The handler
+        decides the outcome (approve/reject) and returns a mapping with a
+        ``decision`` key; anything unexpected maps to ERROR.
+        """
+        if handler is None:
+            return CockpitResponse(
+                status=CockpitResponseStatus.NOT_AVAILABLE,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task="no pending-action handler configured",
+                payload={"decision": "not_available"},
+                ts=now,
+            )
+        action = request.artifact_path  # 复用请求槽位传递 confirm/reject
+        if action not in ("confirm", "reject"):
+            return CockpitResponse(
+                status=CockpitResponseStatus.BAD_REQUEST,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task="action must be confirm or reject",
+                payload={},
+                ts=now,
+            )
+        try:
+            result = handler(action)
+        except Exception as exc:  # noqa: BLE001 - handler failure fails closed
+            return CockpitResponse(
+                status=CockpitResponseStatus.ERROR,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task=f"pending-action handler raised {type(exc).__name__}",
+                payload={"decision": "failed"},
+                ts=now,
+            )
+        getter = getattr(result, "get", None)
+        decision = getter("decision", "") if callable(getter) else ""
+        if decision == "approved":
+            return CockpitResponse(
+                status=CockpitResponseStatus.STARTED,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task="pending action approved",
+                payload={"decision": "approved"},
+                ts=now,
+            )
+        if decision == "rejected":
+            return CockpitResponse(
+                status=CockpitResponseStatus.DENIED,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task="pending action rejected by operator",
+                payload={"decision": "rejected"},
+                ts=now,
+            )
+        return CockpitResponse(
+            status=CockpitResponseStatus.ERROR,
+            body_html="",
+            content_type="text/plain; charset=utf-8",
+            task="pending-action handler returned an unexpected decision",
+            payload={"decision": "failed"},
             ts=now,
         )
 
@@ -208,6 +325,35 @@ class CockpitFacade:
                 payload={"project_id": request.project_id, "role_id": request.role_id},
                 ts=now,
             )
+        tasks = tuple(
+            {
+                "task_id": t.task_id,
+                "title": t.title,
+                "status": t.status,
+                "due_at": t.due_at,
+                "assignee_role_id": t.assignee_role_id,
+            }
+            for t in rv.current_tasks
+        )
+        milestones = tuple(
+            {
+                "milestone_id": m.milestone_id,
+                "title": m.title,
+                "due_at": m.due_at,
+                "completed": m.completed,
+            }
+            for m in rv.milestones
+        )
+        artifacts = tuple(
+            {
+                "path": a.path,
+                "role": a.role,
+                "media_type": a.media_type,
+                "size_bytes": a.size_bytes,
+                "digest_hex": a.digest_hex,
+            }
+            for a in rv.artifacts
+        )
         return CockpitResponse(
             status=CockpitResponseStatus.OK,
             body_html=f"<h1>{rv.display_name}</h1><p>tasks: {len(rv.current_tasks)}</p>",
@@ -220,6 +366,9 @@ class CockpitFacade:
                 "task_count": len(rv.current_tasks),
                 "milestone_count": len(rv.milestones),
                 "artifact_count": len(rv.artifacts),
+                "current_tasks": tasks,
+                "milestones": milestones,
+                "artifacts": artifacts,
             },
             ts=now,
         )

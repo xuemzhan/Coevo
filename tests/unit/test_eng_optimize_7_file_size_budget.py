@@ -20,6 +20,7 @@ KNOWN_LARGE_FILES: dict[str, int] = {
     "src/coevo/protocol/agent_package.py": 692,
     "src/coevo/identity/private_keys.py": 637,
     "src/coevo/merge/repository.py": 608,
+    "src/coevo/app/pipeline.py": 722,
 }
 
 

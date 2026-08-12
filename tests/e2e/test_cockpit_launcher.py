@@ -154,20 +154,35 @@ class CockpitLauncherE2ETest(unittest.TestCase):
                 creationflags=flags,
             )
             token = None
+            saw_open_line = False
+            seen_lines = []
             try:
                 deadline = time.time() + 30
-                while time.time() < deadline and token is None:
+                while time.time() < deadline and not (token and saw_open_line):
                     line = process.stdout.readline()
                     if not line:
                         if process.poll() is not None:
                             break
                         time.sleep(0.1)
                         continue
+                    seen_lines.append(line)
                     if line.startswith("session token: "):
                         token = line.strip().split("session token: ", 1)[1]
+                    if line.startswith("open cockpit: "):
+                        saw_open_line = True
                 self.assertIsNotNone(
                     token,
                     "session token was not printed by --print-token",
+                )
+                self.assertTrue(
+                    saw_open_line,
+                    "clickable cockpit URL was not printed",
+                )
+                combined_stdout = "".join(seen_lines)
+                self.assertIn(
+                    f"http://127.0.0.1:{port}/?token=" + token,
+                    combined_stdout,
+                    "clickable cockpit URL does not carry the printed token",
                 )
                 request = urllib.request.Request(
                     f"http://127.0.0.1:{port}/api/health",

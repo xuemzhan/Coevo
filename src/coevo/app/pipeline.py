@@ -38,6 +38,7 @@
 
 from __future__ import annotations
 
+import threading
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -58,6 +59,7 @@ class DemoResult:
     cockpit_url: str
     store: Any
     hub: Any
+    cockpit_token: str = ""
     cockpit_server: Any | None = None
 
 
@@ -158,29 +160,79 @@ def _export_demo_package(
     return package_path, export_digest
 
 
-def _build_demo_cockpit_views() -> tuple[Any, Any]:
+def _build_demo_cockpit_views(
+    completed: Any = None,
+    store: Any = None,
+    *,
+    package_path: str = "",
+    package_digest: str = "",
+    knowledge_bundle_id: str = "",
+) -> tuple[Any, Any]:
     """DEMO-ONLY: build the cockpit workspace/role snapshots."""
 
     from src.coevo.cockpit import (
+        ActivityEntry,
         ArtifactSummary,
         MilestoneSummary,
         RoleView,
         TaskSummary,
+        TraceStepSummary,
         WorkspaceView,
     )
 
+    trace = tuple(
+        TraceStepSummary(
+            step_index=step.step_index,
+            agent_id=step.agent_id or "human",
+            result=step.result.value,
+            requires_human_confirmation=step.requires_human_confirmation,
+            confirmed_by=step.confirmed_by or "",
+            detail=step.detail,
+        )
+        for step in (completed.orch_report.trace if completed is not None else ())
+    )
+    activity = ()
+    if store is not None:
+        try:
+            entries = getattr(store, "audit_entries", ())
+        except Exception:
+            entries = ()
+        activity = tuple(
+            ActivityEntry(
+                sequence=entry.sequence,
+                event_id=entry.event_id,
+                action=entry.action,
+                result=entry.result,
+                digest=entry.payload_digest,
+                recorded_at=entry.recorded_at,
+            )
+            for entry in entries
+        )
     workspace_view = WorkspaceView(
         "PRJ001",
-        "Ship offline MVP demo",
+        "离线 MVP 演示交付",
         ("a.pm", "a.eng"),
         1,
         1,
         1,
+        package_path,
+        package_digest,
+        knowledge_bundle_id,
+        trace,
+        activity,
     )
-    role_view = RoleView(
+    pm_role_view = RoleView(
+        "a.pm",
+        "PRJ001",
+        "负责人",
+        (),
+        (),
+        (),
+    )
+    eng_role_view = RoleView(
         "a.eng",
         "PRJ001",
-        "Engineering",
+        "工程",
         (TaskSummary("t.1", "Implement demo", "in_progress",
                      "2026-08-31T00:00:00Z", "a.eng"),),
         (MilestoneSummary("m.1", "Demo ready", "2026-08-31T00:00:00Z", False),),
@@ -188,7 +240,50 @@ def _build_demo_cockpit_views() -> tuple[Any, Any]:
                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                          128, "0" * 64),),
     )
-    return workspace_view, role_view
+    # 并行项目演示：PRJ002 停在人工确认节点，用于展示多项目流转与
+    # 跨项目"待确认"汇总（DEMO 视图数据，非伪造真实链）。
+    prj002_trace = (
+        TraceStepSummary(
+            0, "agent.task_flow_understanding", "ok", False, "",
+            "real facade completed",
+        ),
+        TraceStepSummary(
+            1, "agent.task_decomposition", "ok", False, "",
+            "real facade completed",
+        ),
+        TraceStepSummary(
+            2, "agent.team_recommendation", "ok", False, "",
+            "real facade completed",
+        ),
+        TraceStepSummary(
+            3, "human", "ok", True, "",
+            "waiting for operator confirmation",
+        ),
+    )
+    prj002_view = WorkspaceView(
+        "PRJ002",
+        "知识复用试点项目",
+        ("a.pm",),
+        1,
+        0,
+        0,
+        trace=prj002_trace,
+    )
+    prj002_role = RoleView(
+        "a.pm",
+        "PRJ002",
+        "负责人",
+        (TaskSummary(
+            "t.2", "复用演示模板生成基线", "pending",
+            "2026-08-25T00:00:00Z", "a.pm",
+        ),),
+        (),
+        (),
+    )
+    return (
+        (workspace_view, prj002_view),
+        (pm_role_view, eng_role_view, prj002_role),
+    )
 
 
 def _store_demo_knowledge(run_dir: Path, now: str) -> str:
@@ -250,38 +345,16 @@ def run_demo_pipeline(
     now: str | None = None,
     with_cockpit: bool = False,
     cockpit_port: int = 12751,
+    progress: Any = None,
+    confirm_callback: Any = None,
+    session_timeout_sec: int = 8 * 3600,
+    confirm_via_web: bool = False,
+    gate_ready: Any = None,
+    cockpit_lock_path: Path | None = None,
 ) -> DemoResult:
     """Execute the whole offline MVP loop and return the results."""
     from src.coevo.crypto import GmsslPrototypeProvider
-    from src.coevo.identity.models import Actor
-    from src.coevo.identity.service import StaticAuthorizer
-    from src.coevo.orchestrator import (
-        MVP_FIXED_CHAIN,
-        AgentRegistry,
-        OrchestrationEvent,
-        OrchestrationEventKind,
-        OrchestrationOutcome,
-        Orchestrator,
-        RealChainExecutor,
-        RealChainStore,
-        canonical_digest,
-    )
-    from src.coevo.audit_governance import AuditStreamHub
-    from src.coevo.cockpit import (
-        CockpitHttpConfig,
-        CockpitHttpServer,
-    )
-    from src.coevo.talent.models import (
-        AvailabilityWindow,
-        RedactedIdentity,
-        SkillTag,
-        Talent,
-        TalentPool,
-    )
-    from src.coevo.talent.service import TalentRecommenderService
-    from src.coevo.task_decomposition.service import TaskDecompositionService
-    from src.coevo.task_flow.service import FlowUnderstandingService
-    from src.coevo.workspace.models import WorkspaceEntry
+    from src.coevo.orchestrator import RealChainStore
 
     now = now or now_utc_iso_z()
     runtime_dir = Path(runtime_dir)
@@ -300,6 +373,76 @@ def run_demo_pipeline(
         signer=DemoSigner(),
         freshness=DemoFreshnessAuthority(),
     )
+    try:
+        return _run_demo_pipeline_with_store(
+            run_dir,
+            now,
+            store,
+            provider,
+            sender_handle,
+            recipient_handle,
+            with_cockpit,
+            cockpit_port,
+            progress,
+            confirm_callback,
+            session_timeout_sec,
+            confirm_via_web,
+            gate_ready,
+            cockpit_lock_path,
+        )
+    except BaseException:
+        # 失败路径也必须释放资源：关闭数据库句柄并停止已启动的驾驶舱，
+        # 否则测试/运行环境会残留文件锁与单实例锁。
+        store.close()
+        raise
+
+
+def _run_demo_pipeline_with_store(
+    run_dir: Path,
+    now: str,
+    store: Any,
+    provider: Any,
+    sender_handle: Any,
+    recipient_handle: Any,
+    with_cockpit: bool,
+    cockpit_port: int,
+    progress: Any = None,
+    confirm_callback: Any = None,
+    session_timeout_sec: int = 8 * 3600,
+    confirm_via_web: bool = False,
+    gate_ready: Any = None,
+    cockpit_lock_path: Path | None = None,
+) -> DemoResult:
+    """执行演示主流程；驾驶舱服务器若已启动由调用方负责停止。"""
+    from src.coevo.audit_governance import AuditStreamHub
+    from src.coevo.cockpit import (
+        CockpitHttpConfig,
+        CockpitHttpServer,
+    )
+    from src.coevo.identity.models import Actor
+    from src.coevo.identity.service import StaticAuthorizer
+    from src.coevo.orchestrator import (
+        MVP_FIXED_CHAIN,
+        AgentRegistry,
+        OrchestrationEvent,
+        OrchestrationEventKind,
+        OrchestrationOutcome,
+        Orchestrator,
+        RealChainExecutor,
+        canonical_digest,
+    )
+    from src.coevo.task_decomposition.service import TaskDecompositionService
+    from src.coevo.task_flow.service import FlowUnderstandingService
+    from src.coevo.talent.models import (
+        AvailabilityWindow,
+        RedactedIdentity,
+        SkillTag,
+        Talent,
+        TalentPool,
+    )
+    from src.coevo.talent.service import TalentRecommenderService
+    from src.coevo.workspace.models import WorkspaceEntry
+
     talent = Talent(
         "talent.1",
         (SkillTag("tech:python"),),
@@ -336,6 +479,8 @@ def run_demo_pipeline(
         now,
     )
     workspace = WorkspaceEntry("PRJ001", "a.pm", "pkg.input", DEMO_REVISION)
+    if callable(progress):
+        progress("初始化身份、加密与真实链环境")
 
     # 3. Framework gate (FRAMEWORK-INTEGRATION-3): validate the fixed chain
     #    with the framework plan gate before the real dispatch.  RBAC / L4
@@ -370,29 +515,115 @@ def run_demo_pipeline(
         store=store,
         now=now,
     )
-    confirmed = Orchestrator.confirm_real_chain(
-        held,
-        preview=held.package_preview,
-        actor=Actor(DEMO_ACTOR),
-        authorizer=StaticAuthorizer({
-            DEMO_ACTOR: frozenset({"orchestrator:confirm-package:PRJ001"}),
-        }),
-        store=store,
-        now=now,
-    )
-    completed = Orchestrator.resume_real_chain(
-        confirmed,
-        registry=registry,
-        chain=MVP_FIXED_CHAIN,
-        event=event,
-        workspace=workspace,
-        executor=executor,
-        store=store,
-        now=now,
-        crypto_provider=provider,
-        sender_handle=sender_handle,
-        recipient_handle=recipient_handle,
-    )
+    server = None
+    cockpit_url = ""
+    cockpit_token = ""
+    if callable(progress):
+        progress("编排链前三步完成，等待负责人确认")
+    if confirm_via_web:
+        # 网页确认：启动驾驶舱并挂接确认处理器，阻塞等待负责人在页面确认。
+        gate_event = threading.Event()
+        gate_state: dict[str, Any] = {}
+
+        def _web_handler(action: str) -> dict[str, str]:
+            if action == "reject":
+                gate_state["decision"] = "rejected"
+                gate_event.set()
+                return {"decision": "rejected"}
+            _confirmed = Orchestrator.confirm_real_chain(
+                held,
+                preview=held.package_preview,
+                actor=Actor(DEMO_ACTOR),
+                authorizer=StaticAuthorizer({
+                    DEMO_ACTOR: frozenset({"orchestrator:confirm-package:PRJ001"}),
+                }),
+                store=store,
+                now=now,
+            )
+            _completed = Orchestrator.resume_real_chain(
+                _confirmed,
+                registry=registry,
+                chain=MVP_FIXED_CHAIN,
+                event=event,
+                workspace=workspace,
+                executor=executor,
+                store=store,
+                now=now,
+                crypto_provider=provider,
+                sender_handle=sender_handle,
+                recipient_handle=recipient_handle,
+            )
+            gate_state["decision"] = "approved"
+            gate_state["completed"] = _completed
+            gate_event.set()
+            return {"decision": "approved"}
+
+        pending_views = _build_demo_cockpit_views(held, store)
+        try:
+            from src.coevo.cockpit import CockpitHttpConfig, CockpitHttpServer
+
+            server = CockpitHttpServer(
+                CockpitHttpConfig(
+                    bind_port=cockpit_port,
+                    request_timeout_sec=5,
+                    state_path=run_dir / "cockpit-state.json",
+                    session_timeout_sec=session_timeout_sec,
+                    lock_path=cockpit_lock_path,
+                ),
+                workspace_views=pending_views[0],
+                role_views=pending_views[1],
+                pending_action_handler=_web_handler,
+            )
+            server.start()
+        except BaseException:
+            if server is not None:
+                try:
+                    server.stop()
+                except Exception:
+                    pass
+            raise
+        cockpit_url = server.url
+        cockpit_token = server.session_manager.create()
+        if callable(gate_ready):
+            gate_ready(cockpit_url, cockpit_token)
+        if callable(progress):
+            progress("已启动驾驶舱，等待负责人在网页上确认")
+        gate_event.wait()
+        if gate_state.get("decision") != "approved":
+            raise RuntimeError("demo rejected by operator at the confirmation gate")
+        completed = gate_state["completed"]
+    else:
+        if callable(confirm_callback):
+            approved = confirm_callback(held.package_preview)
+            if not approved:
+                raise RuntimeError(
+                    "demo rejected by operator at the confirmation gate"
+                )
+        confirmed = Orchestrator.confirm_real_chain(
+            held,
+            preview=held.package_preview,
+            actor=Actor(DEMO_ACTOR),
+            authorizer=StaticAuthorizer({
+                DEMO_ACTOR: frozenset({"orchestrator:confirm-package:PRJ001"}),
+            }),
+            store=store,
+            now=now,
+        )
+        if callable(progress):
+            progress("负责人确认通过，恢复编排链")
+        completed = Orchestrator.resume_real_chain(
+            confirmed,
+            registry=registry,
+            chain=MVP_FIXED_CHAIN,
+            event=event,
+            workspace=workspace,
+            executor=executor,
+            store=store,
+            now=now,
+            crypto_provider=provider,
+            sender_handle=sender_handle,
+            recipient_handle=recipient_handle,
+        )
     if completed.orch_report.outcome != OrchestrationOutcome.COMPLETED:
         raise RuntimeError(
             f"demo chain did not complete: {completed.orch_report.outcome}"
@@ -404,32 +635,73 @@ def run_demo_pipeline(
     )
 
     # 4. Export a real encrypted package to the outbox and verify it.
+    if callable(progress):
+        progress("生成加密任务包并回读校验")
     package_path, export_digest = _export_demo_package(
         run_dir, project_input, now, completed,
         provider, sender_handle, recipient_handle,
     )
 
-    # 5. Cockpit snapshot (views) + optional live server.
-    workspace_view, role_view = _build_demo_cockpit_views()
-    cockpit_url = ""
-    server = None
-    if with_cockpit:
-        server = CockpitHttpServer(
-            CockpitHttpConfig(
-                bind_port=cockpit_port,
-                request_timeout_sec=5,
-                state_path=run_dir / "cockpit-state.json",
-            ),
-            workspace_views=(workspace_view,),
-            role_views=(role_view,),
-        )
-        server.start()
-        cockpit_url = server.url
-
-    # 6. Knowledge bundle + persistent store.
+    # 5. Knowledge bundle + persistent store (视图需要知识包 ID).
+    if callable(progress):
+        progress("沉淀知识库")
     knowledge_bundle_id = _store_demo_knowledge(run_dir, now)
 
+    # 6. Cockpit snapshot (views) + optional live server.
+    if callable(progress):
+        progress("组装驾驶舱视图")
+    workspace_views, role_views = _build_demo_cockpit_views(
+        completed,
+        store,
+        package_path=str(package_path),
+        package_digest=export_digest or wire_sha256,
+        knowledge_bundle_id=knowledge_bundle_id,
+    )
+    # 无论是否启动驾驶舱服务，都把视图快照落盘，供 --resume 重开。
+    from src.coevo.cockpit.state_store import CockpitStateStore
+
+    state_store = CockpitStateStore(run_dir / "cockpit-state.json")
+    state_store.save(workspace_views, role_views)
+    if confirm_via_web:
+        # 网页确认模式下服务器已在确认前启动：重建完成态视图并替换快照。
+        from src.coevo.cockpit import CockpitFacade
+
+        server.state = CockpitFacade.start_server(
+            workspace_views=workspace_views,
+            role_views=role_views,
+            now=now,
+        )
+    elif with_cockpit:
+        try:
+            server = CockpitHttpServer(
+                CockpitHttpConfig(
+                    bind_port=cockpit_port,
+                    request_timeout_sec=5,
+                    state_path=run_dir / "cockpit-state.json",
+                    session_timeout_sec=session_timeout_sec,
+                    lock_path=cockpit_lock_path,
+                ),
+                workspace_views=workspace_views,
+                role_views=role_views,
+            )
+            server.start()
+        except BaseException:
+            # 服务器启动失败（例如单实例锁被占用）时立即释放已获取的资源，
+            # 避免残留文件句柄与单实例锁。
+            if server is not None:
+                try:
+                    server.stop()
+                except Exception:
+                    pass
+            raise
+        cockpit_url = server.url
+        cockpit_token = server.session_manager.create()
+        if callable(progress):
+            progress("启动本地驾驶舱并提供会话入口")
+
     # 7. Audit stream (push notifications).
+    if callable(progress):
+        progress("发布审计事件并封口")
     hub = AuditStreamHub()
     pushed: list[Any] = []
     hub.subscribe("u.auditor", pushed.append)
@@ -443,6 +715,7 @@ def run_demo_pipeline(
         knowledge_bundle_id=knowledge_bundle_id,
         audit_event_count=hub.event_count,
         cockpit_url=cockpit_url,
+        cockpit_token=cockpit_token,
         store=store,
         hub=hub,
         cockpit_server=server,

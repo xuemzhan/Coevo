@@ -126,8 +126,14 @@ class CockpitHttpServerTests(unittest.TestCase):
         self.token = self.server.session_manager.create()
         self.base = f"http://127.0.0.1:{self.port}"
 
-    def test_index_requires_token(self):
+    def test_index_is_served_without_a_token(self):
+        # 索引页是纯静态壳，不含数据；token 由前端从 URL/会话存储管理，
+        # 因此未登录访问也应得到页面而非 401，API 仍全部要求令牌。
         status, _, _ = _request(f"{self.base}/")
+        self.assertEqual(200, status)
+
+    def test_api_requires_token_even_when_index_is_public(self):
+        status, _, _ = _request(f"{self.base}/api/list_projects")
         self.assertEqual(401, status)
 
     def test_healthz_is_unauthenticated_and_ok(self):
@@ -188,13 +194,22 @@ class CockpitHttpServerTests(unittest.TestCase):
     def test_index_with_token_serves_page_with_csp(self):
         status, headers, body = _request(f"{self.base}/?token={self.token}")
         self.assertEqual(200, status)
-        self.assertIn(b"Coevo Cockpit", body)
+        self.assertIn("Coevo 驾驶舱".encode("utf-8"), body)
         self.assertIn("Content-Security-Policy", headers)
         self.assertIn("default-src 'self'", headers["Content-Security-Policy"])
         # REVIEW-FIX-3 (L-3): the index response must never be cached or
         # leak the URL token via the browser referrer/history.
         self.assertEqual("no-store", headers.get("Cache-Control"))
         self.assertEqual("no-referrer", headers.get("Referrer-Policy"))
+
+    def test_static_assets_do_not_require_a_session_token(self):
+        # 真实浏览器加载 CSS/JS 时不携带会话令牌；静态资源不含敏感数据，
+        # 必须先于会话校验提供，否则页面无法渲染。
+        for path in ("/static/app.js", "/static/style.css"):
+            status, headers, body = _request(f"{self.base}{path}")
+            self.assertEqual(200, status, path)
+            self.assertIn("charset=utf-8", headers.get("Content-Type", ""))
+            self.assertTrue(body, path)
 
     def test_bearer_authorization_header_is_accepted(self):
         status, _, _ = _request(

@@ -7,12 +7,14 @@ import unittest
 from pathlib import Path
 
 from src.coevo.cockpit import (
+    ActivityEntry,
     ArtifactSummary,
     CockpitStateStore,
     CockpitValidationError,
     MilestoneSummary,
     RoleView,
     TaskSummary,
+    TraceStepSummary,
     WorkspaceView,
     deserialize_views,
     serialize_views,
@@ -27,6 +29,78 @@ def _workspace_view() -> WorkspaceView:
         task_count=1,
         milestone_count=1,
         artifact_count=1,
+    )
+
+
+def _workspace_view_with_trace() -> WorkspaceView:
+    return WorkspaceView(
+        project_id="PRJ001",
+        display_name="Project One",
+        roles=("a.pm", "a.eng"),
+        task_count=1,
+        milestone_count=1,
+        artifact_count=1,
+        trace=(
+            TraceStepSummary(
+                step_index=0,
+                agent_id="agent.task_flow_understanding",
+                result="ok",
+                requires_human_confirmation=False,
+                confirmed_by="",
+                detail="real facade completed",
+            ),
+            TraceStepSummary(
+                step_index=3,
+                agent_id="human",
+                result="ok",
+                requires_human_confirmation=True,
+                confirmed_by="u.pm",
+                detail="confirmed by authorized human",
+            ),
+        ),
+    )
+
+
+def _workspace_view_with_activity() -> WorkspaceView:
+    return WorkspaceView(
+        project_id="PRJ001",
+        display_name="Project One",
+        roles=("a.pm", "a.eng"),
+        task_count=1,
+        milestone_count=1,
+        artifact_count=1,
+        activity=(
+            ActivityEntry(
+                sequence=1,
+                event_id="ev.demo.001",
+                action="chain.dispatch",
+                result="ok",
+                digest="d" * 64,
+                recorded_at="2026-08-11T00:00:00Z",
+            ),
+            ActivityEntry(
+                sequence=2,
+                event_id="ev.demo.001",
+                action="chain.confirmation",
+                result="ok",
+                digest="e" * 64,
+                recorded_at="2026-08-11T00:01:00Z",
+            ),
+        ),
+    )
+
+
+def _workspace_view_with_package() -> WorkspaceView:
+    return WorkspaceView(
+        project_id="PRJ001",
+        display_name="Project One",
+        roles=("a.pm", "a.eng"),
+        task_count=1,
+        milestone_count=1,
+        artifact_count=1,
+        package_path="outbox/TASK_ASSIGNMENT_PRJ001_x.agent",
+        package_digest="b" * 64,
+        knowledge_bundle_id="kb.PRJ001.2026-08-11t000000z",
     )
 
 
@@ -70,6 +144,49 @@ class SerializeViewsTests(unittest.TestCase):
             serialize_views((_workspace_view(),), (_role_view(),))
         )
         self.assertEqual((_workspace_view(),), workspace)
+        self.assertEqual((_role_view(),), roles)
+
+    def test_round_trip_preserves_orchestration_trace(self):
+        workspace, roles = deserialize_views(
+            serialize_views((_workspace_view_with_trace(),), (_role_view(),))
+        )
+        self.assertEqual(2, len(workspace[0].trace))
+        self.assertTrue(workspace[0].trace[1].requires_human_confirmation)
+        self.assertEqual("u.pm", workspace[0].trace[1].confirmed_by)
+
+    def test_round_trip_preserves_audit_activity(self):
+        workspace, roles = deserialize_views(
+            serialize_views((_workspace_view_with_activity(),), (_role_view(),))
+        )
+        self.assertEqual(2, len(workspace[0].activity))
+        self.assertEqual("chain.confirmation", workspace[0].activity[1].action)
+        self.assertEqual("ok", workspace[0].activity[1].result)
+
+    def test_round_trip_preserves_package_summary(self):
+        workspace, roles = deserialize_views(
+            serialize_views((_workspace_view_with_package(),), (_role_view(),))
+        )
+        self.assertEqual(
+            "outbox/TASK_ASSIGNMENT_PRJ001_x.agent",
+            workspace[0].package_path,
+        )
+        self.assertEqual("b" * 64, workspace[0].package_digest)
+        self.assertEqual(
+            "kb.PRJ001.2026-08-11t000000z",
+            workspace[0].knowledge_bundle_id,
+        )
+
+    def test_deserialize_legacy_state_without_trace_is_accepted(self):
+        # 旧版本快照没有 trace 键，加载时必须按空轨迹兼容，不得失败。
+        payload = serialize_views((_workspace_view(),), (_role_view(),))
+        del payload["workspace_views"][0]["trace"]
+        del payload["workspace_views"][0]["activity"]
+        del payload["workspace_views"][0]["package_path"]
+        del payload["workspace_views"][0]["package_digest"]
+        del payload["workspace_views"][0]["knowledge_bundle_id"]
+        workspace, roles = deserialize_views(payload)
+        self.assertEqual((), workspace[0].trace)
+        self.assertEqual((), workspace[0].activity)
         self.assertEqual((_role_view(),), roles)
 
     def test_serialize_rejects_bad_types(self):

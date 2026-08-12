@@ -40,6 +40,7 @@ class CockpitRoute(enum.Enum):
     TASK_VIEW = "task_view"
     MILESTONE_VIEW = "milestone_view"
     WPS_OPEN = "wps_open"
+    PENDING_CONFIRM = "pending_confirm"
 
 class CockpitResponseStatus(enum.Enum):
     """HTTP-like status codes (without depending on http module)."""
@@ -125,6 +126,64 @@ class ArtifactSummary:
             )
 
 @dataclass(frozen=True)
+class TraceStepSummary:
+    """Orchestration trace step projected for the cockpit (read-only)."""
+
+    step_index: int
+    agent_id: str
+    result: str
+    requires_human_confirmation: bool
+    confirmed_by: str
+    detail: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.step_index, int) or self.step_index < 0:
+            raise CockpitValidationError(
+                f"step_index must be a non-negative integer; got {self.step_index!r}"
+            )
+        if not isinstance(self.agent_id, str):
+            raise CockpitValidationError("agent_id must be a string")
+        if not isinstance(self.result, str) or not self.result:
+            raise CockpitValidationError("result must be a non-empty string")
+        if not isinstance(self.requires_human_confirmation, bool):
+            raise CockpitValidationError(
+                "requires_human_confirmation must be bool"
+            )
+        if not isinstance(self.confirmed_by, str):
+            raise CockpitValidationError("confirmed_by must be a string")
+        if not isinstance(self.detail, str):
+            raise CockpitValidationError("detail must be a string")
+
+
+@dataclass(frozen=True)
+class ActivityEntry:
+    """One audit-chain row projected for the cockpit (read-only)."""
+
+    sequence: int
+    event_id: str
+    action: str
+    result: str
+    digest: str
+    recorded_at: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.sequence, int) or self.sequence <= 0:
+            raise CockpitValidationError(
+                f"sequence must be a positive integer; got {self.sequence!r}"
+            )
+        if not isinstance(self.event_id, str) or not self.event_id:
+            raise CockpitValidationError("event_id must be a non-empty string")
+        if not isinstance(self.action, str) or not self.action:
+            raise CockpitValidationError("action must be a non-empty string")
+        if not isinstance(self.result, str) or not self.result:
+            raise CockpitValidationError("result must be a non-empty string")
+        if not isinstance(self.digest, str) or not self.digest:
+            raise CockpitValidationError("digest must be a non-empty string")
+        if not isinstance(self.recorded_at, str) or not self.recorded_at:
+            raise CockpitValidationError("recorded_at must be a non-empty string")
+
+
+@dataclass(frozen=True)
 class RoleView:
     role_id: str
     project_id: str
@@ -169,6 +228,11 @@ class WorkspaceView:
     task_count: int
     milestone_count: int
     artifact_count: int
+    package_path: str = ""
+    package_digest: str = ""
+    knowledge_bundle_id: str = ""
+    trace: tuple[TraceStepSummary, ...] = ()
+    activity: tuple[ActivityEntry, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.project_id, str) or not _SAFE_ID.match(self.project_id):
@@ -190,6 +254,29 @@ class WorkspaceView:
                 raise CockpitValidationError(
                     f"{label} must be a non-negative integer; got {value!r}"
                 )
+        if not isinstance(self.trace, tuple) or not all(
+            isinstance(t, TraceStepSummary) for t in self.trace
+        ):
+            raise CockpitValidationError(
+                "trace must be a tuple of TraceStepSummary"
+            )
+        if not isinstance(self.activity, tuple) or not all(
+            isinstance(a, ActivityEntry) for a in self.activity
+        ):
+            raise CockpitValidationError(
+                "activity must be a tuple of ActivityEntry"
+            )
+        if not isinstance(self.package_path, str):
+            raise CockpitValidationError("package_path must be a string")
+        if not isinstance(self.package_digest, str) or (
+            self.package_digest
+            and not _HEX_64.match(self.package_digest)
+        ):
+            raise CockpitValidationError(
+                "package_digest must be empty or a 64-char lowercase hex"
+            )
+        if not isinstance(self.knowledge_bundle_id, str):
+            raise CockpitValidationError("knowledge_bundle_id must be a string")
 
 @dataclass(frozen=True)
 class CockpitRequest:

@@ -65,7 +65,7 @@ class FastTierTests(unittest.TestCase):
         )
         self.assertEqual(
             quality_gate.fingerprint(quality_gate.commands("quality")),
-            "b96157dbb895a417",
+            "507ff7cb3ed3fd24",
         )
 
     def test_make_shim_exposes_fast_target(self) -> None:
