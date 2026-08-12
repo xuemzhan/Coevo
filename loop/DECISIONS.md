@@ -5686,3 +5686,32 @@ security-reviewer 双签门禁。
   （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
 
 
+## 2026-08-12T12:30:00Z -- MATURITY 修复与优化第一批（R-03 / R-04 / O-06）完成（Approved）
+
+- Item: 独立成熟度审查（2026-08-12）拆解出的修复与优化计划第一批落地；完整清单
+  与进度见 `docs/plans/maturity-review-2026-08-12-tasks.md`；按用户指令
+  "分步进行优化，先不做全量门禁"，本轮只跑定向测试（完整单元套件 + 驾驶舱
+  HTTP 集成 + 回传链 E2E），未跑全量门禁。
+- R-03：`loop/STATE.json` 元数据时效修复（iteration 31 / current_item=
+  ARCH-REVIEW-18 / last_verified_commit=631d46a）+ 新增守卫测试
+  `tests/unit/test_state_metadata_guard.py`（STATE 必须指向最后一条正式
+  BACKLOG 项、last_verified_commit 必须可达 HEAD、updated_at 不得未来）。
+- R-04：`release_check` 新增 `gate_covers_head`（最近门禁 `started_at` 不得早于
+  HEAD 提交时间，与 `git_clean` 配合保证发布对象确被门禁验证）+ 运维手册同步；
+  本次审查复跑的全量门禁记录（VERIFICATION / audit-head）随本轮提交落档。
+- O-06：督办/会议真实交互链路——回传链 E2E 增加 `SupervisionCoordinator`
+  协调步骤并把 `meeting_conclusions` 传入知识聚合；驾驶舱新增
+  `SupervisionSummary` 快照与 `SUPERVISION_VIEW` 路由（`/api/supervision_view`，
+  仅查看；确认仍走 `PENDING_CONFIRM`，subject 绑定 + RBAC）；demo 组合根注册
+  `agent.supervision_meeting`（5 个智能体）；US-12 能力级别升为
+  `INTEGRATION_VERIFIED`；文件规模预算按契约例外流程登记
+  `cockpit/facade.py: 676`、`cockpit/server.py: 1108`
+  （`docs/architecture/file-size-budget.md` 同步）。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: user instruction（"基于上面的计划分步进行优化，先不做全量门禁"）；
+  executed by: Codex（独立审查方执行计划）；未推送（需另行确认）。
+
+
