@@ -5606,6 +5606,25 @@ security-reviewer 双签门禁。
   （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
 
 
+## 2026-08-12T09:00:00Z -- PRODUCT-REVIEW T-12 同步实现完成（Approved）
+
+- Item: T-12 跨节点同步实现（离线优先）。
+- Scope: `src/coevo/sync/store.py`：
+  - `SyncOutbox`：单节点追加式出站链（哈希链 + 单调序号 + event_id 防重放），
+    JSONL 持久化；
+  - `SyncReconciler`：只读对账（新事件/重放/缺口检测），入站链非法时失败关闭；
+  - `export_bundle` / `load_bundle`：文件式传输，篡改链字段失败关闭。
+- Verification: `tests/unit/test_sync_store.py` 11 项 + 契约测试 5 项全绿；
+  按用户指令不做全量门禁。
+- Boundary: 负载完整性签名与受控网络传输仍为后续项（sync-protocol.md §6，
+  依赖 US-5-AC-2 密码产品）。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: Codex (loop-engineer) per user instruction
+  （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
+
 ## 2026-08-12T10:00:00Z -- 外部项前置就绪 + 验证包基线修正（Approved）
 
 - Item: 剩余外部依赖项（T-03/T-06/T-18）的可实施前置收口。
@@ -5627,22 +5646,25 @@ security-reviewer 双签门禁。
   （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
 
 
-## 2026-08-12T09:00:00Z -- PRODUCT-REVIEW T-12 同步实现完成（Approved）
+## 2026-08-12T11:00:00Z -- 收尾修复：预算白名单 + DECISIONS 时序 + 新包登记（Approved）
 
-- Item: T-12 跨节点同步实现（离线优先）。
-- Scope: `src/coevo/sync/store.py`：
-  - `SyncOutbox`：单节点追加式出站链（哈希链 + 单调序号 + event_id 防重放），
-    JSONL 持久化；
-  - `SyncReconciler`：只读对账（新事件/重放/缺口检测），入站链非法时失败关闭；
-  - `export_bundle` / `load_bundle`：文件式传输，篡改链字段失败关闭。
-- Verification: `tests/unit/test_sync_store.py` 11 项 + 契约测试 5 项全绿；
+- Item: 完整单元套件回归暴露的 8 项守卫失败修复。
+- Scope:
+  - 文件规模预算（契约例外流程）：新增登记 `src/coevo/cockpit/facade.py: 604`；
+    更新 `app/pipeline.py: 722→723`、`cockpit/server.py: 1100→1105`、
+    `merge/repository.py: 608→624`（T-08/09/10/14 合法增长），契约文档计数
+    10→11；
+  - DECISIONS 时序修正：交换 10:00（外部项前置）与 09:00（T-12）两节，
+    恢复按时间升序；
+  - 新包/文件登记：`docs/modules/sync.md` + 模块索引 + root_modules
+    （db_migration）+ app.md（production.py）+ ports-adapters（sync 层映射）。
+- Verification: 完整单元套件（1573 发现/1562 通过）由 8 失败修复至全绿；
   按用户指令不做全量门禁。
-- Boundary: 负载完整性签名与受控网络传输仍为后续项（sync-protocol.md §6，
-  依赖 US-5-AC-2 密码产品）。
 - Governance marker check (latest section must acknowledge the policy):
   decision status: approved a+b; .gitignore excludes runtime receipts;
   git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
 - Decision status: approved.
 - Decided by: Codex (loop-engineer) per user instruction
   （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
+
 

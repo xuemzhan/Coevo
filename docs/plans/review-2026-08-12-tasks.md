@@ -1,7 +1,7 @@
 # 成熟产品视角审查报告 —— 任务拆解（2026-08-12）
 
-> 来源：`docs/process/` 审查结论（2026-08-12，HEAD `e890be8`，全量门禁
-> `fingerprint=507ff7cb3ed3fd24` 通过后）。
+> 来源：`docs/process/product-review-2026-08-12.md`（2026-08-12 成熟产品视角
+> 审查报告，HEAD `e890be8`、全量门禁 `fingerprint=507ff7cb3ed3fd24` 通过后）。
 > 登记方式：按 RECORDS-2 单一在飞不变量，任务以队列注释登记于
 > `loop/BACKLOG.yaml`，完整清单以本文档为权威；逐轮进入 loop 时再从队列
 > 转为正式条目。

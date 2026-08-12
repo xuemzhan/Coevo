@@ -30,6 +30,7 @@
 | audit_governance | Application/Adapters | facade/stream=Application；stream_store=Adapter |
 | workspace | Ports/Adapters | 路径策略=Ports；init_service=Adapter |
 | protocol | Ports | `.agent` 编解码/导入/重放 |
+| sync | Ports | 跨节点同步信封契约/出站队列/对账（离线文件包；在线传输为 Adapter） |
 | benchmarks | Adapters | 探针 |
 
 ## 3. 不变量

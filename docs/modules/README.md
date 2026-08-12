@@ -119,6 +119,7 @@ English one-paragraph overview per module: [README.en.md](README.en.md)。
 | `report/` | [report.md](report.md) | US-9 成果回传 |
 | `risk/` | [risk.md](risk.md) | US-11 风险预警 |
 | `supervision/` | [supervision.md](supervision.md) | US-12 督办协调 |
+| `sync/` | [sync.md](sync.md) | 跨节点同步（信封契约/出站队列/对账） |
 | `talent/` | [talent.md](talent.md) | US-3 团队组建 |
 | `task_decomposition/` | [task_decomposition.md](task_decomposition.md) | US-2 任务分解 |
 | `task_flow/` | [task_flow.md](task_flow.md) | US-1 流程理解 |

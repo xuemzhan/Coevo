@@ -18,6 +18,7 @@
 |---|---|---|
 | `pipeline.py` | `run_demo_pipeline()` | 七阶段演示流水线（PKI 引导 → 真实链 → 加密包 → 驾驶舱 → 知识 → 审计） |
 | `demo_support.py` | `DemoSigner`、`DemoFreshnessAuthority`、`DemoRegistrationVerifier`/`DemoRegistrationResolver`/`DemoPolicyRegistry`、`ensure_demo_profile()`、`sample_project_input()` | 演示专用支撑：SM2 测试 PKI 引导、模拟签名/新鲜度权威、注册门演示适配器（**显式非生产**，生产须注入真实 SM2 验签）、业务化样例输入 |
+| `production.py` | `validate_production_composition()`、`run_production_pipeline()`、`production_entry_contract()` | **生产组合根契约**（PRODUCT-REVIEW T-05/T-08）：组合校验拒绝 demo/原型组件（scope + 类型名双门禁）、缺省用 PolicyAuthorizer 由 grants 构造 |
 
 ## 关键入口与数据流
 
