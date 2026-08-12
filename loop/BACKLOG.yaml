@@ -1844,6 +1844,17 @@ items:
   #   REVIEW2-4 WPS 真实启动链路 / REVIEW2-5 HTTP 认证黑盒矩阵 / REVIEW2-6 crypto 隔离门禁 /
   #   REVIEW2-7 类型化状态边界 / REVIEW2-8 显式事件模型 / REVIEW2-9 断网黑盒证明 /
   #   REVIEW2-10 审计归档重锚定 / REVIEW2-11 交付门禁 / REVIEW2-12 能力状态矩阵
+  # ---------- PRODUCT-REVIEW 系列：2026-08-12 成熟产品视角审查结论拆解（用户指令"将审查报告进行任务拆解"） ----------
+  # 队列（按 RECORDS-2 逐轮登记，完整清单见 docs/plans/review-2026-08-12-tasks.md
+  # 与 DECISIONS 2026-08-12 登记条目）：
+  #   P0：T-01 AI 定位决策 / T-02 本地模型建议链路（依赖 T-01）/
+  #       T-03 独立双签（外部：独立角色）/ T-04 独立验证包核对
+  #   P1：T-05 生产链执行入口契约 / T-06 生产密码接入（外部：US-5-AC-2 审批）/
+  #       T-07 审计密钥托管 / T-08 真实 RBAC（依赖 T-09）/ T-09 会话绑定身份 /
+  #       T-10 生产 pending-action 契约（依赖 T-08/T-09）/
+  #       T-11 同步协议设计 / T-12 同步实现（依赖 T-11）
+  #   P2：T-13 cockpit-state 迁移 / T-14 DB 迁移框架 / T-15 指纹环境无关 /
+  #       T-16 文档快照刷新 / T-17 令牌安全指引 / T-18 CI 激活（外部：owner Release）
   - id: ARCH-REVIEW-1
     story: ARCH-REVIEW
     title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化

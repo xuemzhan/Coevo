@@ -5535,3 +5535,31 @@ security-reviewer 双签门禁。
   instructed full gate + push (single explicit push authorization for the
   current main branch; still no merge/tag/release).
 
+
+## 2026-08-12T06:00:00Z -- mature-product review task decomposition (Approved)
+
+- Item: 2026-08-12 成熟产品视角审查报告的 18 项任务拆解（PRODUCT-REVIEW 系列，
+  T-01..T-18）。
+- Trigger: user instruction "将上面的审查报告进行任务拆解" + "把这份拆解写入仓库
+  （docs/plans/... 或按仓库规范登记到 loop/BACKLOG.yaml）"。
+- Registration: 完整清单以
+  `docs/plans/review-2026-08-12-tasks.md` 为权威；按 RECORDS-2 单一在飞
+  不变量，任务以队列注释登记于 `loop/BACKLOG.yaml`（逐轮进入 loop 时再转正式
+  条目，避免多非 done 项违反不变量；与 ARCH-REVIEW-3 先例一致）。
+- P0：T-01 AI 定位决策 / T-02 本地模型建议链路（依赖 T-01）/
+  T-03 独立双签（外部：独立角色）/ T-04 独立验证包核对。
+- P1：T-05 生产链执行入口契约 / T-06 生产密码接入（外部：US-5-AC-2 审批）/
+  T-07 审计密钥托管 / T-08 真实 RBAC（依赖 T-09）/ T-09 会话绑定身份 /
+  T-10 生产 pending-action 契约（依赖 T-08/T-09）/
+  T-11 同步协议设计 / T-12 同步实现（依赖 T-11）。
+- P2：T-13 cockpit-state 迁移 / T-14 DB 迁移框架 / T-15 指纹环境无关 /
+  T-16 文档快照刷新 / T-17 令牌安全指引 / T-18 CI 激活（外部：owner Release）。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: Codex (loop-engineer) per user instruction; full gate + push
+  authorization remains as recorded in the 2026-08-12 05:00:00Z entry
+  (that was a single explicit authorization for that round); pushing this
+  records change requires separate user confirmation.
+
