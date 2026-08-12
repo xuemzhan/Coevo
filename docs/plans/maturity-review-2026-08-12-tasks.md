@@ -29,7 +29,7 @@
 | O-05 | 目标硬件性能复测 | `benchmarks/` | 目标硬件 13 项探针达标留档 | 目标硬件 | pending |
 | O-06 | 督办/会议真实交互链路 | `supervision/`、`cockpit/`、`app/demo_support.py`、回传链 E2E | 回传链 E2E 含督办/会议协调；驾驶舱 SUPERVISION_VIEW 路由；demo 注册 agent.supervision_meeting；US-12 能力级别提升 | 无 | **done** |
 | O-07 | 多用户/中心端同步产品化 | `sync/`、`identity/`、`cockpit/` | 离线文件式对账双节点 E2E（本批完成，`tests/e2e/test_sync_reconciliation.py`，同步离线半升为 INTEGRATION_VERIFIED）；受控网络部分待 O-01 裁决 | 依赖 O-01 | **部分完成**（离线半 done；在线半待 O-01） |
-| O-08 | 风险模型推断型增强（可选） | `risk/`、`model/` | 模型推断风险进入草稿+人工确认闭环，离线回退测试 | 依赖 R-05 | pending |
+| O-08 | 风险模型推断型增强（可选） | `risk/agent.py`、`config/model-prompts.json` | `RiskSuggestionAgent.suggest` 草稿 + 离线回退；`apply` 仅接受 `ConfirmedStateChange`；单元测试全绿（10 项） | R-05 已由 T-01 选项 B 覆盖（确定性 + 可选模型辅助） | **done** |
 
 ## 3. 执行纪律（本轮已遵守）
 

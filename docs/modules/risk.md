@@ -16,6 +16,7 @@
 |---|---|---|
 | `models.py` | `Risk`、`RiskReport`、`RiskKind`、`SourceKind` | 风险/报告/来源类型与校验（四类闭集） |
 | `analyzer.py` | `RiskAnalyzer`、`analyze_after_merge()`、`merge_and_analyze()` | 合并后自动分析：最新回执校验 → 规则分析 → 传染推断 → 建议 + 审计投影 |
+| `agent.py` | `RiskSuggestion`、`RiskSuggestionAgent`（MATURITY-O-08） | 可选模型推断风险建议：草稿边界 + 离线回退；仅经 `ConfirmedStateChange` 人工确认后并入候选报告 |
 
 ## 关键入口与数据流
 
@@ -27,24 +28,32 @@ merge_and_analyze（合并成功且生成回执）→ RiskAnalyzer.analyze_after
 
 - `RiskAnalyzer`（阈值可配置：延期天数、沉默天数、证据不足等）；
 - `merge_and_analyze()` — 合并失败则无风险报告（不产生伪风险）。
+- `RiskSuggestionAgent.suggest()` — 可选增强：模型推断 `SourceKind.INFERRED`
+  风险草稿；provider 不可用返回 `()`（确定性分析不变）；
+- `RiskSuggestionAgent.apply()` — 只接受 `ConfirmedStateChange`（REVIEW2-7），
+  未知/重复/越窗/已存在 id 一律拒绝，产出仍为候选报告（未正式发布）。
 
 ## 安全与不变量
 
 - **只用最新权威回执**（旧状态拒绝）；回执链版本连续校验失败关闭；
 - 风险报告 `requires_owner_confirmation=True`、`formally_released=False` 为默认；
 - 判断依据/影响任务显式记录；审计投影只留结构事实。
+- 模型推断建议默认 `requires_confirmation=True`、`formally_released=False`；
+  审计投影排除 basis/recommendation/rationale。
 
 ## 测试覆盖
 
 - `tests/unit/test_risk_analyzer.py`（延期/前置/沉默/证据不足/传染/建议）；
 - `tests/integration/test_merge_risk_receipt_chain.py`；
 - `tests/security/test_merge_receipt_repository.py`（回执行级门禁）。
+- `tests/unit/test_risk_suggestion_agent.py`（模型建议解析/校验/离线回退/
+  人工确认并入/审计脱敏）。
 
 ## 依赖与下游
 
 - **上游依赖**：`merge`（回执）、`task_decomposition`（基线）；
 - **下游消费者**：`supervision`（督办/会议）、`decision_brief`（风险专题）、
-  `knowledge_base`（风险知识）。
+  `knowledge_base`（风险知识）；`model`（可选建议 provider）。
 
 ## 错误语义
 

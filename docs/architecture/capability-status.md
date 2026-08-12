@@ -36,7 +36,7 @@
 | US-8 进展采集 | `INTEGRATION_VERIFIED` | watcher + 证据关联 |
 | US-9 成果回传 | `INTEGRATION_VERIFIED` | 报告包 wire 一致性 |
 | US-10 状态合并 | `INTEGRATION_VERIFIED` | 合并收敛 property + 收据链 |
-| US-11 风险预警 | `INTEGRATION_VERIFIED` | 四类风险 + 传染推断 |
+| US-11 风险预警 | `INTEGRATION_VERIFIED` | 四类风险 + 传染推断；模型推断风险建议为可选增强（MATURITY-O-08：草稿 + ConfirmedStateChange 人工确认 + 离线回退） |
 | US-12 督办/会议 | `INTEGRATION_VERIFIED`（回传链 E2E 覆盖协调步骤） | 回传链 e2e 含督办/会议协调（真实加密包闭环）+ 驾驶舱 SUPERVISION_VIEW 路由（unit/integration）+ demo 注册 agent.supervision_meeting；正式会议调度/正式督办发送仍须负责人确认 |
 | US-13 决策简报 | `INTEGRATION_VERIFIED` | DOCX 模板受控 + 权威收据绑定 |
 | US-14 知识沉淀 | `INTEGRATION_VERIFIED` | SQLite 持久化 + 密级检查 |

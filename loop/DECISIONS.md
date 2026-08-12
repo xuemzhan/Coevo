@@ -5737,3 +5737,24 @@ security-reviewer 双签门禁。
   未推送（需另行确认）。
 
 
+## 2026-08-12T13:30:00Z -- MATURITY O-08 风险模型推断建议（done）
+
+- Item: 成熟度计划最后一个可执行实现项——US-11-AC-4 的模型推断风险可选增强
+  （T-01 选项 B 已定稿：确定性编排 + 可选模型辅助）。
+- Scope: 新增 `src/coevo/risk/agent.py`——`RiskSuggestion`（草稿，默认
+  requires_confirmation=True / formally_released=False，source=INFERRED）+
+  `RiskSuggestionAgent.suggest()`（provider 不可用时返回 `()`，离线回退，
+  门禁不触网）+ `apply()`（仅接受 `ConfirmedStateChange`，未知/重复/越窗/
+  已存在 id 拒绝，产出仍为候选报告）+ 审计投影（排除 basis/recommendation/
+  rationale）；`config/model-prompts.json` 新增 `risk.suggest` 默认提示词
+  （版本化 + 摘要锁定）；`risk/__init__.py` 导出。
+- Verification: `tests/unit/test_risk_suggestion_agent.py` 10 项全绿
+  （模型校验/离线回退/解析/去重/人工确认并入/审计脱敏）；按用户指令不做全量门禁。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: user instruction（"继续"）；executed by: Codex（独立审查方执行计划）；
+  未推送（需另行确认）。
+
+

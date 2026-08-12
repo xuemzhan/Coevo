@@ -16,6 +16,14 @@
       "system": "You are a task-decomposition assistant running on DeepSeek. Given a project and a confirmed process-flow summary, propose ONLY additional tasks and dependency edges as JSON with this exact shape: {\"tasks\":[{\"work_package_id\":\"...\",\"task_id\":\"...\",\"title\":\"...\",\"responsible_role\":\"...\",\"plan_start\":\"ISO-8601-Z\",\"plan_end\":\"ISO-8601-Z\",\"deliverable_title\":\"...\",\"acceptance_criteria\":[\"...\"]}],\"candidate_edges\":[{\"predecessor_task_id\":\"...\",\"successor_task_id\":\"...\"}]}. Use only work_package_ids present in the flow. Do not repeat existing node ids. Output ONLY the JSON object.",
       "user_template": "Project input:\n{project}\n\nConfirmed flow:\n{flow}\n\nRespond with ONLY the JSON object.",
       "digest": "8054636ff0bcde6e85cedd3f32d9b2fe65899d0fe52fc032db539caa9efb486e"
+    },
+    {
+      "id": "risk.suggest",
+      "version": 1,
+      "provider_key": "default",
+      "system": "You are a risk-warning assistant. Given a confirmed project risk report, propose ONLY additional model-inferred risks as JSON with exactly this shape: {\"inferred_risks\":[{\"risk_id\":\"safe-id\",\"kind\":\"deadline_overrun|predecessor_unfinished|long_silence|insufficient_evidence|severe_coordination_needed|at_risk_bloom|blocked_bloom\",\"affected_tasks\":[\"safe-id\"],\"basis\":\"...\",\"recommendation\":\"...\",\"suggested_deadline\":\"ISO-8601-Z\",\"severity\":3,\"rationale\":\"...\"}]}. Kinds must be one of the listed values; affected_tasks must reference existing tasks; suggested_deadline must not precede analysed_at; do not repeat existing risk ids; output ONLY the JSON object.",
+      "user_template": "Project summary:\n{project}\n\nConfirmed risk report:\n{flow}\n\nRespond with ONLY the JSON object.",
+      "digest": "02e96958d28218ec78fa169ced5fc258bd6d99f446c8ed8f8c330cb46d107aea"
     }
   ]
 }

@@ -18,8 +18,11 @@ from .models import (MergeAndAnalyzeOutcome, Risk, RiskAnalysisError, RiskKind, 
 
 from .analyzer import (RiskAnalyzer, _descendants, _plus_days, _risk, _validated_graph, _validated_receipt, analyze_after_merge, merge_and_analyze)
 
+from .agent import RiskSuggestion, RiskSuggestionAgent
+
 __all__ = [
     "MergeAndAnalyzeOutcome", "Risk", "RiskAnalyzer", "RiskAnalysisError",
-    "RiskKind", "RiskReport", "RiskValidationError", "SourceKind",
+    "RiskKind", "RiskReport", "RiskSuggestion", "RiskSuggestionAgent",
+    "RiskValidationError", "SourceKind",
     "analyze_after_merge", "merge_and_analyze",
 ]
