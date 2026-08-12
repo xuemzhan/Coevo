@@ -9,7 +9,8 @@
 | 项 | 状态 | 证据 |
 |---|---|---|
 | `.github/workflows/quality.yml` | 已入库（验证侧四目标 fmt/lint/test/test-security/test-e2e + 制品证据上传 + 失败即红） | 随 main 推送 |
-| `docs/dependencies/ci-artifact.json` | **已锚定**（version=1.0.0，sha256=`81dd3e7d5e1e0bfdd1dc8562bf58abf0a5a6fc4b0f311d1cb5acbb3899902856`，url 已填，非 pending） | 描述符 |
+| `docs/dependencies/ci-artifact.json` | **已锚定**（version=1.0.0，sha256=`e679aec38727eadd07683cd809b3e0bb19ee8c248d35a306261502fde652d6d9`，url 已填，非 pending） | 描述符 |
+| `scripts/ci-build-toolchain.py` | **可复现构建**（2026-08-12 修复：zip 时间戳归一化，两次重建哈希一致 `e679aec3…`） | 复现性回归测试 `test_ci_restore.py::test_build_archive_is_byte_reproducible` |
 | `scripts/ci-restore-toolchain.ps1` | fail-closed：https-only、哈希不符不解压、staging 校验、失败清理 | 脚本 |
 | 审计封存边界 | CI 只跑验证侧；`--target quality` 的签名封存保留在维护机（非导出私钥不上 runner） | `ci-artifact-hosting.md` §4 |
 
@@ -17,6 +18,8 @@
 
 - [ ] 1. 在维护机构建制品（如尚未生成）：
       `python scripts\ci-build-toolchain.py --version 1.0.0`
+      （构建脚本已字节级可复现；若 `.tools` 内容变更，重建后必须先更新
+      `ci-artifact.json` 的 `sha256` 再发布）
 - [ ] 2. 在 GitHub 创建标签 `toolchain-1.0.0`，上传制品
       `coevo-toolchain-win64-1.0.0.zip`（名称必须与描述符 `url` 一致）；
 - [ ] 3. 上传后用维护机核对：

@@ -2,7 +2,8 @@
 
 > 状态：方案生效（2026-08-03，业务负责人批准 CI/制品托管方案）。
 > 状态更新（2026-08-04，CI-2）：制品已在维护机本地构建并回填
-> `ci-artifact.json`（version=1.0.0，sha256=81dd3e7d…），工作流已随 main
+> `ci-artifact.json`（version=1.0.0，sha256=e679aec3…，2026-08-12 起构建脚本
+> 时间戳归一化、字节级可复现），工作流已随 main
 > 推送。剩余激活前置：所有者创建 `toolchain-1.0.0` GitHub Release 并上传
 > `coevo-toolchain-win64-1.0.0.zip`（见 §5）。
 
@@ -33,6 +34,11 @@ python scripts\ci-build-toolchain.py --version 1.0.0
 ```
 
 脚本输出路径、文件数与 SHA-256（已回填至 `ci-artifact.json`）。
+
+> **可复现性（MATURITY-O-02，2026-08-12）**：`ci-build-toolchain.py` 对 zip
+> 条目时间戳归一化（固定 1980-01-01），同一 `.tools` 内容无论何时何地构建，
+> SHA-256 恒定。若 `.tools` 内容有变动（工具链升级），必须重建制品并同步刷新
+> `ci-artifact.json` 的 `version/sha256` 后再发布。
 
 ```powershell
 Get-FileHash .\coevo-toolchain-win64-<version>.zip -Algorithm SHA256

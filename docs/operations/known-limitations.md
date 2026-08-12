@@ -9,7 +9,7 @@
 |---|---|---|---|
 | 国密认证模块（SKF/PKCS#11/硬件令牌） | 未落地 | 受保护密钥句柄为软件 KSP 实现（CNG KEK 封装），非认证模块 | 外部采购；适配契约与受保护层已就绪 |
 | Win7 存量环境实机验证 | 未落地 | `win7-compat` 分支仅静态专项，未实机验证 | 存量 Win7 环境 |
-| CI 激活 | 待发布制品 | `.github/workflows/quality.yml` 已入库并随 main 推送；`ci-artifact.json` 已回填（CI-2，version=1.0.0，sha256=81dd3e7d…）；制品本地构建并通过恢复+fmt/lint 冒烟 | 所有者创建 `toolchain-1.0.0` Release 并上传 `coevo-toolchain-win64-1.0.0.zip`（维护机本地副本：`%TEMP%\coevo-toolchain-win64-1.0.0.zip`，可随时用 `ci-build-toolchain.py` 重建） |
+| CI 激活 | 待发布制品 | `.github/workflows/quality.yml` 已入库并随 main 推送；`ci-artifact.json` 已回填（MATURITY-O-02 2026-08-12 可复现构建修复后 version=1.0.0，sha256=e679aec3…，字节级可复现）；制品本地重建两次哈希一致并通过恢复冒烟 | 所有者创建 `toolchain-1.0.0` Release 并上传 `coevo-toolchain-win64-1.0.0.zip`（用 `ci-build-toolchain.py` 重建；若 `.tools` 内容变更需先刷新 `ci-artifact.json` 哈希） |
 | 审计签名密钥托管 / 独立审计节点 | 未落地 | 审计封存仍依赖维护机 `CurrentUser/My` 非导出证书 | 批准密码产品/受控密钥介质（见 audit-key-runbook） |
 | Windows 服务形态 | 未落地 | 自启为计划任务（登录触发），非服务（服务需管理员与 SCM 集成） | 若需常驻服务另行决策 |
 

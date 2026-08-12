@@ -5846,3 +5846,30 @@ security-reviewer 双签门禁。
   未推送（需另行确认）。
 
 
+## 2026-08-12T15:30:00Z -- MATURITY O-02 可复现构建修复 + 制品哈希刷新（Approved）
+
+- Item: 继续推进 O-02 CI 激活——发现并修复制品构建不可复现缺陷。
+- 发现：按执行单用 `ci-build-toolchain.py --version 1.0.0` 重建制品，哈希为
+  `81bc72e6…`，与 `ci-artifact.json` 锚定的 `81dd3e7d…` 不一致（文件数与大小
+  一致）。根因：zipfile 默认内嵌每个文件的 mtime，制品哈希随构建时间漂移，
+  导致"内容寻址 + 哈希锚定"在跨时间/跨机器构建时不可复现，owner 按执行单
+  发布时 CI 恢复必然哈希失败。
+- 修复：`scripts/ci-build-toolchain.py` 对 zip 条目时间戳归一化
+  （固定 1980-01-01），同一 `.tools` 内容字节级可复现；新增回归测试
+  `tests/unit/test_ci_restore.py::test_build_archive_is_byte_reproducible`
+  （两次构建哈希一致）。
+- 刷新：用修复后脚本重建制品（80,076,829 字节 / 4934 文件，两次哈希一致），
+  `docs/dependencies/ci-artifact.json` sha256 更新为
+  `e679aec38727eadd07683cd809b3e0bb19ee8c248d35a306261502fde652d6d9`；
+  `known-limitations.md`、`ci-artifact-hosting.md`、`ci-activation-checklist.md`
+  同步（若 `.tools` 内容变更须重建并刷新哈希后再发布）。
+- Verification：`tests/unit/test_ci_restore.py` 全绿 + 完整单元套件回归；
+  纯代码 1 个文件 + 测试 + 文档，未跑全量门禁（按用户既有指令）。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: user instruction（"继续"）；executed by: Codex（独立审查方）；
+  未推送（需另行确认）。
+
+

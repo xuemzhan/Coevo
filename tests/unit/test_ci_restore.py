@@ -183,6 +183,21 @@ class CiBuildToolchainTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 build.build_archive(self._fake_tools(tmp), out)
 
+    def test_build_archive_is_byte_reproducible(self):
+        """MATURITY-O-02: the artifact hash must not drift between builds."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            tools = self._fake_tools(tmp)
+            first = tmp_dir / "first.zip"
+            second = tmp_dir / "second.zip"
+            build.build_archive(tools, first)
+            build.build_archive(tools, second)
+            self.assertEqual(
+                hashlib.sha256(first.read_bytes()).hexdigest(),
+                hashlib.sha256(second.read_bytes()).hexdigest(),
+                "toolchain artifact must be byte-reproducible",
+            )
+
 
 class CiPlanConsistencyTests(unittest.TestCase):
     def test_workflow_runs_verification_side_gates(self):

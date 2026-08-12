@@ -23,7 +23,7 @@
 | ID | 标题 | 范围 | 完成定义 | 依赖 / 外部 | 状态 |
 |---|---|---|---|---|---|
 | O-01 | 在线/受控网络协同版本边界决策 | `docs/architecture/`、`external-gates.md` | 版本边界明确或进入设计；声明纪律守卫 | 业务决策（对齐 T-11/T-12 边界） | **proposed**（DECISIONS 2026-08-12T13:00:00Z；决策卡已就绪 `docs/plans/pending-decisions-brief.md`） |
-| O-02 | CI 激活 | `.github/workflows/quality.yml`、`ci-artifact.json` | CI 首次全量门禁绿；制品哈希一致 | 外部：owner Release（对齐 T-18） | **就绪件 done**（workflow 已入库、制品已锚定 sha256、执行单 `docs/operations/ci-activation-checklist.md`）；待 owner 建 Release |
+| O-02 | CI 激活 | `.github/workflows/quality.yml`、`ci-artifact.json` | CI 首次全量门禁绿；制品哈希一致 | 外部：owner Release（对齐 T-18） | **就绪件 done**（workflow 已入库、构建脚本可复现修复、制品哈希已刷新 `e679aec3…`、执行单就绪）；待 owner 建 Release |
 | O-03 | Win7 实机验证 | `win7-compat` 分支、`tests/win7/` | 实机专项通过 + 验证记录 | 外部：Win7 环境 | **就绪件 done**（验收手册 §1）；待实机 |
 | O-04 | WPS 真实宿主验收 | `cockpit/wps.py`、文档 | 真实 WPS 打开/生成副本验收通过 | 外部：WPS 环境 | **就绪件 done**（验收手册 §2）；待宿主 |
 | O-05 | 目标硬件性能复测 | `benchmarks/` | 目标硬件 13 项探针达标留档 | 目标硬件 | **就绪件 done**（验收手册 §3）；待硬件 |

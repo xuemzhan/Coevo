@@ -5,12 +5,12 @@
   "url_pattern": "https://github.com/xuemzhan/Coevo/releases/download/toolchain-<version>/coevo-toolchain-win64-<version>.zip",
   "version": "1.0.0",
   "url": "https://github.com/xuemzhan/Coevo/releases/download/toolchain-1.0.0/coevo-toolchain-win64-1.0.0.zip",
-  "sha256": "81dd3e7d5e1e0bfdd1dc8562bf58abf0a5a6fc4b0f311d1cb5acbb3899902856",
+  "sha256": "e679aec38727eadd07683cd809b3e0bb19ee8c248d35a306261502fde652d6d9",
   "contents": [
     ".tools/python/3.14.3/python.exe",
     ".tools/node/24.14.0/node.exe",
     ".tools/control/control.pyz",
     ".tools/gmssl/3.2.0/GmSSL-3.2.0-win64/bin/gmssl.dll"
   ],
-  "publish_instructions": "CI-2: version/url/sha256 are pinned (artifact built locally with scripts/ci-build-toolchain.py --version 1.0.0; 80.08 MB, 4934 files). Remaining owner step: create a GitHub Release on the toolchain-1.0.0 tag and upload the artifact as coevo-toolchain-win64-1.0.0.zip. The restore script is fail-closed on the pinned sha256."
+  "publish_instructions": "CI-2 + MATURITY-O-02 (2026-08-12): builder is byte-reproducible (zip entry timestamps normalized); pinned sha256=e679aec38727eadd07683cd809b3e0bb19ee8c248d35a306261502fde652d6d9 (rebuilt 2026-08-12, 80.08 MB, 4934 files). Remaining owner step: create a GitHub Release on the toolchain-1.0.0 tag and upload the artifact as coevo-toolchain-win64-1.0.0.zip; if .tools content changes, rebuild and refresh version/sha256 here first. The restore script is fail-closed on the pinned sha256."
 }

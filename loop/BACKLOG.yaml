@@ -1874,7 +1874,7 @@ items:
   #     2017/2013/0/4 + security pass；外部门条件 11 -> PASS）
   #   R-06 审计密钥托管 + 独立审查：done（T-07 三档托管；ARCH-REVIEW-5/REVIEW2-10 PASS；
   #     CTAF-PROPOSAL-REVIEW PASS）
-  #   O-02/O-03/O-04/O-05 就绪件：done（CI 激活执行单 + 外部环境验收手册）
+  #   O-02/O-03/O-04/O-05 就绪件：done（CI 激活执行单 + 可复现构建修复 + 外部环境验收手册）
   #   O-01/R-05 决策卡：就绪（docs/plans/pending-decisions-brief.md），待业务负责人裁决
   #   其余 R-02 与 O-02..O-05 的实际执行待外部审批/环境就绪。
   - id: ARCH-REVIEW-1

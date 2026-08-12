@@ -51,7 +51,22 @@ def build_archive(tools_root: Path, out: Path, *, force: bool = False) -> str:
                 relative = path.relative_to(tools_root).as_posix()
                 if "__pycache__" in relative or relative.endswith(".pyc"):
                     continue
-                zf.write(path, f".tools/{relative}")
+                # Deterministic archive: entry timestamps are normalized so
+                # the artifact is byte-reproducible from the same toolchain
+                # content regardless of when/where it is built (MATURITY
+                # O-02 fix, 2026-08-12). Without this, zipfile embeds each
+                # file's mtime and the SHA-256 pin drifts on every rebuild.
+                info = zipfile.ZipInfo(
+                    f".tools/{relative}",
+                    date_time=(1980, 1, 1, 0, 0, 0),
+                )
+                with path.open("rb") as stream:
+                    zf.writestr(
+                        info,
+                        stream.read(),
+                        compress_type=zipfile.ZIP_DEFLATED,
+                        compresslevel=6,
+                    )
                 count += 1
     digest = hashlib.sha256(out.read_bytes()).hexdigest()
     print(
