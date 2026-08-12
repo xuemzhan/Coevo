@@ -36,11 +36,50 @@ from . import (
 )
 
 
-SCHEMA_VERSION: str = "1.0"
+SCHEMA_VERSION: str = "1.1"
 STATE_MAX_BYTES: int = 4 * 1024 * 1024
 _ALLOWED_TOP_LEVEL: frozenset[str] = frozenset({
     "schema_version", "workspace_views", "role_views",
 })
+
+
+def _migrate_1_0_to_1_1(data: dict[str, Any]) -> dict[str, Any]:
+    """1.0 → 1.1：为工作区视图补齐默认字段，不丢数据。
+
+    1.0 时代未写入 trace/activity/package 摘要字段；迁移显式补默认值，
+    取代原先"宽容解析"的隐式兼容。
+    """
+    migrated = dict(data)
+    migrated["schema_version"] = "1.1"
+    views = []
+    for item in migrated.get("workspace_views", []):
+        view = dict(item)
+        for field in ("package_path", "package_digest", "knowledge_bundle_id"):
+            view.setdefault(field, "")
+        view.setdefault("trace", [])
+        view.setdefault("activity", [])
+        views.append(view)
+    migrated["workspace_views"] = views
+    return migrated
+
+
+MIGRATIONS: dict[str, Any] = {
+    "1.0": _migrate_1_0_to_1_1,
+}
+
+
+def _apply_migrations(data: dict[str, Any]) -> dict[str, Any]:
+    """逐版本迁移到当前 schema；无迁移路径（未知/更新版本）失败关闭。"""
+    version = _require(data, "schema_version", str)
+    while version != SCHEMA_VERSION:
+        migrate = MIGRATIONS.get(version)
+        if migrate is None:
+            raise CockpitValidationError(
+                f"unsupported state schema_version {version!r}"
+            )
+        data = migrate(data)
+        version = _require(data, "schema_version", str)
+    return data
 
 
 def _require(mapping: dict[str, Any], key: str, expected: type) -> Any:
@@ -296,8 +335,7 @@ def deserialize_views(
     """Strictly parse a persisted payload; any deviation raises."""
     if set(data) != _ALLOWED_TOP_LEVEL:
         raise CockpitValidationError("state payload has unknown top-level fields")
-    if _require(data, "schema_version", str) != SCHEMA_VERSION:
-        raise CockpitValidationError("unsupported state schema_version")
+    data = _apply_migrations(data)
     workspace = tuple(
         _mapping_to_workspace_view(item)
         for item in _require(data, "workspace_views", list)

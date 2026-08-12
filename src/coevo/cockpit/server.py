@@ -599,6 +599,9 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
                     time.monotonic() - self.server._started_monotonic, 1
                 ),
                 "session_count": self.server.session_manager.session_count,
+                "session_subject_count": len(
+                    self.server.session_manager.subjects()
+                ),
                 "request_count": self.server.request_count,
                 "probe_count": self.server.probe_count,
                 "rejected_count": self.server.rejected_count,
@@ -657,6 +660,9 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
         action = data.get("action", "")
         if not isinstance(action, str) or action not in ("confirm", "reject"):
             raise ValueError("action must be confirm or reject")
+        subject = self.server.session_manager.subject(
+            self._bearer_token(), self._now()
+        )
         request = CockpitRequest(
             route=CockpitRoute.PENDING_CONFIRM,
             project_id="",
@@ -665,17 +671,20 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             artifact_path=action,  # 复用槽位承载 confirm/reject
             ts=self._now(),
         )
-        self._dispatch_and_send(request)
+        self._dispatch_and_send(request, subject=subject)
 
     # -- dispatch + response helpers ----------------------------------------
 
-    def _dispatch_and_send(self, request: CockpitRequest) -> None:
+    def _dispatch_and_send(
+        self, request: CockpitRequest, *, subject: str = ""
+    ) -> None:
         response: CockpitResponse = CockpitFacade.dispatch(
             request,
             server_state=self.server.state,
             now=self._now(),
             wps_launcher=self.server._wps_launcher,
             pending_action_handler=self.server._pending_action_handler,
+            subject=subject,
         )
         self.server.append_audit(CockpitFacade.to_audit_record(request, response))
         status_codes = {

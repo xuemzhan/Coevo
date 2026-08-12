@@ -1,6 +1,7 @@
 # 能力状态矩阵（Capability Status Matrix）
 
-> 状态：生效（2026-08-10，REVIEW2-12；与 ARCH-REVIEW-3 范围治理关联）
+> 状态：生效（2026-08-12，REVIEW2-12 快照已随 08-11/12 驾驶舱产品化轮次刷新；
+> 与 ARCH-REVIEW-3 范围治理关联）
 > 用途：把 BACKLOG 的 "done" 语义与能力生产成熟度解耦，杜绝
 > "全量门禁全绿，因此系统完成"的过度叙事。
 
@@ -20,7 +21,7 @@
 **规则**：BACKLOG 的 `done` 只表示"该切片完成"；能力当前级别必须单独声明。
 进入 `PRODUCTION_READY` 前必须满足完成定义（独立验证 + 独立安全审查 + 批准产品）。
 
-## 2. 当前能力状态（2026-08-10 快照）
+## 2. 当前能力状态（2026-08-12 快照）
 
 | 能力 | 当前级别 | 主要证据 / 缺口 |
 |---|---|---|
@@ -31,7 +32,7 @@
 | US-4 运行中枢 | `E2E_VERIFIED` | 真实链（real chain）+ 固定编排链 e2e |
 | US-5 `.agent` 协议 | `E2E_VERIFIED`（原型密码）/ `BLOCKED`（生产） | wire/导入/回传 e2e 全绿；正式 SM2/SM4 产品待 US-5-AC-2 审批 |
 | US-6 工作区 | `INTEGRATION_VERIFIED` | 路径策略/隔离/原子导入 |
-| US-7 本地驾驶舱 | `E2E_VERIFIED`（HTTP/离线前端）；WPS 真实进程 `INTEGRATION_VERIFIED` | 黑盒认证矩阵 + 离线断网证明；WPS 需真实宿主验收 |
+| US-7 本地驾驶舱 | `E2E_VERIFIED`（HTTP/离线前端）；WPS 真实进程 `INTEGRATION_VERIFIED` | 黑盒认证矩阵 + 离线断网证明；多项目/网页确认（demo 模式）/会话管理已落地；生产 pending-action 处理器契约与用户身份绑定待接线（PRODUCT-REVIEW T-08/T-09/T-10）；WPS 需真实宿主验收 |
 | US-8 进展采集 | `INTEGRATION_VERIFIED` | watcher + 证据关联 |
 | US-9 成果回传 | `INTEGRATION_VERIFIED` | 报告包 wire 一致性 |
 | US-10 状态合并 | `INTEGRATION_VERIFIED` | 合并收敛 property + 收据链 |

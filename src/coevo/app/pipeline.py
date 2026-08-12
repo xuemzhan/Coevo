@@ -525,7 +525,8 @@ def _run_demo_pipeline_with_store(
         gate_event = threading.Event()
         gate_state: dict[str, Any] = {}
 
-        def _web_handler(action: str) -> dict[str, str]:
+        def _web_handler(action: str, *, subject: str = "") -> dict[str, str]:
+            gate_state["subject"] = subject
             if action == "reject":
                 gate_state["decision"] = "rejected"
                 gate_event.set()
@@ -583,7 +584,7 @@ def _run_demo_pipeline_with_store(
                     pass
             raise
         cockpit_url = server.url
-        cockpit_token = server.session_manager.create()
+        cockpit_token = server.session_manager.create(subject=DEMO_ACTOR)
         if callable(gate_ready):
             gate_ready(cockpit_url, cockpit_token)
         if callable(progress):
@@ -695,7 +696,7 @@ def _run_demo_pipeline_with_store(
                     pass
             raise
         cockpit_url = server.url
-        cockpit_token = server.session_manager.create()
+        cockpit_token = server.session_manager.create(subject=DEMO_ACTOR)
         if callable(progress):
             progress("启动本地驾驶舱并提供会话入口")
 

@@ -38,11 +38,19 @@
   provider 时的兼容开关（见 configuration-reference）。
 - **原型密码路径（GmSSL 3.2.0 + 纯 Python SM3）**：真实算法、开源引擎、受保护
   句柄层已落地，但非国密认证模块（见 §1）。
+- **网页确认（`--serve-gate`）为 demo 模式语义**：`PENDING_CONFIRM` 路由
+  fail-closed（无处理器返回 NOT_AVAILABLE），但处理器仅由 demo pipeline 注入；
+  生产 pending-action 处理器契约与用户身份/RBAC 绑定待接线（PRODUCT-REVIEW
+  T-08/T-09/T-10）。
+- **多项目为演示视图**：PRJ002 等并行项目是驾驶舱视图数据，非多租户/多用户
+  产品能力；中心端/跨节点同步仍为 DESIGNED/MODELED（PRODUCT-REVIEW
+  T-11/T-12）。
 
 ## 3. 维护注意
 
-- 门禁指纹随 lint 命令集变化（如新增 secret_scan 后 `34fc0b6`→`e3a61c2`）；发布
-  记录必须引用**实际运行**的指纹。
+- 门禁指纹随 lint 命令集变化（如新增 secret_scan 后 `34fc0b6`→`e3a61c2`）；
+  指纹哈希当前包含环境绝对路径，跨工作区会漂移（PRODUCT-REVIEW T-15 将改为
+  环境无关）；发布记录必须引用**实际运行**的指纹。
 - 锁定文件（python-script-lock.tsv、toolchain-lock.json、make.cs）任何编辑都必须
   全链同步哈希，否则环境入口/门禁失败关闭。
 - 新增 `COEVO_*` 环境变量必须登记 `configuration-reference.md`（有测试校验）。

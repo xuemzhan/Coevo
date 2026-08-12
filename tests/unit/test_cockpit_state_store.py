@@ -16,6 +16,7 @@ from src.coevo.cockpit import (
     TaskSummary,
     TraceStepSummary,
     WorkspaceView,
+    _apply_migrations,
     deserialize_views,
     serialize_views,
 )
@@ -177,8 +178,9 @@ class SerializeViewsTests(unittest.TestCase):
         )
 
     def test_deserialize_legacy_state_without_trace_is_accepted(self):
-        # 旧版本快照没有 trace 键，加载时必须按空轨迹兼容，不得失败。
+        # 1.0 旧快照没有 trace/activity/package 字段：显式迁移补齐默认值。
         payload = serialize_views((_workspace_view(),), (_role_view(),))
+        payload["schema_version"] = "1.0"
         del payload["workspace_views"][0]["trace"]
         del payload["workspace_views"][0]["activity"]
         del payload["workspace_views"][0]["package_path"]
@@ -188,6 +190,31 @@ class SerializeViewsTests(unittest.TestCase):
         self.assertEqual((), workspace[0].trace)
         self.assertEqual((), workspace[0].activity)
         self.assertEqual((_role_view(),), roles)
+
+    def test_migration_1_0_fills_default_fields(self):
+        # 显式迁移路径：1.0 → 1.1 补齐默认字段，视图可解析且不丢角色数据。
+        payload = serialize_views((_workspace_view(),), (_role_view(),))
+        payload["schema_version"] = "1.0"
+        for field in (
+            "trace", "activity",
+            "package_path", "package_digest", "knowledge_bundle_id",
+        ):
+            del payload["workspace_views"][0][field]
+        migrated = _apply_migrations(payload)
+        self.assertEqual("1.1", migrated["schema_version"])
+        view = migrated["workspace_views"][0]
+        self.assertEqual([], view["trace"])
+        self.assertEqual([], view["activity"])
+        self.assertEqual("", view["package_path"])
+        workspace, roles = deserialize_views(payload)
+        self.assertEqual((_workspace_view(),), workspace)
+        self.assertEqual((_role_view(),), roles)
+
+    def test_unknown_schema_version_is_rejected(self):
+        payload = serialize_views((_workspace_view(),), (_role_view(),))
+        payload["schema_version"] = "9.9"
+        with self.assertRaises(CockpitValidationError):
+            deserialize_views(payload)
 
     def test_serialize_rejects_bad_types(self):
         with self.assertRaises(CockpitValidationError):
@@ -221,8 +248,8 @@ class SerializeViewsTests(unittest.TestCase):
     def test_deserialize_rejects_duplicate_keys(self):
         payload = serialize_views((_workspace_view(),), (_role_view(),))
         raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).replace(
-            '"schema_version":"1.0"',
-            '"schema_version":"1.0","schema_version":"1.0"',
+            '"schema_version":"1.1"',
+            '"schema_version":"1.1","schema_version":"1.1"',
             1,
         )
         with tempfile.TemporaryDirectory() as tmp:

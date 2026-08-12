@@ -61,15 +61,22 @@ class CockpitSessionManager:
         self._timeout_sec = timeout_sec
         self._max_sessions = max_sessions
         self._max_session_age_sec = max_session_age_sec
-        self._sessions: dict[str, tuple[str, str]] = {}
+        self._sessions: dict[str, tuple[str, str, str]] = {}
 
-    def create(self, now: str | None = None) -> str:
-        """Issue a fresh raw bearer token; only its digest is retained."""
+    def create(self, now: str | None = None, subject: str = "") -> str:
+        """Issue a fresh raw bearer token bound to an optional subject.
+
+        Only the digest is retained; ``subject`` is an immutable identity
+        claim (e.g. ``u.pm``) attached at issuance and never derivable from
+        the raw token.
+        """
         now = now or now_utc_iso_z()
         if not is_iso_utc_z(now):
             raise CockpitValidationError("now must be ISO-8601 UTC Z")
+        if not isinstance(subject, str):
+            raise CockpitValidationError("subject must be a string")
         token = secrets.token_urlsafe(32)
-        self._sessions[self._digest(token)] = (now, now)
+        self._sessions[self._digest(token)] = (now, now, subject)
         self._evict_if_needed()
         return token
 
@@ -84,7 +91,7 @@ class CockpitSessionManager:
         entry = self._sessions.get(digest)
         if entry is None:
             return False
-        created_at, last_seen = entry
+        created_at, last_seen, _subject = entry
         # Parse ``now`` once and reuse it for both checks (PERF-SESS-1).
         now_seconds = _iso_seconds(now)
         if (
@@ -96,8 +103,17 @@ class CockpitSessionManager:
         if now_seconds - _iso_seconds(last_seen) > self._timeout_sec:
             del self._sessions[digest]
             return False
-        self._sessions[digest] = (created_at, now)
+        self._sessions[digest] = (created_at, now, _subject)
         return True
+
+    def subject(self, token: str, now: str | None = None) -> str:
+        """Return the session subject, or ``""`` when the token is invalid."""
+        if not isinstance(token, str) or not token:
+            return ""
+        if not self.validate(token, now=now):
+            return ""
+        entry = self._sessions.get(self._digest(token))
+        return entry[2] if entry is not None else ""
 
     def revoke(self, token: str) -> bool:
         """Revoke a session by raw token (best effort, constant-ish cost)."""
@@ -112,13 +128,21 @@ class CockpitSessionManager:
         now = now or now_utc_iso_z()
         if not is_iso_utc_z(now):
             raise CockpitValidationError("now must be ISO-8601 UTC Z")
+        entry = self._sessions.get(self._digest(token))
+        if entry is None:
+            raise CockpitValidationError("token is not a valid session")
+        subject = entry[2]
         if not self.revoke(token):
             raise CockpitValidationError("token is not a valid session")
-        return self.create(now=now)
+        return self.create(now=now, subject=subject)
 
     @property
     def session_count(self) -> int:
         return len(self._sessions)
+
+    def subjects(self) -> tuple[str, ...]:
+        """Sorted unique session subjects (privacy-safe: identities only)."""
+        return tuple(sorted({entry[2] for entry in self._sessions.values()}))
 
     def _evict_if_needed(self) -> None:
         excess = len(self._sessions) - self._max_sessions

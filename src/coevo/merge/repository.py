@@ -162,8 +162,24 @@ class MergeReceiptRepository:
         metadata = self.connection.execute(
             "SELECT schema_version FROM merge_metadata WHERE singleton=1"
         ).fetchone()
-        if metadata is None or metadata[0] != "1.0":
+        if metadata is None:
             raise MergeReceiptRepositoryError("receipt store schema is unsupported")
+        from src.coevo.db_migration import (
+            SchemaMigrationError,
+            apply_migrations,
+        )
+
+        try:
+            apply_migrations(
+                self.connection,
+                metadata_table="merge_metadata",
+                expected_version="1.0",
+                migrations=(),
+            )
+        except SchemaMigrationError as exc:
+            raise MergeReceiptRepositoryError(
+                f"receipt store schema is unsupported ({exc})"
+            ) from exc
 
     def _checkpoint(self) -> dict[str, object]:
         """Persist a checkpoint row atomically."""

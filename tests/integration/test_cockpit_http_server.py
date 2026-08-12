@@ -356,6 +356,42 @@ class CockpitHttpServerTests(unittest.TestCase):
         data = json.loads(body)
         self.assertEqual("not_available", data["payload"]["decision"])
 
+    def test_pending_confirm_passes_session_subject_to_handler(self):
+        # PRODUCT-REVIEW T-10：处理器必须收到发起会话的身份声明。
+        seen = {}
+
+        class _CaptureHandler:
+            def __call__(self, action, *, subject=""):
+                seen["subject"] = subject
+                return {"decision": "approved"}
+
+        confirm_port = _free_port()
+        confirm_server = CockpitHttpServer(
+            CockpitHttpConfig(
+                bind_port=confirm_port,
+                request_timeout_sec=3,
+                session_timeout_sec=60,
+                lock_path=None,
+            ),
+            workspace_views=(_workspace_view(),),
+            role_views=(_role_view(),),
+            pending_action_handler=_CaptureHandler(),
+        )
+        self.addCleanup(confirm_server.stop)
+        confirm_server.start()
+        token = confirm_server.session_manager.create(subject="u.pm")
+        status, _, _ = _request(
+            f"http://127.0.0.1:{confirm_port}/api/pending_confirm",
+            token=token,
+            headers={
+                "Origin": f"http://127.0.0.1:{confirm_port}",
+                "X-Requested-With": "coevo-cockpit",
+            },
+            body={"action": "confirm"},
+        )
+        self.assertEqual(200, status)
+        self.assertEqual("u.pm", seen.get("subject"))
+
     def test_abrupt_client_disconnect_does_not_break_server(self):
         # A client that opens a connection and vanishes mid-request must not
         # wedge the listener: the next well-formed request still succeeds.

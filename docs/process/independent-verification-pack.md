@@ -1,7 +1,7 @@
 # 独立验收执行包（Independent Verification Pack）
 
-> 状态：生效（2026-08-10；ARCH-REVIEW-3 记录"实现完成、待独立验收"后，供独立
-> mvp-verifier 与 security-reviewer 使用的验收执行包）。
+> 状态：生效（2026-08-12 刷新；ARCH-REVIEW-3 记录"实现完成、待独立验收"后，供
+> 独立 mvp-verifier 与 security-reviewer 使用的验收执行包）。
 
 ## 1. 角色与独立性
 
@@ -26,6 +26,15 @@ python scripts\audit_seal.py verify
 
 发布级复验：`python scripts\quality_gate.py --target quality`（业务负责人解除"不做
 全量门禁"限制后执行）。
+
+当前基线（2026-08-12）：
+- **最近一次实际记录的全量门禁**（T-15 指纹环境无关化之前）：exit=0，
+  fingerprint=`507ff7cb3ed3fd24`，totals discovered=1932 passed=1928
+  failed=0；单元 1528/1525、集成 272/271、安全 103、E2E 25、Win7 4；
+  audit fully-sealed（sequence 2486）；
+- **T-15 起指纹环境无关**：指纹按仓库相对路径归一，同一仓库布局跨工作区
+  一致，预期指纹为 `b5c12e15ae7c559f`（该指纹待下一次全量门禁实际记录）。
+成熟产品视角审查结论与后续任务见 `docs/plans/review-2026-08-12-tasks.md`。
 
 ## 3. 逐项证据位置
 

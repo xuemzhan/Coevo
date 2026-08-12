@@ -1855,6 +1855,12 @@ items:
   #       T-11 同步协议设计 / T-12 同步实现（依赖 T-11）
   #   P2：T-13 cockpit-state 迁移 / T-14 DB 迁移框架 / T-15 指纹环境无关 /
   #       T-16 文档快照刷新 / T-17 令牌安全指引 / T-18 CI 激活（外部：owner Release）
+  # 进度（2026-08-12 第一批）：T-01 简报 proposed / T-04 done / T-05 done /
+  #   T-13 done / T-15 done / T-16 done / T-17 done；其余待后续轮次或外部依赖
+  #   （详见 docs/plans/review-2026-08-12-tasks.md 进度表）
+  # 进度（2026-08-12 第二批）：T-02 done / T-07 done / T-08 done / T-09 done /
+  #   T-10 done / T-11 done / T-12 done / T-14 done；
+  #   剩余 T-03/T-06/T-18（外部依赖：独立角色/密码审批/owner Release）
   - id: ARCH-REVIEW-1
     story: ARCH-REVIEW
     title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化

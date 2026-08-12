@@ -47,7 +47,7 @@ class Win7GateTests(unittest.TestCase):
         self.assertIn(win7_argv, quality)
         self.assertEqual(
             quality_gate.fingerprint(quality),
-            "507ff7cb3ed3fd24",
+            "b5c12e15ae7c559f",
         )
 
     def test_make_shim_exposes_test_win7(self) -> None:

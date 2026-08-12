@@ -5563,3 +5563,86 @@ security-reviewer 双签门禁。
   (that was a single explicit authorization for that round); pushing this
   records change requires separate user confirmation.
 
+
+## 2026-08-12T07:00:00Z -- AI positioning decision brief (Proposed)
+
+- Item: PRODUCT-REVIEW T-01 — 确定"AI 具身智能体"的真实产品定位。
+- Recommendation: 选项 B（确定性任务编排 + 可选模型辅助）；模型适配层保留为
+  扩展点，本地模型建议链路（选项 A）经 T-02 另行打通。
+- Evidence: config/model-config.json（provider=offline）、
+  src/coevo/task_decomposition/agent.py（草稿边界 + 离线回退）、
+  docs/modules/model.md、docs/architecture/capability-status.md。
+- Decision status: **proposed**（待业务负责人裁决；裁决前 README 澄清句与
+  能力矩阵注记已按选项 B 的事实口径落地）。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b（本标记指收据策略承认；本条自身状态见上）；
+  .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decided by: Codex (loop-engineer) preparing brief; final decision belongs to
+  the business owner.
+
+
+## 2026-08-12T08:00:00Z -- PRODUCT-REVIEW 第二批完成（Approved）
+
+- Item: PRODUCT-REVIEW 第二批 7 项落地（T-02/T-07/T-08/T-09/T-10/T-11/T-14）。
+- Scope:
+  - T-02 模型建议链路契约测试复核（离线回退/草稿边界 6 项全绿）；
+  - T-07 审计密钥托管方案（audit-key-runbook §6 三档托管）；
+  - T-08 PolicyAuthorizer（framework policy 绑定 + fail-closed）+ production
+    默认授权器；
+  - T-09 驾驶舱会话绑定 subject（签发绑定、令牌不可反推、健康 subject 计数、
+    COEVO_OPERATOR_ID 登记配置参考）；
+  - T-10 PendingActionHandler 契约 + cockpit-confirmation-contract 文档 +
+    注入隔离守卫；
+  - T-11 同步协议设计（sync-protocol.md + src/coevo/sync/contract.py 可执行契约）；
+  - T-14 SQLite 迁移框架（src/coevo/db_migration.py）+ merge 仓库接入。
+- Verification: 受影响定向测试 200+ 项全绿（含治理/文档/安全/集成）；
+  按用户指令不做全量门禁。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: Codex (loop-engineer) per user instruction
+  （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
+
+
+## 2026-08-12T10:00:00Z -- 外部项前置就绪 + 验证包基线修正（Approved）
+
+- Item: 剩余外部依赖项（T-03/T-06/T-18）的可实施前置收口。
+- Scope:
+  - T-03 前置：独立验证执行包基线修正——区分"最近实际门禁指纹 507ff7"与
+    "T-15 起环境无关预期指纹 b5c12e15ae7c559f（待下一次全量门禁实际记录）"；
+    `release_check` 在未提交工作区下仅 git_clean 为 critical，属预期。
+  - T-06 前置：`GmsslProtectedProvider` 声明 `ProviderScope.APPROVED_PRODUCT`，
+    生产入口 scope 门禁兼容；新增源级守卫测试。
+  - T-18 前置：CI workflow 无指纹钉、`ci-restore-toolchain.ps1` 按钉扎
+    SHA-256 失败关闭；剩余 owner 动作：创建 `toolchain-1.0.0` Release 并上传
+    `coevo-toolchain-win64-1.0.0.zip`（制品哈希已钉于 ci-artifact.json）。
+- Verification: 受影响定向测试 177 项全绿；按用户指令不做全量门禁。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: Codex (loop-engineer) per user instruction
+  （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
+
+
+## 2026-08-12T09:00:00Z -- PRODUCT-REVIEW T-12 同步实现完成（Approved）
+
+- Item: T-12 跨节点同步实现（离线优先）。
+- Scope: `src/coevo/sync/store.py`：
+  - `SyncOutbox`：单节点追加式出站链（哈希链 + 单调序号 + event_id 防重放），
+    JSONL 持久化；
+  - `SyncReconciler`：只读对账（新事件/重放/缺口检测），入站链非法时失败关闭；
+  - `export_bundle` / `load_bundle`：文件式传输，篡改链字段失败关闭。
+- Verification: `tests/unit/test_sync_store.py` 11 项 + 契约测试 5 项全绿；
+  按用户指令不做全量门禁。
+- Boundary: 负载完整性签名与受控网络传输仍为后续项（sync-protocol.md §6，
+  依赖 US-5-AC-2 密码产品）。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: Codex (loop-engineer) per user instruction
+  （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
+

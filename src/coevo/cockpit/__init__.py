@@ -55,5 +55,10 @@ from .models import (ActivityEntry, ArtifactSummary, CockpitError, CockpitNotFou
 from .facade import (CockpitFacade)
 
 from .server import CSRF_HEADER_VALUE, CockpitHttpConfig, CockpitHttpServer, CockpitSessionManager, SingleInstanceLock, now_utc_iso_z, resolve_static_path
-from .state_store import CockpitStateStore, deserialize_views, serialize_views
+from .state_store import (
+    _apply_migrations,
+    CockpitStateStore,
+    deserialize_views,
+    serialize_views,
+)
 from .wps import MAX_DOCUMENT_BYTES, WpsLaunchDecision, WpsLaunchResult, WpsLauncher

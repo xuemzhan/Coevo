@@ -32,6 +32,7 @@
 | `COEVO_LOCK_PATH` | `%LOCALAPPDATA%\KaiwuAgent\cockpit.lock` | 可解析路径 | 单实例锁文件显式覆盖（STABILITY-1） |
 | `COEVO_REPO_ROOT` | 脚本所在仓库根 | 可解析路径 | 门禁/脚本定位仓库根（开发与运维脚本） |
 | `COEVO_WPS_EXE` | `wps.exe` | 非空字符串 | WPS 启动器显式可执行文件（cockpit/wps.py） |
+| `COEVO_OPERATOR_ID` | 空 | 任意字符串 | 交互式启动（`run_cockpit.py --print-token/--open`）签发的驾驶舱会话 subject（身份声明，PRODUCT-REVIEW T-09）；仅用于会话绑定与展示，不参与授权判定 |
 
 ## 2. 模型访问（src/coevo/model/）
 

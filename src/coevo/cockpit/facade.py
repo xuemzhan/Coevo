@@ -15,9 +15,23 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Protocol
 
 from src.coevo.timefmt import is_iso_utc_z
 from .models import CockpitRequest, CockpitResponse, CockpitResponseStatus, CockpitRoute, CockpitServerConfig, CockpitServerState, CockpitValidationError, LOOPBACK_HOST, RoleView, STATIC_ROOT, WPSAllowList, WorkspaceView, _hash_path
+
+class PendingActionHandler(Protocol):
+    """生产 pending-action 处理器契约（PRODUCT-REVIEW T-10）。
+
+    ``__call__(action, *, subject)`` 接收 ``"confirm"`` 或 ``"reject"`` 与
+    发起会话的身份声明 ``subject``，返回含 ``decision`` 键的映射
+    （``approved`` / ``rejected``）；任何其它结果、异常或无处理器均失败关闭。
+    生产处理器由可信组合根注入，并以 subject + PolicyAuthorizer 判定授权；
+    demo 仅通过 ``--serve-gate`` 注入。
+    """
+
+    def __call__(self, action: str, *, subject: str) -> dict[str, str]: ...
+
 
 class CockpitFacade:
     """Pure-function cockpit dispatch (US-7 AC-5..AC-9)."""
@@ -59,6 +73,7 @@ class CockpitFacade:
         now: str,
         wps_launcher: object | None = None,
         pending_action_handler: object | None = None,
+        subject: str = "",
     ) -> CockpitResponse:
         """AC-5..AC-8: dispatch a request to a response. Pure function."""
         if not isinstance(request, CockpitRequest):
@@ -95,7 +110,7 @@ class CockpitFacade:
             return CockpitFacade._wps_open(server_state, request, now, wps_launcher)
         if request.route == CockpitRoute.PENDING_CONFIRM:
             return CockpitFacade._pending_confirm(
-                request, now, pending_action_handler
+                request, now, pending_action_handler, subject=subject
             )
         return CockpitResponse(
             status=CockpitResponseStatus.BAD_REQUEST,
@@ -166,6 +181,8 @@ class CockpitFacade:
         request: CockpitRequest,
         now: str,
         handler: object | None = None,
+        *,
+        subject: str = "",
     ) -> CockpitResponse:
         """Route a pending human-confirmation action to the wired handler.
 
@@ -194,7 +211,7 @@ class CockpitFacade:
                 ts=now,
             )
         try:
-            result = handler(action)
+            result = handler(action, subject=subject)
         except Exception as exc:  # noqa: BLE001 - handler failure fails closed
             return CockpitResponse(
                 status=CockpitResponseStatus.ERROR,

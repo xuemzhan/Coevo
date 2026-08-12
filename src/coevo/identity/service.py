@@ -38,6 +38,36 @@ class StaticAuthorizer:
         return permission in self._grants.get(actor_id, frozenset())
 
 
+class PolicyAuthorizer:
+    """Policy-backed authorizer (PRODUCT-REVIEW T-08): real RBAC for production.
+
+    Composed at the trusted root from configuration only; never from request
+    data. An optional framework ``Policy`` profile is validated at
+    construction and bound as the gate context. ``is_allowed`` is
+    fail-closed: unknown actor or unlisted permission is denied.
+    """
+
+    def __init__(
+        self,
+        grants: Mapping[str, frozenset[str]],
+        policy: Any | None = None,
+    ) -> None:
+        if policy is not None:
+            from src.coevo.framework.policy import validate_policy
+
+            validate_policy(policy)
+        self._grants = {
+            actor: frozenset(permissions)
+            for actor, permissions in grants.items()
+        }
+        self._policy = policy
+
+    def is_allowed(self, actor_id: str, permission: str) -> bool:
+        if not isinstance(actor_id, str) or not isinstance(permission, str):
+            return False
+        return permission in self._grants.get(actor_id, frozenset())
+
+
 class IdentityService:
     def __init__(self, repository: IdentityRepository, authorizer: Authorizer):
         self.repository = repository

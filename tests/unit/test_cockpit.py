@@ -399,12 +399,13 @@ class WPSOpenTests(unittest.TestCase):
 class PendingConfirmTests(unittest.TestCase):
     """PENDING_CONFIRM 路由：fail-closed，未配置处理器时不可用。"""
 
-    def _dispatch(self, action: str, handler=None):
+    def _dispatch(self, action: str, handler=None, subject: str = ""):
         return CockpitFacade.dispatch(
             _req(route=CockpitRoute.PENDING_CONFIRM, artifact_path=action),
             server_state=_state(),
             now=NOW2,
             pending_action_handler=handler,
+            subject=subject,
         )
 
     def test_without_handler_reports_not_available(self):
@@ -415,7 +416,7 @@ class PendingConfirmTests(unittest.TestCase):
     def test_approve_maps_to_started(self):
         r = self._dispatch(
             "confirm",
-            handler=lambda action: {"decision": "approved"},
+            handler=lambda action, subject="": {"decision": "approved"},
         )
         self.assertEqual(CockpitResponseStatus.STARTED, r.status)
         self.assertEqual("approved", r.payload["decision"])
@@ -423,7 +424,7 @@ class PendingConfirmTests(unittest.TestCase):
     def test_reject_maps_to_denied(self):
         r = self._dispatch(
             "reject",
-            handler=lambda action: {"decision": "rejected"},
+            handler=lambda action, subject="": {"decision": "rejected"},
         )
         self.assertEqual(CockpitResponseStatus.DENIED, r.status)
         self.assertEqual("rejected", r.payload["decision"])
@@ -431,17 +432,53 @@ class PendingConfirmTests(unittest.TestCase):
     def test_invalid_action_is_rejected(self):
         r = self._dispatch(
             "maybe",
-            handler=lambda action: {"decision": "approved"},
+            handler=lambda action, subject="": {"decision": "approved"},
         )
         self.assertEqual(CockpitResponseStatus.BAD_REQUEST, r.status)
 
     def test_handler_exception_fails_closed(self):
-        def boom(action):
+        def boom(action, subject=""):
             raise RuntimeError("handler down")
 
         r = self._dispatch("confirm", handler=boom)
         self.assertEqual(CockpitResponseStatus.ERROR, r.status)
         self.assertEqual("failed", r.payload["decision"])
+
+    def test_handler_receives_session_subject(self):
+        seen = {}
+
+        def capture(action, subject=""):
+            seen["subject"] = subject
+            return {"decision": "approved"}
+
+        self._dispatch("confirm", handler=capture, subject="u.pm")
+        self.assertEqual("u.pm", seen["subject"])
+
+
+class PendingActionContractTests(unittest.TestCase):
+    """PRODUCT-REVIEW T-10：生产处理器契约与 demo 注入隔离。"""
+
+    def test_handler_protocol_is_defined(self):
+        from src.coevo.cockpit.facade import PendingActionHandler
+
+        self.assertTrue(hasattr(PendingActionHandler, "__call__"))
+
+    def test_handler_injection_is_demo_only(self):
+        pipeline_src = (ROOT / "src" / "coevo" / "app" / "pipeline.py").read_text(
+            encoding="utf-8"
+        )
+        production_src = (ROOT / "src" / "coevo" / "app" / "production.py").read_text(
+            encoding="utf-8"
+        )
+        # 处理器仅由 demo 的 serve-gate 注入；生产入口不得内置处理器。
+        self.assertIn("pending_action_handler=_web_handler", pipeline_src)
+        self.assertNotIn("pending_action_handler", production_src)
+
+    def test_facade_default_is_fail_closed(self):
+        facade_src = (ROOT / "src" / "coevo" / "cockpit" / "facade.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("pending_action_handler: object | None = None", facade_src)
 
 
 # ---------------------------------------------------------------------------

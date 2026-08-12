@@ -134,8 +134,31 @@ def commands(target):
 
 
 def fingerprint(argvs):
+    """Stable, environment-independent command-set fingerprint.
+
+    Absolute paths under the repo root are relativized to ``{root}/...`` and
+    absolute tool paths outside the root are reduced to their basename, so
+    the same repo layout produces the same fingerprint regardless of where
+    the checkout or toolchain is installed.
+    """
+
+    root_str = str(ROOT).replace("\\", "/").rstrip("/")
+
+    def _normalize(argv):
+        out = []
+        for item in argv:
+            s = str(item)
+            s2 = s.replace("\\", "/")
+            if s2.startswith(root_str + "/"):
+                out.append("{root}/" + s2[len(root_str) + 1:])
+            elif len(s2) >= 2 and s2[1] == ":" or s2.startswith("/"):
+                out.append(s2.rsplit("/", 1)[-1])
+            else:
+                out.append(s)
+        return out
+
     return hashlib.sha256(
-        json.dumps(argvs, separators=(",", ":")).encode()
+        json.dumps([_normalize(argv) for argv in argvs], separators=(",", ":")).encode()
     ).hexdigest()[:16]
 
 def _trim_records_to_policy(verification: Path = VERIFICATION) -> str:

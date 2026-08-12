@@ -199,7 +199,9 @@ def run(args: argparse.Namespace) -> int:
         # REVIEW-FIX-2: interactive token handoff. The raw token is shown
         # once on stdout (never via the logging framework and never written
         # to disk); the server retains only its SHA-256 digest.
-        token = server.session_manager.create()
+        token = server.session_manager.create(
+            subject=os.environ.get("COEVO_OPERATOR_ID", "")
+        )
         if args.print_token:
             print(f"session token: {token}", flush=True)
         # 直接打印可点击的完整地址，方便使用者复制粘贴。

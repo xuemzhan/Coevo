@@ -120,6 +120,37 @@ class CockpitSessionManagerTests(unittest.TestCase):
         self.assertTrue(manager.validate(new, now=T0))
         self.assertEqual(1, manager.session_count)
 
+    def test_session_binds_subject(self):
+        manager = CockpitSessionManager(timeout_sec=60)
+        token = manager.create(now=T0, subject="u.pm")
+        self.assertEqual("u.pm", manager.subject(token, now=T0))
+        # 未绑定 subject 的旧形态会话仍兼容。
+        legacy = manager.create(now=T0)
+        self.assertEqual("", manager.subject(legacy, now=T0))
+
+    def test_subject_is_not_derivable_from_token(self):
+        manager = CockpitSessionManager(timeout_sec=60)
+        token = manager.create(now=T0, subject="u.pm")
+        self.assertNotIn("u.pm", token)
+        self.assertEqual("u.pm", manager.subject(token, now=T0))
+
+    def test_rotate_preserves_subject(self):
+        manager = CockpitSessionManager(timeout_sec=60)
+        old = manager.create(now=T0, subject="u.pm")
+        new = manager.rotate(old, now=T0)
+        self.assertEqual("u.pm", manager.subject(new, now=T0))
+
+    def test_subject_of_invalid_token_is_empty(self):
+        manager = CockpitSessionManager(timeout_sec=60)
+        self.assertEqual("", manager.subject("bad-token", now=T0))
+
+    def test_subjects_lists_unique_identities(self):
+        manager = CockpitSessionManager(timeout_sec=60)
+        manager.create(now=T0, subject="u.pm")
+        manager.create(now=T0, subject="u.qa")
+        manager.create(now=T0, subject="u.pm")
+        self.assertEqual(("u.pm", "u.qa"), manager.subjects())
+
     def test_rotate_unknown_token_is_rejected(self):
         manager = CockpitSessionManager(timeout_sec=60)
         with self.assertRaises(CockpitValidationError):
