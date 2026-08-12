@@ -17,6 +17,9 @@ from src.coevo.timefmt import is_iso_utc_z
 
 from src.coevo.ids import HEX_64 as _HEX_64
 
+from src.coevo.supervision import EscalationLevel as _EscalationLevel
+from src.coevo.supervision import ReminderKind as _ReminderKind
+
 LOOPBACK_HOST: str = "127.0.0.1"
 
 STATIC_ROOT: Path = Path(__file__).resolve().parent / "static"
@@ -41,6 +44,7 @@ class CockpitRoute(enum.Enum):
     MILESTONE_VIEW = "milestone_view"
     WPS_OPEN = "wps_open"
     PENDING_CONFIRM = "pending_confirm"
+    SUPERVISION_VIEW = "supervision_view"
 
 class CockpitResponseStatus(enum.Enum):
     """HTTP-like status codes (without depending on http module)."""
@@ -278,6 +282,104 @@ class WorkspaceView:
         if not isinstance(self.knowledge_bundle_id, str):
             raise CockpitValidationError("knowledge_bundle_id must be a string")
 
+
+@dataclass(frozen=True)
+class SupervisionSummary:
+    """US-12 supervision/meeting snapshot for the cockpit (MATURITY-O-06).
+
+    A minimal, sensitive-free projection of one supervision item plus its
+    escalation/reminder/meeting state. ``from_outcome`` converts a real
+    :class:`~src.coevo.supervision.SupervisionOutcome` into the snapshot so
+    the return chain can feed the cockpit without leaking business phrasing
+    (basis / recommendation / rationale / closing_condition).
+    """
+
+    project_id: str
+    item_id: str
+    risk_id: str
+    risk_kind: str
+    responsible_subject: str
+    due_at: str
+    escalation_level: str = ""
+    reminder_kind: str = ""
+    meeting_proposal_id: str = ""
+    requires_confirmation: bool = True
+
+    _ESCALATION_VALUES: frozenset[str] = frozenset(
+        level.value for level in _EscalationLevel
+    ) | frozenset({""})
+    _REMINDER_VALUES: frozenset[str] = frozenset(
+        kind.value for kind in _ReminderKind
+    ) | frozenset({""})
+
+    def __post_init__(self) -> None:
+        for label, value in (
+            ("project_id", self.project_id),
+            ("item_id", self.item_id),
+            ("risk_id", self.risk_id),
+            ("responsible_subject", self.responsible_subject),
+        ):
+            if not isinstance(value, str) or not _SAFE_ID.match(value):
+                raise CockpitValidationError(
+                    f"{label} must be safe-id; got {value!r}"
+                )
+        if not isinstance(self.risk_kind, str) or not self.risk_kind:
+            raise CockpitValidationError("risk_kind must be a non-empty string")
+        if not is_iso_utc_z(self.due_at):
+            raise CockpitValidationError(
+                f"due_at must be ISO-8601 UTC 'Z'; got {self.due_at!r}"
+            )
+        if self.escalation_level not in self._ESCALATION_VALUES:
+            raise CockpitValidationError(
+                f"escalation_level {self.escalation_level!r} not in supervision closed set"
+            )
+        if self.reminder_kind not in self._REMINDER_VALUES:
+            raise CockpitValidationError(
+                f"reminder_kind {self.reminder_kind!r} not in supervision closed set"
+            )
+        if self.meeting_proposal_id and not _SAFE_ID.match(self.meeting_proposal_id):
+            raise CockpitValidationError(
+                f"meeting_proposal_id must be safe-id when present; got {self.meeting_proposal_id!r}"
+            )
+        if self.requires_confirmation is not True:
+            raise CockpitValidationError(
+                "supervision summary must require owner confirmation (fail-closed)"
+            )
+
+    @classmethod
+    def from_outcome(
+        cls, outcome: object
+    ) -> tuple["SupervisionSummary", ...]:
+        """Project a SupervisionOutcome into cockpit supervision summaries."""
+
+        from src.coevo.supervision import SupervisionOutcome
+
+        if not isinstance(outcome, SupervisionOutcome):
+            raise CockpitValidationError("outcome must be a SupervisionOutcome")
+        escalations = {e.item_id: e.level.value for e in outcome.escalations}
+        reminders = {r.item_id: r.kind.value for r in outcome.reminders}
+        meeting_proposal_id = (
+            outcome.meeting_proposal.proposal_id
+            if outcome.meeting_proposal is not None
+            else ""
+        )
+        return tuple(
+            cls(
+                project_id=item.project_id,
+                item_id=item.item_id,
+                risk_id=item.risk_id,
+                risk_kind=item.risk_kind.value,
+                responsible_subject=item.responsible_subject,
+                due_at=item.due_at,
+                escalation_level=escalations.get(item.item_id, ""),
+                reminder_kind=reminders.get(item.item_id, ""),
+                meeting_proposal_id=meeting_proposal_id,
+                requires_confirmation=outcome.requires_owner_confirmation,
+            )
+            for item in outcome.items
+        )
+
+
 @dataclass(frozen=True)
 class CockpitRequest:
     route: CockpitRoute
@@ -388,6 +490,7 @@ class CockpitServerState:
     config: CockpitServerConfig
     workspace_views: tuple[WorkspaceView, ...] = field(default_factory=tuple)
     role_views: tuple[RoleView, ...] = field(default_factory=tuple)
+    supervision_views: tuple[SupervisionSummary, ...] = field(default_factory=tuple)
     started_at: str = ""
 
     def __post_init__(self) -> None:
@@ -404,6 +507,12 @@ class CockpitServerState:
         ):
             raise CockpitValidationError(
                 "role_views must be a tuple of RoleView"
+            )
+        if not isinstance(self.supervision_views, tuple) or not all(
+            isinstance(s, SupervisionSummary) for s in self.supervision_views
+        ):
+            raise CockpitValidationError(
+                "supervision_views must be a tuple of SupervisionSummary"
             )
         if self.started_at and not is_iso_utc_z(self.started_at):
             raise CockpitValidationError(

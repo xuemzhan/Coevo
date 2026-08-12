@@ -114,15 +114,16 @@ class ChainToPlanTests(unittest.TestCase):
 
 
 class DemoRegistrationAssemblyTests(unittest.TestCase):
-    def test_register_demo_agents_registers_all_four(self) -> None:
+    def test_register_demo_agents_registers_all_five(self) -> None:
         registry, registered = register_demo_agents(AgentRegistry.empty())
-        self.assertEqual(4, len(registry))
+        self.assertEqual(5, len(registry))
         self.assertEqual(
             [
                 "agent.task_flow_understanding",
                 "agent.task_decomposition",
                 "agent.team_recommendation",
                 "agent.task_package_build",
+                "agent.supervision_meeting",
             ],
             registered,
         )
@@ -131,6 +132,7 @@ class DemoRegistrationAssemblyTests(unittest.TestCase):
             ("agent.task_decomposition", AgentCapability.TASK_DECOMPOSITION),
             ("agent.team_recommendation", AgentCapability.TEAM_RECOMMENDATION),
             ("agent.task_package_build", AgentCapability.TASK_PACKAGE_BUILD),
+            ("agent.supervision_meeting", AgentCapability.SUPERVISION_MEETING),
         ):
             self.assertEqual(
                 agent_id, registry.get(agent_id).spec.agent_id  # type: ignore[union-attr]

@@ -29,6 +29,18 @@ RiskReport（负责人已确认候选）→ SupervisionCoordinator.coordinate
 - `COORDINATION_RECOMMENDED_KINDS` / `SUPERVISABLE_RISK_KINDS` — 触发协调的
   风险种类闭集。
 
+## 接线与集成（MATURITY-O-06，2026-08-12）
+
+- **回传链 E2E**（`tests/e2e/test_return_chain.py`）：真实 SM2/SM4 加密成果包
+  导入 → 合并 → 风险确认后，调用 `SupervisionCoordinator.coordinate` 生成督办项 /
+  升级 / 提醒 / 会议候选与结论投影，并把 `meeting_conclusions` 传入知识聚合；
+- **驾驶舱**：`SupervisionSummary`（`cockpit/models.py`）把
+  `SupervisionOutcome` 投影为无敏感文本的督办快照；新路由
+  `SUPERVISION_VIEW`（`/api/supervision_view`，仅查看）按项目返回督办项；
+  确认/驳回仍走 `PENDING_CONFIRM`（会话 subject 绑定 + RBAC，见 T-08/T-09/T-10）；
+- **编排注册**：demo 组合根注册 `agent.supervision_meeting`（能力
+  `supervision_meeting`，通过框架 Manifest 门后进入注册表）。
+
 ## 安全与不变量
 
 - 纯函数无 IO；建议基于权威输入（已验证风险/回执），失败关闭；
@@ -37,12 +49,18 @@ RiskReport（负责人已确认候选）→ SupervisionCoordinator.coordinate
 
 ## 测试覆盖
 
-- `tests/unit/test_supervision_meeting.py`（10 项：模型校验/协调器/常量）。
+- `tests/unit/test_supervision_meeting.py`（模型校验/协调器/常量）；
+- `tests/unit/test_supervision_cockpit.py`（SupervisionSummary 模型/投影/
+  SUPERVISION_VIEW 路由/审计脱敏）；
+- `tests/integration/test_cockpit_http_server.py`（`/api/supervision_view`
+  HTTP 鉴权与返回）；
+- `tests/e2e/test_return_chain.py`（真实加密回传链内含督办/会议协调步骤）。
 
 ## 依赖与下游
 
 - **上游依赖**：`risk`（风险报告）、`merge`（回执）；
-- **下游消费者**：`knowledge_base`（会议结论知识）、`app/pipeline`、示例闭环。
+- **下游消费者**：`knowledge_base`（会议结论知识）、`cockpit`（SUPERVISION_VIEW
+  快照）、`app/pipeline`（demo 注册 `agent.supervision_meeting`）、示例闭环。
 
 ## 错误语义
 

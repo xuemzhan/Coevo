@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Protocol
 
 from src.coevo.timefmt import is_iso_utc_z
-from .models import CockpitRequest, CockpitResponse, CockpitResponseStatus, CockpitRoute, CockpitServerConfig, CockpitServerState, CockpitValidationError, LOOPBACK_HOST, RoleView, STATIC_ROOT, WPSAllowList, WorkspaceView, _hash_path
+from .models import CockpitRequest, CockpitResponse, CockpitResponseStatus, CockpitRoute, CockpitServerConfig, CockpitServerState, CockpitValidationError, LOOPBACK_HOST, RoleView, STATIC_ROOT, SupervisionSummary, WPSAllowList, WorkspaceView, _hash_path
 
 class PendingActionHandler(Protocol):
     """生产 pending-action 处理器契约（PRODUCT-REVIEW T-10）。
@@ -46,6 +46,7 @@ class CockpitFacade:
         request_timeout_sec: int = 5,
         workspace_views: tuple[WorkspaceView, ...] = (),
         role_views: tuple[RoleView, ...] = (),
+        supervision_views: tuple[SupervisionSummary, ...] = (),
         now: str = "",
     ) -> CockpitServerState:
         """Bind to loopback (AC-1), snapshot workspace + role views (AC-9)."""
@@ -62,6 +63,7 @@ class CockpitFacade:
             config=config,
             workspace_views=workspace_views,
             role_views=role_views,
+            supervision_views=supervision_views,
             started_at=now,
         )
 
@@ -112,6 +114,8 @@ class CockpitFacade:
             return CockpitFacade._pending_confirm(
                 request, now, pending_action_handler, subject=subject
             )
+        if request.route == CockpitRoute.SUPERVISION_VIEW:
+            return CockpitFacade._supervision_view(server_state, request, now)
         return CockpitResponse(
             status=CockpitResponseStatus.BAD_REQUEST,
             body_html="",
@@ -247,6 +251,74 @@ class CockpitFacade:
             content_type="text/plain; charset=utf-8",
             task="pending-action handler returned an unexpected decision",
             payload={"decision": "failed"},
+            ts=now,
+        )
+
+    @staticmethod
+    def _supervision_view(
+        state: CockpitServerState, request: CockpitRequest, now: str
+    ) -> CockpitResponse:
+        """MATURITY-O-06: US-12 supervision snapshot for a project.
+
+        View-only projection: returns the supervision items (ids, risk kinds,
+        due dates, escalation/reminder state, meeting proposal id) for one
+        project. Sensitive business phrasing is never included. The
+        confirmation itself stays on the pending-action handler
+        (``PENDING_CONFIRM``) so it is subject-bound and RBAC-gated.
+        """
+        if not request.project_id:
+            return CockpitResponse(
+                status=CockpitResponseStatus.BAD_REQUEST,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task="project_id required for supervision_view",
+                payload={},
+                ts=now,
+            )
+        project_exists = any(
+            w.project_id == request.project_id for w in state.workspace_views
+        )
+        items = tuple(
+            s for s in state.supervision_views if s.project_id == request.project_id
+        )
+        if not project_exists and not items:
+            return CockpitResponse(
+                status=CockpitResponseStatus.NOT_FOUND,
+                body_html="",
+                content_type="text/plain; charset=utf-8",
+                task=f"project {request.project_id!r} not found",
+                payload={"project_id": request.project_id},
+                ts=now,
+            )
+        payload_items = tuple(
+            {
+                "item_id": s.item_id,
+                "risk_id": s.risk_id,
+                "risk_kind": s.risk_kind,
+                "responsible_subject": s.responsible_subject,
+                "due_at": s.due_at,
+                "escalation_level": s.escalation_level,
+                "reminder_kind": s.reminder_kind,
+                "meeting_proposal_id": s.meeting_proposal_id,
+                "requires_confirmation": s.requires_confirmation,
+            }
+            for s in items
+        )
+        html = (
+            "<ul>"
+            + "".join(f"<li>{s.item_id} ({s.risk_kind})</li>" for s in items)
+            + "</ul>"
+        )
+        return CockpitResponse(
+            status=CockpitResponseStatus.OK,
+            body_html=html,
+            content_type="text/html; charset=utf-8",
+            task="supervision view",
+            payload={
+                "project_id": request.project_id,
+                "items": payload_items,
+                "count": len(items),
+            },
             ts=now,
         )
 

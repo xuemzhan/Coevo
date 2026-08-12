@@ -572,6 +572,7 @@ class CockpitRequestHandler(BaseHTTPRequestHandler):
             "/api/role_view": (CockpitRoute.ROLE_VIEW, "role_id"),
             "/api/task_view": (CockpitRoute.TASK_VIEW, "task_id"),
             "/api/milestone_view": (CockpitRoute.MILESTONE_VIEW, "task_id"),
+            "/api/supervision_view": (CockpitRoute.SUPERVISION_VIEW, "project_id"),
         }
         if path not in route_map:
             self._send_not_found()
@@ -852,6 +853,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
         *,
         workspace_views: tuple[Any, ...] = (),
         role_views: tuple[Any, ...] = (),
+        supervision_views: tuple[Any, ...] = (),
         started_at: str = "",
         session_manager: CockpitSessionManager | None = None,
         wps_launcher: object | None = None,
@@ -894,6 +896,7 @@ class CockpitHttpServer(ThreadingHTTPServer):
             request_timeout_sec=config.request_timeout_sec,
             workspace_views=workspace_views,
             role_views=role_views,
+            supervision_views=supervision_views,
             now=started_at,
         )
         self._audit_log: deque[dict[str, Any]] = deque(maxlen=AUDIT_MAXLEN)

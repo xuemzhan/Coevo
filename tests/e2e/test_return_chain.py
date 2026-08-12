@@ -240,6 +240,20 @@ class ReturnChainE2ETest(unittest.TestCase):
                 confirmed_by=RECIPIENT,
                 event_id="risk.confirm.retchain",
             )
+
+            # ---- supervision / meeting coordination (MATURITY-O-06) ----
+            from src.coevo.supervision import SupervisionCoordinator
+
+            supervision = SupervisionCoordinator().coordinate(
+                risk_report=risk_report,
+                project_recipient_cert_id=RECIPIENT,
+                now=CONFIRMED_AT,
+            )
+            self.assertTrue(supervision.items)
+            supervision_audit = SupervisionCoordinator().to_audit_record(supervision)
+            self.assertTrue(supervision_audit["requires_owner_confirmation"])
+            self.assertFalse(supervision_audit["formally_released"])
+
             briefs = DecisionBriefRepository()
             brief = DecisionBriefService().generate(
                 receipt_id=receipt.receipt_id,
@@ -268,6 +282,15 @@ class ReturnChainE2ETest(unittest.TestCase):
                 },
                 merge_records=(outcome.commit.proposal.record.to_dict(),),
                 risk_reports=(risk_report.to_dict(),),
+                meeting_conclusions=tuple(
+                    {
+                        "kind": c.kind.value,
+                        "subject_ref": c.subject_ref,
+                        "title": f"meeting conclusion: {c.kind.value}",
+                        "summary": c.note,
+                    }
+                    for c in supervision.conclusions
+                ),
                 decision_briefs=(
                     {
                         "id": brief.brief_id,

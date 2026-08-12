@@ -17,6 +17,11 @@
 确需新增超阈值文件时，必须先拆分或经架构评审在 `loop/DECISIONS.md` 留痕并
 同步更新本契约与守卫测试中的登记表；不允许通过删除守卫测试"修复"失败。
 
+> 2026-08-12（MATURITY-O-06）：驾驶舱新增 `SUPERVISION_VIEW` 路由与
+> `SupervisionSummary` 快照，经契约例外流程登记
+> `src/coevo/cockpit/facade.py: 676`、`src/coevo/cockpit/server.py: 1108`
+> （见 `loop/DECISIONS.md` 对应条目；计数维持 11 个）。
+
 ## 3. 守卫测试
 
 `tests/unit/test_eng_optimize_7_file_size_budget.py`：预算上限 / 大文件集合钉死 /

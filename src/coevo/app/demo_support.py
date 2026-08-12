@@ -98,6 +98,7 @@ _DEMO_REGISTRATION_AGENTS: tuple[tuple[str, str], ...] = (
     ("agent.task_decomposition", "task_decomposition"),
     ("agent.team_recommendation", "team_recommendation"),
     ("agent.task_package_build", "task_package_build"),
+    ("agent.supervision_meeting", "supervision_meeting"),
 )
 
 

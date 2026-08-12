@@ -12,8 +12,8 @@ MAX_FILE_LINES = 1133
 LARGE_FILE_THRESHOLD = 600
 KNOWN_LARGE_FILES: dict[str, int] = {
     "src/coevo/merge/engine.py": 1133,
-    "src/coevo/cockpit/server.py": 1105,
-    "src/coevo/cockpit/facade.py": 604,
+    "src/coevo/cockpit/server.py": 1108,
+    "src/coevo/cockpit/facade.py": 676,
     "src/coevo/orchestrator/real_chain_store.py": 771,
     "src/coevo/orchestrator/_real_chain.py": 720,
     "src/coevo/talent/store.py": 709,

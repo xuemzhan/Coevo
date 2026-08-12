@@ -583,5 +583,59 @@ class CockpitConcurrencyLimitTests(unittest.TestCase):
             self.assertEqual("127.0.0.1", busy[0]["client_host"])
 
 
+class CockpitSupervisionViewHttpTests(unittest.TestCase):
+    """MATURITY-O-06: /api/supervision_view served over real HTTP."""
+
+    def test_supervision_view_api_requires_token_and_returns_items(self) -> None:
+        from src.coevo.cockpit import SupervisionSummary
+
+        port = _free_port()
+        server = CockpitHttpServer(
+            CockpitHttpConfig(
+                bind_port=port,
+                request_timeout_sec=3,
+                session_timeout_sec=60,
+                lock_path=None,
+            ),
+            workspace_views=(_workspace_view(),),
+            role_views=(),
+            supervision_views=(
+                SupervisionSummary(
+                    project_id="PRJ001",
+                    item_id="sup.PRJ001.risk.1.00",
+                    risk_id="risk.1",
+                    risk_kind="severe_coordination_needed",
+                    responsible_subject="PRJ001",
+                    due_at="2026-08-20T00:00:00Z",
+                    escalation_level="emergency",
+                    reminder_kind="urge",
+                    meeting_proposal_id="meeting.PRJ001.pkg.retchain",
+                ),
+            ),
+        )
+        server.start()
+        try:
+            base = f"http://127.0.0.1:{port}"
+            status, _, _ = _request(
+                f"{base}/api/supervision_view?project_id=PRJ001"
+            )
+            self.assertEqual(401, status)
+            token = server.session_manager.create(subject="u.pm")
+            status, _, body = _request(
+                f"{base}/api/supervision_view?project_id=PRJ001",
+                token=token,
+            )
+            self.assertEqual(200, status)
+            data = json.loads(body)
+            self.assertEqual("ok", data["status"])
+            self.assertEqual(1, data["payload"]["count"])
+            self.assertEqual(
+                "sup.PRJ001.risk.1.00",
+                data["payload"]["items"][0]["item_id"],
+            )
+        finally:
+            server.stop()
+
+
 if __name__ == "__main__":
     unittest.main()
