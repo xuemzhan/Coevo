@@ -239,6 +239,11 @@ class ReleaseCheckTests(unittest.TestCase):
                 if "traceability_check.py" in joined:
                     return subprocess.CompletedProcess([], 0, stdout="{}", stderr="")
                 if command and command[0] == "git":
+                    if "log" in joined:
+                        past = (datetime.now(UTC) - timedelta(hours=1)).isoformat().replace(
+                            "+00:00", "Z"
+                        )
+                        return subprocess.CompletedProcess([], 0, stdout=past, stderr="")
                     return subprocess.CompletedProcess([], 0, stdout="", stderr="")
                 return subprocess.CompletedProcess([], 1, stdout="", stderr="boom")
 
@@ -264,6 +269,11 @@ class ReleaseCheckTests(unittest.TestCase):
 
             def clean_git(repo, command):
                 if command and command[0] == "git":
+                    if "log" in command:
+                        past = (datetime.now(UTC) - timedelta(hours=1)).isoformat().replace(
+                            "+00:00", "Z"
+                        )
+                        return subprocess.CompletedProcess([], 0, stdout=past, stderr="")
                     return subprocess.CompletedProcess([], 0, stdout="", stderr="")
                 if "audit_seal.py" in " ".join(command):
                     return subprocess.CompletedProcess(
@@ -278,6 +288,11 @@ class ReleaseCheckTests(unittest.TestCase):
 
             def dirty_git(repo, command):
                 if command and command[0] == "git":
+                    if "log" in command:
+                        past = (datetime.now(UTC) - timedelta(hours=1)).isoformat().replace(
+                            "+00:00", "Z"
+                        )
+                        return subprocess.CompletedProcess([], 0, stdout=past, stderr="")
                     return subprocess.CompletedProcess([], 0, stdout="?? dirty.txt\n", stderr="")
                 if "audit_seal.py" in " ".join(command):
                     return subprocess.CompletedProcess(
@@ -290,6 +305,95 @@ class ReleaseCheckTests(unittest.TestCase):
             with mock.patch.object(release_check, "_run", side_effect=dirty_git):
                 code = release_check.main(["--repo-root", str(root)])
             self.assertEqual(2, code)
+
+    def test_gate_covers_head_real_repo_self_consistent(self):
+        """MATURITY-R-04: the real-repo check is well-formed and fail-closed.
+
+        The local gate artifact either covers the current HEAD (ok) or was
+        started before the HEAD commit (critical) -- the latter is the exact
+        "commits landed after the last full gate" gap this check closes.
+        """
+
+        check = release_check.check_gate_covers_head(ROOT)
+        self.assertEqual("gate_covers_head", check["name"])
+        if check["ok"]:
+            self.assertIn("covers HEAD", check["detail"])
+        else:
+            self.assertEqual("critical", check["level"])
+            self.assertTrue(
+                "before HEAD commit" in check["detail"]
+                or "cannot read HEAD" in check["detail"],
+                check,
+            )
+
+    def test_gate_covers_head_missing_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            check = release_check.check_gate_covers_head(Path(tmp))
+        self.assertFalse(check["ok"])
+        self.assertEqual("critical", check["level"])
+
+    def test_gate_covers_head_missing_started_at_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gate_dir = root / "loop" / "runtime" / "gate-results"
+            gate_dir.mkdir(parents=True)
+            (gate_dir / "fast.json").write_text(
+                json.dumps({"exit_code": 0, "totals": {"discovered": 1, "failed": 0}}),
+                encoding="utf-8",
+            )
+            check = release_check.check_gate_covers_head(root)
+        self.assertFalse(check["ok"])
+        self.assertIn("started_at", check["detail"])
+
+    def test_gate_covers_head_stale_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gate_dir = root / "loop" / "runtime" / "gate-results"
+            gate_dir.mkdir(parents=True)
+            now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+            (gate_dir / "fast.json").write_text(
+                json.dumps({"exit_code": 0, "started_at": now, "totals": {"discovered": 1, "failed": 0}}),
+                encoding="utf-8",
+            )
+            future = (datetime.now(UTC) + timedelta(days=1)).isoformat().replace("+00:00", "Z")
+            completed = subprocess.CompletedProcess([], 0, stdout=future, stderr="")
+            with mock.patch.object(release_check, "_run", return_value=completed):
+                check = release_check.check_gate_covers_head(root)
+        self.assertFalse(check["ok"])
+        self.assertIn("before HEAD commit", check["detail"])
+
+    def test_gate_covers_head_git_failure_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gate_dir = root / "loop" / "runtime" / "gate-results"
+            gate_dir.mkdir(parents=True)
+            now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+            (gate_dir / "fast.json").write_text(
+                json.dumps({"exit_code": 0, "started_at": now, "totals": {"discovered": 1, "failed": 0}}),
+                encoding="utf-8",
+            )
+            completed = subprocess.CompletedProcess([], 1, stdout="", stderr="boom")
+            with mock.patch.object(release_check, "_run", return_value=completed):
+                check = release_check.check_gate_covers_head(root)
+        self.assertFalse(check["ok"])
+        self.assertIn("cannot read HEAD", check["detail"])
+
+    def test_gate_covers_head_covered_is_ok(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gate_dir = root / "loop" / "runtime" / "gate-results"
+            gate_dir.mkdir(parents=True)
+            now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+            (gate_dir / "fast.json").write_text(
+                json.dumps({"exit_code": 0, "started_at": now, "totals": {"discovered": 1, "failed": 0}}),
+                encoding="utf-8",
+            )
+            past = (datetime.now(UTC) - timedelta(hours=1)).isoformat().replace("+00:00", "Z")
+            completed = subprocess.CompletedProcess([], 0, stdout=past, stderr="")
+            with mock.patch.object(release_check, "_run", return_value=completed):
+                check = release_check.check_gate_covers_head(root)
+        self.assertTrue(check["ok"], check)
+        self.assertEqual("ok", check["level"])
 
 
 if __name__ == "__main__":

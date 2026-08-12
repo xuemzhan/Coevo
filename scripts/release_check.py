@@ -264,27 +264,14 @@ def check_recent_gate(
     records alone are not sufficient.
     """
 
-    results_dir = repo_root / "loop" / "runtime" / "gate-results"
-    if not results_dir.is_dir():
+    latest = _latest_gate_artifact(repo_root)
+    if latest is None:
         return {
             "name": "recent_gate",
             "ok": False,
             "level": "critical",
             "detail": "no gate results artifact; run a quality gate before release",
         }
-    artifacts = sorted(
-        results_dir.glob("*.json"),
-        key=lambda path: path.stat().st_mtime,
-        reverse=True,
-    )
-    if not artifacts:
-        return {
-            "name": "recent_gate",
-            "ok": False,
-            "level": "critical",
-            "detail": "gate results directory is empty",
-        }
-    latest = artifacts[0]
     try:
         payload = json.loads(latest.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -336,6 +323,107 @@ def check_recent_gate(
     }
 
 
+def _latest_gate_artifact(repo_root: Path) -> Path | None:
+    """Return the newest loop/runtime/gate-results/*.json artifact, if any."""
+
+    results_dir = repo_root / "loop" / "runtime" / "gate-results"
+    if not results_dir.is_dir():
+        return None
+    artifacts = sorted(
+        results_dir.glob("*.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    return artifacts[0] if artifacts else None
+
+
+def _head_commit_time(repo_root: Path) -> datetime | None:
+    """Return the ISO-8601 committer time of HEAD, or None if unreadable."""
+
+    result = _run(repo_root, ["git", "log", "-1", "--format=%cI", "HEAD"])
+    if result.returncode != 0:
+        return None
+    text = result.stdout.strip()
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def check_gate_covers_head(repo_root: Path) -> dict[str, Any]:
+    """MATURITY-R-04: the latest passing gate must cover the current HEAD.
+
+    A gate that started before the HEAD commit cannot prove the tree being
+    released was verified (the 2026-08-12 e890be8 gap: commits landed after
+    the last full gate). Combined with ``check_git_clean`` (release requires a
+    clean worktree), this makes "verified HEAD" a release precondition.
+    """
+
+    latest = _latest_gate_artifact(repo_root)
+    if latest is None:
+        return {
+            "name": "gate_covers_head",
+            "ok": False,
+            "level": "critical",
+            "detail": "no gate results artifact; run a quality gate before release",
+        }
+    try:
+        payload = json.loads(latest.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "name": "gate_covers_head",
+            "ok": False,
+            "level": "critical",
+            "detail": f"latest gate artifact unreadable: {exc}",
+        }
+    started_at = payload.get("started_at")
+    if not isinstance(started_at, str):
+        return {
+            "name": "gate_covers_head",
+            "ok": False,
+            "level": "critical",
+            "detail": f"latest gate artifact has no started_at ({latest.name})",
+        }
+    try:
+        gate_start = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
+    except ValueError:
+        return {
+            "name": "gate_covers_head",
+            "ok": False,
+            "level": "critical",
+            "detail": f"latest gate artifact has unparsable started_at ({latest.name})",
+        }
+    head_time = _head_commit_time(repo_root)
+    if head_time is None:
+        return {
+            "name": "gate_covers_head",
+            "ok": False,
+            "level": "critical",
+            "detail": "cannot read HEAD commit time",
+        }
+    if gate_start < head_time:
+        return {
+            "name": "gate_covers_head",
+            "ok": False,
+            "level": "critical",
+            "detail": (
+                f"gate started {gate_start.isoformat()} before HEAD commit "
+                f"{head_time.isoformat()}; run a full quality gate on current HEAD"
+            ),
+        }
+    return {
+        "name": "gate_covers_head",
+        "ok": True,
+        "level": "ok",
+        "detail": (
+            f"covers HEAD (gate {gate_start.isoformat()} >= "
+            f"HEAD {head_time.isoformat()})"
+        ),
+    }
+
+
 def build_report(
     repo_root: Path,
     *,
@@ -352,6 +440,7 @@ def build_report(
         check_traceability(repo_root, python),
         check_delivery_artifacts(repo_root),
         check_recent_gate(repo_root),
+        check_gate_covers_head(repo_root),
     ]
     critical = [c for c in checks if not c["ok"] and c["level"] == "critical"]
     warnings = [c for c in checks if not c["ok"] or c["level"] == "warning"]

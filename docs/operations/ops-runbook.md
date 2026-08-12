@@ -198,6 +198,13 @@ secret_scan 干净、追溯矩阵一致、loop/STATE done 且无阻塞、无 in-
 `loop/runtime/gate-results/` artifact；缺失/失败/超期=不发布）**。已知限制与外部
 条件见 `known-limitations.md`，发布前必读。
 
+**MATURITY-R-04（2026-08-12）**：新增 `gate_covers_head` 检查——最近一次门禁的
+`started_at` 必须不早于当前 HEAD 的提交时间，即**门禁必须覆盖将要发布的提交**；
+若门禁早于最新提交运行（例如提交落在门禁之后），release_check 判定为不发布，
+必须先在当前 HEAD 上重跑全量门禁。该检查与 `git_clean` 配合，保证发布对象
+确实被最近一次门禁验证过（2026-08-12 e890be8 提交落在最后一次全量门禁之后的
+教训已固化）。
+
 ## 8. 门禁与审计运维（2026-08-10 增补）
 
 ### 8.1 分层门禁
