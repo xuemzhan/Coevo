@@ -277,7 +277,7 @@ MVP 已验证“业务智能、分布式离线协同、运行中枢编排”三�
 （GB/T 32905），真实 SM2/SM3/SM4 全链路可用。正式部署仍剩余三项外部条件：
 
 1. 受保护密钥句柄与国密认证模块（长期目标）；
-2. 独立审计节点与合规双签复核；
+2. 独立审计节点（合规双签已于 2026-08-12 由独立 mvp-verifier + security-reviewer 放行）；
 3. Win7 存量环境实机验证。
 
 详见 `loop/DECISIONS.md` 与 `docs/dependencies/approved-crypto-provider-path.md`。

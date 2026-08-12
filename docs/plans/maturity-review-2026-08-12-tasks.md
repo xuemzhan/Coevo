@@ -11,12 +11,12 @@
 
 | ID | 标题 | 范围 | 完成定义 | 依赖 / 外部 | 状态 |
 |---|---|---|---|---|---|
-| R-01 | 独立双签执行 | `docs/process/independent-verification-pack.md`、`external-gates.md` | 独立 mvp-verifier + security-reviewer 双签落档；mvp-complete 条件 11 与 REVIEW-REQUIRED 门禁关闭 | 外部：独立角色（对齐 T-03） | **审查已执行**：verifier conditional-pass（待被审提交全量门禁证据，用户未解除"不做全量门禁"）/ security pass（无阻断项）；外部门保持 REVIEW-REQUIRED |
+| R-01 | 独立双签执行 | `docs/process/independent-verification-pack.md`、`external-gates.md` | 独立 mvp-verifier + security-reviewer 双签落档；mvp-complete 条件 11 与 REVIEW-REQUIRED 门禁关闭 | 外部：独立角色（对齐 T-03） | **done**（2026-08-12 双签放行：沙箱守卫 violations=[] + 主树全量门禁 exit=0 fingerprint=`b5c12e15ae7c559f` 2017/2013/0/4 + security pass；外部门 条件 11 → PASS） |
 | R-02 | 生产密码产品接入 | `crypto/`、`identity/`、`app/production.py` | 生产链默认拒绝原型；GmsslProtectedProvider 启用；US-5-AC-2 关闭 | 外部：密码审批（对齐 T-06） | pending |
 | R-03 | STATE 元数据时效修复 + 守卫 | `loop/STATE.json`、`tests/unit/test_state_metadata_guard.py` | STATE 指向最后正式 BACKLOG 项；last_verified_commit 可达 HEAD；updated_at 非未来；守卫测试全绿 | 无 | **done**（1e6c7f8） |
 | R-04 | 全量门禁覆盖 HEAD 纪律 | `scripts/release_check.py`、`docs/operations/ops-runbook.md`、loop 记录 | `gate_covers_head` 检查生效（门禁 started_at ≥ HEAD 提交时间）；本次门禁证据落档提交 | 无 | **done**（8a13ac4） |
 | R-05 | AI 定位正式裁决 | `loop/DECISIONS.md`、README、capability-status | 业务负责人裁决留痕；对外口径一致 | 业务负责人（对齐 T-01） | pending |
-| R-06 | 审计密钥托管执行 + 独立审查 | `audit-key-runbook.md`、`audit_key_health.py` | 三档托管执行；ARCH-REVIEW-5 / REVIEW2-10 独立审查关闭 | 外部：独立安全审查（对齐 T-07） | pending |
+| R-06 | 审计密钥托管执行 + 独立审查 | `audit-key-runbook.md`、`audit_key_health.py` | 三档托管执行；ARCH-REVIEW-5 / REVIEW2-10 独立审查关闭 | 外部：独立安全审查（对齐 T-07） | **done**（T-07 三档托管已落地；ARCH-REVIEW-5 / REVIEW2-10 独立安全审查 2026-08-12 通过；B/C 档介质仍需批准密码产品） |
 
 ## 2. 优化项（O 系列，提升成熟度）
 

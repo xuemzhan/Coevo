@@ -8,11 +8,11 @@
 
 | 风险 ID | 风险描述 | 级别 | 处置状态 | 处置证据 | 责任 / 下一步 |
 |---|---|---|---|---|---|
-| P0-1 | MVP 完成缺独立双签（GOAL.md mvp-complete 条件 11） | P0 | 已登记，待独立验收 | `external-gates.md`（mvp-complete 条件 11 = REVIEW-REQUIRED）；`docs/process/independent-verification-pack.md` | 业务负责人安排独立 mvp-verifier + security-reviewer |
+| P0-1 | MVP 完成缺独立双签（GOAL.md mvp-complete 条件 11） | P0 | **已关闭**（2026-08-12 独立双签放行） | `external-gates.md`（mvp-complete 条件 11 原 REVIEW-REQUIRED → 2026-08-12 PASS）；主树全量门禁 exit=0 fingerprint=`b5c12e15ae7c559f`（totals 2017/2013/0/4）；沙箱守卫 violations=[]；security-reviewer pass | 已满足；进入生产部署仍受 P0-2（批准密码产品）约束 |
 | P0-2 | 正式国密密码产品未接入（受保护密钥句柄为软件 KSP/CNG KEK 实现） | P0 | 已登记，外部审批 | `external-gates.md`（US-5-AC-2 = BLOCKED）；`crypto-mode-isolation.md`；`approved-crypto-provider-path.md` | 外部采购/审批后接入 GmsslProtectedProvider 生产路径 |
 | P1-1 | Go/Python 双实现漂移（27 条映射规则双写） | P1 | **已修复** | `go-python-parity.md`；`go/taskflow/testdata/mapping-rules.json`；`go/taskflow/parity_test.go`；`tests/unit/test_arch_review_10_go_python_parity.py` | 规则变更先改 golden corpus，两侧同步 |
 | P1-2 | 受控网络协同模式为设计态，易被误报为"已建成分布式系统" | P1 | **已收口（范围声明）** | `online-mode-scope.md`；`capability-status.md`（中心端持久化/跨节点同步 = DESIGNED/MODELED） | 后续版本实现；对外汇报遵守声明纪律 |
-| P1-3 | CTAF 设计提案（v0.4.1）未经独立架构评审 | P1 | 已登记，待独立评审（自动独立评审机制尝试失败，见 DECISIONS 2026-08-11） | `external-gates.md`（CTAF-PROPOSAL-REVIEW = REVIEW-REQUIRED）；`design-proposal.md`（产品级草案 / 待独立复核后定稿）；实现方预评审 `docs/process/ctaf-pre-review-2026-08-11.md` | 独立架构师评审后定稿（外部指派 / 豁免留痕 / 可用外部会话执行） |
+| P1-3 | CTAF 设计提案（v0.4.1）未经独立架构评审 | P1 | **已通过**（2026-08-12 独立架构评审） | `external-gates.md`（CTAF-PROPOSAL-REVIEW 原 REVIEW-REQUIRED → 2026-08-12 PASS）；`design-proposal.md`（内部一致 + 实现对齐 + 边界诚实，可作为 M1..M9 实施基线） | 提案可定稿；里程碑落地仍须逐切片独立验证 + 安全审查 |
 | P2-1 | 大文件 / 高复杂度单文件风险 | P2 | **已修复** | `file-size-budget.md`；`tests/unit/test_eng_optimize_7_file_size_budget.py`（MAX_FILE_LINES=1133、9 个大文件只降不增） | 维护时遵守预算；超阈值先拆分 |
 | P2-2 | 内存态 / 持久态边界不透明 | P2 | **已修复** | `state-persistence.md`；`tests/unit/test_arch_review_11_persistence_matrix.py`（23 个有状态组件） | 新增有状态组件同步更新矩阵 |
 | P2-3 | 发布门禁子进程编码健壮性（GBK 控制台下 traceability 打印 U+2194 崩溃致 release_check critical） | P2 | **已修复** | `scripts/release_check.py`（PYTHONIOENCODING=utf-8）；`tests/unit/test_eng_optimize_8_release_encoding.py` | 子进程 stdout 编码保持 UTF-8；规范路径已健壮 |

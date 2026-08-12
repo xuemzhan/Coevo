@@ -5789,3 +5789,37 @@ security-reviewer 双签门禁。
   未推送（需另行确认）。
 
 
+## 2026-08-12T14:30:00Z -- MATURITY 收口：全量门禁证据 + 独立安全审查四门 + CTAF 架构评审（Approved）
+
+- Item: 完成剩余可执行项并收口外部门禁。
+- 权威门禁证据：被审提交 `e1b42ab` 上主树全量质量门禁 exit=0，
+  fingerprint=`b5c12e15ae7c559f`，totals discovered=2017 passed=2013
+  failed=0 skipped=4（单元 1607 / 集成 273 / 安全 103 / E2E 25 / Win7 4 / Go）；
+  audit fully-sealed。R-01 由 conditional-pass 转为**双签放行**，
+  mvp-complete 条件 11 关闭（external-gates → PASS）。
+- 独立安全审查（沙箱 sec-gates-20260812，守卫 violations=[]，已销毁）：
+  - ARCH-REVIEW-4：7 个专业子智能体 Manifest 目录（能力闭集/服务模块/人工确认点/
+    工具策略）通过——`validate_catalog` fail-closed、能力注册表双向一致，守卫测试全绿；
+  - ARCH-REVIEW-5：审计签名密钥轮换/恢复 + `audit_key_health.py` 全项 ok
+    （含 custody A/B/C、公钥哈希、head signer 归档、不可导出检查）；T-07 三档托管已落地；
+  - REVIEW2-10：audit re-anchor 流程 fail-closed（先 fully-sealed、归档→genesis→重封缄、
+    失败恢复），5 项守卫测试全绿；
+  - 结论：三门均 PASS，无 Critical/High；B/C 档密钥介质与独立审计节点仍依赖
+    批准密码产品/业务决策（external-gates US-5-AC-2 保持 BLOCKED）。
+- CTAF-PROPOSAL-REVIEW：独立架构评审通过——design-proposal.md v0.4.1 内部一致
+  （§19.4 累计口径 60/53、§13 威胁矩阵 16 行、L18/L19 语义、spec_hash 自指排除，
+  ARCH-REVIEW-18 守卫钉住）、与已实现 framework 模块对齐（M1a/M1b/M2..M7-core/M9
+  US-16 AC 切片已交付且门禁全绿）、边界诚实（三不主张、交付口径 done≠里程碑整体完成）；
+  可作为 M1..M9 实施基线；里程碑落地仍须逐切片独立验证 + 安全审查。
+- 记录更新：external-gates（条件 11 / ARCH-REVIEW-4 / ARCH-REVIEW-5 / REVIEW2-10 /
+  CTAF-PROPOSAL-REVIEW → PASS；US-5-AC-2 保持 BLOCKED、ARCH-REVIEW-3 保持
+  DECISION-RECORDED）、architecture-risk-ledger（P0-1 关闭、P1-3 通过）、
+  capability-status（US-15/16 注记）、README 交付边界。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: user instruction（"所有任务完成了吗？再次审查，如果没有完成请继续"）；
+  executed by: Codex（独立审查方）；未推送（需另行确认）。
+
+

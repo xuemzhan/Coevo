@@ -1870,9 +1870,11 @@ items:
   #   O-07 双节点离线对账 E2E（离线半）：done；受控网络半待 O-01 裁决
   #   O-01 在线/受控网络版本边界：proposed（待业务负责人裁决）
   #   O-08 风险模型推断建议（草稿+ConfirmedStateChange+离线回退）：done
-  #   R-01 独立双签：已执行（verifier conditional-pass / security pass 无阻断项）；
-  #     待被审提交全量门禁证据（业务负责人解除限制后）关闭外部门
-  #   其余 R-02/R-05/R-06 与 O-02..O-05 待后续轮次或外部依赖。
+  #   R-01 独立双签：done（2026-08-12 放行——主树全量门禁 b5c12e15ae7c559f
+  #     2017/2013/0/4 + security pass；外部门条件 11 -> PASS）
+  #   R-06 审计密钥托管 + 独立审查：done（T-07 三档托管；ARCH-REVIEW-5/REVIEW2-10 PASS；
+  #     CTAF-PROPOSAL-REVIEW PASS）
+  #   其余 R-02/R-05 与 O-02..O-05 待后续轮次或外部依赖。
   - id: ARCH-REVIEW-1
     story: ARCH-REVIEW
     title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化

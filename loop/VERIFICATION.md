@@ -1,1175 +1,3 @@
-## 2026-08-09T12:10:46.708376Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `1`
-```text
-^^^^^^^^^^
-AssertionError: 0 != 1 : helper failed: GMH-E-MAGIC
-At E:\Workspace\Coevo\scripts\generate-sm2-test-pki.ps1:106 char:7
-+       throw ('helper failed: ' + $diagnostic.Trim())
-+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException
-    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC
- 
-
-
-======================================================================
-FAIL: test_generation_is_isolated_encrypted_verified_and_non_overwriting (test_sm2_test_pki_generation.Sm2TestPkiTests.test_generation_is_isolated_encrypted_verified_and_non_overwriting)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 129, in test_generation_is_isolated_encrypted_verified_and_non_overwriting
-    self.assertEqual(0, result.returncode, result.stderr)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 0 != 1 : helper failed: GMH-E-MAGIC
-At E:\Workspace\Coevo\scripts\generate-sm2-test-pki.ps1:106 char:7
-+       throw ('helper failed: ' + $diagnostic.Trim())
-+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException
-    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC
- 
-
-
-======================================================================
-FAIL: test_helper_response_is_fixed_public_frame_and_response_loss_recovers (test_sm2_test_pki_generation.Sm2TestPkiTests.test_helper_response_is_fixed_public_frame_and_response_loss_recovers)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 433, in test_helper_response_is_fixed_public_frame_and_response_loss_recovers
-    self.assertEqual(0, lost.returncode, lost.stderr)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 0 != 1 : helper failed: GMH-E-MAGIC
-At E:\Workspace\Coevo\scripts\generate-sm2-test-pki.ps1:106 char:7
-+       throw ('helper failed: ' + $diagnostic.Trim())
-+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException
-    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC
- 
-
-
-======================================================================
-FAIL: test_hung_helper_is_tree_killed_and_drains_are_bounded (test_sm2_test_pki_generation.Sm2TestPkiTests.test_hung_helper_is_tree_killed_and_drains_are_bounded)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 270, in test_hung_helper_is_tree_killed_and_drains_are_bounded
-    self.assertIn("helper timed out", result.stderr)
-    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 'helper timed out' not found in "helper failed: GMH-E-MAGIC\nAt E:\\Workspace\\Coevo\\scripts\\generate-sm2-test-pki.ps1:106 char:7\n+       throw ('helper failed: ' + $diagnostic.Trim())\n+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException\n    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC\n \n"
-
-======================================================================
-FAIL: test_kill_points_are_recovered_with_same_nonce (test_sm2_test_pki_generation.Sm2TestPkiTests.test_kill_points_are_recovered_with_same_nonce) (point='after-rename')
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 476, in test_kill_points_are_recovered_with_same_nonce
-    self.assertEqual(0, result.returncode, result.stderr)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 0 != 1 : helper failed: GMH-E-MAGIC
-At E:\Workspace\Coevo\scripts\generate-sm2-test-pki.ps1:106 char:7
-+       throw ('helper failed: ' + $diagnostic.Trim())
-+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException
-    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC
- 
-
-
-======================================================================
-FAIL: test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 496, in test_launcher_ignores_poisoned_path_and_cleans_ephemeral_helper
-    self.assertEqual(0, result.returncode, result.stderr)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 0 != 1 : helper failed: GMH-E-MAGIC
-At E:\Workspace\Coevo\scripts\generate-sm2-test-pki.ps1:106 char:7
-+       throw ('helper failed: ' + $diagnostic.Trim())
-+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException
-    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC
- 
-
-
-======================================================================
-FAIL: test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper (test_sm2_test_pki_generation.Sm2TestPkiTests.test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 306, in test_preheld_delete_handle_blocks_before_staging_and_leaves_no_helper
-    self.assertRegex(result.stderr, r"GMH-E-DIRECTORY-LOCK-[A-Z-]+-WIN32-32-ATTEMPT-4|Unable to lock file|Unable to lock tool directory")
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: Regex didn't match: 'GMH-E-DIRECTORY-LOCK-[A-Z-]+-WIN32-32-ATTEMPT-4|Unable to lock file|Unable to lock tool directory' not found in "helper failed: GMH-E-MAGIC\nAt E:\\Workspace\\Coevo\\scripts\\generate-sm2-test-pki.ps1:106 char:7\n+       throw ('helper failed: ' + $diagnostic.Trim())\n+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException\n    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC\n \n"
-
-======================================================================
-FAIL: test_wide_runtime_acl_is_corrected_before_staging_creation (test_sm2_test_pki_generation.Sm2TestPkiTests.test_wide_runtime_acl_is_corrected_before_staging_creation)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "E:\Workspace\Coevo\tests\integration\test_sm2_test_pki_generation.py", line 335, in test_wide_runtime_acl_is_corrected_before_staging_creation
-    self.assertEqual(0, result.returncode, result.stderr)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 0 != 1 : helper failed: GMH-E-MAGIC
-At E:\Workspace\Coevo\scripts\generate-sm2-test-pki.ps1:106 char:7
-+       throw ('helper failed: ' + $diagnostic.Trim())
-+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : OperationStopped: (helper failed: GMH-E-MAGIC:String) [], RuntimeException
-    + FullyQualifiedErrorId : helper failed: GMH-E-MAGIC
- 
-
-
-----------------------------------------------------------------------
-Ran 251 tests in 335.148s
-
-FAILED (failures=15, errors=3)
-
-```
-
-
-
-
-
-
-
-
-
-## 2026-08-09T12:47:56.086142Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `0`
-```text
-ests.test_promote_failure_requires_recovery_and_reopen_commits_exactly_once) ... ok
-test_row_shape_validator_rejects_each_oversize_and_malformed_column (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_row_shape_validator_rejects_each_oversize_and_malformed_column) ... ok
-test_signed_chain_binds_store_head_sequence_and_previous_hash (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
-test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
-test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
-test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
-test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
-test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
-test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
-test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
-test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
-test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
-test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
-test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
-test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
-test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
-test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
-test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
-test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
-test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
-test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
-test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
-test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
-test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
-test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
-test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
-test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
-test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
-test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
-test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
-test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
-test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
-test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
-test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
-
-----------------------------------------------------------------------
-Ran 99 tests in 172.345s
-
-OK
-$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
-$ C:\Python314\python.exe -m unittest discover -s tests/e2e -v
-test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... ok
-test_preflight_exits_zero_on_healthy_repo (test_cockpit_launcher.CockpitLauncherE2ETest.test_preflight_exits_zero_on_healthy_repo) ... ok
-test_print_token_issues_usable_session (test_cockpit_launcher.CockpitLauncherE2ETest.test_print_token_issues_usable_session) ... ok
-test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
-test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
-test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
-test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... ok
-test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
-test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
-test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
-test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
-test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
-test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
-test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
-
-----------------------------------------------------------------------
-Ran 14 tests in 148.550s
-
-OK
-audit seal: fully-sealed
-
-```
-
-
-[gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 501769 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260809\verification-20260809.txt; [ok] decisions: nothing to archive
-
-
-
-
-
-
-
-
-## 2026-08-09T13:09:59.996019Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `0`
-```text
-ests.test_promote_failure_requires_recovery_and_reopen_commits_exactly_once) ... ok
-test_row_shape_validator_rejects_each_oversize_and_malformed_column (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_row_shape_validator_rejects_each_oversize_and_malformed_column) ... ok
-test_signed_chain_binds_store_head_sequence_and_previous_hash (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
-test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
-test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
-test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
-test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
-test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
-test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
-test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
-test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
-test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
-test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
-test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
-test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
-test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
-test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
-test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
-test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
-test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
-test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
-test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
-test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
-test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
-test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
-test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
-test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
-test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
-test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
-test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
-test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
-test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
-test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
-test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
-
-----------------------------------------------------------------------
-Ran 99 tests in 146.975s
-
-OK
-$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
-$ C:\Python314\python.exe -m unittest discover -s tests/e2e -v
-test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... ok
-test_preflight_exits_zero_on_healthy_repo (test_cockpit_launcher.CockpitLauncherE2ETest.test_preflight_exits_zero_on_healthy_repo) ... ok
-test_print_token_issues_usable_session (test_cockpit_launcher.CockpitLauncherE2ETest.test_print_token_issues_usable_session) ... ok
-test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
-test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
-test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
-test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... ok
-test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
-test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
-test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
-test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
-test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
-test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
-test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
-
-----------------------------------------------------------------------
-Ran 14 tests in 145.405s
-
-OK
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T13:19:15.953153Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T13:20:04.339625Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-    "kind": "code",
-          "path": "src/coevo/crypto/gmssl_provider.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/sm3.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/audit_anchor.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/repository.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/validation.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/certificates.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_store_db.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/package_builder.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/import_service.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/replay_detector.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize30.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-30",
-      "title": "注释补全收尾（2026-08-09，用户指令\"继续优化\"；增量门禁）：audit_governance（stream_store/facade，5 处）+ orchestrator/real_chain_store（27 处，含 canonical_json_bytes 内嵌套 validate 与 9 个 operation 事务闭包）共 32 个函数补全 docstring，写明失败关闭/审计链绑定/事务原子性契约；纯注释零行为变化；守卫 tests/unit/test_framework_optimize31.py（32 函数每个出现均有非空 docstring，一行桩豁免）",
-      "code": [
-        "src/coevo/audit_governance/stream_store.py",
-        "src/coevo/audit_governance/facade.py",
-        "src/coevo/orchestrator/real_chain_store.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize31.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/stream_store.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/facade.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/orchestrator/real_chain_store.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize31.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-31",
-      "title": "_score_candidate 阶段化拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：talent/recommender._score_candidate（123 行）按评分算法五阶段纯迁移式拆分为 5 个模块级助手（_match_skills/_match_credentials/_window_fit/_load_headroom/_tie_break），_score_candidate 收敛为 32 行编排；评分权重、reason/alert 语义、确定性排序逐字节不变；守卫 tests/unit/test_framework_optimize32.py",
-      "code": [
-        "src/coevo/talent/recommender.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize32.py",
-        "tests/unit/test_talent_recommender.py",
-        "tests/unit/test_talent_store.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/talent/recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize32.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_recommender.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_talent_store.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-33",
-      "title": "64-hex 正则收敛并收紧（2026-08-09，用户指令\"继续优化\"；增量门禁）：4 处本地 `[0-9a-f]{64}` 副本收敛到共享叶子 ids.HEX_64/is_hex_64（identity/private_keys PUBLIC_DIGEST_RE、protocol/sm2_sign _HEX_RE（随删未使用的 import re）、audit_governance/models digest_hex、crypto/cng_handle 两处 fullmatch）；共享正则 `$`→`\\Z` 收紧——尾部换行由放行改拒绝（失败关闭强化，与既有 fullmatch 站点一致，行为差异记录在案）；更新 test_framework_optimize13 pattern 钉与收敛守卫 + 新增守卫 test_framework_optimize34.py",
-      "code": [
-        "src/coevo/ids.py",
-        "src/coevo/identity/private_keys.py",
-        "src/coevo/protocol/sm2_sign.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/crypto/cng_handle.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize34.py",
-        "tests/unit/test_framework_optimize13.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/ids.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/sm2_sign.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize34.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize13.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-34",
-      "title": "from_mapping 跨字段校验抽取（2026-08-09，用户指令\"继续优化\"；增量门禁）：EnvelopeHeader.from_mapping（103 行）构造后跨字段不变量校验块（package_type 枚举/协议期望值/compression 白名单/expires>created/nonce 非空/1 TiB 上限）抽为静态方法 `_validate_cross_fields`（29 行），from_mapping 收敛为 78 行构造+校验编排；校验顺序、错误消息、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize35.py",
-      "code": [
-        "src/coevo/protocol/agent_package.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize35.py",
-        "tests/unit/test_agent_wire_regression.py",
-        "tests/integration/test_agent_package_aead.py",
-        "tests/integration/test_agent_package_atomic_import.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize35.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_agent_wire_regression.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_agent_package_aead.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_agent_package_atomic_import.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T13:23:38.958818Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T13:24:27.058410Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-protocol/sm2_sign.py",
-        "src/coevo/audit_governance/models.py",
-        "src/coevo/crypto/cng_handle.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize34.py",
-        "tests/unit/test_framework_optimize13.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/ids.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/identity/private_keys.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/sm2_sign.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/audit_governance/models.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/crypto/cng_handle.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize34.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize13.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-34",
-      "title": "from_mapping 跨字段校验抽取（2026-08-09，用户指令\"继续优化\"；增量门禁）：EnvelopeHeader.from_mapping（103 行）构造后跨字段不变量校验块（package_type 枚举/协议期望值/compression 白名单/expires>created/nonce 非空/1 TiB 上限）抽为静态方法 `_validate_cross_fields`（29 行），from_mapping 收敛为 78 行构造+校验编排；校验顺序、错误消息、失败关闭语义逐字节不变；守卫 tests/unit/test_framework_optimize35.py",
-      "code": [
-        "src/coevo/protocol/agent_package.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize35.py",
-        "tests/unit/test_agent_wire_regression.py",
-        "tests/integration/test_agent_package_aead.py",
-        "tests/integration/test_agent_package_atomic_import.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/protocol/agent_package.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize35.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_agent_wire_regression.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_agent_package_aead.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_agent_package_atomic_import.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-35",
-      "title": "门禁稳定性：tamper 测试复原硬化（2026-08-09，全量门禁收口发现）：关闭 DECISIONS 记录的已知 flake——test_local_toolchain_security 临时篡改 validate_opencode.py，复原源改为 git HEAD 纯净 blob（finally 无条件写回），污染基线无法自我延续，test_engineering_baseline 不再偶发 RuntimeError；污染模拟验证通过",
-      "code": [
-        "tests/security/test_local_toolchain_security.py"
-      ],
-      "tests": [
-        "tests/security/test_local_toolchain_security.py",
-        "tests/unit/test_engineering_baseline.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_engineering_baseline.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-36",
-      "title": "门禁稳定性：sm2-test-pki helper stdin BOM 根因修复（2026-08-09，全量门禁收口发现）：CP65001 下 .NET StandardInput StreamWriter 预写 UTF-8 BOM，与 COEVOPKI/2 帧自带 BOM 叠加成双重 BOM → GMH-E-MAGIC（探针实证 chcp 65001=40 字节双 BOM / chcp 936=37 字节干净帧）；generate-sm2-test-pki.ps1 顶部钉 BOM-free CP936 + toolchain-lock gmssl_test_pki.helper.launcher 重哈希（11208→11642）",
-      "code": [
-        "scripts/generate-sm2-test-pki.ps1",
-        "docs/dependencies/toolchain-lock.json"
-      ],
-      "tests": [
-        "tests/integration/test_sm2_test_pki_generation.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/generate-sm2-test-pki.ps1",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_sm2_test_pki_generation.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-37",
-      "title": "同类收口：crypto helper stdin BOM 健壮性（2026-08-09，OPTIMIZE-36 同类扫描发现）：invoke-gmssl-crypto.ps1 同样被 CP65001 StreamWriter BOM 破坏 COEVOCRYPTO/1 帧（GCP-E-MAGIC，e2e test_return_chain 实测失败，单元 mock 未覆盖）；同款编码钉 + toolchain-lock gmssl_prototype_provider.helper.launcher 重哈希（8166→8604）",
-      "code": [
-        "scripts/invoke-gmssl-crypto.ps1",
-        "docs/dependencies/toolchain-lock.json"
-      ],
-      "tests": [
-        "tests/e2e/test_return_chain.py",
-        "tests/unit/test_gmssl_provider_retry.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/invoke-gmssl-crypto.ps1",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/e2e/test_return_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_gmssl_provider_retry.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-38",
-      "title": "_build_content 阶段拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：decision_brief/_build._build_content（145 行/cc~19）按三类型分支纯迁移式拆分为 3 个模块级助手（_type_parameters AC-5 类型参数校验返回 topic_set、_content_title 标签与标题、_progress_text 进度文案），_build_content 收敛为 98 行组装编排；校验顺序、错误消息、标题/进度文案、风险字段逐字节不变；守卫 tests/unit/test_framework_optimize38.py + OPTIMIZE-21 守卫适配新助手",
-      "code": [
-        "src/coevo/decision_brief/_build.py",
-        "tests/unit/test_framework_optimize21.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize38.py",
-        "tests/unit/test_decision_brief.py",
-        "tests/unit/test_framework_optimize21.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_build.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "tests/unit/test_framework_optimize21.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize38.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_decision_brief.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize21.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-09T13:40:53.939770Z — target=`quality` fingerprint=`f742f64aa8dce72c`
-- exit_code: `0`
-```text
-ests.test_promote_failure_requires_recovery_and_reopen_commits_exactly_once) ... ok
-test_row_shape_validator_rejects_each_oversize_and_malformed_column (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_row_shape_validator_rejects_each_oversize_and_malformed_column) ... ok
-test_signed_chain_binds_store_head_sequence_and_previous_hash (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_signed_chain_binds_store_head_sequence_and_previous_hash) ... ok
-test_stale_baseline_is_rejected_before_insert (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_stale_baseline_is_rejected_before_insert) ... ok
-test_truncation_is_rejected_by_freshness_checkpoint (test_merge_receipt_repository.MergeReceiptRepositorySecurityTests.test_truncation_is_rejected_by_freshness_checkpoint) ... ok
-test_gitignore_excludes_receipt_pattern (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_gitignore_excludes_receipt_pattern) ... ok
-test_no_reachable_receipt_blobs_across_all_refs (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_reachable_receipt_blobs_across_all_refs) ... ok
-test_no_tracked_receipt_paths (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_no_tracked_receipt_paths) ... ok
-test_pre_scrub_head_is_no_longer_reachable (test_private_key_handles_bindings.PrivateKeyHandleGitBindingTests.test_pre_scrub_head_is_no_longer_reachable) ... ok
-test_validate_bundle_rejects_private_key_handle_field (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_handle_field) ... ok
-test_validate_bundle_rejects_private_key_pkcs8_bytes (test_private_key_storage.IdentityBundlePrivateKeyRejectionTests.test_validate_bundle_rejects_private_key_pkcs8_bytes) ... ok
-test_reference_accepts_only_safe_metadata (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_accepts_only_safe_metadata) ... ok
-test_reference_is_frozen_and_hash_stable_across_rotations (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_is_frozen_and_hash_stable_across_rotations) ... ok
-test_reference_rejects_inverted_validity (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_inverted_validity) ... ok
-test_reference_rejects_malformed_handle_and_digest (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_reference_rejects_malformed_handle_and_digest) ... ok
-test_repr_and_pickle_never_expose_secret_token (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_repr_and_pickle_never_expose_secret_token) ... ok
-test_validate_handle_payload_rejects_private_key_blob_strings (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_private_key_blob_strings) ... ok
-test_validate_handle_payload_rejects_unknown_or_sensitive_fields (test_private_key_storage.PrivateKeyReferenceSafetyTests.test_validate_handle_payload_rejects_unknown_or_sensitive_fields) ... ok
-test_audit_chain_detects_event_tampering (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_detects_event_tampering) ... ok
-test_audit_chain_records_store_use_revoke_and_destroy (test_private_key_storage.PrivateKeyServicePolicyTests.test_audit_chain_records_store_use_revoke_and_destroy) ... ok
-test_destroyed_handle_blocks_use_with_stale_reference (test_private_key_storage.PrivateKeyServicePolicyTests.test_destroyed_handle_blocks_use_with_stale_reference) ... ok
-test_overwrite_store_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_overwrite_store_is_rejected) ... ok
-test_revoke_without_reason_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoke_without_reason_is_rejected) ... ok
-test_revoked_reference_blocks_use_and_audits_rejection (test_private_key_storage.PrivateKeyServicePolicyTests.test_revoked_reference_blocks_use_and_audits_rejection) ... ok
-test_stored_reference_round_trips_use_and_returns_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_stored_reference_round_trips_use_and_returns_signature) ... ok
-test_untrusted_parent_thumbprint_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_untrusted_parent_thumbprint_is_rejected) ... ok
-test_use_outside_validity_window_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_outside_validity_window_is_rejected) ... ok
-test_use_with_naive_datetime_is_rejected (test_private_key_storage.PrivateKeyServicePolicyTests.test_use_with_naive_datetime_is_rejected) ... ok
-test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_binds_certificate_pin_digest_algorithm_and_audits_digest_only) ... ok
-test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature (test_private_key_storage.PrivateKeyServicePolicyTests.test_verify_rejects_wrong_pin_revoked_destroyed_and_bad_signature) ... ok
-test_poisoned_powershell_path_is_rejected_before_execution (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_poisoned_powershell_path_is_rejected_before_execution) ... ok
-test_rejects_uncontrolled_helper_path (test_private_key_storage.WindowsPrivateKeyLaunchPolicyTests.test_rejects_uncontrolled_helper_path) ... ok
-test_custom_tools_use_current_typed_api (test_tool_permissions.PermissionTests.test_custom_tools_use_current_typed_api) ... ok
-test_network_and_install_commands_are_fail_closed (test_tool_permissions.PermissionTests.test_network_and_install_commands_are_fail_closed) ... ok
-
-----------------------------------------------------------------------
-Ran 99 tests in 151.177s
-
-OK
-$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
-$ C:\Python314\python.exe -m unittest discover -s tests/e2e -v
-test_launcher_serves_healthz_and_stops_gracefully (test_cockpit_launcher.CockpitLauncherE2ETest.test_launcher_serves_healthz_and_stops_gracefully) ... ok
-test_preflight_exits_zero_on_healthy_repo (test_cockpit_launcher.CockpitLauncherE2ETest.test_preflight_exits_zero_on_healthy_repo) ... ok
-test_print_token_issues_usable_session (test_cockpit_launcher.CockpitLauncherE2ETest.test_print_token_issues_usable_session) ... ok
-test_api_endpoints_drive_the_ui (test_cockpit_offline_frontend.OfflineFrontendTests.test_api_endpoints_drive_the_ui) ... ok
-test_index_serves_local_page_with_csp (test_cockpit_offline_frontend.OfflineFrontendTests.test_index_serves_local_page_with_csp) ... ok
-test_local_assets_load_and_have_no_external_urls (test_cockpit_offline_frontend.OfflineFrontendTests.test_local_assets_load_and_have_no_external_urls) ... ok
-test_unknown_asset_is_not_served (test_cockpit_offline_frontend.OfflineFrontendTests.test_unknown_asset_is_not_served) ... ok
-test_cli_smoke_run_exits_zero (test_demo_runner.DemoRunnerTests.test_cli_smoke_run_exits_zero) ... ok
-test_pipeline_completes_with_real_package_and_persistence (test_demo_runner.DemoRunnerTests.test_pipeline_completes_with_real_package_and_persistence) ... ok
-test_pipeline_with_cockpit_server_serves_and_stops (test_demo_runner.DemoRunnerTests.test_pipeline_with_cockpit_server_serves_and_stops) ... ok
-test_windows_certificate_parser_and_generation_markers_work_end_to_end (test_identity_dev_environment.IdentityDevelopmentEnvironmentTests.test_windows_certificate_parser_and_generation_markers_work_end_to_end) ... ok
-test_strict_environment_validator_passes (test_loop_environment.LoopEnvironmentE2ETest.test_strict_environment_validator_passes) ... ok
-test_validator_runs_with_standard_library_only (test_offline_baseline.OfflineBaselineTests.test_validator_runs_with_standard_library_only) ... ok
-test_real_encrypted_report_drives_merge_risk_brief_knowledge (test_return_chain.ReturnChainE2ETest.test_real_encrypted_report_drives_merge_risk_brief_knowledge) ... ok
-
-----------------------------------------------------------------------
-Ran 14 tests in 143.656s
-
-OK
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-10T03:15:48.574853Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
-- exit_code: `0`
-```text
-preflight audit seal: fully-sealed
-$ C:\Python314\python.exe -m compileall -q -f scripts src tests
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
-## 2026-08-10T03:16:13.524609Z — target=`lint` fingerprint=`5103146e112f2dd1`
-- exit_code: `0`
-```text
-  "kind": "test",
-          "path": "tests/integration/test_agent_package_atomic_import.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-35",
-      "title": "门禁稳定性：tamper 测试复原硬化（2026-08-09，全量门禁收口发现）：关闭 DECISIONS 记录的已知 flake——test_local_toolchain_security 临时篡改 validate_opencode.py，复原源改为 git HEAD 纯净 blob（finally 无条件写回），污染基线无法自我延续，test_engineering_baseline 不再偶发 RuntimeError；污染模拟验证通过",
-      "code": [
-        "tests/security/test_local_toolchain_security.py"
-      ],
-      "tests": [
-        "tests/security/test_local_toolchain_security.py",
-        "tests/unit/test_engineering_baseline.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/security/test_local_toolchain_security.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_engineering_baseline.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-36",
-      "title": "门禁稳定性：sm2-test-pki helper stdin BOM 根因修复（2026-08-09，全量门禁收口发现）：CP65001 下 .NET StandardInput StreamWriter 预写 UTF-8 BOM，与 COEVOPKI/2 帧自带 BOM 叠加成双重 BOM → GMH-E-MAGIC（探针实证 chcp 65001=40 字节双 BOM / chcp 936=37 字节干净帧）；generate-sm2-test-pki.ps1 顶部钉 BOM-free CP936 + toolchain-lock gmssl_test_pki.helper.launcher 重哈希（11208→11642）",
-      "code": [
-        "scripts/generate-sm2-test-pki.ps1",
-        "docs/dependencies/toolchain-lock.json"
-      ],
-      "tests": [
-        "tests/integration/test_sm2_test_pki_generation.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/generate-sm2-test-pki.ps1",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/integration/test_sm2_test_pki_generation.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-37",
-      "title": "同类收口：crypto helper stdin BOM 健壮性（2026-08-09，OPTIMIZE-36 同类扫描发现）：invoke-gmssl-crypto.ps1 同样被 CP65001 StreamWriter BOM 破坏 COEVOCRYPTO/1 帧（GCP-E-MAGIC，e2e test_return_chain 实测失败，单元 mock 未覆盖）；同款编码钉 + toolchain-lock gmssl_prototype_provider.helper.launcher 重哈希（8166→8604）",
-      "code": [
-        "scripts/invoke-gmssl-crypto.ps1",
-        "docs/dependencies/toolchain-lock.json"
-      ],
-      "tests": [
-        "tests/e2e/test_return_chain.py",
-        "tests/unit/test_gmssl_provider_retry.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "scripts/invoke-gmssl-crypto.ps1",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "docs/dependencies/toolchain-lock.json",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/e2e/test_return_chain.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_gmssl_provider_retry.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-38",
-      "title": "_build_content 阶段拆分（2026-08-09，用户指令\"继续优化\"；增量门禁）：decision_brief/_build._build_content（145 行/cc~19）按三类型分支纯迁移式拆分为 3 个模块级助手（_type_parameters AC-5 类型参数校验返回 topic_set、_content_title 标签与标题、_progress_text 进度文案），_build_content 收敛为 98 行组装编排；校验顺序、错误消息、标题/进度文案、风险字段逐字节不变；守卫 tests/unit/test_framework_optimize38.py + OPTIMIZE-21 守卫适配新助手",
-      "code": [
-        "src/coevo/decision_brief/_build.py",
-        "tests/unit/test_framework_optimize21.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize38.py",
-        "tests/unit/test_decision_brief.py",
-        "tests/unit/test_framework_optimize21.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/decision_brief/_build.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "tests/unit/test_framework_optimize21.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize38.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_decision_brief.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize21.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ENG-BASE",
-      "ac": "FRAMEWORK-OPTIMIZE-39",
-      "title": "revise 字段覆盖去重（2026-08-09，用户指令\"继续优化\"；增量门禁）：ProgressCaptureService.revise（109 行）内 text/kind/confidence 三块同构 ItemOverride 构造去重为模块级 `_apply_override`（返回 overrides+新条目 与 edited_value 二元组），revise 收敛为 94 行；kind 的 ProgressItemKind 类型检查保留在调用处；判定顺序、override 字段、错误语义逐字节不变；守卫 tests/unit/test_framework_optimize39.py",
-      "code": [
-        "src/coevo/progress_capture/service.py"
-      ],
-      "tests": [
-        "tests/unit/test_framework_optimize39.py",
-        "tests/unit/test_progress_capture.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "src/coevo/progress_capture/service.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_framework_optimize39.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_progress_capture.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    },
-    {
-      "story": "ARCH-REVIEW",
-      "ac": "AC-1",
-      "title": "编排器 seam 契约（2026-08-10 架构审查 P0-1）：框架层（framework/orchestrator + integration）= 校验/策略网关，产品层（orchestrator/service + real_chain_store）= 唯一执行器，integration = 唯一合法桥；无旁路规则：组合根必须先 validate_product_chain 再调用产品 dispatch，guarded_dispatch 校验失败不调用内层，TOOL/非 MVP 能力不得进入执行器；Plan↔Chain 往返结构稳定；report_to_outcome 对全部产品 outcome fail-closed（未知 → ESCALATED）；契约文档 + AST 组合根守卫测试",
-      "code": [
-        "docs/architecture/orchestrator-seam.md",
-        "src/coevo/framework/integration.py",
-        "src/coevo/framework/orchestrator.py",
-        "src/coevo/app/pipeline.py"
-      ],
-      "tests": [
-        "tests/unit/test_arch_review_1_orchestrator_seam.py"
-      ],
-      "status": "done",
-      "evidence": [
-        {
-          "kind": "code",
-          "path": "docs/architecture/orchestrator-seam.md",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/integration.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/framework/orchestrator.py",
-          "exists": true
-        },
-        {
-          "kind": "code",
-          "path": "src/coevo/app/pipeline.py",
-          "exists": true
-        },
-        {
-          "kind": "test",
-          "path": "tests/unit/test_arch_review_1_orchestrator_seam.py",
-          "exists": true
-        }
-      ],
-      "kind": "covered"
-    }
-  ]
-}
-$ C:\Python314\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
-{"ok": true, "errors": []}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
-{"ok": true, "status": "fully-sealed"}
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
-[ok] verification: nothing to archive
-[ok] decisions: nothing to archive
-check ok: all record files within archiving policy
-$ C:\Python314\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
-secret scan ok
-audit seal: fully-sealed
-
-```
-
-
-
-
-
-
-
-
 ## 2026-08-10T03:19:44.658598Z — target=`fmt` fingerprint=`8d456a2ce09245c7`
 - exit_code: `0`
 ```text
@@ -1178,6 +6,7 @@ $ C:\Python314\python.exe -m compileall -q -f scripts src tests
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -1437,6 +266,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:28:30.837331Z — target=`fast` fingerprint=`b3b305cfbb18796f`
 - exit_code: `0`
 ```text
@@ -1521,6 +351,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:30:55.301824Z — target=`test-win7` fingerprint=`ed47f47b5590627d`
 - exit_code: `0`
 ```text
@@ -1538,6 +369,7 @@ OK
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -1619,6 +451,7 @@ OK (skipped=3)
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -1917,6 +750,7 @@ apply refused: the audit chain must remain append-only
 
 
 
+
 ## 2026-08-10T03:39:41.431777Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -1927,6 +761,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=295
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -2225,6 +1060,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:48:41.810797Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -2496,6 +1332,7 @@ ValueError: substring not found
 
 
 ```
+
 
 
 
@@ -2804,6 +1641,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T03:54:54.755110Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -2813,6 +1651,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=308
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3105,6 +1944,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -3409,6 +2249,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:12:58.013406Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -3701,6 +2542,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -4010,6 +2852,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:23:30.485224Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -4307,6 +3150,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:29:03.323324Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -4572,6 +3416,7 @@ First extra element 0:
 
 
 ```
+
 
 
 
@@ -4869,6 +3714,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5173,6 +4019,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T04:48:20.358669Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -5464,6 +4311,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -5767,6 +4615,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 11 section(s): archived 11 old section(s); size 508098 > 500000 bytes; size-trimmed 11 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
 
 
 
@@ -6076,6 +4925,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:11:56.988328Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -6372,6 +5222,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -6677,6 +5528,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:26:05.288128Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -6971,6 +5823,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -7275,6 +6128,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T05:38:09.220462Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -7569,6 +6423,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -7875,6 +6730,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T11:40:15.500433Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -7888,6 +6744,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=279
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8121,6 +6978,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8360,6 +7218,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T11:57:17.321547Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -8591,6 +7450,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -8831,6 +7691,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T12:21:56.190981Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -9067,6 +7928,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T12:25:32.051464Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -9215,6 +8077,7 @@ AssertionError: '`DECISION-REQUIRED`' not found in '# 外部依赖与待批门�
 [gate] totals: {"discovered": 1490, "failed": 1, "passed": 1486, "skipped": 3}
 
 ```
+
 
 
 
@@ -9428,6 +8291,7 @@ AssertionError: False is not true : {'name': 'recent_gate', 'ok': False, 'level'
 
 
 
+
 ## 2026-08-10T12:31:58.006570Z — target=`test-win7` fingerprint=`f878b96fcadb1df7`
 - exit_code: `0`
 ```text
@@ -9441,6 +8305,7 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=292
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -9680,6 +8545,7 @@ audit seal: fully-sealed
 
 
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 500847 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
 
 
 
@@ -9938,6 +8804,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T13:16:07.315668Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -10170,6 +9037,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -10428,6 +9296,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T13:30:35.523924Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -10660,6 +9529,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -10899,6 +9769,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T13:36:21.330534Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -11135,6 +10006,7 @@ audit seal: fully-sealed
 
 
 
+
 ## 2026-08-10T13:39:42.078535Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -11368,6 +10240,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 
@@ -11609,6 +10482,7 @@ audit seal: fully-sealed
 [gate] records self-trim: [verification] archive 12 section(s): archived 12 old section(s); size 501986 > 500000 bytes; size-trimmed 12 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
 
 
+
 ## 2026-08-10T13:44:59.070850Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -11841,6 +10715,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T13:46:50.428304Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -12071,6 +10946,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T13:52:31.707419Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -12307,6 +11183,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T13:54:23.673880Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -12539,6 +11416,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T13:57:21.946524Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -12775,6 +11653,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T14:01:54.433062Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -13001,6 +11880,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 
 ## 2026-08-10T14:03:43.941780Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -13231,6 +12111,7 @@ audit seal: fully-sealed
 ```
 
 
+
 ## 2026-08-10T23:47:14.391267Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `1`
 ```text
@@ -13427,6 +12308,7 @@ AssertionError: '2026-08-10' not greater than or equal to '2026-08-11' : DECISIO
 [gate] totals: {"discovered": 1513, "failed": 1, "passed": 1509, "skipped": 3}
 
 ```
+
 
 
 ## 2026-08-10T23:50:17.691371Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
@@ -13631,6 +12513,7 @@ AssertionError: False is not true : {'name': 'recent_gate', 'ok': False, 'level'
 
 
 [gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 503152 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260810\verification-20260810.txt; [ok] decisions: nothing to archive
+
 
 ## 2026-08-10T23:53:48.218381Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
@@ -13859,6 +12742,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-11T12:47:43.107115Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -14086,6 +12970,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-11T12:55:00.644260Z — target=`fast` fingerprint=`fb8029ba3cf2de07`
 - exit_code: `0`
 ```text
@@ -14309,6 +13194,7 @@ apply refused: the audit chain must remain append-only
 audit seal: fully-sealed
 
 ```
+
 
 ## 2026-08-11T12:58:00.130348Z — target=`quality` fingerprint=`b96157dbb895a417`
 - exit_code: `0`
@@ -14554,6 +13440,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-12T04:48:36.426706Z — target=`quality` fingerprint=`507ff7cb3ed3fd24`
 - exit_code: `1`
 ```text
@@ -14707,6 +13594,7 @@ AttributeError: 'tuple' object has no attribute 'project_id'
 
 ```
 
+
 ## 2026-08-12T04:57:44.390981Z — target=`quality` fingerprint=`507ff7cb3ed3fd24`
 - exit_code: `1`
 ```text
@@ -14843,6 +13731,7 @@ AssertionError: 'decision status: approved a+b' not found in '## 2026-08-12t05:0
 [gate] totals: {"discovered": 1528, "failed": 2, "passed": 1523, "skipped": 3}
 
 ```
+
 
 ## 2026-08-12T05:51:37.460325Z — target=`quality` fingerprint=`507ff7cb3ed3fd24`
 - exit_code: `0`
@@ -15088,6 +13977,7 @@ audit seal: fully-sealed
 
 ```
 
+
 ## 2026-08-12T08:13:33.868519Z — target=`quality` fingerprint=`b5c12e15ae7c559f`
 - exit_code: `0`
 ```text
@@ -15331,3 +14221,259 @@ discovered=4 passed=4 failed=0 skipped=0 duration_ms=614
 audit seal: fully-sealed
 
 ```
+
+
+## 2026-08-12T11:42:49.737831Z — target=`quality` fingerprint=`b5c12e15ae7c559f`
+- exit_code: `0`
+```text
+$ preflight
+preflight audit seal: fully-sealed
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe -m compileall -q -f scripts src tests
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\validate_opencode.py
+PASS required: AGENTS.md
+PASS required: opencode.jsonc
+PASS required: Makefile
+PASS required: docs/README.md
+PASS required: loop/STATE.json
+PASS required: loop/BACKLOG.yaml
+PASS required: loop/VERIFICATION.md
+PASS required: loop/tool-audit.jsonl
+PASS required: .opencode/plugins/loop-guard.ts
+PASS required: .opencode/tools/loop_state.ts
+PASS required: .opencode/tools/quality_gate.ts
+PASS required: .opencode/tools/traceability_check.ts
+PASS required: tests/unit
+PASS required: tests/integration
+PASS required: tests/security
+PASS required: tests/e2e
+PASS denied: webfetch
+PASS denied: websearch
+PASS denied: external_directory
+PASS bash defaults to ask
+PASS bash denied: git push*
+PASS bash denied: curl *
+PASS bash denied: wget *
+PASS bash denied: pip install*
+PASS bash denied: npm install*
+PASS current tool API: loop_state.ts
+PASS current tool API: quality_gate.ts
+PASS current tool API: traceability_check.ts
+{"ok": true, "failures": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz traceability_check
+
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-17",
+      "title": "双守卫一致性安全守卫（2026-08-10 架构风险修复）：.codex/hooks/loop-guard.mjs 镜像必须与 .opencode/plugins/loop-guard.ts 保持同一禁用命令集（git push/reset --hard/clean、rm -rf、del /s、format、curl、wget、iwr/irm、npm/bun/pip/pip3、pnpm/yarn、python -m pip、go get）与 path-policy，防止单运行时漂移",
+      "code": [
+        ".codex/hooks/loop-guard.mjs",
+        ".opencode/plugins/loop-guard.ts"
+      ],
+      "tests": [
+        "tests/security/test_loop_guard_static.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": ".codex/hooks/loop-guard.mjs",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": ".opencode/plugins/loop-guard.ts",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/security/test_loop_guard_static.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    },
+    {
+      "story": "ARCH-REVIEW",
+      "ac": "AC-18",
+      "title": "CTAF 提案一致性守卫（2026-08-11 继续优化与修复）：固化预评审 F-1..F-5 修正——累计口径 60/53（§19.3/§19.4 一致）、威胁矩阵 16 行（提案 §13 实测 16 行且 README 一致）、trace_id 标注 sha256-64hex、M1a/M2 已交付标记与交付口径说明、§16.6/§17 幽灵编号 B12/A18 清除",
+      "code": [
+        "docs/plans/distributed-agent-framework/design-proposal.md",
+        "docs/plans/distributed-agent-framework/README.md"
+      ],
+      "tests": [
+        "tests/unit/test_arch_review_18_ctaf_consistency.py"
+      ],
+      "status": "done",
+      "evidence": [
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/design-proposal.md",
+          "exists": true
+        },
+        {
+          "kind": "code",
+          "path": "docs/plans/distributed-agent-framework/README.md",
+          "exists": true
+        },
+        {
+          "kind": "test",
+          "path": "tests/unit/test_arch_review_18_ctaf_consistency.py",
+          "exists": true
+        }
+      ],
+      "kind": "covered"
+    }
+  ]
+}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\.tools\control\control.pyz audit_log verify
+{"ok": true, "errors": []}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\audit_seal.py verify --allow-tail
+{"ok": true, "status": "fully-sealed"}
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\archive_records.py --check
+[ok] verification: nothing to archive
+[ok] decisions: nothing to archive
+check ok: all record files within archiving policy
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\secret_scan.py
+secret scan ok
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite unit
+08-12T11:44:12.904167+00:00 >= HEAD 2026-08-12T10:44:12.947520+00:00)",
+      "level": "ok",
+      "name": "gate_covers_head",
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "status": "ok",
+  "version": "1.2.3"
+}
+{
+  "checks": [
+    {
+      "detail": "1 uncommitted change(s)",
+      "level": "critical",
+      "name": "git_clean",
+      "ok": false
+    },
+    {
+      "detail": "1.2.3",
+      "level": "ok",
+      "name": "version",
+      "ok": true
+    },
+    {
+      "detail": "done (X)",
+      "level": "ok",
+      "name": "state",
+      "ok": true
+    },
+    {
+      "detail": "all items done",
+      "level": "ok",
+      "name": "backlog",
+      "ok": true
+    },
+    {
+      "detail": "fully-sealed",
+      "level": "ok",
+      "name": "audit",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "secret_scan",
+      "ok": true
+    },
+    {
+      "detail": "consistent",
+      "level": "ok",
+      "name": "traceability",
+      "ok": true
+    },
+    {
+      "detail": "clean",
+      "level": "ok",
+      "name": "delivery_artifacts",
+      "ok": true
+    },
+    {
+      "detail": "passing (fast-fixture.json)",
+      "level": "ok",
+      "name": "recent_gate",
+      "ok": true
+    },
+    {
+      "detail": "covers HEAD (gate 2026-08-12T11:44:12.904167+00:00 >= HEAD 2026-08-12T10:44:12.951270+00:00)",
+      "level": "ok",
+      "name": "gate_covers_head",
+      "ok": true
+    }
+  ],
+  "ok": false,
+  "status": "critical",
+  "version": "1.2.3"
+}
+{
+  "ok": true,
+  "findings": []
+}
+{
+  "ok": false,
+  "findings": [
+    {
+      "path": "bad.py",
+      "line": 1,
+      "pattern": "pem_private_key",
+      "snippet": "-----BEGIN PRIVATE KEY-----"
+    }
+  ]
+}
+[split] pkg: models=2
+discovered=1607 passed=1604 failed=0 skipped=3 duration_ms=73309
+  [unit] discovered=1607 passed=1604 failed=0 skipped=3 exit=0
+reject path received a malformed import record (object); refusing to fabricate decision_maker
+apply refused: the audit chain must remain append-only
+[gate] counts: discovered=1607 passed=1604 failed=0 skipped=3
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite integration
+discovered=274 passed=273 failed=0 skipped=1 duration_ms=364061
+  [integration] discovered=274 passed=273 failed=0 skipped=1 exit=0
+[gate] counts: discovered=274 passed=273 failed=0 skipped=1
+$ D:/Go/bin/go.exe test ./...
+ok  	coevo/go/taskflow	(cached)
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite security
+discovered=103 passed=103 failed=0 skipped=0 duration_ms=86192
+  [security] discovered=103 passed=103 failed=0 skipped=0 exit=0
+[gate] counts: discovered=103 passed=103 failed=0 skipped=0
+$ E:\Workspace\Coevo\.tools\node\24.14.0\node.exe tests/security/path_policy_test.mjs
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite e2e
+external_requests=0 loopback_requests=8 missing_local_assets=0 runtime_downloads=0
+discovered=29 passed=29 failed=0 skipped=0 duration_ms=148429
+  [e2e] discovered=29 passed=29 failed=0 skipped=0 exit=0
+[gate] counts: discovered=29 passed=29 failed=0 skipped=0
+$ E:\Workspace\Coevo\.venv\Scripts\python.exe E:\Workspace\Coevo\scripts\test.py --suite win7
+discovered=4 passed=4 failed=0 skipped=0 duration_ms=325
+  [win7] discovered=4 passed=4 failed=0 skipped=0 exit=0
+[gate] counts: discovered=4 passed=4 failed=0 skipped=0
+[gate] totals: {"discovered": 2017, "failed": 0, "passed": 2013, "skipped": 4}
+audit seal: fully-sealed
+
+```
+
+## 2026-08-12T14:30:00.000000Z — target=`independent-review`（MATURITY 收口）
+
+- 独立 mvp-verifier：沙箱 `verifier-20260812` 守卫 violations=[]（已销毁）；被审提交
+  `e1b42ab` 主树全量门禁 exit=0 fingerprint=`b5c12e15ae7c559f`（totals
+  discovered=2017 passed=2013 failed=0 skipped=4）；audit fully-sealed；
+  追溯矩阵无悬空；结论 `pass`。
+- 独立 security-reviewer：沙箱 `sec-reviewer-20260812`、`sec-gates-20260812`
+  守卫 violations=[]（已销毁）；STRIDE 九类阻断项取证 + 安全定向测试全绿 +
+  `secret_scan` ok；ARCH-REVIEW-4 / ARCH-REVIEW-5 / REVIEW2-10 三门 PASS，
+  无 Critical/High；结论 `pass`。
+- 独立架构评审（CTAF-PROPOSAL-REVIEW）：design-proposal.md v0.4.1 内部一致、
+  实现对齐、边界诚实，可作为 M1..M9 实施基线；结论 `pass`。
+- 双签放行 → mvp-complete 条件 11 与四个 REVIEW-REQUIRED 外部门关闭
+  （external-gates → PASS，2026-08-12）；US-5-AC-2 保持 BLOCKED。
+
+
+[gate] records self-trim: [verification] archive 10 section(s): archived 10 old section(s); size 507282 > 500000 bytes; size-trimmed 10 kept section(s);   -> wrote E:\Workspace\Coevo\loop\archive\20260812\verification-20260812.txt; [ok] decisions: nothing to archive
