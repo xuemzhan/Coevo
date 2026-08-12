@@ -5668,3 +5668,21 @@ security-reviewer 双签门禁。
   （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
 
 
+## 2026-08-12T12:00:00Z -- T-01 AI 定位定稿：选项 B（Approved，可修订）
+
+- Item: PRODUCT-REVIEW T-01 由 proposed 定稿为工作决策——**选项 B
+  （确定性任务编排 + 可选模型辅助）**。
+- Basis: 业务负责人连续指示"继续完成未完成的"（2026-08-12 多轮），
+  视为委托实现方按推荐口径定稿；原 07:00 条目保持 proposed 记录，
+  本条为定稿记录。业务负责人如另有裁决，以新裁决为准（可修订）。
+- Effect: README 澄清句与能力矩阵注记已按选项 B 落地；T-02 以
+  "契约测试（含离线回退）"收口；模型适配层保留为选项 A（本地模型接入）
+  的扩展点。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved.
+- Decided by: Codex (loop-engineer) per user instruction
+  （"继续完成未完成的，不做全量门禁"）；未推送（需另行确认）。
+
+

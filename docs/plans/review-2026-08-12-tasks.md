@@ -68,11 +68,11 @@ T-03（独立双签）→ 宣告完成。
 
 | 任务 | 状态 | 备注 |
 |---|---|---|
-| T-01 AI 定位决策简报 | 简报完成（proposed） | `docs/plans/ai-positioning-brief.md` + README 澄清句 + DECISIONS 留痕；待业务裁决 |
+| T-01 AI 定位决策简报 | 已定稿（选项 B，可修订） | `docs/plans/ai-positioning-brief.md` + README 澄清句；DECISIONS 12:00 定稿（原 07:00 proposed；业务负责人可修订） |
 | T-02 本地模型建议链路 | done（契约测试已具备并复核） | 离线回退/畸形拒绝/草稿边界/不应用边 6 项测试全绿 |
 | T-04 独立验证包核对 | done | 刷新基线（指纹/计数/审计 sequence） |
 | T-05 生产链执行入口契约 | done | `src/coevo/app/production.py` + 7 项守卫测试（拒绝 demo 组件、校验先于真实链） |
-| T-07 审计密钥托管方案 | done | `audit-key-runbook.md` §6：三档托管 + 健康检查接入点 |
+| T-07 审计密钥托管方案 | done | `audit-key-runbook.md` §6：三档托管 + `audit_key_health.py` custody 检查（A/B/C）落地 |
 | T-08 真实 RBAC | done | `PolicyAuthorizer`（framework policy 绑定 + fail-closed）+ production 默认授权器 |
 | T-09 会话绑定身份 | done | 会话携带 subject（签发绑定、令牌不可反推）+ 健康 subject 计数 + `COEVO_OPERATOR_ID` |
 | T-10 生产 pending-action 契约 | done | `PendingActionHandler` Protocol + `docs/architecture/cockpit-confirmation-contract.md` + 注入隔离守卫 |

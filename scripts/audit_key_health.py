@@ -47,6 +47,10 @@ REQUIRED_CONFIG_FIELDS: Final[frozenset[str]] = frozenset({
     "digest_algorithm",
     "formal_replacement",
 })
+
+# PRODUCT-REVIEW T-07：密钥托管形态（A=维护机非导出证书，B=受控介质，
+# C=独立审计节点）。缺省视为 A（当前原型形态），非法值失败关闭。
+CUSTODY_MODES: Final[frozenset[str]] = frozenset({"A", "B", "C"})
 _POWERSHELL_FALLBACK: Final[str] = (
     r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 )
@@ -100,6 +104,16 @@ def validate_config(config: dict[str, object]) -> list[str]:
     if config.get("schema_version") != "1.0":
         problems.append("schema_version must be '1.0'")
     return problems
+
+
+def custody_problems(config: dict[str, object]) -> list[str]:
+    """Validate the ``custody`` field (A/B/C); absent defaults to A."""
+    custody = config.get("custody")
+    if custody is None:
+        return []
+    if not isinstance(custody, str) or custody not in CUSTODY_MODES:
+        return [f"custody must be one of {sorted(CUSTODY_MODES)}; got {custody!r}"]
+    return []
 
 
 def public_cert_problems(repo_root: Path, config: dict[str, object]) -> list[str]:
@@ -272,6 +286,7 @@ def build_report(
         problems.extend(issues)
 
     _add("config.structure", validate_config(config))
+    _add("config.custody", custody_problems(config))
     _add("config.public_certificate", public_cert_problems(repo_root, config))
     _add("config.head_signer", head_signer_problems(repo_root, config))
     if inspect:

@@ -63,6 +63,22 @@ class ValidateConfigTests(unittest.TestCase):
         config = _valid_config(thumbprint="not-a-thumbprint")
         self.assertTrue(any("thumbprint" in p for p in health.validate_config(config)))
 
+    def test_custody_absent_defaults_to_ok(self):
+        # PRODUCT-REVIEW T-07：缺省视为 A（维护机非导出证书），不失败。
+        self.assertEqual([], health.custody_problems(_valid_config()))
+
+    def test_custody_valid_modes_are_ok(self):
+        for mode in ("A", "B", "C"):
+            config = _valid_config()
+            config["custody"] = mode
+            self.assertEqual([], health.custody_problems(config), mode)
+
+    def test_custody_invalid_mode_reported(self):
+        config = _valid_config()
+        config["custody"] = "X"
+        problems = health.custody_problems(config)
+        self.assertTrue(any("custody" in p for p in problems))
+
     def test_bad_cert_sha_reported(self):
         config = _valid_config()
         config["public_certificate_sha256"] = "xyz"

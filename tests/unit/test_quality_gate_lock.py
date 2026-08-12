@@ -21,6 +21,7 @@ SPEC = importlib.util.spec_from_file_location(
     "quality_gate", SCRIPTS / "quality_gate.py"
 )
 quality_gate = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = quality_gate  # dataclass 注解解析需要模块先注册
 SPEC.loader.exec_module(quality_gate)
 
 

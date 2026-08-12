@@ -49,8 +49,9 @@
 ## 3. 维护注意
 
 - 门禁指纹随 lint 命令集变化（如新增 secret_scan 后 `34fc0b6`→`e3a61c2`）；
-  指纹哈希当前包含环境绝对路径，跨工作区会漂移（PRODUCT-REVIEW T-15 将改为
-  环境无关）；发布记录必须引用**实际运行**的指纹。
+  T-15 起指纹按仓库相对路径归一，跨工作区一致（预期
+  `b5c12e15ae7c559f`，待下一次全量门禁实际记录）；发布记录必须引用**实际
+  运行**的指纹。
 - 锁定文件（python-script-lock.tsv、toolchain-lock.json、make.cs）任何编辑都必须
   全链同步哈希，否则环境入口/门禁失败关闭。
 - 新增 `COEVO_*` 环境变量必须登记 `configuration-reference.md`（有测试校验）。

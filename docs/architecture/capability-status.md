@@ -32,7 +32,7 @@
 | US-4 运行中枢 | `E2E_VERIFIED` | 真实链（real chain）+ 固定编排链 e2e |
 | US-5 `.agent` 协议 | `E2E_VERIFIED`（原型密码）/ `BLOCKED`（生产） | wire/导入/回传 e2e 全绿；正式 SM2/SM4 产品待 US-5-AC-2 审批 |
 | US-6 工作区 | `INTEGRATION_VERIFIED` | 路径策略/隔离/原子导入 |
-| US-7 本地驾驶舱 | `E2E_VERIFIED`（HTTP/离线前端）；WPS 真实进程 `INTEGRATION_VERIFIED` | 黑盒认证矩阵 + 离线断网证明；多项目/网页确认（demo 模式）/会话管理已落地；生产 pending-action 处理器契约与用户身份绑定待接线（PRODUCT-REVIEW T-08/T-09/T-10）；WPS 需真实宿主验收 |
+| US-7 本地驾驶舱 | `E2E_VERIFIED`（HTTP/离线前端）；WPS 真实进程 `INTEGRATION_VERIFIED` | 黑盒认证矩阵 + 离线断网证明；多项目/网页确认（demo 模式）/会话管理已落地；会话 subject 绑定（T-09）、PolicyAuthorizer（T-08）、PendingActionHandler 契约（T-10）已接线，生产处理器待批准密码产品后注入；WPS 需真实宿主验收 |
 | US-8 进展采集 | `INTEGRATION_VERIFIED` | watcher + 证据关联 |
 | US-9 成果回传 | `INTEGRATION_VERIFIED` | 报告包 wire 一致性 |
 | US-10 状态合并 | `INTEGRATION_VERIFIED` | 合并收敛 property + 收据链 |
