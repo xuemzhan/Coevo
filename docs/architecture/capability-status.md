@@ -42,7 +42,7 @@
 | US-14 知识沉淀 | `INTEGRATION_VERIFIED` | SQLite 持久化 + 密级检查 |
 | US-15 安全审计 | `E2E_VERIFIED`；归档重锚定 `PROTOTYPE`（REVIEW2-10 后可用、待独立审查） | 哈希链+签名 fully-sealed |
 | US-16 框架层（CTAF） | `INTEGRATION_VERIFIED` | manifest/policy/plan/hybrid/k8s 清单全测试 |
-| 中心端持久化/跨节点同步 | `DESIGNED` / `MODELED` | 显式事件模型（REVIEW2-8）已建模；真实同步协议待接入 |
+| 中心端持久化/跨节点同步 | `INTEGRATION_VERIFIED`（离线文件式对账）/ `DESIGNED`（受控网络） | 显式事件模型（REVIEW2-8）+ 信封契约（T-11）+ 出站链/对账/文件包（T-12）+ 双节点离线对账 E2E（MATURITY-O-07）；受控网络传输与中心端聚合仍 DESIGNED（O-01 决策） |
 | 生产密码能力 | `BLOCKED` | US-5-AC-2 外部审批 |
 | 生产部署（安装/升级/回滚） | `PROTOTYPE` | 安装器存在；生产验收待做 |
 

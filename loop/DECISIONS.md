@@ -5715,3 +5715,25 @@ security-reviewer 双签门禁。
   executed by: Codex（独立审查方执行计划）；未推送（需另行确认）。
 
 
+## 2026-08-12T13:00:00Z -- MATURITY 第二批：O-07 离线对账 E2E（done）+ O-01 边界裁决（Proposed）
+
+- Item: 继续执行成熟度修复与优化计划第二批——无外部依赖部分。
+- O-07（离线半）：新增 `tests/e2e/test_sync_reconciliation.py` 双节点离线文件式
+  对账 E2E：成员出站链（SyncOutbox）→ bundle 导出 → 中心 load + reconcile →
+  新事件应用、重送幂等、缺口触发重拉（序列缺失失败关闭）、篡改失败关闭、增量
+  投递只应用最新事件。同步能力离线半由 `MODELED` 升为 `INTEGRATION_VERIFIED`
+  （capability-status / modules/sync.md / known-limitations 同步）；受控网络
+  传输与中心端聚合仍为 DESIGNED。
+- O-01（proposed，发起裁决）：推荐把"受控网络/在线协同"列为后续版本范围
+  （沿用 ARCH-REVIEW-13 声明纪律与 `online-mode-scope.md`），MVP 维持离线闭环；
+  正式裁决权在业务负责人，本条目为发起记录，不视为已批准。
+- 按用户指令继续不做全量门禁：本轮跑双节点对账 E2E（4 项）+ 后续完整单元套件回归。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b（本标记指收据策略承认；O-01 自身状态见上）;
+  .gitignore excludes runtime receipts; git rm --cached performed;
+  local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: proposed（O-07 执行项已完成；O-01 边界裁决待业务负责人确认）。
+- Decided by: user instruction（"继续"）；executed by: Codex（独立审查方执行计划）；
+  未推送（需另行确认）。
+
+

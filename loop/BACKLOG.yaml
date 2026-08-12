@@ -1867,7 +1867,9 @@ items:
   #   R-03 STATE 元数据时效修复 + 守卫：done（1e6c7f8）
   #   R-04 门禁覆盖 HEAD 纪律（release_check gate_covers_head）+ 运维手册：done（8a13ac4）
   #   O-06 督办/会议真实交互链路（回传链 E2E + 驾驶舱 SUPERVISION_VIEW + demo 注册）：done
-  #   其余 R-01/R-02/R-05/R-06 与 O-01..O-05/O-07/O-08 待后续轮次或外部依赖。
+  #   O-07 双节点离线对账 E2E（离线半）：done；受控网络半待 O-01 裁决
+  #   O-01 在线/受控网络版本边界：proposed（待业务负责人裁决）
+  #   其余 R-01/R-02/R-05/R-06 与 O-02..O-05/O-08 待后续轮次或外部依赖。
   - id: ARCH-REVIEW-1
     story: ARCH-REVIEW
     title: 架构审查 P0-1：编排器 seam 契约——框架层（framework/orchestrator + integration）仅承担校验/策略网关，产品层（orchestrator/service）为唯一执行器；补契约测试断言两条固定链任何派发路径均经同一状态机入口且无旁路；所有权文档化

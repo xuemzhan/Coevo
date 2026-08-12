@@ -43,8 +43,9 @@
   生产 pending-action 处理器契约与用户身份/RBAC 绑定待接线（PRODUCT-REVIEW
   T-08/T-09/T-10）。
 - **多项目为演示视图**：PRJ002 等并行项目是驾驶舱视图数据，非多租户/多用户
-  产品能力；中心端/跨节点同步仍为 DESIGNED/MODELED（PRODUCT-REVIEW
-  T-11/T-12）。
+  产品能力；中心端/跨节点同步的**离线文件式对账**已由双节点 E2E 验证
+  （MATURITY-O-07，`INTEGRATION_VERIFIED`），受控网络传输与中心端聚合仍为
+  `DESIGNED`（版本边界待业务裁决，O-01）。
 
 ## 3. 维护注意
 

@@ -22,13 +22,13 @@
 
 | ID | 标题 | 范围 | 完成定义 | 依赖 / 外部 | 状态 |
 |---|---|---|---|---|---|
-| O-01 | 在线/受控网络协同版本边界决策 | `docs/architecture/`、`external-gates.md` | 版本边界明确或进入设计；声明纪律守卫 | 业务决策（对齐 T-11/T-12 边界） | pending |
+| O-01 | 在线/受控网络协同版本边界决策 | `docs/architecture/`、`external-gates.md` | 版本边界明确或进入设计；声明纪律守卫 | 业务决策（对齐 T-11/T-12 边界） | **proposed**（DECISIONS 2026-08-12T13:00:00Z；推荐 MVP 维持离线闭环、受控网络列入后续版本，沿用 ARCH-REVIEW-13） |
 | O-02 | CI 激活 | `.github/workflows/quality.yml`、`ci-artifact.json` | CI 首次全量门禁绿；制品哈希一致 | 外部：owner Release（对齐 T-18） | pending |
 | O-03 | Win7 实机验证 | `win7-compat` 分支、`tests/win7/` | 实机专项通过 + 验证记录 | 外部：Win7 环境 | pending |
 | O-04 | WPS 真实宿主验收 | `cockpit/wps.py`、文档 | 真实 WPS 打开/生成副本验收通过 | 外部：WPS 环境 | pending |
 | O-05 | 目标硬件性能复测 | `benchmarks/` | 目标硬件 13 项探针达标留档 | 目标硬件 | pending |
 | O-06 | 督办/会议真实交互链路 | `supervision/`、`cockpit/`、`app/demo_support.py`、回传链 E2E | 回传链 E2E 含督办/会议协调；驾驶舱 SUPERVISION_VIEW 路由；demo 注册 agent.supervision_meeting；US-12 能力级别提升 | 无 | **done** |
-| O-07 | 多用户/中心端同步产品化 | `sync/`、`identity/`、`cockpit/` | 离线对账扩展到受控网络双节点 E2E；能力级别提升 | 依赖 O-01 | pending |
+| O-07 | 多用户/中心端同步产品化 | `sync/`、`identity/`、`cockpit/` | 离线文件式对账双节点 E2E（本批完成，`tests/e2e/test_sync_reconciliation.py`，同步离线半升为 INTEGRATION_VERIFIED）；受控网络部分待 O-01 裁决 | 依赖 O-01 | **部分完成**（离线半 done；在线半待 O-01） |
 | O-08 | 风险模型推断型增强（可选） | `risk/`、`model/` | 模型推断风险进入草稿+人工确认闭环，离线回退测试 | 依赖 R-05 | pending |
 
 ## 3. 执行纪律（本轮已遵守）

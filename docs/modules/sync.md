@@ -38,8 +38,17 @@
 - `tests/unit/test_sync_protocol_contract.py`：字段/版本/顺序/重放防护/哈希链；
 - `tests/unit/test_sync_store.py`：顺序/链路/重放/单源约束/持久化/对账/
   导出导入/篡改拒绝。
+- `tests/e2e/test_sync_reconciliation.py`（MATURITY-O-07）：双节点离线文件式
+  对账 E2E——成员出站链 → bundle 导出 → 中心校验/对账/新事件应用 → 重送幂等、
+  缺口触发重拉、篡改失败关闭。
 
 ## 依赖与下游
 
 - **上游**：`src.coevo.timefmt`（ISO 校验）、标准库 json/hashlib；
 - **下游**：未来受控网络传输与中心端聚合（DESIGNED）。
+
+## 能力状态（MATURITY-O-07，2026-08-12）
+
+离线文件式对账半已由双节点 E2E 验证（`INTEGRATION_VERIFIED`）；受控网络传输与
+中心端聚合仍为 `DESIGNED`（见 `online-mode-scope.md`，版本边界裁决见
+`loop/DECISIONS.md` O-01 提案）。
