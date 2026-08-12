@@ -11,7 +11,7 @@
 
 | ID | 标题 | 范围 | 完成定义 | 依赖 / 外部 | 状态 |
 |---|---|---|---|---|---|
-| R-01 | 独立双签执行 | `docs/process/independent-verification-pack.md`、`external-gates.md` | 独立 mvp-verifier + security-reviewer 双签落档；mvp-complete 条件 11 与 REVIEW-REQUIRED 门禁关闭 | 外部：独立角色（对齐 T-03） | pending |
+| R-01 | 独立双签执行 | `docs/process/independent-verification-pack.md`、`external-gates.md` | 独立 mvp-verifier + security-reviewer 双签落档；mvp-complete 条件 11 与 REVIEW-REQUIRED 门禁关闭 | 外部：独立角色（对齐 T-03） | **审查已执行**：verifier conditional-pass（待被审提交全量门禁证据，用户未解除"不做全量门禁"）/ security pass（无阻断项）；外部门保持 REVIEW-REQUIRED |
 | R-02 | 生产密码产品接入 | `crypto/`、`identity/`、`app/production.py` | 生产链默认拒绝原型；GmsslProtectedProvider 启用；US-5-AC-2 关闭 | 外部：密码审批（对齐 T-06） | pending |
 | R-03 | STATE 元数据时效修复 + 守卫 | `loop/STATE.json`、`tests/unit/test_state_metadata_guard.py` | STATE 指向最后正式 BACKLOG 项；last_verified_commit 可达 HEAD；updated_at 非未来；守卫测试全绿 | 无 | **done**（1e6c7f8） |
 | R-04 | 全量门禁覆盖 HEAD 纪律 | `scripts/release_check.py`、`docs/operations/ops-runbook.md`、loop 记录 | `gate_covers_head` 检查生效（门禁 started_at ≥ HEAD 提交时间）；本次门禁证据落档提交 | 无 | **done**（8a13ac4） |

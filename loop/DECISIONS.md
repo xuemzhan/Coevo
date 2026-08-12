@@ -5758,3 +5758,34 @@ security-reviewer 双签门禁。
   未推送（需另行确认）。
 
 
+## 2026-08-12T14:00:00Z -- MATURITY R-01 独立双签执行（verifier conditional / security pass）
+
+- Item: 成熟度计划 R-01——独立 mvp-verifier + security-reviewer 双签执行。
+- 执行方式：按 `docs/process/independent-review-governance.md` 只读沙箱契约，
+  分别以 `verifier-20260812`、`sec-reviewer-20260812` 沙箱钉扎被审提交
+  `b81b19f844607017b722ee819b78ad5c0edc050e` 独立取证；两个沙箱
+  `review_sandbox.py check` 均为 violations=[]，审查后已 discard。
+- mvp-verifier 结论：**conditional-pass**——沙箱守卫无违规；沙箱内单元套件
+  1597 通过 / 5 失败 / 5 跳过，5 个失败全部归因于沙箱缺未跟踪工具链
+  （`.tools`、外部 venv），与 REVIEW-SANDBOX-2 环境差异口径一致（主仓库同提交
+  单元套件 1607/1604/0/3 全绿）；审计链 `audit_log verify` ok、
+  `audit_seal verify` fully-sealed；追溯矩阵无悬空（沙箱内 missing=1 亦为
+  `.tools/control/control.pyz` 未跟踪文件，非矩阵悬空）。**放行的唯一缺口**：
+  被审提交的权威全量门禁（`make quality`）证据尚未产生——按用户指令
+  "先不做全量门禁"未执行（执行包 §2 明确该步须业务负责人解除限制后执行）。
+- security-reviewer 结论：**pass（无阻断项）**——STRIDE 九类阻断项逐项取证：
+  私钥扫描干净、导入先验签后使用、路径穿越/重解析点拒绝、WPS/文件类型白名单、
+  版本优先于时间戳（base_revision 严格相等）、接收人绑定、模型输出仅经
+  ConfirmedStateChange（REVIEW2-7 + risk/agent.py）、审计链哈希链+签名
+  fully-sealed、驾驶舱强制环回绑定；安全定向测试 99 项通过（1 条件跳过）+ 密钥扫描 ok。
+- 记录口径：`external-gates.md` 的 mvp-complete 条件 11 保持 `REVIEW-REQUIRED`
+  （守卫测试钉住该状态），待业务负责人解除全量门禁限制并跑出被审提交的全量门禁
+  证据后，由编排者按治理 §6 关闭。
+- Governance marker check (latest section must acknowledge the policy):
+  decision status: approved a+b; .gitignore excludes runtime receipts;
+  git rm --cached performed; local runtime file preserved; historical git blobs were scrubbed.
+- Decision status: approved（审查已执行并留痕；放行条件待全量门禁证据）。
+- Decided by: user instruction（"继续"）；executed by: Codex（独立审查方）；
+  未推送（需另行确认）。
+
+
